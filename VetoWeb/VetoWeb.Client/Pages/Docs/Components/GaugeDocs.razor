@@ -356,6 +356,76 @@
         }
         """;
 
+    private const string CarCode = """
+        @* Seven gears, a limiter at 8000, and a top speed it holds for five seconds. *@
+
+        @* FlickerFrom: neon flicker once it is into the red.
+           TransitionDuration: the model's own step, or the needle trails its input. *@
+        <VetoGauge Needle="true" Value="@_rpm" Max="8000" Label="RPM x1000"
+                   Bands="RpmBands" FollowBands="true"
+                   FlickerFrom="7200"
+                   TransitionDuration="40"
+                   Background="radial-gradient(circle at 50% 42%, #1b212c, #0b0e13)">
+            <FaceContent>
+                <span class="badge">VETO <small>reto spec</small></span>
+            </FaceContent>
+        </VetoGauge>
+
+        <VetoGauge Needle="true" Value="@_speed" Max="360" Label="km/h"
+                   TransitionDuration="40" />
+
+        @code {
+            const double TopSpeed = 350, Redline = 8000, Idle = 850;
+            const double HoldSeconds = 5, ShiftSeconds = 0.28;
+
+            // Revs per km/h in each gear, and how hard each one pulls in km/h per second.
+            static readonly double[] Ratios = [118, 80, 58, 44, 34, 27, 21.5];
+            static readonly double[] Pull   = [60, 48, 39, 31, 24, 18, 14];
+
+            double _speed, _rpm = Idle, _shifting, _holding;
+            int _gear = 1;
+
+            void Advance(double seconds)
+            {
+                if (_holding > 0)
+                {
+                    // Sitting on the top speed, then back to the line.
+                    _holding -= seconds;
+                    if (_holding <= 0) Reset();
+                }
+                else if (_shifting > 0)
+                {
+                    // The clutch is out: no drive, so the car coasts through the shift.
+                    _shifting -= seconds;
+                    _speed = Math.Max(0, _speed - 3 * seconds);
+                }
+                else
+                {
+                    // Pull falls away with speed, so it creeps up on its top speed
+                    // instead of marching to it at a constant rate.
+                    _speed += Pull[_gear - 1] * (1 - 0.6 * (_speed / TopSpeed)) * seconds;
+
+                    if (_speed >= TopSpeed)
+                    {
+                        _speed = TopSpeed;
+                        _holding = HoldSeconds;
+                    }
+                }
+
+                _rpm = Math.Clamp(_speed * Ratios[_gear - 1] + Idle, Idle, Redline);
+
+                // At the limiter the next gear goes in, and the revs fall to whatever
+                // that ratio makes of the speed the car is already carrying.
+                if (_rpm >= Redline && _gear < Ratios.Length
+                    && _shifting <= 0 && _holding <= 0)
+                {
+                    _gear++;
+                    _shifting = ShiftSeconds;
+                }
+            }
+        }
+        """;
+
     private const string BandCode = """
         <VetoGauge Value="_disk" Label="Disk" Unit="%"
                    Bands="DiskBands" FollowBands="true" />
@@ -385,6 +455,7 @@
                    ValueFontSize="1.5rem"
                    ShowTicks="true" TickEvery="250" MajorTickEvery="4"
                    ShowTickLabels="true"
+                   ValueFontSize="1.5rem"
                    Bands="RpmBands"
                    FollowBands="true" />
 
