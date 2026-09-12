@@ -227,7 +227,14 @@
         @* Anywhere else: *@
         @inject IVetoToastService Toasts
 
-        <VetoButton OnClick="() => Toasts.Success(&quot;Saved&quot;)">Save</VetoButton>
+        <VetoButton OnClick="Save">Save</VetoButton>
+
+        @code {
+            // A named method, not an inline lambda: Razor cannot parse a string literal
+            // inside an attribute-bound lambda, so `OnClick="() => Toasts.Success("Saved")"`
+            // will not compile however the quotes are escaped.
+            private void Save() => Toasts.Success("Saved");
+        }
         """;
 
     private const string RichCode = """

@@ -20,3 +20,41 @@
     outline: none;
     box-shadow: var(--veto-focus-ring);
 }
+
+/* The maker's plate on the demo dial - a red rule, the name, the model under it. */
+
+.demo-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    transform: translateY(-2.4rem);
+}
+
+.demo-badge-rule {
+    width: 3px;
+    height: 1.7rem;
+    background-color: var(--veto-color-danger);
+    border-radius: 2px;
+}
+
+.demo-badge-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    line-height: 1;
+    text-align: left;
+}
+
+.demo-badge-name {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    color: #e8edf6;
+}
+
+.demo-badge-sub {
+    font-size: 0.52rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #7d8798;
+}

@@ -18,6 +18,13 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-car"
+               Title="A car, revving"
+               Description="Two dials driven by one small engine model rather than by a sine wave: the revs climb, hit the limiter, and fall away as each gear goes in while the speed keeps building. Seven gears to 350 km/h, then it holds top speed for five seconds and goes back to the line. Each gauge is given a transition equal to the model's own 40ms step, so one sweep finishes exactly as the next begins - the default 150ms ease would leave both needles permanently chasing a value they never catch."
+               Code="@CarCode">
+        <CarDashboard TestId="car" />
+    </DemoBlock>
+
     <DemoBlock TestId="demo-bands"
                Title="Bands, and a dial that colours itself"
                Description="Bands colour stretches of the dial - the amber zone before a disk fills up, the red line on a tachometer. With FollowBands the reading itself takes the colour of whichever band it falls in, so the gauge turns red on its own rather than waiting to be told."
@@ -134,6 +141,45 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-face"
+               Title="The dial face"
+               Description="Background takes any CSS background - a URL, a data URI, a gradient - clipped to the dial's circle. FaceContent puts markup in the middle of it. Both sit under everything the gauge draws, so the ticks and the needle sweep across the face the way they do on a real instrument, and both are hidden from assistive technology: the reading is what a gauge is for, and a badge printed on it is not part of that."
+               Code="@FaceCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoGauge TestId="face-badge"
+                       Needle="true"
+                       Value="58"
+                       Label="Boost"
+                       Unit=" psi"
+                       Max="30"
+                       Size="VetoSize.Large"
+                       ValueFontSize="1.25rem"
+                       ShowTicks="true"
+                       TickEvery="2"
+                       MajorTickEvery="5"
+                       ShowTickLabels="true"
+                       Background="radial-gradient(circle at 50% 40%, #1b212c 0%, #0e1116 70%)"
+                       Color="VetoColor.Neutral">
+                <FaceContent>
+                    <span class="demo-badge">
+                        <span class="demo-badge-rule"></span>
+                        <span class="demo-badge-text">
+                            <span class="demo-badge-name">VETO</span>
+                            <span class="demo-badge-sub">reto spec</span>
+                        </span>
+                    </span>
+                </FaceContent>
+            </VetoGauge>
+
+            <VetoGauge TestId="face-plain"
+                       Value="64"
+                       Label="Load"
+                       Unit="%"
+                       Size="VetoSize.Large"
+                       Background="linear-gradient(140deg, var(--veto-color-surface-raised), var(--veto-color-surface))" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-shapes"
                Title="Sizes, colours and sweep"
                Description="Three sizes and the library's colour roles. StartAngle and EndAngle are the dial's own geometry: the default pair leaves the bottom open the way a car's instruments do, and a half circle is the usual choice for a dashboard tile."
@@ -177,7 +223,8 @@
 
     private static readonly VetoGaugeBand[] RpmBands =
     [
-        new(6500, 8000, "var(--veto-color-danger)", "Red line"),
+        new(6500, 7200, "var(--veto-color-warning)", "Approaching the line"),
+        new(7200, 8000, "var(--veto-color-danger)", "Red line"),
     ];
 
     /// <summary>
@@ -215,6 +262,10 @@
         new("NeedleLength / NeedleWidth / NeedleColor", "double? / double / string?", "null / 3 / null", "The needle. Null length stops it short of the numbers; null colour follows the reading."),
         new("HubRadius / HubColor", "double / string?", "7 / null", "The hub the needle turns on. Zero draws none."),
         new("ValueFontSize / LabelFontSize", "string?", "null", "Any CSS length. Worth setting when a long unit makes the reading too wide for the dial."),
+        new("Background", "string?", "null", "The dial's face, as any CSS background. Clipped to the circle, drawn under the ticks and the needle."),
+        new("FaceContent", "RenderFragment?", "null", "Markup in the middle of the dial - a badge, a model name. Decorative, and hidden from assistive technology."),
+        new("FlickerFrom", "double?", "null", "The reading at or above which the dial flickers like a neon tube. Held steady under prefers-reduced-motion."),
+        new("TransitionDuration", "int?", "null", "How long the needle takes to reach a new reading, in ms. Set it to the interval between updates - or 0 - for a dial driven continuously, or it trails its input."),
         new("ValueProvider", "Func<Task<double>>?", "null", "Called every PollInterval for the current value. The general way in."),
         new("PollUrl / PollJsonPath", "string?", "null", "GET this URL and read the number at this dotted path. Needs an HttpClient registered."),
         new("PollInterval", "int", "0", "How often to poll, in milliseconds. Zero never polls."),
@@ -224,6 +275,76 @@
 
     private const string BasicCode = """
         <VetoGauge Value="_cpu" Label="CPU" Unit="%" />
+        """;
+
+    private const string CarCode = """
+        @* Seven gears, a limiter at 8000, and a top speed it holds for five seconds. *@
+
+        @* FlickerFrom: neon flicker once it is into the red.
+           TransitionDuration: the model's own step, or the needle trails its input. *@
+        <VetoGauge Needle="true" Value="@_rpm" Max="8000" Label="RPM x1000"
+                   Bands="RpmBands" FollowBands="true"
+                   FlickerFrom="7200"
+                   TransitionDuration="40"
+                   Background="radial-gradient(circle at 50% 42%, #1b212c, #0b0e13)">
+            <FaceContent>
+                <span class="badge">VETO <small>reto spec</small></span>
+            </FaceContent>
+        </VetoGauge>
+
+        <VetoGauge Needle="true" Value="@_speed" Max="360" Label="km/h"
+                   TransitionDuration="40" />
+
+        @code {
+            const double TopSpeed = 350, Redline = 8000, Idle = 850;
+            const double HoldSeconds = 5, ShiftSeconds = 0.28;
+
+            // Revs per km/h in each gear, and how hard each one pulls in km/h per second.
+            static readonly double[] Ratios = [118, 80, 58, 44, 34, 27, 21.5];
+            static readonly double[] Pull   = [60, 48, 39, 31, 24, 18, 14];
+
+            double _speed, _rpm = Idle, _shifting, _holding;
+            int _gear = 1;
+
+            void Advance(double seconds)
+            {
+                if (_holding > 0)
+                {
+                    // Sitting on the top speed, then back to the line.
+                    _holding -= seconds;
+                    if (_holding <= 0) Reset();
+                }
+                else if (_shifting > 0)
+                {
+                    // The clutch is out: no drive, so the car coasts through the shift.
+                    _shifting -= seconds;
+                    _speed = Math.Max(0, _speed - 3 * seconds);
+                }
+                else
+                {
+                    // Pull falls away with speed, so it creeps up on its top speed
+                    // instead of marching to it at a constant rate.
+                    _speed += Pull[_gear - 1] * (1 - 0.6 * (_speed / TopSpeed)) * seconds;
+
+                    if (_speed >= TopSpeed)
+                    {
+                        _speed = TopSpeed;
+                        _holding = HoldSeconds;
+                    }
+                }
+
+                _rpm = Math.Clamp(_speed * Ratios[_gear - 1] + Idle, Idle, Redline);
+
+                // At the limiter the next gear goes in, and the revs fall to whatever
+                // that ratio makes of the speed the car is already carrying.
+                if (_rpm >= Redline && _gear < Ratios.Length
+                    && _shifting <= 0 && _holding <= 0)
+                {
+                    _gear++;
+                    _shifting = ShiftSeconds;
+                }
+            }
+        }
         """;
 
     private const string BandCode = """
@@ -248,12 +369,17 @@
                    Size="VetoSize.Large"
                    ShowTicks="true" TickEvery="250" MajorTickEvery="4"
                    ShowTickLabels="true"
+                   ValueFontSize="1.5rem"
                    Bands="RpmBands"
                    FollowBands="true" />
 
         @code {
+            // Two bands, in order: amber first, then the red it runs into.
             private static readonly VetoGaugeBand[] RpmBands =
-                [new(6500, 8000, "var(--veto-color-danger)", "Red line")];
+            [
+                new(6500, 7200, "var(--veto-color-warning)", "Approaching the line"),
+                new(7200, 8000, "var(--veto-color-danger)", "Red line"),
+            ];
         }
         """;
 
@@ -275,14 +401,12 @@
         """;
 
     private const string TuningCode = """
+        @* A long unit needs a smaller reading, or it runs out over the ticks. *@
         <VetoGauge Needle="true" Value="140" Max="240"
                    Label="Speed" Unit=" km/h"
                    Size="VetoSize.Large"
-
-                   @* A long unit needs a smaller reading, or it runs out over the ticks. *@
                    ValueFontSize="1.125rem"
                    LabelFontSize="0.75rem"
-
                    ShowTicks="true" TickEvery="20" MajorTickEvery="2"
                    ShowTickLabels="true" TickLabelSize="9" TickLabelOffset="18"
 
@@ -293,6 +417,25 @@
 
         @* HubRadius="0" draws no hub at all. *@
         <VetoGauge Needle="true" Value="70" NeedleWidth="2" HubRadius="0" />
+        """;
+
+    private const string FaceCode = """
+        <VetoGauge Needle="true" Value="18" Max="30" Label="Boost" Unit=" psi"
+                   Background="radial-gradient(circle at 50% 40%, #1b212c 0%, #0e1116 70%)">
+            <FaceContent>
+                <span class="badge">
+                    <span class="badge-rule"></span>       @* a red rule down the left *@
+                    <span>
+                        <span class="badge-name">VETO</span>
+                        <span class="badge-sub">reto spec</span>
+                    </span>
+                </span>
+            </FaceContent>
+        </VetoGauge>
+
+        @* Or just a face, with no content on it: *@
+        <VetoGauge Value="64" Label="Load" Unit="%"
+                   Background="linear-gradient(140deg, #1b212c, #0e1116)" />
         """;
 
     private const string ShapeCode = """

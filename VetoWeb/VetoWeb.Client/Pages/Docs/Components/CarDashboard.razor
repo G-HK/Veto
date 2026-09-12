@@ -1,0 +1,268 @@
+@namespace VetoWeb.Client.Pages.Docs.Components
+@using Veto.Components.Gauge
+@implements IDisposable
+
+@* A car's instrument binnacle, driven by a small engine model rather than by a sine wave -
+   the revs climb, hit the limiter, fall as each gear goes in, and climb again, which is what
+   makes the pair of dials read as one car instead of two unrelated animations. *@
+
+<div class="car" data-testid="@TestId" data-gear="@_gear" data-state="@State">
+
+    <div class="car__dials">
+        <VetoGauge TestId="@(TestId is null ? null : $"{TestId}-tacho")"
+                   Needle="true"
+                   Value="@_rpm"
+                   Min="0"
+                   Max="8000"
+                   Label="RPM x1000"
+                   Format="0"
+                   Size="VetoSize.Large"
+                   ValueFontSize="1.125rem"
+                   LabelFontSize="0.7rem"
+                   ShowTicks="true"
+                   TickEvery="250"
+                   MajorTickEvery="4"
+                   ShowTickLabels="true"
+                   TickLabelSize="9"
+                   TickLabelOffset="17"
+                   Bands="RpmBands"
+                   FollowBands="true"
+                   FlickerFrom="DangerFrom"
+                   NeedleWidth="4"
+                   HubRadius="9"
+                   TransitionDuration="@Tick"
+                   Background="radial-gradient(circle at 50% 42%, #1b212c 0%, #10141b 62%, #0b0e13 100%)">
+            <FaceContent>
+                @* The maker's plate, the way one is printed on a real dial: a red rule, the
+                   name, and the model under it - and the needle sweeps straight over it. *@
+                <span class="car__badge">
+                    <span class="car__badge-rule"></span>
+                    <span class="car__badge-text">
+                        <span class="car__badge-name">VETO</span>
+                        <span class="car__badge-sub">reto spec</span>
+                    </span>
+                </span>
+            </FaceContent>
+        </VetoGauge>
+
+        <div class="car__cluster">
+            <span class="car__gear" data-testid="@(TestId is null ? null : $"{TestId}-gear")">@GearLabel</span>
+            <span class="car__gear-caption">gear</span>
+
+            <div class="car__lights">
+                <span class="car__light car__light--shift" data-lit="@Lit(_rpm >= ShiftLight)">SHIFT</span>
+                <span class="car__light car__light--limit" data-lit="@Lit(_rpm >= Redline - 60)">LIMIT</span>
+            </div>
+        </div>
+
+        <VetoGauge TestId="@(TestId is null ? null : $"{TestId}-speedo")"
+                   Needle="true"
+                   Value="@_speed"
+                   Min="0"
+                   Max="360"
+                   Label="km/h"
+                   Format="0"
+                   Size="VetoSize.Large"
+                   ValueFontSize="1.5rem"
+                   LabelFontSize="0.7rem"
+                   ShowTicks="true"
+                   TickEvery="10"
+                   MajorTickEvery="4"
+                   ShowTickLabels="true"
+                   TickLabelSize="9"
+                   TickLabelOffset="17"
+                   Bands="SpeedBands"
+                   NeedleWidth="4"
+                   HubRadius="9"
+                   TransitionDuration="@Tick"
+                   Background="radial-gradient(circle at 50% 42%, #1b212c 0%, #10141b 62%, #0b0e13 100%)">
+            <FaceContent>
+                <span class="car__badge">
+                    <span class="car__badge-rule"></span>
+                    <span class="car__badge-text">
+                        <span class="car__badge-name">VETO</span>
+                        <span class="car__badge-sub">reto spec</span>
+                    </span>
+                </span>
+            </FaceContent>
+        </VetoGauge>
+    </div>
+
+    <div class="car__controls">
+        <VetoButton TestId="@(TestId is null ? null : $"{TestId}-toggle")"
+                    Size="VetoSize.Small"
+                    Variant="VetoVariant.Outlined"
+                    OnClick="Toggle">@(_running ? "Pause" : "Drive")</VetoButton>
+
+        <VetoButton TestId="@(TestId is null ? null : $"{TestId}-reset")"
+                    Size="VetoSize.Small"
+                    Variant="VetoVariant.Text"
+                    OnClick="Reset">Back to the line</VetoButton>
+
+        <span class="car__status" data-testid="@(TestId is null ? null : $"{TestId}-status")">@StatusText</span>
+    </div>
+</div>
+
+@code {
+    /// <summary>Test hook for the whole binnacle.</summary>
+    [Parameter]
+    public string? TestId { get; set; }
+
+    /// <summary>
+    /// How often the model advances, in milliseconds. Each gauge is given the same figure as its
+    /// transition, so one step finishes exactly as the next arrives and the needles sweep
+    /// smoothly instead of trailing.
+    /// </summary>
+    private const int Tick = 40;
+
+    private const double TopSpeed = 350;
+    private const double Redline = 8000;
+    private const double ShiftLight = 6500;
+    private const double DangerFrom = 7200;
+    private const double Idle = 850;
+    private const double HoldSeconds = 5;
+    private const double ShiftSeconds = 0.28;
+
+    /// <summary>Revs per km/h in each gear - the seven-speed gearbox, in one line.</summary>
+    private static readonly double[] Ratios = [118, 80, 58, 44, 34, 27, 21.5];
+
+    /// <summary>How hard each gear pulls, in km/h per second, before drag is taken off.</summary>
+    private static readonly double[] Pull = [60, 48, 39, 31, 24, 18, 14];
+
+    // Two bands, in order: the orange warning first, then the red one it runs into. The
+    // reading takes whichever it falls in, so the dial goes amber before it goes red.
+    private static readonly VetoGaugeBand[] RpmBands =
+    [
+        new(6500, DangerFrom, "var(--veto-color-warning)", "Approaching the line"),
+        new(DangerFrom, 8000, "var(--veto-color-danger)", "Red line"),
+    ];
+
+    private static readonly VetoGaugeBand[] SpeedBands =
+    [
+        new(300, 360, "var(--veto-color-warning)", "Very fast"),
+    ];
+
+    private double _speed;
+    private double _rpm = Idle;
+    private int _gear = 1;
+    private double _shifting;
+    private double _holding;
+    private bool _running = true;
+    private CancellationTokenSource? _engine;
+
+    private string State => _holding > 0 ? "holding" : _shifting > 0 ? "shifting" : _running ? "driving" : "paused";
+
+    private string GearLabel => _gear.ToString();
+
+    private string StatusText => _holding > 0
+        ? $"Top speed - holding for {_holding:0.0}s"
+        : _shifting > 0
+            ? $"Shifting into {GearLabel}"
+            : _running ? "Accelerating" : "Paused";
+
+    private static string Lit ( bool on ) => on ? "true" : "false";
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        if (firstRender)
+        {
+            Start();
+        }
+    }
+
+    public void Dispose ()
+    {
+        _engine?.Cancel();
+        _engine?.Dispose();
+        _engine = null;
+    }
+
+    private void Start ()
+    {
+        _engine?.Cancel();
+        var cts = new CancellationTokenSource();
+        _engine = cts;
+        _ = RunAsync(cts.Token);
+    }
+
+    private async Task RunAsync ( CancellationToken token )
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(Tick, token);
+
+                if (_running)
+                {
+                    Advance(Tick / 1000d);
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // The page went away.
+        }
+    }
+
+    private void Toggle ()
+    {
+        _running = !_running;
+    }
+
+    private void Reset ()
+    {
+        _speed = 0;
+        _rpm = Idle;
+        _gear = 1;
+        _shifting = 0;
+        _holding = 0;
+    }
+
+    /// <summary>
+    /// One step of the engine. Deliberately a gearbox rather than a ramp: the revs rising to the
+    /// limiter and dropping away as the next gear goes in is the whole character of the thing,
+    /// and it is what makes the two dials look like they belong to the same car.
+    /// </summary>
+    private void Advance ( double seconds )
+    {
+        if (_holding > 0)
+        {
+            _holding -= seconds;
+
+            if (_holding <= 0)
+            {
+                Reset();
+            }
+        }
+        else if (_shifting > 0)
+        {
+            // The clutch is out: no drive, so the car coasts for the length of the shift.
+            _shifting -= seconds;
+            _speed = Math.Max(0, _speed - 3 * seconds);
+        }
+        else
+        {
+            // Pull falls away with speed, so the car creeps up on its top speed instead of
+            // marching to it at a constant rate.
+            _speed += Pull[_gear - 1] * (1 - 0.6 * (_speed / TopSpeed)) * seconds;
+
+            if (_speed >= TopSpeed)
+            {
+                _speed = TopSpeed;
+                _holding = HoldSeconds;
+            }
+        }
+
+        _rpm = Math.Clamp(_speed * Ratios[_gear - 1] + Idle, Idle, Redline);
+
+        // At the limiter the next gear goes in, and the revs fall to whatever that ratio makes
+        // of the speed the car is already doing.
+        if (_rpm >= Redline && _gear < Ratios.Length && _shifting <= 0 && _holding <= 0)
+        {
+            _gear++;
+            _shifting = ShiftSeconds;
+        }
+    }
+}

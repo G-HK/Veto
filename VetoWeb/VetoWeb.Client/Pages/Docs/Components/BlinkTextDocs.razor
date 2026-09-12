@@ -209,10 +209,12 @@
 
     private const string PauseCode = """
         <VetoBlinkText Text="scanning | 12 hosts | 3 open ports | done"
-                       PauseOn="@(new Dictionary<char, int> { ['|'] = 600 })" />
+                       CharactersPerSecond="70"
+                       PauseOn="@(new Dictionary<char, int> { ['|'] = 600 })"
+                       Loop="true" />
 
         <VetoBlinkText Text="One word at a time reads faster."
                        ByWord="true"
-                       CharactersPerSecond="6" />
+                       CharactersPerSecond="7" />
         """;
 }

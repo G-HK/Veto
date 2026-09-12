@@ -12,7 +12,18 @@
          data-testid="@TestId"
          data-value="@Css(Reading)"
          data-band="@(CurrentBand?.Label ?? CurrentBand?.Color)"
-         data-polling="@(IsPolling ? "true" : null)">
+         data-polling="@(IsPolling ? "true" : null)"
+         data-flicker="@(IsFlickering ? "true" : null)">
+
+        @if (HasFace)
+        {
+            @* Under the dial rather than over it, so the ticks and the needle sweep across the
+               face the way they do on a real instrument. Decorative: the reading is what a
+               gauge is for, and a badge on the face is not part of it. *@
+            <div class="veto-gauge__face" style="@FaceStyle" aria-hidden="true">
+                @FaceContent
+            </div>
+        }
 
         <svg class="veto-gauge__dial"
              viewBox="0 0 200 200"
