@@ -1,0 +1,110 @@
+@namespace Veto.Components.Rating
+@typeparam TValue where TValue : struct, System.Numerics.INumber<TValue>
+@inherits VetoInputBase<TValue>
+@using Veto.Components.Icon
+
+@if (Visible)
+{
+    <div class="@RootCssClass"
+         style="@RootCssStyle"
+         data-testid="@TestId"
+         data-value="@FormatNumber(Score)"
+         data-preview="@(_preview is null ? null : FormatNumber(_preview.Value))">
+
+        @if (HasLabel)
+        {
+            <label class="veto-rating__label" for="@ElementId">
+                @Label
+                @if (Required)
+                {
+                    <span class="veto-rating__required" aria-hidden="true">*</span>
+                }
+            </label>
+        }
+
+        <div class="veto-rating__row">
+            @* One focusable element for the whole rating: a screen reader hears a single
+               "3 of 6" control rather than six unrelated buttons, and the arrow keys walk
+               the scale a half step at a time when halves are allowed. *@
+            <div @ref="InputElement"
+                 @attributes="InnerAttributes"
+                 id="@ElementId"
+                 class="veto-rating__items @FieldValidationClass"
+                 role="slider"
+                 tabindex="@(Disabled ? -1 : 0)"
+                 aria-valuemin="0"
+                 aria-valuemax="@Max"
+                 aria-valuenow="@FormatNumber(Score)"
+                 aria-valuetext="@ValueText"
+                 aria-label="@(HasLabel ? null : AccessibleName)"
+                 aria-orientation="horizontal"
+                 aria-required="@(Required ? "true" : null)"
+                 aria-readonly="@(Interactive ? null : "true")"
+                 aria-disabled="@(Disabled ? "true" : null)"
+                 aria-invalid="@(HasErrors ? "true" : null)"
+                 aria-describedby="@DescribedBy"
+                 @onkeydown="OnKeyDownAsync"
+                 @onmouseleave="ClearPreview">
+                @for (var index = 1; index <= Max; index++)
+                {
+                    var item = index;
+                    <span class="veto-rating__item"
+                          data-index="@item"
+                          data-fill="@FillOf(item)"
+                          data-testid="@(TestId is null ? null : $"{TestId}-item-{item}")">
+                        <span class="veto-rating__icon veto-rating__icon--empty" aria-hidden="true">
+                            <VetoIcon Icon="@(EmptyIcon ?? Icon)" Size="VetoIconSize.Inherit" />
+                        </span>
+                        <span class="veto-rating__icon veto-rating__icon--filled"
+                              style="width:@(FillCss(item))%"
+                              aria-hidden="true">
+                            <VetoIcon Icon="@Icon" Size="VetoIconSize.Inherit" />
+                        </span>
+
+                        @if (Interactive)
+                        {
+                            @* Hit targets, not tab stops: the group above owns the focus. With
+                               halves on, the left half of an icon is its own target, which is
+                               what lets any icon show a half value without a second glyph. *@
+                            @if (AllowHalf)
+                            {
+                                <button type="button"
+                                        tabindex="-1"
+                                        class="veto-rating__hit veto-rating__hit--half"
+                                        title="@TitleFor(item - 0.5)"
+                                        aria-label="@TitleFor(item - 0.5)"
+                                        data-testid="@(TestId is null ? null : $"{TestId}-half-{item}")"
+                                        @onclick="() => PickAsync(item - 0.5)"
+                                        @onmouseenter="() => PreviewAsync(item - 0.5)"></button>
+                            }
+                            <button type="button"
+                                    tabindex="-1"
+                                    class="veto-rating__hit veto-rating__hit--full"
+                                    title="@TitleFor(item)"
+                                    aria-label="@TitleFor(item)"
+                                    data-testid="@(TestId is null ? null : $"{TestId}-pick-{item}")"
+                                    @onclick="() => PickAsync(item)"
+                                    @onmouseenter="() => PreviewAsync(item)"></button>
+                        }
+                    </span>
+                }
+            </div>
+
+            @if (ShowValue)
+            {
+                <span class="veto-rating__value" data-testid="@(TestId is null ? null : $"{TestId}-value")">@ValueText</span>
+            }
+        </div>
+
+        @if (HasErrors)
+        {
+            <p class="veto-rating__message veto-rating__message--error" id="@ErrorId" role="alert">
+                @ValidationMessages.First()
+            </p>
+        }
+        else if (!string.IsNullOrWhiteSpace(HelperText))
+        {
+            <p class="veto-rating__message" id="@HelperId">@HelperText</p>
+        }
+    </div>
+}

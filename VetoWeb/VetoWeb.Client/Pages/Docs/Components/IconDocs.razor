@@ -1,0 +1,133 @@
+@page "/docs/components/icon"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Icon — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Icon"
+          Lead="SVG icons that inherit colour and size from their surroundings. No icon font, no package to install.">
+
+    <DemoBlock TestId="demo-set"
+               Title="The built-in set"
+               Description="VetoIcons is a class of string constants, each one the inner markup of a 24x24 SVG. Only the icons you actually reference end up in your app."
+               Code="@SetCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" TestId="icon-set">
+            @foreach (var (name, icon) in Set)
+            {
+                <VetoStack Gap="VetoSpacing.ExtraSmall" Align="VetoAlign.Center" Class="icon-cell">
+                    <VetoIcon Icon="@icon" Size="VetoIconSize.Large" />
+                    <span class="icon-cell__name">@name</span>
+                </VetoStack>
+            }
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes and colour"
+               Description="Icons draw with currentColor, so they take the colour of whatever they sit in. Size Inherit makes an icon scale with the text beside it."
+               Code="@SizesCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Align="VetoAlign.Center">
+            <VetoIcon Icon="@VetoIcons.Bell" Size="VetoIconSize.Small" />
+            <VetoIcon Icon="@VetoIcons.Bell" Size="VetoIconSize.Medium" />
+            <VetoIcon Icon="@VetoIcons.Bell" TestId="large" Size="VetoIconSize.Large" />
+            <VetoIcon Icon="@VetoIcons.Bell" Size="VetoIconSize.ExtraLarge" />
+            <span class="icon-inline">Inherits its size <VetoIcon Icon="@VetoIcons.ChevronRight" Size="VetoIconSize.Inherit" /></span>
+            <span class="icon-danger"><VetoIcon Icon="@VetoIcons.Warning" Size="VetoIconSize.Large" /></span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-accessibility"
+               Title="Decorative by default"
+               Description="An icon beside a label says nothing new, so it is hidden from screen readers. Give it a Title only when the icon is the only thing carrying the meaning - it then becomes an image with an accessible name."
+               Code="@AccessibilityCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Align="VetoAlign.Center">
+            <VetoIcon Icon="@VetoIcons.Info" TestId="decorative" Size="VetoIconSize.Large" />
+            <VetoIcon Icon="@VetoIcons.Trash" TestId="named" Title="Delete" Size="VetoIconSize.Large" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-rotation"
+               Title="Rotation and spin"
+               Description="Rotation reuses one chevron for all four directions. Spin is for loading states, and stops under prefers-reduced-motion."
+               Code="@RotationCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Align="VetoAlign.Center">
+            <VetoIcon Icon="@VetoIcons.ChevronDown" Size="VetoIconSize.Large" />
+            <VetoIcon Icon="@VetoIcons.ChevronDown" TestId="rotated" Rotation="180" Size="VetoIconSize.Large" />
+            <VetoIcon Icon="@VetoIcons.Settings" TestId="spin" Spin="true" Size="VetoIconSize.Large" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-custom"
+               Title="Your own icons"
+               Description="Icon takes any SVG markup, so you are never limited to the built-in set. Draw with currentColor and it behaves like the rest."
+               Code="@CustomCode">
+        <VetoIcon TestId="custom" Size="VetoIconSize.ExtraLarge"
+                  Icon="@("<path d=\"M12 3 4 21h16Z\" /><path d=\"M12 10v5\" />")" />
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private static readonly (string Name, string Icon)[] Set =
+    [
+        ("Menu", VetoIcons.Menu), ("Close", VetoIcons.Close), ("Home", VetoIcons.Home),
+        ("Search", VetoIcons.Search), ("Settings", VetoIcons.Settings), ("User", VetoIcons.User),
+        ("Bell", VetoIcons.Bell), ("Sun", VetoIcons.Sun), ("Moon", VetoIcons.Moon),
+        ("Monitor", VetoIcons.Monitor), ("Check", VetoIcons.Check), ("Plus", VetoIcons.Plus),
+        ("Minus", VetoIcons.Minus), ("Edit", VetoIcons.Edit), ("Trash", VetoIcons.Trash),
+        ("Copy", VetoIcons.Copy), ("Info", VetoIcons.Info), ("Warning", VetoIcons.Warning),
+        ("Error", VetoIcons.Error), ("Success", VetoIcons.Success), ("Document", VetoIcons.Document),
+        ("Folder", VetoIcons.Folder), ("Grid", VetoIcons.Grid), ("Sidebar", VetoIcons.Sidebar),
+        ("Terminal", VetoIcons.Terminal), ("Palette", VetoIcons.Palette),
+        ("DragHandle", VetoIcons.DragHandle), ("ExternalLink", VetoIcons.ExternalLink),
+        ("ChevronUp", VetoIcons.ChevronUp), ("ChevronDown", VetoIcons.ChevronDown),
+        ("ChevronLeft", VetoIcons.ChevronLeft), ("ChevronRight", VetoIcons.ChevronRight)
+    ];
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Icon", "string?", "null", "The icon's SVG inner markup, normally a VetoIcons constant."),
+        new("Size", "VetoIconSize", "Medium", "Small, Medium, Large, ExtraLarge, or Inherit to follow the font size."),
+        new("Title", "string?", "null", "Accessible name. Supplying one makes the icon role=\"img\"; leaving it null keeps it decorative."),
+        new("Rotation", "int", "0", "Rotation in degrees."),
+        new("Spin", "bool", "false", "Spins continuously. Ignored under prefers-reduced-motion."),
+        new("StrokeWidth", "double", "2", "Stroke weight, for matching surrounding text."),
+        new("ViewBox", "string", "\"0 0 24 24\"", "Only needs changing for icons not drawn on a 24x24 grid.")
+    ];
+
+    private const string SetCode = """
+        <VetoIcon Icon="@VetoIcons.Search" />
+        """;
+
+    private const string SizesCode = """
+        <VetoIcon Icon="@VetoIcons.Bell" Size="VetoIconSize.Small" />
+        <VetoIcon Icon="@VetoIcons.Bell" Size="VetoIconSize.ExtraLarge" />
+
+        <!-- Inherit scales with the surrounding text -->
+        <span>Read more <VetoIcon Icon="@VetoIcons.ChevronRight" Size="VetoIconSize.Inherit" /></span>
+        """;
+
+    private const string AccessibilityCode = """
+        <!-- Decorative: hidden from screen readers -->
+        <VetoIcon Icon="@VetoIcons.Info" />
+
+        <!-- Meaningful: announced as "Delete" -->
+        <VetoIcon Icon="@VetoIcons.Trash" Title="Delete" />
+        """;
+
+    private const string RotationCode = """
+        <VetoIcon Icon="@VetoIcons.ChevronDown" Rotation="180" />
+        <VetoIcon Icon="@VetoIcons.Settings" Spin="true" />
+        """;
+
+    private const string CustomCode = """
+        <VetoIcon Icon="@MyIcon" Size="VetoIconSize.ExtraLarge" />
+
+        @code {
+            private const string MyIcon =
+                "<path d=\"M12 3 4 21h16Z\" /><path d=\"M12 10v5\" />";
+        }
+        """;
+}

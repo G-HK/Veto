@@ -1,0 +1,48 @@
+/* The docs site's own chrome. Everything else on the site is a Veto component. */
+
+.app-bar__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-2);
+    text-decoration: none;
+    color: var(--veto-color-text);
+}
+
+.app-bar__mark {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border-radius: var(--veto-radius-sm);
+}
+
+.app-bar__name {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    padding: var(--veto-space-3) var(--veto-space-4);
+    font-family: var(--veto-font-sans);
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-danger);
+}
+
+#blazor-error-ui .dismiss {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    cursor: pointer;
+}

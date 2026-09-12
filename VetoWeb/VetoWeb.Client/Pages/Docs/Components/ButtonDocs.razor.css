@@ -1,0 +1,6 @@
+.demo-value {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    min-height: 1.25rem;
+}

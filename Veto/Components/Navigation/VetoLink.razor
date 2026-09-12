@@ -1,0 +1,18 @@
+@namespace Veto.Components.Navigation
+@inherits Veto.Core.VetoComponentBase
+@implements IDisposable
+@inject NavigationManager Navigation
+
+@if (Visible)
+{
+    <a @ref="RootElement"
+       @attributes="InnerAttributes"
+       id="@ElementId"
+       class="@CssClass"
+       style="@CssStyle"
+       data-testid="@TestId"
+       href="@Href"
+       target="@Target"
+       rel="@ResolvedRel"
+       aria-current="@(IsActive ? "page" : null)">@ChildContent</a>
+}

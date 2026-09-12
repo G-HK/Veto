@@ -1,0 +1,49 @@
+/* VetoHandbookToc - the contents rail beside a handbook page. */
+
+.veto-handbook-toc {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-2);
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-sm);
+}
+
+.veto-handbook-toc__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+}
+
+.veto-handbook-toc__list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.veto-handbook-toc__link {
+    display: block;
+    padding: var(--veto-space-1) var(--veto-space-3);
+    line-height: 1.5;
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+    border-left: 2px solid var(--veto-color-border);
+    transition: color var(--veto-transition), border-color var(--veto-transition);
+}
+
+.veto-handbook-toc__link:hover {
+    color: var(--veto-color-text);
+    border-left-color: var(--veto-color-border-strong);
+}
+
+.veto-handbook-toc__link:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-handbook-toc__link--current {
+    color: var(--veto-color-primary);
+    font-weight: 600;
+    border-left-color: var(--veto-color-primary);
+}

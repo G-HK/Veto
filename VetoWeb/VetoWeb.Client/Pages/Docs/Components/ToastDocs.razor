@@ -1,0 +1,281 @@
+@page "/docs/components/toast"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.Toast
+@inject IVetoToastService Toasts
+
+<PageTitle>Toast — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Toast"
+          Lead="Short-lived notifications raised from anywhere in the app: six positions, eleven animations, stacking, de-duplication and toasts that refuse to leave.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Raising a toast"
+               Description="Inject IVetoToastService and call it. One VetoToastHost in the layout does the rendering, so nothing that raises a toast needs to know anything about how it looks."
+               Code="@BasicCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+            <VetoButton TestId="raise-info" Color="VetoColor.Primary" OnClick="RaiseInfo">Info</VetoButton>
+            <VetoButton TestId="raise-success" Color="VetoColor.Success" OnClick="RaiseSuccess">Success</VetoButton>
+            <VetoButton TestId="raise-warning" Color="VetoColor.Warning" OnClick="RaiseWarning">Warning</VetoButton>
+            <VetoButton TestId="raise-error" Color="VetoColor.Danger" OnClick="RaiseError">Error</VetoButton>
+            <VetoButton TestId="raise-plain" Variant="VetoVariant.Outlined" OnClick="RaisePlain">Default</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-title"
+               Title="Title, custom icon, and a click handler"
+               Description="Everything on a toast is an option. A title gives the message a heading; OnClick makes the whole toast actionable; OnClose runs once it has gone, whichever way it went."
+               Code="@RichCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+            <VetoButton TestId="raise-titled" OnClick="RaiseTitled">With a title</VetoButton>
+            <VetoButton TestId="raise-clickable" OnClick="RaiseClickable">Clickable</VetoButton>
+            <span class="demo-value" data-testid="clicked">@_clicked</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-positions"
+               Title="Six positions"
+               Description="The host sets the app's position; any single toast may override it. Mixing positions across a whole app is usually a mistake, but one message in the opposite corner is sometimes exactly right."
+               Code="@PositionCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+            @foreach (var position in Positions)
+            {
+                <VetoButton TestId="@($"pos-{position.ToString().ToLowerInvariant()}")"
+                            Size="VetoSize.Small"
+                            Variant="VetoVariant.Outlined"
+                            OnClick="() => RaiseAt(position)">@position</VetoButton>
+            }
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-animations"
+               Title="Eleven animations"
+               Description="A toast always leaves the way it came in - the same displaced state is used for both directions, so it can never enter one way and exit another. Under prefers-reduced-motion every one of them degrades to a plain fade."
+               Code="@AnimationCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+            @foreach (var animation in Animations)
+            {
+                <VetoButton TestId="@($"anim-{animation.ToString().ToLowerInvariant()}")"
+                            Size="VetoSize.Small"
+                            Variant="VetoVariant.Outlined"
+                            OnClick="() => RaiseWith(animation)">@animation</VetoButton>
+            }
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-timing"
+               Title="Timing, the progress bar, and toasts that stay"
+               Description="Duration is per toast. The progress bar counts the remaining time down and holds while the pointer is over the toast, so a message is never snatched away mid-read. Sticky drops the timer entirely - the toast stays until somebody dismisses it, which is what you want for anything the user must actually see."
+               Code="@TimingCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+            <VetoButton TestId="raise-quick" Size="VetoSize.Small" OnClick="RaiseQuick">1 second</VetoButton>
+            <VetoButton TestId="raise-slow" Size="VetoSize.Small" OnClick="RaiseSlow">15 seconds</VetoButton>
+            <VetoButton TestId="raise-sticky" Size="VetoSize.Small" Color="VetoColor.Danger" OnClick="RaiseSticky">Sticky</VetoButton>
+            <VetoButton TestId="raise-bare" Size="VetoSize.Small" Variant="VetoVariant.Outlined" OnClick="RaiseBare">No bar</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-duplicates"
+               Title="Duplicates and the stack limit"
+               Description="Press the same button twice. Allow shows both; Block drops the second; Replace folds it into the one already on screen, restarts its timer and counts the repeat - which is what you want when the repetition itself is the information. The host's MaxToasts caps how many can be on screen at once; raising one beyond the cap retires the oldest, though never a sticky one."
+               Code="@DuplicateCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+            <VetoButton TestId="dup-allow" Size="VetoSize.Small" OnClick="DupAllow">Allow</VetoButton>
+            <VetoButton TestId="dup-block" Size="VetoSize.Small" OnClick="DupBlock">Block</VetoButton>
+            <VetoButton TestId="dup-replace" Size="VetoSize.Small" OnClick="DupReplace">Replace (counts up)</VetoButton>
+            <VetoButton TestId="raise-many" Size="VetoSize.Small" Variant="VetoVariant.Outlined" OnClick="RaiseMany">Raise eight at once</VetoButton>
+            <VetoButton TestId="clear-all" Size="VetoSize.Small" Variant="VetoVariant.Text" OnClick="ClearAll">Clear all</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="host-parameters" Title="VetoToastHost parameters" Rows="HostParameters" />
+
+    <ParameterTable TestId="option-parameters" Title="VetoToastOptions" Rows="OptionParameters" />
+
+</DocsPage>
+
+@code {
+    private string? _clicked;
+
+    private static readonly VetoToastPosition[] Positions = Enum.GetValues<VetoToastPosition>();
+
+    private static readonly VetoToastAnimation[] Animations = Enum.GetValues<VetoToastAnimation>();
+
+    private void RaiseInfo () => Toasts.Info("Six files were indexed", new VetoToastOptions { TestId = "info-toast" });
+
+    private void RaiseSuccess () => Toasts.Success("Saved", new VetoToastOptions { TestId = "success-toast" });
+
+    private void RaiseWarning () => Toasts.Warning("Two tests are still failing", new VetoToastOptions { TestId = "warning-toast" });
+
+    private void RaiseError () => Toasts.Error("Could not reach the server", new VetoToastOptions { TestId = "error-toast" });
+
+    private void RaisePlain () => Toasts.Show("Nothing in particular happened", VetoToastType.Default, new VetoToastOptions { TestId = "plain-toast" });
+
+    private void RaiseQuick () => Toasts.Info("Gone in a second", new VetoToastOptions { Duration = 1000, TestId = "quick-toast" });
+
+    private void RaiseSlow () => Toasts.Info("Around for a while", new VetoToastOptions { Duration = 15000, TestId = "slow-toast" });
+
+    private void RaiseBare () => Toasts.Info("No bar, no button", new VetoToastOptions
+    {
+        ShowProgress = false,
+        ShowCloseButton = false,
+        TestId = "bare-toast",
+    });
+
+    private void DupAllow () => Toasts.Info("Same message", new VetoToastOptions
+    {
+        Duplicates = VetoToastDuplicates.Allow,
+        TestId = "dup-allow-toast",
+        Duration = 20000,
+    });
+
+    private void DupBlock () => Toasts.Warning("Blocked repeat", new VetoToastOptions
+    {
+        Duplicates = VetoToastDuplicates.Block,
+        TestId = "dup-block-toast",
+        Duration = 20000,
+    });
+
+    private void DupReplace () => Toasts.Error("Connection lost", new VetoToastOptions
+    {
+        Duplicates = VetoToastDuplicates.Replace,
+        TestId = "dup-replace-toast",
+        Duration = 20000,
+    });
+
+    private void ClearAll () => Toasts.Clear();
+
+    private void RaiseTitled () => Toasts.Success("Three files changed, none broke.", new VetoToastOptions
+    {
+        Title = "Build finished",
+        TestId = "titled-toast",
+    });
+
+    private void RaiseClickable () => Toasts.Info("Click me", new VetoToastOptions
+    {
+        TestId = "clickable-toast",
+        CloseOnClick = true,
+        OnClick = () => { _clicked = "Toast clicked"; StateHasChanged(); return Task.CompletedTask; },
+    });
+
+    private void RaiseSticky () => Toasts.Error("This one is not going anywhere.", new VetoToastOptions
+    {
+        Title = "Needs your attention",
+        Sticky = true,
+        TestId = "sticky-toast",
+    });
+
+    private void RaiseAt ( VetoToastPosition position ) => Toasts.Info($"Raised at {position}", new VetoToastOptions
+    {
+        Position = position,
+        TestId = $"toast-{position.ToString().ToLowerInvariant()}",
+    });
+
+    private void RaiseWith ( VetoToastAnimation animation ) => Toasts.Info($"{animation}", new VetoToastOptions
+    {
+        Animation = animation,
+        Duration = 4000,
+        TestId = $"toast-{animation.ToString().ToLowerInvariant()}",
+    });
+
+    private void RaiseMany ()
+    {
+        for (var i = 1; i <= 8; i++)
+        {
+            Toasts.Info($"Message {i} of 8", new VetoToastOptions { TestId = "many-toast" });
+        }
+    }
+
+    private static readonly ParameterTable.Row[] HostParameters =
+    [
+        new("Position", "VetoToastPosition", "TopRight", "TopLeft, TopCenter, TopRight, BottomLeft, BottomCenter or BottomRight."),
+        new("Animation", "VetoToastAnimation", "Fade", "None, Fade, Zoom, SlideLeft/Right/Up/Down, FlipXDown/Up, FlipYLeft/Right."),
+        new("Duration", "int", "5000", "How long a toast stays, in milliseconds."),
+        new("AnimationDuration", "int", "250", "How long the arrival and departure animations run."),
+        new("MaxToasts", "int", "5", "The most toasts on screen at once. Zero means no limit."),
+        new("Duplicates", "VetoToastDuplicates", "Allow", "Allow, Block, or Replace a message already on screen."),
+        new("ShowProgress", "bool", "true", "Count each toast's remaining time down with a bar."),
+        new("ShowCloseButton", "bool", "true", "Give each toast a close button."),
+        new("CloseOnClick", "bool", "false", "Dismiss a toast when it is clicked anywhere."),
+        new("PauseOnHover", "bool", "true", "Hold the countdown while the pointer is over a toast."),
+        new("NewestOnTop", "bool", "true", "Put the newest toast nearest the screen edge."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("AriaLabel / CloseLabel", "string", "\"Notifications\" / \"Dismiss\"", "Accessible names for the stack and the close button."),
+    ];
+
+    private static readonly ParameterTable.Row[] OptionParameters =
+    [
+        new("Title", "string?", "null", "A heading above the message."),
+        new("Sticky", "bool", "false", "Never hide - stays until dismissed. Drops the progress bar."),
+        new("Duration", "int?", "null", "Override the host's duration for this toast."),
+        new("Position / Animation", "enum?", "null", "Override the host's position or animation for this toast."),
+        new("ShowProgress / ShowCloseButton / CloseOnClick / PauseOnHover", "bool?", "null", "Override the matching host setting."),
+        new("Icon / HideIcon", "string? / bool", "null / false", "A custom icon, or no icon at all."),
+        new("Content", "RenderFragment?", "null", "Markup rendered in place of the plain message."),
+        new("Class / Style", "string?", "null", "A bespoke look for one toast."),
+        new("TestId", "string?", "null", "Rendered as data-testid - the stable hook for a Playwright spec."),
+        new("DeduplicationKey", "string?", "null", "What counts as 'the same toast'. Defaults to type + title + message."),
+        new("Duplicates", "VetoToastDuplicates?", "null", "Override the host's duplicate policy for this toast."),
+        new("OnClick / OnClose", "Func<Task>?", "null", "Raised when the toast is clicked, and once it has gone."),
+        new("Size", "VetoSize?", "null", "Override the host's size for this toast."),
+    ];
+
+    private const string BasicCode = """
+        @* Once, in the layout: *@
+        <VetoToastHost />
+
+        @* Anywhere else: *@
+        @inject IVetoToastService Toasts
+
+        <VetoButton OnClick="() => Toasts.Success(&quot;Saved&quot;)">Save</VetoButton>
+        """;
+
+    private const string RichCode = """
+        Toasts.Success("Three files changed, none broke.", new VetoToastOptions
+        {
+            Title = "Build finished",
+            OnClose = () => { _dismissed = true; return Task.CompletedTask; },
+        });
+        """;
+
+    private const string PositionCode = """
+        @* The app's default: *@
+        <VetoToastHost Position="VetoToastPosition.BottomRight" />
+
+        @* One message somewhere else: *@
+        Toasts.Info("Over here", new VetoToastOptions
+        {
+            Position = VetoToastPosition.TopCenter,
+        });
+        """;
+
+    private const string AnimationCode = """
+        <VetoToastHost Animation="VetoToastAnimation.SlideRight" />
+
+        Toasts.Info("Flipped", new VetoToastOptions
+        {
+            Animation = VetoToastAnimation.FlipXUp,
+        });
+        """;
+
+    private const string TimingCode = """
+        Toasts.Info("Gone in a second", new VetoToastOptions { Duration = 1000 });
+
+        @* Sticky: no timer, no progress bar, stays until dismissed. *@
+        Toasts.Error("This one is not going anywhere.", new VetoToastOptions
+        {
+            Title = "Needs your attention",
+            Sticky = true,
+        });
+        """;
+
+    private const string DuplicateCode = """
+        <VetoToastHost MaxToasts="5" Duplicates="VetoToastDuplicates.Block" />
+
+        @* Or per toast - the repeat is the information here, so count it: *@
+        Toasts.Error("Connection lost", new VetoToastOptions
+        {
+            Duplicates = VetoToastDuplicates.Replace,
+        });
+        """;
+}

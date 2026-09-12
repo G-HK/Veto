@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+    <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <!--
+      Referenced by the docs site, deliberately not by Veto itself. VetoCron ships a built-in
+      English describer so it works with no dependencies; this package is what the Describer
+      parameter exists for, and the Cron page demonstrates swapping it in for ~25 languages.
+    -->
+    <PackageReference Include="CronExpressionDescriptor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto\Veto.csproj" />
+  </ItemGroup>
+
+</Project>

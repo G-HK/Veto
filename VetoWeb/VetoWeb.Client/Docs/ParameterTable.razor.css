@@ -1,0 +1,46 @@
+.param-table__scroll {
+    /* Wide tables scroll inside the card; the page never scrolls sideways. */
+    overflow-x: auto;
+}
+
+.param-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--veto-font-size-sm);
+    text-align: start;
+}
+
+.param-table th,
+.param-table td {
+    padding: var(--veto-space-3) var(--veto-space-4);
+    text-align: start;
+    vertical-align: top;
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+.param-table thead th {
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+    white-space: nowrap;
+}
+
+.param-table tbody tr:last-child th,
+.param-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.param-table tbody th {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.param-table code {
+    font-family: var(--veto-font-mono);
+    font-size: 0.8125rem;
+    color: var(--veto-color-primary);
+}
+
+.param-table td:last-child {
+    min-width: 20rem;
+    color: var(--veto-color-text-muted);
+}

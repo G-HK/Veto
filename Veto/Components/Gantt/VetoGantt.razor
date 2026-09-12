@@ -1,0 +1,331 @@
+@namespace Veto.Components.Gantt
+@inherits Veto.Core.VetoComponentBase
+@implements IAsyncDisposable
+@using System.Globalization
+@using Veto.Components.Buttons
+@using Veto.Components.Icon
+@using Veto.Components.TextBox
+@inject IJSRuntime JS
+
+@if (Visible)
+{
+    <div @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId"
+         data-store="@(PersistKey is null ? null : StoreBackend)"
+         data-draggable="@(Editable ? (DragHandleAttached ? "true" : "false") : null)">
+
+        @if (ShowToolbar)
+        {
+            <div class="veto-gantt__toolbar" data-testid="@Sub("toolbar")">
+                @if (ShowSearch)
+                {
+                    <div class="veto-gantt__search">
+                        <VetoTextBox TValue="string"
+                                     TestId="@Sub("search")"
+                                     Placeholder="Filter tasks"
+                                     Size="VetoSize.Small"
+                                     Immediate="true"
+                                     Value="Search"
+                                     ValueChanged="OnSearchChangedAsync"
+                                     ValueExpression="() => Search" />
+                    </div>
+                }
+
+                @if (ShowCategoryFilter && Categories.Count > 0)
+                {
+                    <div class="veto-gantt__filters" role="group" aria-label="Filter by category">
+                        @foreach (var category in Categories)
+                        {
+                            <button type="button"
+                                    class="veto-gantt__chip veto-gantt__chip--category @(IsCategoryOn(category.Name) ? "veto-gantt__chip--on" : null)"
+                                    style="@CategoryStyle(category)"
+                                    data-testid="@Sub($"category-{Slug(category.Name)}")"
+                                    aria-pressed="@(IsCategoryOn(category.Name) ? "true" : "false")"
+                                    @onclick="() => ToggleCategoryAsync(category.Name)">
+                                <span class="veto-gantt__swatch" aria-hidden="true"></span>
+                                @category.Name
+                            </button>
+                        }
+                    </div>
+                }
+
+                <span class="veto-gantt__spacer"></span>
+
+                @if (ShowScalePicker)
+                {
+                    <div class="veto-gantt__scales" role="group" aria-label="Time scale">
+                        @foreach (var option in ScaleOptions)
+                        {
+                            <button type="button"
+                                    class="veto-gantt__chip @(Scale == option ? "veto-gantt__chip--on" : null)"
+                                    data-testid="@Sub($"scale-{option.ToModifier()}")"
+                                    aria-pressed="@(Scale == option ? "true" : "false")"
+                                    @onclick="() => SetScaleAsync(option)">
+                                @option
+                            </button>
+                        }
+                    </div>
+                }
+
+                @if (ShowNavigation)
+                {
+                    <div class="veto-gantt__nav">
+                        <VetoIconButton Icon="@VetoIcons.ChevronLeft"
+                                        Label="Earlier"
+                                        Size="VetoSize.Small"
+                                        TestId="@Sub("previous")"
+                                        OnClick="() => ScrollByAsync(-1)" />
+                        <VetoButton Size="VetoSize.Small"
+                                    Variant="VetoVariant.Outlined"
+                                    Color="VetoColor.Neutral"
+                                    TestId="@Sub("today")"
+                                    OnClick="ScrollToTodayAsync">
+                            Today
+                        </VetoButton>
+                        <VetoIconButton Icon="@VetoIcons.ChevronRight"
+                                        Label="Later"
+                                        Size="VetoSize.Small"
+                                        TestId="@Sub("next")"
+                                        OnClick="() => ScrollByAsync(1)" />
+                    </div>
+                }
+
+                @if (Exportable)
+                {
+                    <div class="veto-gantt__nav">
+                        <VetoButton Size="VetoSize.Small"
+                                    Variant="VetoVariant.Outlined"
+                                    Color="VetoColor.Neutral"
+                                    StartIcon="@VetoIcons.Document"
+                                    TestId="@Sub("export-csv")"
+                                    OnClick="() => ExportAsync(VetoGanttExportFormat.Csv)">
+                            CSV
+                        </VetoButton>
+                        <VetoButton Size="VetoSize.Small"
+                                    Variant="VetoVariant.Outlined"
+                                    Color="VetoColor.Neutral"
+                                    StartIcon="@VetoIcons.Copy"
+                                    TestId="@Sub("export-json")"
+                                    OnClick="() => ExportAsync(VetoGanttExportFormat.Json)">
+                            JSON
+                        </VetoButton>
+                    </div>
+                }
+
+                @if (ShowResetButton && PersistKey is not null && HasEdits)
+                {
+                    <div class="veto-gantt__nav">
+                        <VetoButton Size="VetoSize.Small"
+                                    Variant="VetoVariant.Outlined"
+                                    Color="VetoColor.Danger"
+                                    StartIcon="@VetoIcons.Trash"
+                                    TestId="@Sub("reset")"
+                                    OnClick="ResetAsync">
+                            Reset my changes
+                        </VetoButton>
+                    </div>
+                }
+
+                @Toolbar
+            </div>
+        }
+
+        @if (Loading)
+        {
+            <div class="veto-gantt__frame veto-gantt__frame--loading"
+                 style="@FrameStyle"
+                 role="status"
+                 aria-busy="true"
+                 aria-label="@LoadingText"
+                 data-testid="@Sub("skeleton")">
+                <div class="veto-gantt__sidebar">
+                    <div class="veto-gantt__sidebar-head">@SidebarTitle</div>
+                    @for (var row = 0; row < LoadingRows; row++)
+                    {
+                        <div class="veto-gantt__row veto-gantt__row--label">
+                            <VetoSkeleton Width="@SkeletonNameWidth(row)" />
+                        </div>
+                    }
+                </div>
+
+                <div class="veto-gantt__scroller">
+                    <div class="veto-gantt__skeleton-head">
+                        <VetoSkeleton Width="9rem" />
+                    </div>
+                    @for (var row = 0; row < LoadingRows; row++)
+                    {
+                        <div class="veto-gantt__row">
+                            @* Offset and width vary per row, so the placeholder reads as a
+                               schedule rather than a stack of identical blocks. *@
+                            <VetoSkeleton Variant="VetoSkeletonVariant.Rectangle"
+                                          Class="veto-gantt__skeleton-bar"
+                                          Style="@SkeletonBarStyle(row)" />
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+        <VetoLoadingOverlay Loading="Refreshing" Label="@LoadingText" TestId="@Sub("refresh")">
+        <div class="veto-gantt__frame" style="@FrameStyle">
+            <div class="veto-gantt__sidebar" data-testid="@Sub("sidebar")">
+                <div class="veto-gantt__sidebar-head">@SidebarTitle</div>
+
+                @foreach (var row in Rows)
+                {
+                    <div class="veto-gantt__row veto-gantt__row--label @(IsSelected(row.Item) ? "veto-gantt__row--selected" : null)"
+                         style="@($"--veto-gantt-depth: {row.Depth}")"
+                         data-testid="@Sub($"label-{row.Item.Id}")">
+                        @if (row.HasChildren)
+                        {
+                            <button type="button"
+                                    class="veto-gantt__twisty"
+                                    aria-expanded="@(IsExpanded(row.Item.Id) ? "true" : "false")"
+                                    aria-label="@($"Toggle {row.Item.Name}")"
+                                    data-testid="@Sub($"twisty-{row.Item.Id}")"
+                                    @onclick="() => ToggleGroup(row.Item.Id)">
+                                <VetoIcon Icon="@VetoIcons.ChevronDown" Rotation="@(IsExpanded(row.Item.Id) ? 0 : -90)" />
+                            </button>
+                        }
+                        else
+                        {
+                            <span class="veto-gantt__twisty veto-gantt__twisty--empty"></span>
+                        }
+
+                        <span class="veto-gantt__name" title="@row.Item.Name">@row.Item.Name</span>
+
+                        @if (ShowDates)
+                        {
+                            <span class="veto-gantt__dates">@FormatRange(row.Item)</span>
+                        }
+                    </div>
+                }
+
+                @if (Rows.Count == 0)
+                {
+                    <div class="veto-gantt__empty" data-testid="@Sub("empty")">@EmptyText</div>
+                }
+            </div>
+
+            <div @ref="_scroller" class="veto-gantt__scroller" data-testid="@Sub("scroller")">
+                <div class="veto-gantt__canvas" style="@($"width: {Timeline.Width.ToString("0.##", CultureInfo.InvariantCulture)}px")">
+
+                    <div class="veto-gantt__head">
+                        <div class="veto-gantt__head-row veto-gantt__head-row--groups">
+                            @foreach (var group in Timeline.Groups)
+                            {
+                                <span class="veto-gantt__head-cell" style="@CellStyle(group)">@group.Label</span>
+                            }
+                        </div>
+                        <div class="veto-gantt__head-row">
+                            @foreach (var column in Timeline.Columns)
+                            {
+                                <span class="veto-gantt__head-cell @(column.IsWeekend ? "veto-gantt__head-cell--weekend" : null)"
+                                      style="@CellStyle(column)">@column.Label</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div @ref="_grid" class="veto-gantt__grid">
+                        @if (ShowWeekends && Scale == VetoGanttScale.Day)
+                        {
+                            @foreach (var column in Timeline.Columns.Where(c => c.IsWeekend))
+                            {
+                                <span class="veto-gantt__weekend" style="@CellStyle(column)" aria-hidden="true"></span>
+                            }
+                        }
+
+                        @if (ShowToday && Timeline.Contains(Today))
+                        {
+                            <span class="veto-gantt__today"
+                                  style="@($"left: {Timeline.OffsetOf(Today).ToString("0.##", CultureInfo.InvariantCulture)}px")"
+                                  data-testid="@Sub("today-marker")"
+                                  aria-hidden="true"></span>
+                        }
+
+                        @if (ShowDependencies && Links.Count > 0)
+                        {
+                            @* Drawn above the rows but below the bars, and transparent to the
+                               pointer, so an arrow never intercepts a click meant for a bar. *@
+                            <svg class="veto-gantt__links"
+                                 width="@Timeline.Width.ToString("0.##", CultureInfo.InvariantCulture)"
+                                 height="@LinkLayerHeight.ToString("0.##", CultureInfo.InvariantCulture)"
+                                 data-testid="@Sub("links")"
+                                 aria-hidden="true"
+                                 focusable="false">
+                                <defs>
+                                    <marker id="@($"{ElementId}-arrow")"
+                                            viewBox="0 0 8 8"
+                                            refX="7" refY="4"
+                                            markerWidth="6" markerHeight="6"
+                                            orient="auto-start-reverse">
+                                        <path d="M 0 1 L 7 4 L 0 7 z" fill="context-stroke" />
+                                    </marker>
+                                </defs>
+
+                                @foreach (var link in Links)
+                                {
+                                    <path class="veto-gantt__link @(IsLinkActive(link) ? "veto-gantt__link--active" : null)"
+                                          d="@LinkPath(link)"
+                                          marker-end="@($"url(#{ElementId}-arrow)")"
+                                          data-testid="@Sub($"link-{link.FromId}-{link.ToId}")" />
+                                }
+                            </svg>
+                        }
+
+                        @foreach (var row in Rows)
+                        {
+                            <div class="veto-gantt__row @(IsSelected(row.Item) ? "veto-gantt__row--selected" : null)">
+                                @if (row.Item.IsMilestone)
+                                {
+                                    <button type="button"
+                                            class="veto-gantt__milestone"
+                                            style="@BarStyle(row.Item)"
+                                            title="@Tooltip(row.Item)"
+                                            aria-label="@Tooltip(row.Item)"
+                                            data-testid="@Sub($"bar-{row.Item.Id}")"
+                                            @onclick="() => SelectAsync(row.Item)"></button>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="veto-gantt__bar @(row.HasChildren ? "veto-gantt__bar--summary" : null) @(IsEditable(row) ? "veto-gantt__bar--editable" : null)"
+                                            style="@BarStyle(row.Item)"
+                                            title="@Tooltip(row.Item)"
+                                            aria-label="@Tooltip(row.Item)"
+                                            data-testid="@Sub($"bar-{row.Item.Id}")"
+                                            data-editable="@(IsEditable(row) ? "true" : null)"
+                                            data-row-id="@row.Item.Id"
+                                            @onclick="() => SelectAsync(row.Item)"
+                                            @onkeydown="args => OnBarKeyDownAsync(args, row.Item)">
+                                        @if (ShowProgress && row.Item.Progress is { } progress)
+                                        {
+                                            @* The washed-out part is what is left to do: the solid
+                                               part reads as done, and the label keeps its contrast
+                                               against the bar's full colour. *@
+                                            <span class="veto-gantt__remaining"
+                                                  style="@($"width: {((1 - Math.Clamp(progress, 0, 1)) * 100).ToString("0.##", CultureInfo.InvariantCulture)}%")"
+                                                  aria-hidden="true"></span>
+                                        }
+
+                                        @if (ShowBarLabels)
+                                        {
+                                            <span class="veto-gantt__bar-label">@row.Item.Name</span>
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        </VetoLoadingOverlay>
+        }
+    </div>
+}

@@ -1,0 +1,10 @@
+@namespace Veto.Theming
+@implements IDisposable
+@inject IVetoThemeService ThemeService
+
+@if (_css is not null)
+{
+    <style>@((MarkupString)_css)</style>
+}
+
+@ChildContent

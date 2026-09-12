@@ -1,0 +1,304 @@
+@page "/docs/components/slider"
+@rendermode InteractiveWebAssembly
+@using System.ComponentModel.DataAnnotations
+@using Veto.Components.Slider
+
+<PageTitle>Slider — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Slider"
+          Lead="A number picked by dragging along a rail - with notches, named stops, and a second thumb when you need a span rather than a point.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Basic"
+               Description="Zero to a hundred out of the box. Drag it, or focus it and use the arrow keys - it is a native range input underneath, so the browser supplies the keyboard, the touch handling and the pointer capture."
+               Code="@BasicCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <VetoSlider TValue="int"
+                        TestId="basic"
+                        Label="Volume"
+                        ShowValue="true"
+                        Suffix="%"
+                        HelperText="Defaults to a 0-100 scale in steps of one."
+                        @bind-Value="_volume" />
+            <span class="demo-value" data-testid="basic-output">@_volume</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-bounds"
+               Title="Your own scale"
+               Description="Min, Max and Step are all yours, and the component is generic over the number type - bind it to an int, a double or a decimal. Prefix and Suffix dress the printed figure."
+               Code="@BoundsCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoSlider TValue="int"
+                        TestId="bounds"
+                        Label="Temperature"
+                        Min="-20"
+                        Max="40"
+                        Step="5"
+                        ShowValue="true"
+                        Suffix="°C"
+                        @bind-Value="_temperature" />
+            <VetoSlider TValue="decimal"
+                        TestId="decimals"
+                        Label="Budget"
+                        Min="0"
+                        Max="2.5m"
+                        Step="0.1m"
+                        Format="0.0"
+                        Prefix="$"
+                        Suffix="m"
+                        ShowValue="true"
+                        @bind-Value="_budget" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-marks"
+               Title="Marks"
+               Description="Notches on the rail. Set ShowMarks and the slider lays one out every MarkEvery - or every Step - and labels it with its own number."
+               Code="@MarksCode">
+        <VetoSlider TValue="int"
+                    TestId="marks"
+                    Label="Quality"
+                    Max="100"
+                    Step="5"
+                    ShowMarks="true"
+                    MarkEvery="25"
+                    ShowValue="true"
+                    @bind-Value="_quality" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-named-marks"
+               Title="Marks with words instead of numbers"
+               Description="A mark's label is just text, so a scale can read Low / Medium / High where the number underneath means nothing to the reader. Add SnapToMarks and the thumb settles on a stop rather than anywhere between them, which turns the slider into a chooser."
+               Code="@NamedMarksCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <VetoSlider TValue="int"
+                        TestId="named"
+                        Label="Priority"
+                        Max="100"
+                        Marks="NamedMarks"
+                        SnapToMarks="true"
+                        @bind-Value="_priority" />
+            <span class="demo-value" data-testid="named-output">@_priority</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-range"
+               Title="Two thumbs, one span"
+               Description="Set Range and the slider grows a second thumb: Value is the low end, UpperValue the high one, each with its own accessible name. The thumbs may meet but never pass each other."
+               Code="@RangeCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <VetoSlider TValue="int"
+                        TestId="range"
+                        Range="true"
+                        Label="Price"
+                        Min="0"
+                        Max="1000"
+                        Step="50"
+                        Prefix="$"
+                        ShowValue="true"
+                        ShowMarks="true"
+                        MarkEvery="250"
+                        LowerThumbLabel="Lowest price"
+                        UpperThumbLabel="Highest price"
+                        @bind-Value="_priceFrom"
+                        @bind-UpperValue="_priceTo" />
+            <span class="demo-value" data-testid="range-output">@_priceFrom – @_priceTo</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes, colours and variants"
+               Description="The same enums the rest of the library uses."
+               Code="@SizesCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoSlider TValue="int" TestId="size-sm" Size="VetoSize.Small" Label="Small" @bind-Value="_scratch" />
+            <VetoSlider TValue="int" TestId="size-lg" Size="VetoSize.Large" Label="Large" @bind-Value="_scratch" />
+            <VetoSlider TValue="int" TestId="color-success" Color="VetoColor.Success" Label="Success" @bind-Value="_scratch" />
+            <VetoSlider TValue="int" TestId="variant-filled" Variant="VetoVariant.Filled" Label="Filled" @bind-Value="_scratch" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-states"
+               Title="Disabled and read-only"
+               Description="Disabled cannot be focused. Read-only can be focused and read out, but the thumb springs back to where it was."
+               Code="@StatesCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoSlider TValue="int" TestId="disabled" Label="Disabled" Disabled="true" ShowValue="true" @bind-Value="_locked" />
+            <VetoSlider TValue="int" TestId="readonly" Label="Read-only" ReadOnly="true" ShowValue="true" @bind-Value="_locked" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-validation"
+               Title="Validation"
+               Description="Inside an EditForm the slider picks up the model's validation attributes like any other input."
+               Code="@ValidationCode">
+        <EditForm Model="_form" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+                <VetoSlider TestId="effort"
+                            Label="Effort"
+                            Required="true"
+                            Max="10"
+                            ShowValue="true"
+                            HelperText="At least three."
+                            @bind-Value="_form.Effort" />
+                <button class="demo-submit" type="submit" data-testid="submit">Save</button>
+                <span class="demo-value" data-testid="submit-value">@_submitted</span>
+            </VetoStack>
+        </EditForm>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private int _volume = 40;
+    private int _temperature = 20;
+    private decimal _budget = 1.2m;
+    private int _quality = 50;
+    private int _priority = 50;
+    private int _priceFrom = 200;
+    private int _priceTo = 800;
+    private int _scratch = 60;
+    private int _locked = 70;
+    private readonly FormModel _form = new();
+    private string? _submitted;
+
+    private static readonly VetoSliderMark[] NamedMarks =
+    [
+        new(0, "Low"),
+        new(50, "Medium"),
+        new(100, "High")
+    ];
+
+    private void OnValidSubmit () => _submitted = $"Saved: {_form.Effort}";
+
+    private sealed class FormModel
+    {
+        [Range( 3, 10, ErrorMessage = "Effort must be at least 3." )]
+        public int Effort { get; set; }
+    }
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Value", "TValue", "default", "The value, or the low end of a range. Use @bind-Value."),
+        new("UpperValue", "TValue", "100", "The high end of a range. Use @bind-UpperValue."),
+        new("Range", "bool", "false", "Grow a second thumb and pick a span rather than a point."),
+        new("Min / Max", "TValue", "0 / 100", "The ends of the scale."),
+        new("Step", "TValue", "1", "The smallest change a drag or an arrow key can make."),
+        new("Marks", "IReadOnlyList<VetoSliderMark>?", "null", "The notches: a position and an optional label, numeric or not."),
+        new("ShowMarks", "bool", "false", "Generate labelled notches when none are supplied."),
+        new("MarkEvery", "double?", "null", "Spacing of generated marks. Defaults to Step."),
+        new("ShowMarkLabels", "bool", "true", "Draw the notches' labels."),
+        new("SnapToMarks", "bool", "false", "Settle on the nearest mark rather than anywhere on the scale."),
+        new("ShowValue", "bool", "false", "Print the current value above the rail."),
+        new("Format / Prefix / Suffix", "string?", "null", "How every printed number is formatted and dressed."),
+        new("RangeSeparator", "string", "\" – \"", "What goes between the two numbers of a printed range."),
+        new("LowerThumbLabel / UpperThumbLabel", "string", "\"Minimum\" / \"Maximum\"", "Accessible names for a range's two thumbs."),
+        new("Immediate", "bool", "true", "Follow the thumb as it is dragged, rather than updating only when the drag ends."),
+        new("Color", "VetoColor", "Primary", "The accent the filled rail takes."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Variant", "VetoVariant", "Outlined", "Outlined, Filled or Text."),
+        new("Disabled / ReadOnly / Required", "bool", "false", "The usual input states."),
+        new("OnValueChanged", "EventCallback<TValue>", "—", "Raised after the value changes.")
+    ];
+
+    private const string BasicCode = """
+        <VetoSlider TValue="int"
+                    Label="Volume"
+                    ShowValue="true"
+                    Suffix="%"
+                    @bind-Value="_volume" />
+        """;
+
+    private const string BoundsCode = """
+        <VetoSlider TValue="int"
+                    Label="Temperature"
+                    Min="-20" Max="40" Step="5"
+                    ShowValue="true" Suffix="°C"
+                    @bind-Value="_temperature" />
+
+        <VetoSlider TValue="decimal"
+                    Label="Budget"
+                    Min="0" Max="2.5m" Step="0.1m"
+                    Format="0.0" Prefix="$" Suffix="m"
+                    ShowValue="true"
+                    @bind-Value="_budget" />
+        """;
+
+    private const string MarksCode = """
+        <VetoSlider TValue="int"
+                    Label="Quality"
+                    Step="5"
+                    ShowMarks="true"
+                    MarkEvery="25"
+                    ShowValue="true"
+                    @bind-Value="_quality" />
+        """;
+
+    private const string NamedMarksCode = """
+        <VetoSlider TValue="int"
+                    Label="Priority"
+                    Marks="Stops"
+                    SnapToMarks="true"
+                    @bind-Value="_priority" />
+
+        @code {
+            private static readonly VetoSliderMark[] Stops =
+            [
+                new(0, "Low"),
+                new(50, "Medium"),
+                new(100, "High")
+            ];
+        }
+        """;
+
+    private const string RangeCode = """
+        <VetoSlider TValue="int"
+                    Range="true"
+                    Label="Price"
+                    Min="0" Max="1000" Step="50"
+                    Prefix="$"
+                    ShowValue="true"
+                    LowerThumbLabel="Lowest price"
+                    UpperThumbLabel="Highest price"
+                    @bind-Value="_from"
+                    @bind-UpperValue="_to" />
+        """;
+
+    private const string SizesCode = """
+        <VetoSlider TValue="int" Size="VetoSize.Small" Label="Small" @bind-Value="_v" />
+        <VetoSlider TValue="int" Color="VetoColor.Success" Label="Success" @bind-Value="_v" />
+        <VetoSlider TValue="int" Variant="VetoVariant.Filled" Label="Filled" @bind-Value="_v" />
+        """;
+
+    private const string StatesCode = """
+        <VetoSlider TValue="int" Label="Disabled" Disabled="true" @bind-Value="_v" />
+        <VetoSlider TValue="int" Label="Read-only" ReadOnly="true" @bind-Value="_v" />
+        """;
+
+    private const string ValidationCode = """
+        <EditForm Model="_form" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+
+            <VetoSlider Label="Effort"
+                        Required="true"
+                        Max="10"
+                        ShowValue="true"
+                        @bind-Value="_form.Effort" />
+
+            <button type="submit">Save</button>
+        </EditForm>
+
+        @code {
+            private sealed class FormModel
+            {
+                [Range(3, 10, ErrorMessage = "Effort must be at least 3.")]
+                public int Effort { get; set; }
+            }
+        }
+        """;
+}

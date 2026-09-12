@@ -1,0 +1,10 @@
+/* VetoShortcutList - the container for a run of shortcut rows. */
+
+.veto-shortcut-list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    font-family: var(--veto-font-sans);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text);
+}

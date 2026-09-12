@@ -1,0 +1,46 @@
+@namespace Veto.Layouts.DocsLayout
+@inherits Veto.Core.VetoComponentBase
+@using Veto.Components.Navigation
+@using Veto.Layouts.Shell
+
+@if (Visible)
+{
+    <VetoLayout State="_layout" TestId="@TestId" Class="@CssClass" Style="@CssStyle">
+        <VetoAppBar TestId="@Sub("appbar")" Translucent="true">
+            <VetoIconButton Icon="@VetoIcons.Menu"
+                            Label="Toggle navigation"
+                            TestId="@Sub("toggle")"
+                            OnClick="ToggleDrawer" />
+            @Brand
+            <VetoSpacer />
+            @Toolbar
+        </VetoAppBar>
+
+        <VetoDrawer @bind-Open="_drawerOpen"
+                    TestId="@Sub("drawer")"
+                    Variant="VetoDrawerVariant.Responsive"
+                    Width="@DrawerWidth">
+            <VetoNavMenu Items="Items" TestId="@Sub("nav")" Label="Documentation" />
+        </VetoDrawer>
+
+        <VetoMainContent TestId="@Sub("main")">
+            <div class="veto-docs-layout__columns @(ShowToc ? "veto-docs-layout__columns--toc" : null)">
+                <article class="veto-docs-layout__article">
+                    @ChildContent
+                </article>
+
+                @if (ShowToc)
+                {
+                    <aside class="veto-docs-layout__toc" aria-label="On this page">
+                        @Toc
+                    </aside>
+                }
+            </div>
+        </VetoMainContent>
+
+        @if (Footer is not null)
+        {
+            <VetoFooter TestId="@Sub("footer")">@Footer</VetoFooter>
+        }
+    </VetoLayout>
+}

@@ -1,0 +1,96 @@
+@page "/docs/components/stack"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Stack — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Stack"
+          Lead="Row and column layout with consistent spacing. The component you reach for instead of writing a flex container by hand.">
+
+    <DemoBlock TestId="demo-orientation"
+               Title="Rows and columns"
+               Description="Vertical by default. Gap comes from the spacing scale rather than a pixel value, so spacing stays consistent across the app."
+               Code="@OrientationCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" TestId="row">
+                <VetoCard Padding="VetoSpacing.Small">One</VetoCard>
+                <VetoCard Padding="VetoSpacing.Small">Two</VetoCard>
+                <VetoCard Padding="VetoSpacing.Small">Three</VetoCard>
+            </VetoStack>
+            <VetoStack Gap="VetoSpacing.Small" TestId="column">
+                <VetoCard Padding="VetoSpacing.Small">One</VetoCard>
+                <VetoCard Padding="VetoSpacing.Small">Two</VetoCard>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-alignment"
+               Title="Alignment"
+               Description="Align positions children across the layout axis; Justify distributes them along it."
+               Code="@AlignmentCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal"
+                   Gap="VetoSpacing.Medium"
+                   Justify="VetoJustify.SpaceBetween"
+                   Align="VetoAlign.Center"
+                   TestId="aligned"
+                   Class="stack-demo">
+            <VetoCard Padding="VetoSpacing.Small">Start</VetoCard>
+            <VetoCard Padding="VetoSpacing.Large">Middle</VetoCard>
+            <VetoCard Padding="VetoSpacing.Small">End</VetoCard>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-spacer"
+               Title="Pushing things apart"
+               Description="A VetoSpacer takes whatever room is going, which is how you send one item in a toolbar to the far end without any margin arithmetic."
+               Code="@SpacerCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center" Class="stack-demo">
+            <VetoIcon Icon="@VetoIcons.Folder" Size="VetoIconSize.Large" />
+            <span>Project files</span>
+            <VetoSpacer TestId="spacer" />
+            <VetoIconButton Icon="@VetoIcons.Plus" Label="Add file" Variant="VetoVariant.Outlined" />
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Orientation", "VetoOrientation", "Vertical", "Vertical or Horizontal."),
+        new("Gap", "VetoSpacing", "Medium", "Space between children, from the spacing scale."),
+        new("Align", "VetoAlign", "Stretch", "Across the layout axis: Stretch, Start, Center, End, Baseline."),
+        new("Justify", "VetoJustify", "Start", "Along the layout axis, including SpaceBetween and SpaceEvenly."),
+        new("Wrap", "bool", "false", "Whether children wrap onto further lines."),
+        new("Reverse", "bool", "false", "Reverses visual order without reordering the markup."),
+        new("FullHeight", "bool", "false", "Fills the height available.")
+    ];
+
+    private const string OrientationCode = """
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium">
+            <VetoCard>One</VetoCard>
+            <VetoCard>Two</VetoCard>
+        </VetoStack>
+        """;
+
+    private const string AlignmentCode = """
+        <VetoStack Orientation="VetoOrientation.Horizontal"
+                   Justify="VetoJustify.SpaceBetween"
+                   Align="VetoAlign.Center">
+            <VetoCard>Start</VetoCard>
+            <VetoCard>Middle</VetoCard>
+            <VetoCard>End</VetoCard>
+        </VetoStack>
+        """;
+
+    private const string SpacerCode = """
+        <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center">
+            <VetoIcon Icon="@VetoIcons.Folder" />
+            <span>Project files</span>
+            <VetoSpacer />
+            <VetoIconButton Icon="@VetoIcons.Plus" Label="Add file" />
+        </VetoStack>
+        """;
+}

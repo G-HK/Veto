@@ -1,0 +1,51 @@
+.card-muted {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.card-ok {
+    color: var(--veto-color-success);
+}
+
+.demo-value {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    min-height: 1.25rem;
+}
+
+/* Cards are happiest at a readable width rather than stretched across the page. */
+.demo-card-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--veto-space-4);
+}
+
+.demo-card-row > * {
+    width: 22rem;
+    max-width: 100%;
+}
+
+.demo-card-media {
+    aspect-ratio: 2 / 1;
+}
+
+.demo-prose {
+    margin: 0;
+    color: var(--veto-color-text-muted);
+}
+
+.demo-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+    font-weight: 600;
+}
+
+.demo-trend--up {
+    color: var(--veto-color-success);
+}
+
+.demo-trend--down {
+    color: var(--veto-color-danger);
+}

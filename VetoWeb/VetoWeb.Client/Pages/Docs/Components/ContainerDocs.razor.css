@@ -1,0 +1,10 @@
+.container-demo {
+    padding-block: var(--veto-space-3);
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    text-align: center;
+    color: var(--veto-color-text-muted);
+    background-color: var(--veto-color-surface-raised);
+    border: 1px dashed var(--veto-color-border-strong);
+    border-radius: var(--veto-radius-md);
+}

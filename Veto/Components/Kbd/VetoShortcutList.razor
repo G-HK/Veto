@@ -1,0 +1,17 @@
+@namespace Veto.Components.Kbd
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    @* A description list, because that is what this is: each row is a term and its
+       definition. The visual row - description left, keys right - is the layout, not the
+       structure. *@
+    <dl @ref="RootElement"
+        @attributes="InnerAttributes"
+        id="@ElementId"
+        class="@CssClass"
+        style="@CssStyle"
+        data-testid="@TestId">
+        @ChildContent
+    </dl>
+}

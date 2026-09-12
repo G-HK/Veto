@@ -1,0 +1,25 @@
+.docs-page {
+    padding-block: var(--veto-space-6) 6rem;
+}
+
+.docs-page__eyebrow {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 500;
+    color: var(--veto-color-primary);
+}
+
+.docs-page__title {
+    margin: 0;
+    font-size: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.docs-page__lead {
+    max-width: 62ch;
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--veto-color-text-muted);
+}

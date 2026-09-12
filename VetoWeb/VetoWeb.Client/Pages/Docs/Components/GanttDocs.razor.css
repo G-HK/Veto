@@ -1,0 +1,56 @@
+.docs-heading {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.docs-prose {
+    max-width: 68ch;
+    margin: 0;
+    line-height: 1.65;
+    color: var(--veto-color-text-muted);
+}
+
+.docs-prose code {
+    font-family: var(--veto-font-mono);
+    font-size: 0.875em;
+    color: var(--veto-color-primary);
+}
+
+.demo-value {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    min-height: 1.25rem;
+}
+
+.demo-label {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+}
+
+.chip {
+    padding: var(--veto-space-1) var(--veto-space-3);
+    font: inherit;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-full);
+    cursor: pointer;
+}
+
+.chip:hover { border-color: var(--veto-color-primary); }
+
+.chip:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.chip--on {
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+}

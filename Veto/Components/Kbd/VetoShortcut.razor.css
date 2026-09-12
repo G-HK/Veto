@@ -1,0 +1,36 @@
+/* VetoShortcut - one row of a shortcut reference list. */
+
+.veto-shortcut {
+    display: flex;
+    align-items: baseline;
+    /* Description left, keys right: a column of rows then lines its keys up on one edge,
+       which is what makes the list scannable. */
+    justify-content: space-between;
+    gap: var(--veto-space-4);
+    padding-block: var(--veto-space-2);
+}
+
+.veto-shortcut__description {
+    margin: 0;
+    min-width: 0;
+    color: var(--veto-color-text);
+}
+
+.veto-shortcut__keys {
+    margin: 0;
+    flex: none;
+}
+
+.veto-shortcut-list--divided .veto-shortcut + .veto-shortcut {
+    border-top: 1px solid var(--veto-color-border);
+}
+
+.veto-shortcut-list--sm .veto-shortcut {
+    padding-block: var(--veto-space-1);
+    font-size: var(--veto-font-size-sm);
+}
+
+.veto-shortcut-list--lg .veto-shortcut {
+    padding-block: var(--veto-space-3);
+    font-size: var(--veto-font-size-lg);
+}

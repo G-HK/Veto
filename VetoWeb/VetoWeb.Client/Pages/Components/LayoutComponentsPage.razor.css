@@ -1,0 +1,49 @@
+.demo-page {
+    max-width: 52rem;
+    padding: var(--veto-space-4);
+    font-family: var(--veto-font-sans);
+    color: var(--veto-color-text);
+}
+
+.demo-section {
+    margin-block: var(--veto-space-6);
+}
+
+.demo-section h2 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--veto-color-text-muted);
+    margin-bottom: var(--veto-space-3);
+}
+
+.demo-spaced {
+    margin-top: var(--veto-space-4);
+}
+
+.demo-output {
+    margin-top: var(--veto-space-2);
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    min-height: 1.25rem;
+}
+
+.demo-outline {
+    border: 1px dashed var(--veto-color-border-strong);
+    border-radius: var(--veto-radius-md);
+    padding-block: var(--veto-space-3);
+}
+
+.demo-vrule {
+    height: 1.5rem;
+}
+
+.demo-icon {
+    width: 4rem;
+}
+
+.demo-icon__name {
+    font-size: 0.75rem;
+    color: var(--veto-color-text-muted);
+}

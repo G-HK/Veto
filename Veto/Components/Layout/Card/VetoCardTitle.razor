@@ -1,0 +1,33 @@
+@namespace Veto.Components.Layout
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    @* The heading level is a parameter because a card's title is only a document heading when
+       the card is a section of the page. In a grid of KPI tiles it is a figure, not an outline
+       entry, and promoting twenty of them to <h3> would wreck the page's heading structure. *@
+    @switch (Level)
+    {
+        case 0:
+            <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass" style="@CssStyle" data-testid="@TestId">@ChildContent</div>
+            break;
+        case 1:
+            <h1 @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass" style="@CssStyle" data-testid="@TestId">@ChildContent</h1>
+            break;
+        case 2:
+            <h2 @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass" style="@CssStyle" data-testid="@TestId">@ChildContent</h2>
+            break;
+        case 4:
+            <h4 @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass" style="@CssStyle" data-testid="@TestId">@ChildContent</h4>
+            break;
+        case 5:
+            <h5 @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass" style="@CssStyle" data-testid="@TestId">@ChildContent</h5>
+            break;
+        case 6:
+            <h6 @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass" style="@CssStyle" data-testid="@TestId">@ChildContent</h6>
+            break;
+        default:
+            <h3 @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass" style="@CssStyle" data-testid="@TestId">@ChildContent</h3>
+            break;
+    }
+}

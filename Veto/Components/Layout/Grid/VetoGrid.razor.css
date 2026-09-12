@@ -1,0 +1,49 @@
+/*
+ * VetoGrid - column counts arrive as custom properties rather than classes, so any count
+ * works without the library shipping a class for it. Each breakpoint falls back to the one
+ * below it, which is what makes the mobile-first cascade work with unset values.
+ */
+
+.veto-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--veto-grid-columns, 1), minmax(0, 1fr));
+    min-width: 0;
+}
+
+.veto-grid--gap-0 { gap: 0; }
+.veto-grid--gap-1 { gap: var(--veto-space-1); }
+.veto-grid--gap-2 { gap: var(--veto-space-2); }
+.veto-grid--gap-3 { gap: var(--veto-space-3); }
+.veto-grid--gap-4 { gap: var(--veto-space-4); }
+.veto-grid--gap-5 { gap: var(--veto-space-5); }
+.veto-grid--gap-6 { gap: var(--veto-space-6); }
+
+.veto-grid--align-stretch { align-items: stretch; }
+.veto-grid--align-start { align-items: start; }
+.veto-grid--align-center { align-items: center; }
+.veto-grid--align-end { align-items: end; }
+.veto-grid--align-baseline { align-items: baseline; }
+
+@media (min-width: 640px) {
+    .veto-grid {
+        grid-template-columns: repeat(var(--veto-grid-columns-sm, var(--veto-grid-columns, 1)), minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 960px) {
+    .veto-grid {
+        grid-template-columns: repeat(
+            var(--veto-grid-columns-md, var(--veto-grid-columns-sm, var(--veto-grid-columns, 1))),
+            minmax(0, 1fr)
+        );
+    }
+}
+
+@media (min-width: 1280px) {
+    .veto-grid {
+        grid-template-columns: repeat(
+            var(--veto-grid-columns-lg, var(--veto-grid-columns-md, var(--veto-grid-columns-sm, var(--veto-grid-columns, 1)))),
+            minmax(0, 1fr)
+        );
+    }
+}

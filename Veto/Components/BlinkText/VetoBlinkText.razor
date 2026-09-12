@@ -1,0 +1,36 @@
+@namespace Veto.Components.BlinkText
+@inherits Veto.Core.VetoComponentBase
+@implements IDisposable
+
+@if (Visible)
+{
+    <span @ref="RootElement"
+          @attributes="InnerAttributes"
+          id="@ElementId"
+          class="@CssClass"
+          style="@CssStyle"
+          data-testid="@TestId">
+
+        @* The reveal is decoration. Assistive technology gets the whole text at once rather
+           than one character at a time, which would be unusable. Clipped rather than hidden,
+           so it stays in the accessibility tree. *@
+        <span class="veto-blink-text__accessible" data-testid="@Sub("accessible")">@FullText</span>
+
+        @if (PreserveSpace && Text is not null)
+        {
+            @* A second copy, laid out but invisible, holding the finished text's space so the
+               surrounding layout does not reflow as the reveal grows. Hidden from assistive
+               technology - the clipped copy above is the one that gets announced. *@
+            <span class="veto-blink-text__sizer" aria-hidden="true">@FullText</span>
+        }
+
+        <span class="veto-blink-text__visible" aria-hidden="true" data-testid="@Sub("visible")">@Revealed<!--
+            -->@if (Scramble && !IsComplete && _scrambled.Length > 0)
+            {
+                <span class="veto-blink-text__scramble" data-testid="@Sub("scramble")">@_scrambled</span>
+            }@if (Cursor && (!IsComplete || CursorWhenComplete))
+            {
+                <span class="veto-blink-text__cursor" data-testid="@Sub("cursor")">@CursorCharacter</span>
+            }</span>
+    </span>
+}

@@ -1,0 +1,114 @@
+/* VetoHandbookPage - a documentation article. */
+
+.veto-handbook-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-6);
+    min-width: 0;
+    /* Capped so a line of prose stays near the length people read comfortably. */
+    max-width: 52rem;
+    font-family: var(--veto-font-sans);
+    color: var(--veto-color-text);
+}
+
+.veto-handbook-page__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-2);
+}
+
+.veto-handbook-page__eyebrow {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 500;
+    color: var(--veto-color-primary);
+}
+
+.veto-handbook-page__title {
+    margin: 0;
+    font-size: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.veto-handbook-page__lead {
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--veto-color-text-muted);
+}
+
+.veto-handbook-page__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-3);
+    /*
+     * Anchored sections scroll clear of a fixed app bar instead of landing underneath it.
+     * The frame sets --veto-appbar-height; the fallback covers a page with no app bar.
+     */
+    scroll-margin-top: calc(var(--veto-appbar-height, 0px) + var(--veto-space-5));
+}
+
+.veto-handbook-page__heading {
+    position: relative;
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.veto-handbook-page__anchor {
+    position: absolute;
+    right: calc(100% + var(--veto-space-2));
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity var(--veto-transition);
+}
+
+.veto-handbook-page__heading:hover .veto-handbook-page__anchor,
+.veto-handbook-page__anchor:focus-visible {
+    opacity: 1;
+}
+
+.veto-handbook-page__anchor:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-handbook-page__body {
+    margin: 0;
+    line-height: 1.7;
+    color: var(--veto-color-text-muted);
+}
+
+/*
+ * The landing highlight. Drawn with a tinted background and an accent edge rather than a
+ * colour change on the text, so it reads as "you are here" without making the writing itself
+ * look like a different kind of content.
+ */
+.veto-handbook-page__section--highlighted {
+    position: relative;
+    background-color: color-mix(in srgb, var(--veto-color-primary) 8%, transparent);
+    box-shadow: -0.75rem 0 0 color-mix(in srgb, var(--veto-color-primary) 8%, transparent),
+                0.75rem 0 0 color-mix(in srgb, var(--veto-color-primary) 8%, transparent);
+    border-radius: var(--veto-radius-sm);
+    transition: background-color 400ms ease, box-shadow 400ms ease;
+}
+
+.veto-handbook-page__section--highlighted::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -0.75rem;
+    width: 2px;
+    background-color: var(--veto-color-primary);
+    border-radius: var(--veto-radius-full);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-handbook-page__section--highlighted {
+        transition: none;
+    }
+}

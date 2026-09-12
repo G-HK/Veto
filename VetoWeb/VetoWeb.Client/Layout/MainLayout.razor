@@ -1,0 +1,67 @@
+﻿@inherits LayoutComponentBase
+
+<VetoThemeProvider Theme="VetoDocsTheme.Theme" />
+
+@* One host for the whole site: anything that injects IVetoToastService renders here. *@
+<VetoToastHost TestId="toasts" Position="VetoToastPosition.TopRight" Animation="VetoToastAnimation.SlideRight" />
+
+<VetoLayout State="_layout">
+    <VetoAppBar Translucent="true" TestId="appbar">
+        <VetoIconButton Icon="@VetoIcons.Menu"
+                        Label="Toggle navigation"
+                        TestId="drawer-toggle"
+                        OnClick="ToggleDrawer" />
+
+        <a class="app-bar__brand" href="/">
+            <span class="app-bar__mark" aria-hidden="true">V</span>
+            <span class="app-bar__name">Veto</span>
+        </a>
+
+        <VetoSpacer />
+
+        <VetoIconButton Icon="@VetoIcons.ExternalLink"
+                        Label="Source on GitHub"
+                        Href="https://github.com"
+                        Target="_blank" />
+        <VetoThemeToggle TestId="layout-theme-toggle" />
+    </VetoAppBar>
+
+    <VetoDrawer @bind-Open="_drawerOpen"
+                TestId="drawer"
+                Variant="VetoDrawerVariant.Responsive"
+                Breakpoint="VetoBreakpoint.Medium"
+                Width="15rem">
+        <VetoNavMenu Items="DocsNav.Items" TestId="nav" Label="Documentation" />
+    </VetoDrawer>
+
+    <VetoMainContent TestId="main">
+        @Body
+    </VetoMainContent>
+
+    <VetoFooter TestId="footer">
+        <VetoStack Orientation="VetoOrientation.Horizontal"
+                   Gap="VetoSpacing.Medium"
+                   Align="VetoAlign.Center"
+                   Wrap="true"
+                   Class="footer__row">
+            <span>Veto &middot; components for Blazor WebAssembly</span>
+            <VetoSpacer />
+            <a class="footer__link" href="/docs/installation">Installation</a>
+            <a class="footer__link" href="/docs/usage">Usage</a>
+            <a class="footer__link" href="https://github.com" target="_blank" rel="noreferrer">Source</a>
+        </VetoStack>
+    </VetoFooter>
+</VetoLayout>
+
+<div id="blazor-error-ui">
+    Something went wrong.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+    private readonly VetoLayoutState _layout = new();
+    private bool _drawerOpen = true;
+
+    private void ToggleDrawer () => _drawerOpen = !_drawerOpen;
+}

@@ -1,0 +1,43 @@
+/* VetoDocsLayout - a reading column with an optional contents rail beside it. */
+
+.veto-docs-layout__columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--veto-space-6);
+    padding: var(--veto-space-5);
+}
+
+.veto-docs-layout__article {
+    min-width: 0;
+    max-width: 52rem;
+}
+
+.veto-docs-layout__toc {
+    display: none;
+}
+
+/*
+ * The contents rail appears only when there is room beside the text. Below that it is hidden
+ * rather than stacked - a list of links above the content it describes is just noise.
+ */
+@media (min-width: 1280px) {
+    /*
+     * The reading column is sized to the text rather than to the space available. With a 1fr
+     * column the article stays capped at its own max-width and all the slack opens up as a gap
+     * between the text and the rail, leaving the two looking unrelated.
+     */
+    .veto-docs-layout__columns--toc {
+        grid-template-columns: minmax(0, 52rem) 14rem;
+        justify-content: center;
+    }
+
+    .veto-docs-layout__toc {
+        display: block;
+        position: sticky;
+        top: var(--veto-space-5);
+        align-self: start;
+        max-height: calc(100dvh - 8rem);
+        overflow-y: auto;
+        font-size: var(--veto-font-size-sm);
+    }
+}

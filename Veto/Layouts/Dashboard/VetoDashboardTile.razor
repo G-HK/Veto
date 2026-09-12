@@ -1,0 +1,31 @@
+@namespace Veto.Layouts.Dashboard
+@inherits Veto.Core.VetoComponentBase
+@using Veto.Components.Icon
+
+@if (Visible)
+{
+    <section @ref="RootElement"
+             @attributes="InnerAttributes"
+             id="@ElementId"
+             class="@CssClass"
+             style="@CssStyle"
+             data-testid="@TestId"
+             role="listitem"
+             aria-label="@Title">
+        @if (Title is not null || Actions is not null)
+        {
+            <header class="veto-dashboard-tile__header">
+                @if (Icon is not null)
+                {
+                    <VetoIcon Icon="@Icon" Size="VetoIconSize.Medium" Class="veto-dashboard-tile__icon" />
+                }
+                <h3 class="veto-dashboard-tile__title">@Title</h3>
+                @Actions
+            </header>
+        }
+
+        <div class="veto-dashboard-tile__body">
+            @ChildContent
+        </div>
+    </section>
+}

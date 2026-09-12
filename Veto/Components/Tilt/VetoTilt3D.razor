@@ -1,0 +1,21 @@
+@namespace Veto.Components.Tilt
+@inherits Veto.Core.VetoComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+@if (Visible)
+{
+    <div class="@CssClass" style="@CssStyle" data-testid="@TestId">
+        <div @ref="RootElement"
+             @attributes="InnerAttributes"
+             id="@ElementId"
+             class="veto-tilt-3d__surface">
+            @ChildContent
+
+            @if (Glare)
+            {
+                <span class="veto-tilt-3d__glare" aria-hidden="true"></span>
+            }
+        </div>
+    </div>
+}

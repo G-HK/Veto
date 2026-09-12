@@ -1,0 +1,16 @@
+@namespace Veto.Components.Buttons
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    @* Presentational: the line is a visual grouping cue, and announcing a separator between
+       every couple of buttons would be noise rather than help. Name the groups instead. *@
+    <span @ref="RootElement"
+          @attributes="InnerAttributes"
+          id="@ElementId"
+          class="@CssClass"
+          style="@CssStyle"
+          data-testid="@TestId"
+          role="separator"
+          aria-hidden="true"></span>
+}

@@ -1,0 +1,43 @@
+.demo-page {
+    max-width: 46rem;
+    padding: var(--veto-space-4);
+    font-family: var(--veto-font-sans);
+}
+
+.demo-section {
+    margin-block: var(--veto-space-6);
+}
+
+.demo-section h2 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--veto-color-text-muted);
+    margin-bottom: var(--veto-space-3);
+}
+
+.demo-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--veto-space-4);
+    align-items: flex-start;
+}
+
+.demo-output {
+    margin-top: var(--veto-space-2);
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    min-height: 1.25rem;
+}
+
+.demo-submit {
+    margin-top: var(--veto-space-3);
+    padding: var(--veto-space-2) var(--veto-space-4);
+    font: inherit;
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border: none;
+    border-radius: var(--veto-radius-md);
+    cursor: pointer;
+}

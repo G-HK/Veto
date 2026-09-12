@@ -1,0 +1,128 @@
+@page "/components/textbox"
+@using System.ComponentModel.DataAnnotations
+@rendermode InteractiveWebAssembly
+
+<PageTitle>VetoTextBox</PageTitle>
+
+<div class="demo-page" data-testid="page" data-ready="@(_interactive ? "true" : null)">
+    <h1>VetoTextBox</h1>
+    <p>A single-line text input with a label, helper text, and validation message.</p>
+
+    <section class="demo-section">
+        <h2>Basic</h2>
+        <VetoTextBox TValue="string"
+                     TestId="basic"
+                     Label="Project name"
+                     Placeholder="e.g. Veto"
+                     HelperText="Shown under the field until it becomes invalid."
+                     @bind-Value="_basic" />
+        <p class="demo-output" data-testid="basic-output">@_basic</p>
+    </section>
+
+    <section class="demo-section">
+        <h2>Immediate binding</h2>
+        <VetoTextBox TValue="string"
+                     TestId="immediate"
+                     Label="Search"
+                     Immediate="true"
+                     Placeholder="Updates on every keystroke"
+                     @bind-Value="_immediate" />
+        <p class="demo-output" data-testid="immediate-output">@_immediate</p>
+    </section>
+
+    <section class="demo-section">
+        <h2>Sizes</h2>
+        <div class="demo-row">
+            <VetoTextBox TValue="string" TestId="size-sm" Label="Small" Size="VetoSize.Small" @bind-Value="_size" />
+            <VetoTextBox TValue="string" TestId="size-md" Label="Medium" Size="VetoSize.Medium" @bind-Value="_size" />
+            <VetoTextBox TValue="string" TestId="size-lg" Label="Large" Size="VetoSize.Large" @bind-Value="_size" />
+        </div>
+    </section>
+
+    <section class="demo-section">
+        <h2>Variants</h2>
+        <div class="demo-row">
+            <VetoTextBox TValue="string" TestId="variant-outlined" Label="Outlined" Variant="VetoVariant.Outlined" @bind-Value="_variant" />
+            <VetoTextBox TValue="string" TestId="variant-filled" Label="Filled" Variant="VetoVariant.Filled" @bind-Value="_variant" />
+            <VetoTextBox TValue="string" TestId="variant-text" Label="Text" Variant="VetoVariant.Text" @bind-Value="_variant" />
+        </div>
+    </section>
+
+    <section class="demo-section">
+        <h2>Disabled and read-only</h2>
+        <div class="demo-row">
+            <VetoTextBox TValue="string" TestId="disabled" Label="Disabled" Disabled="true" @bind-Value="_readOnlyValue" />
+            <VetoTextBox TValue="string" TestId="readonly" Label="Read-only" ReadOnly="true" @bind-Value="_readOnlyValue" />
+        </div>
+    </section>
+
+    <section class="demo-section">
+        <h2>Typed value</h2>
+        <VetoTextBox TValue="int?"
+                     TestId="number"
+                     Label="Quantity"
+                     Type="number"
+                     HelperText="Bound to an int?; non-numeric input is rejected."
+                     @bind-Value="_quantity" />
+        <p class="demo-output" data-testid="number-output">@(_quantity?.ToString() ?? "null")</p>
+    </section>
+
+    <section class="demo-section">
+        <h2>Validation</h2>
+        <EditForm Model="_form" OnValidSubmit="OnValidSubmit" data-testid="form">
+            <DataAnnotationsValidator />
+            <VetoTextBox TestId="username"
+                         Label="Username"
+                         Required="true"
+                         HelperText="Between 3 and 20 characters."
+                         @bind-Value="_form.Username" />
+            <button class="demo-submit" type="submit" data-testid="submit">Submit</button>
+        </EditForm>
+        <p class="demo-output" data-testid="submit-output">@_submitted</p>
+    </section>
+
+    <section class="demo-section">
+        <h2>Pass-through attributes</h2>
+        <VetoTextBox TValue="string"
+                     TestId="splat"
+                     Label="Custom"
+                     Class="demo-custom"
+                     Style="max-width: 12rem"
+                     maxlength="5"
+                     autocomplete="off"
+                     @bind-Value="_splat" />
+    </section>
+</div>
+
+@code {
+    private bool _interactive;
+    private string? _basic;
+    private string? _immediate;
+    private string? _size;
+    private string? _variant;
+    private string? _splat;
+    private string? _readOnlyValue = "Cannot edit this";
+    private int? _quantity = 1;
+    private readonly FormModel _form = new();
+    private string? _submitted;
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        // The page is prerendered on the server first; this marker flips only once the
+        // WebAssembly runtime has taken over, which is what the end-to-end tests wait for.
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+
+    private void OnValidSubmit () => _submitted = $"Submitted: {_form.Username}";
+
+    private sealed class FormModel
+    {
+        [Required( ErrorMessage = "Username is required." )]
+        [StringLength( 20, MinimumLength = 3, ErrorMessage = "Username must be 3-20 characters." )]
+        public string? Username { get; set; }
+    }
+}

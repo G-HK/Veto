@@ -1,0 +1,167 @@
+/* VetoButton - label, optional icons, and a loading state. */
+
+.veto-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--veto-space-2);
+    box-sizing: border-box;
+    font-family: var(--veto-font-sans);
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: var(--veto-radius-md);
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition),
+                border-color var(--veto-transition), box-shadow var(--veto-transition);
+}
+
+/*
+ * Effects follow the button's colour role, so a danger button pings red without being told to.
+ * An explicit GlowColor lands in the style attribute and still wins over this.
+ */
+.veto-button {
+    --veto-glow-color: var(--veto-button-color);
+    --veto-ping-color: var(--veto-button-color);
+}
+
+.veto-button--full-width {
+    width: 100%;
+}
+
+.veto-button--rounded {
+    border-radius: var(--veto-radius-full);
+}
+
+/* Size */
+
+.veto-button--sm {
+    font-size: var(--veto-font-size-sm);
+    padding: var(--veto-space-2) var(--veto-space-3);
+    min-height: 2rem;
+}
+
+.veto-button--md {
+    font-size: var(--veto-font-size-md);
+    padding: var(--veto-space-2) var(--veto-space-4);
+    min-height: 2.5rem;
+}
+
+.veto-button--lg {
+    font-size: var(--veto-font-size-lg);
+    padding: var(--veto-space-3) var(--veto-space-5);
+    min-height: 3rem;
+}
+
+/*
+ * Colour. Each role sets one custom property and the variants below read it, so a new role
+ * needs one rule rather than one per variant.
+ */
+
+.veto-button--primary { --veto-button-color: var(--veto-color-primary); --veto-button-hover: var(--veto-color-primary-hover); }
+.veto-button--secondary { --veto-button-color: var(--veto-color-secondary); --veto-button-hover: var(--veto-color-secondary); }
+.veto-button--success { --veto-button-color: var(--veto-color-success); --veto-button-hover: var(--veto-color-success); }
+.veto-button--warning { --veto-button-color: var(--veto-color-warning); --veto-button-hover: var(--veto-color-warning); }
+.veto-button--danger { --veto-button-color: var(--veto-color-danger); --veto-button-hover: var(--veto-color-danger); }
+
+.veto-button--neutral {
+    --veto-button-color: var(--veto-color-text);
+    --veto-button-hover: var(--veto-color-text);
+}
+
+/* Variant */
+
+.veto-button--filled {
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-button-color);
+}
+
+.veto-button--filled.veto-button--neutral {
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+    border-color: var(--veto-color-border);
+}
+
+.veto-button--outlined {
+    color: var(--veto-button-color);
+    background-color: transparent;
+    border-color: var(--veto-color-border);
+}
+
+.veto-button--text {
+    color: var(--veto-button-color);
+    background-color: transparent;
+}
+
+/* States */
+
+.veto-button--filled:hover:not(:disabled) {
+    background-color: var(--veto-button-hover);
+}
+
+.veto-button--outlined:hover:not(:disabled) {
+    border-color: var(--veto-button-color);
+    background-color: color-mix(in srgb, var(--veto-button-color) 8%, transparent);
+}
+
+.veto-button--text:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--veto-button-color) 10%, transparent);
+}
+
+.veto-button:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.veto-button:disabled,
+.veto-button--disabled {
+    color: var(--veto-color-text-disabled);
+    background-color: var(--veto-color-surface-disabled);
+    border-color: transparent;
+    cursor: not-allowed;
+}
+
+/*
+ * A loading button keeps the colours of its resting state: it is busy, not unavailable, and
+ * greying it out would read as though the action had been taken away.
+ */
+.veto-button--loading {
+    cursor: progress;
+}
+
+.veto-button--loading.veto-button--filled {
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-button-color);
+}
+
+.veto-button--loading.veto-button--outlined,
+.veto-button--loading.veto-button--text {
+    color: var(--veto-button-color);
+    background-color: transparent;
+}
+
+.veto-button__label {
+    display: inline-block;
+}
+
+.veto-button__icon,
+.veto-button__spinner {
+    flex: 0 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-button {
+        transition: none;
+    }
+
+    .veto-button:active:not(:disabled) {
+        transform: none;
+    }
+}

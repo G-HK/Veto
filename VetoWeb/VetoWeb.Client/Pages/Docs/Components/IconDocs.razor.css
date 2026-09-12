@@ -1,0 +1,17 @@
+.icon-cell {
+    width: 5rem;
+}
+
+.icon-cell__name {
+    font-size: 0.6875rem;
+    color: var(--veto-color-text-muted);
+    text-align: center;
+}
+
+.icon-inline {
+    font-size: 1.25rem;
+}
+
+.icon-danger {
+    color: var(--veto-color-danger);
+}

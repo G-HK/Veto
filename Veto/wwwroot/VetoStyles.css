@@ -1,0 +1,291 @@
+/*
+ * Veto design tokens.
+ *
+ * Every Veto component styles itself exclusively from the custom properties
+ * declared here - no component may hard-code a color, radius, or spacing value.
+ * Consumers add this one stylesheet:
+ *
+ *   <link rel="stylesheet" href="_content/Veto/VetoStyles.css" />
+ *
+ * Theming: the full light palette lives on bare :root. Dark values are declared
+ * twice - once behind an explicit [data-veto-theme="dark"] on the root element,
+ * and once behind prefers-color-scheme for users who never made a choice. Set
+ * data-veto-theme="light" or "dark" on <html> to override the OS preference.
+ */
+
+:root {
+    color-scheme: light;
+
+    /* Accent roles */
+    --veto-color-primary: #4f46e5;
+    --veto-color-primary-hover: #4338ca;
+    --veto-color-primary-contrast: #ffffff;
+    --veto-color-secondary: #64748b;
+    --veto-color-success: #16a34a;
+    --veto-color-warning: #d97706;
+    --veto-color-danger: #dc2626;
+
+    /* Surfaces and text */
+    --veto-color-surface: #ffffff;
+    --veto-color-surface-raised: #f8fafc;
+    --veto-color-surface-disabled: #f1f5f9;
+    --veto-color-text: #111827;
+    --veto-color-text-muted: #6b7280;
+    --veto-color-text-disabled: #9ca3af;
+    --veto-color-border: #d1d5db;
+    --veto-color-border-strong: #9ca3af;
+
+    /* Shape */
+    --veto-radius-sm: 4px;
+    --veto-radius-md: 6px;
+    --veto-radius-lg: 10px;
+    --veto-radius-full: 9999px;
+
+    /* Spacing scale */
+    --veto-space-1: 0.25rem;
+    --veto-space-2: 0.5rem;
+    --veto-space-3: 0.75rem;
+    --veto-space-4: 1rem;
+    --veto-space-5: 1.5rem;
+    --veto-space-6: 2rem;
+
+    /* Typography */
+    --veto-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --veto-font-mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    --veto-font-size-sm: 0.8125rem;
+    --veto-font-size-md: 0.9375rem;
+    --veto-font-size-lg: 1.0625rem;
+    --veto-line-height: 1.5;
+
+    /* Elevation and motion */
+    --veto-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.08);
+    --veto-shadow-md: 0 4px 12px rgb(15 23 42 / 0.12);
+    --veto-focus-ring: 0 0 0 3px rgb(79 70 229 / 0.35);
+    --veto-focus-ring-danger: 0 0 0 3px rgb(220 38 38 / 0.3);
+    --veto-transition: 150ms ease;
+}
+
+/* Explicit dark theme: <html data-veto-theme="dark"> */
+[data-veto-theme="dark"] {
+    color-scheme: dark;
+
+    --veto-color-primary: #818cf8;
+    --veto-color-primary-hover: #a5b4fc;
+    --veto-color-primary-contrast: #1e1b4b;
+    --veto-color-secondary: #94a3b8;
+    --veto-color-success: #4ade80;
+    --veto-color-warning: #fbbf24;
+    --veto-color-danger: #f87171;
+
+    --veto-color-surface: #111827;
+    --veto-color-surface-raised: #1f2937;
+    --veto-color-surface-disabled: #1a2130;
+    --veto-color-text: #f3f4f6;
+    --veto-color-text-muted: #9ca3af;
+    --veto-color-text-disabled: #6b7280;
+    --veto-color-border: #374151;
+    --veto-color-border-strong: #6b7280;
+
+    --veto-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+    --veto-shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
+    --veto-focus-ring: 0 0 0 3px rgb(129 140 248 / 0.4);
+    --veto-focus-ring-danger: 0 0 0 3px rgb(248 113 113 / 0.35);
+}
+
+/* OS preference, unless the app explicitly asked for light */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-veto-theme="light"]) {
+        color-scheme: dark;
+
+        --veto-color-primary: #818cf8;
+        --veto-color-primary-hover: #a5b4fc;
+        --veto-color-primary-contrast: #1e1b4b;
+        --veto-color-secondary: #94a3b8;
+        --veto-color-success: #4ade80;
+        --veto-color-warning: #fbbf24;
+        --veto-color-danger: #f87171;
+
+        --veto-color-surface: #111827;
+        --veto-color-surface-raised: #1f2937;
+        --veto-color-surface-disabled: #1a2130;
+        --veto-color-text: #f3f4f6;
+        --veto-color-text-muted: #9ca3af;
+        --veto-color-text-disabled: #6b7280;
+        --veto-color-border: #374151;
+        --veto-color-border-strong: #6b7280;
+
+        --veto-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+        --veto-shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
+        --veto-focus-ring: 0 0 0 3px rgb(129 140 248 / 0.4);
+        --veto-focus-ring-danger: 0 0 0 3px rgb(248 113 113 / 0.35);
+    }
+}
+
+/* Respect a reduced-motion preference across every component. */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --veto-transition: 0ms;
+    }
+}
+
+/*
+ * Responsive visibility utilities.
+ *
+ * These carry !important deliberately. Component styles are written with CSS isolation, which
+ * appends an attribute selector - `.veto-icon-button[b-abc123]` - giving them a higher
+ * specificity than any plain class a consuming app can write. Without !important a consumer's
+ * `display` override would silently lose to the component's own rule. Utility classes are the
+ * one place in Veto where !important is correct, for the same reason every utility framework
+ * does it.
+ *
+ * Breakpoints: sm 640px, md 960px, lg 1280px.
+ */
+
+.veto-hide { display: none !important; }
+
+@media (max-width: 639.98px) { .veto-hide-below-sm { display: none !important; } }
+@media (max-width: 959.98px) { .veto-hide-below-md { display: none !important; } }
+@media (max-width: 1279.98px) { .veto-hide-below-lg { display: none !important; } }
+
+@media (min-width: 640px) { .veto-hide-from-sm { display: none !important; } }
+@media (min-width: 960px) { .veto-hide-from-md { display: none !important; } }
+@media (min-width: 1280px) { .veto-hide-from-lg { display: none !important; } }
+
+/* Visible only to assistive technology - for labels an icon-only control still needs. */
+.veto-visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+}
+
+/*
+ * Effects.
+ *
+ * Three opt-in flourishes, kept here rather than in any one component's stylesheet because any
+ * component can turn them on: `Glow` and `Ping` are parameters on the shared base class, and
+ * the underline is what VetoLink and VetoNavMenu are built from.
+ *
+ * All three are drawn on a pseudo-element rather than on the host. A glow written as a
+ * box-shadow on the host would have to fight whatever box-shadow that component already uses
+ * for elevation and focus - and would lose, because CSS isolation gives a component's own rules
+ * an attribute selector and therefore the higher specificity. A pseudo-element has no such
+ * argument to have: it sits outside the host's own box-shadow entirely.
+ *
+ * Colour comes from --veto-glow-color / --veto-ping-color / --veto-underline-color, each
+ * falling back to the theme's accent. A component with a colour role of its own sets the
+ * property to that role, so a danger button glows red without anyone asking it to.
+ */
+
+.veto-glow,
+.veto-ping {
+    position: relative;
+}
+
+.veto-glow::after,
+.veto-ping::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+
+    /* Decoration only: the host still receives every click and hover. */
+    pointer-events: none;
+}
+
+/*
+ * Breathing glow. Opacity is animated rather than the shadow's size, because opacity is
+ * composited and a changing blur radius is repainted every frame.
+ */
+.veto-glow::after {
+    box-shadow:
+        0 0 var(--veto-glow-size, 0.6rem) var(--veto-glow-color, var(--veto-color-primary)),
+        0 0 calc(var(--veto-glow-size, 0.6rem) * 2.2) var(--veto-glow-color, var(--veto-color-primary));
+    opacity: var(--veto-glow-opacity, 0.55);
+    animation: veto-breathe var(--veto-glow-duration, 2.6s) ease-in-out infinite;
+}
+
+@keyframes veto-breathe {
+    0%, 100% { opacity: calc(var(--veto-glow-opacity, 0.55) * 0.4); }
+    50% { opacity: var(--veto-glow-opacity, 0.55); }
+}
+
+/*
+ * Ping ring. Expands past the host, fades, then rests until the next one - the pause is the
+ * difference between a reminder and a strobe.
+ */
+.veto-ping::before {
+    border: var(--veto-ping-width, 2px) solid var(--veto-ping-color, var(--veto-color-primary));
+    opacity: 0;
+    animation: veto-ping var(--veto-ping-duration, 2.4s) cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes veto-ping {
+    0% { transform: scale(1); opacity: 0.7; }
+    60%, 100% { transform: scale(var(--veto-ping-scale, 1.35)); opacity: 0; }
+}
+
+/*
+ * Underline reveal. The line grows from the middle outwards on hover and on keyboard focus
+ * alike - a link that only answered the pointer would leave the keyboard with no sign of where
+ * it was.
+ */
+.veto-underline-reveal {
+    position: relative;
+    text-decoration: none;
+}
+
+.veto-underline-reveal::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: var(--veto-underline-offset, -0.15em);
+    height: var(--veto-underline-width, 2px);
+    background: var(--veto-underline-color, var(--veto-color-primary));
+    box-shadow: 0 0 0.4rem var(--veto-underline-color, var(--veto-color-primary));
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform var(--veto-transition);
+    pointer-events: none;
+}
+
+.veto-underline-reveal:hover::after,
+.veto-underline-reveal:focus-visible::after {
+    transform: scaleX(1);
+}
+
+/*
+ * When the thing being hovered is bigger than the text - a navigation row, a card - put
+ * veto-underline-host on it and veto-underline-reveal on the words. Without this the line would
+ * only appear while the pointer was exactly over the text, and never while crossing the row's
+ * own padding.
+ */
+.veto-underline-host:hover .veto-underline-reveal::after,
+.veto-underline-host:focus-visible .veto-underline-reveal::after {
+    transform: scaleX(1);
+}
+
+/* Always drawn, and still lit from the centre on hover. */
+.veto-underline-static::after {
+    transform: scaleX(1);
+}
+
+/*
+ * Reduced motion. The glow and the ring stay - they are saying something, and removing them
+ * would remove the message along with the movement - but they stop moving and hold at a steady
+ * value instead.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .veto-glow::after {
+        animation: none;
+        opacity: var(--veto-glow-opacity, 0.55);
+    }
+
+    .veto-ping::before {
+        animation: none;
+        opacity: 0.5;
+    }
+}

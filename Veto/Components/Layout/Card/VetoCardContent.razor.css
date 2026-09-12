@@ -1,0 +1,12 @@
+/* VetoCardContent - the body of a composed card. */
+
+.veto-card-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--veto-space-5);
+}
+
+/* The header already paid for the space between itself and the content. */
+.veto-card-header + .veto-card-content {
+    padding-top: 0;
+}

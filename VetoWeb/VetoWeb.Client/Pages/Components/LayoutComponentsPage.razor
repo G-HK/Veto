@@ -1,0 +1,151 @@
+@page "/components/layout"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Layout components</PageTitle>
+
+<div class="demo-page" data-testid="page" data-ready="@(_interactive ? "true" : null)">
+    <h1>Layout components</h1>
+    <p>
+        The vocabulary the layouts are written in. Each one is an ordinary component - drop it
+        anywhere, nest it in anything.
+    </p>
+
+    <section class="demo-section">
+        <h2>Stack</h2>
+        <VetoStack TestId="stack-row" Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+            <VetoCard TestId="stack-child-1" Padding="VetoSpacing.Small">One</VetoCard>
+            <VetoCard Padding="VetoSpacing.Small">Two</VetoCard>
+            <VetoCard Padding="VetoSpacing.Small">Three</VetoCard>
+            <VetoSpacer TestId="spacer" />
+            <VetoCard Padding="VetoSpacing.Small">Pushed by a spacer</VetoCard>
+        </VetoStack>
+
+        <VetoStack TestId="stack-column" Gap="VetoSpacing.Small" Class="demo-spaced">
+            <VetoCard Padding="VetoSpacing.Small">Stacked</VetoCard>
+            <VetoCard Padding="VetoSpacing.Small">Vertically</VetoCard>
+        </VetoStack>
+    </section>
+
+    <section class="demo-section">
+        <h2>Grid</h2>
+        <VetoGrid TestId="grid" Columns="1" ColumnsSmall="2" ColumnsLarge="4" Gap="VetoSpacing.Medium">
+            <VetoCard Padding="VetoSpacing.Small">1</VetoCard>
+            <VetoCard Padding="VetoSpacing.Small">2</VetoCard>
+            <VetoCard Padding="VetoSpacing.Small">3</VetoCard>
+            <VetoGridItem TestId="grid-wide" SpanLarge="2">
+                <VetoCard Padding="VetoSpacing.Small">Spans two columns on wide screens</VetoCard>
+            </VetoGridItem>
+        </VetoGrid>
+    </section>
+
+    <section class="demo-section">
+        <h2>Card</h2>
+        <VetoGrid Columns="1" ColumnsMedium="3" Gap="VetoSpacing.Medium">
+            <VetoCard TestId="card-outlined" Title="Outlined">A hairline border, no shadow.</VetoCard>
+            <VetoCard TestId="card-raised" Title="Raised" Elevation="VetoElevation.Raised">A soft shadow, no border.</VetoCard>
+            <VetoCard TestId="card-flat" Title="Flat" Elevation="VetoElevation.Flat">Neither. Sits on the background.</VetoCard>
+        </VetoGrid>
+
+        <VetoCard TestId="card-footer" Title="With a footer" Class="demo-spaced">
+            <ChildContent>Regions are padded separately, so the rules run the full width.</ChildContent>
+            <Footer>Footer content</Footer>
+        </VetoCard>
+
+        <VetoCard TestId="card-interactive" Title="Interactive" Class="demo-spaced" OnClick="OnCardClicked">
+            Setting OnClick renders a real button, so this is focusable and works from the keyboard.
+        </VetoCard>
+        <p class="demo-output" data-testid="card-output">@_clicks</p>
+    </section>
+
+    <section class="demo-section">
+        <h2>Divider</h2>
+        <VetoDivider TestId="divider-plain" />
+        <VetoDivider TestId="divider-labelled" Label="or" />
+        <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center" Gap="VetoSpacing.None">
+            <span>Left</span>
+            <VetoDivider TestId="divider-vertical" Orientation="VetoOrientation.Vertical" Class="demo-vrule" />
+            <span>Right</span>
+        </VetoStack>
+    </section>
+
+    <section class="demo-section">
+        <h2>Container</h2>
+        <VetoContainer TestId="container" Size="VetoContainerSize.Small" Class="demo-outline">
+            Constrained to a comfortable reading width and centred.
+        </VetoContainer>
+    </section>
+
+    <section class="demo-section">
+        <h2>Icons</h2>
+        <p>
+            Icons are SVG path constants, not a font. Decorative by default; give one a
+            <code>Title</code> and it becomes an image with an accessible name.
+        </p>
+        <VetoStack TestId="icons" Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true">
+            @foreach (var (name, icon) in Icons)
+            {
+                <VetoStack Gap="VetoSpacing.ExtraSmall" Align="VetoAlign.Center" Class="demo-icon">
+                    <VetoIcon Icon="@icon" Size="VetoIconSize.Large" />
+                    <span class="demo-icon__name">@name</span>
+                </VetoStack>
+            }
+        </VetoStack>
+
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center" Class="demo-spaced">
+            <VetoIcon TestId="icon-labelled" Icon="@VetoIcons.Trash" Title="Delete" Size="VetoIconSize.Large" />
+            <VetoIcon TestId="icon-decorative" Icon="@VetoIcons.Info" Size="VetoIconSize.Large" />
+            <VetoIcon TestId="icon-rotated" Icon="@VetoIcons.ChevronDown" Rotation="180" Size="VetoIconSize.Large" />
+            <VetoIcon TestId="icon-spin" Icon="@VetoIcons.Settings" Spin="true" Size="VetoIconSize.Large" />
+        </VetoStack>
+    </section>
+
+    <section class="demo-section">
+        <h2>Icon buttons</h2>
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+            <VetoIconButton TestId="icon-button" Icon="@VetoIcons.Search" Label="Search" OnClick="OnSearchClicked" />
+            <VetoIconButton TestId="icon-button-outlined" Icon="@VetoIcons.Plus" Label="Add" Variant="VetoVariant.Outlined" />
+            <VetoIconButton TestId="icon-button-filled" Icon="@VetoIcons.Check" Label="Confirm" Variant="VetoVariant.Filled" Round="true" />
+            <VetoIconButton TestId="icon-button-toggle" Icon="@VetoIcons.Bell" Label="Notifications" Pressed="_muted" OnClick="ToggleMute" />
+            <VetoIconButton TestId="icon-button-disabled" Icon="@VetoIcons.Trash" Label="Delete" Disabled="true" />
+        </VetoStack>
+        <p class="demo-output" data-testid="icon-button-output">@_searches</p>
+    </section>
+</div>
+
+@code {
+    private bool _interactive;
+    private bool _muted;
+    private string? _clicks;
+    private string? _searches;
+
+    private static readonly (string Name, string Icon)[] Icons =
+    [
+        ("Menu", VetoIcons.Menu),
+        ("Close", VetoIcons.Close),
+        ("Home", VetoIcons.Home),
+        ("Search", VetoIcons.Search),
+        ("Settings", VetoIcons.Settings),
+        ("User", VetoIcons.User),
+        ("Bell", VetoIcons.Bell),
+        ("Sun", VetoIcons.Sun),
+        ("Moon", VetoIcons.Moon),
+        ("Grid", VetoIcons.Grid),
+        ("Terminal", VetoIcons.Terminal),
+        ("Palette", VetoIcons.Palette)
+    ];
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+
+    private void OnCardClicked () => _clicks = "Card activated";
+
+    private void OnSearchClicked () => _searches = "Search clicked";
+
+    private void ToggleMute () => _muted = !_muted;
+}

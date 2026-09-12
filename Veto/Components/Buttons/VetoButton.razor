@@ -1,0 +1,57 @@
+@namespace Veto.Components.Buttons
+@inherits Veto.Core.VetoComponentBase
+@using Veto.Components.Icon
+
+@if (Visible)
+{
+    @if (Href is not null && !Disabled)
+    {
+        <a @ref="RootElement"
+           @attributes="InnerAttributes"
+           id="@ElementId"
+           class="@CssClass"
+           style="@CssStyle"
+           data-testid="@TestId"
+           href="@Href"
+           target="@Target"
+           rel="@Rel">
+            @RenderContents()
+        </a>
+    }
+    else
+    {
+        <button @ref="RootElement"
+                @attributes="InnerAttributes"
+                id="@ElementId"
+                class="@CssClass"
+                style="@CssStyle"
+                data-testid="@TestId"
+                type="@Type"
+                disabled="@(Disabled || Loading)"
+                aria-busy="@(Loading ? "true" : null)"
+                @onclick="OnClickAsync">
+            @RenderContents()
+        </button>
+    }
+}
+
+@code {
+    private RenderFragment RenderContents () =>
+        @<text>
+            @if (Loading)
+            {
+                <VetoIcon Icon="@VetoIcons.Settings" Spin="true" Size="VetoIconSize.Inherit" Class="veto-button__spinner" />
+            }
+            else if (StartIcon is not null)
+            {
+                <VetoIcon Icon="@StartIcon" Size="VetoIconSize.Inherit" Class="veto-button__icon" />
+            }
+
+            <span class="veto-button__label">@ChildContent</span>
+
+            @if (!Loading && EndIcon is not null)
+            {
+                <VetoIcon Icon="@EndIcon" Size="VetoIconSize.Inherit" Class="veto-button__icon" />
+            }
+        </text>;
+}

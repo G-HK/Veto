@@ -1,0 +1,122 @@
+@page "/layouts/docs"
+@page "/layouts/docs/{Section}"
+@layout BareLayout
+@rendermode InteractiveWebAssembly
+@using Veto.Components.Handbook
+
+<PageTitle>@Current.Title — Handbook</PageTitle>
+
+<div class="demo-root" data-testid="page" data-ready="@(_interactive ? "true" : null)">
+    <VetoDocsLayout TestId="layout" Items="Nav" ShowToc="true">
+        <Brand>
+            <span class="brand">Handbook</span>
+        </Brand>
+
+        <Toolbar>
+            <VetoIconButton Icon="@VetoIcons.Search" Label="Search" TestId="tool-search" OnClick="OnSearch" />
+            <VetoThemeToggle />
+        </Toolbar>
+
+        <Toc>
+            @* Built from the same section list as the page, so the two cannot disagree. *@
+            <VetoHandbookToc Sections="Current.Sections" State="_handbook" TestId="toc" />
+        </Toc>
+
+        <Footer>
+            <span>Handbook &middot; a VetoDocsLayout demo</span>
+            <VetoSpacer />
+            <a class="footer__link" href="/docs/layouts">Back to layouts</a>
+        </Footer>
+
+        <ChildContent>
+            <VetoStack Gap="VetoSpacing.Large">
+                <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center" Gap="VetoSpacing.Medium">
+                    <a class="demo-back" href="/docs/layouts">&larr; Back to layouts</a>
+                    <VetoSpacer />
+                    <span class="demo-note" data-testid="status">@_note</span>
+                </VetoStack>
+
+                <VetoCard Title="Landing highlight" TestId="highlight-controls">
+                    <VetoStack Gap="VetoSpacing.Medium">
+                        <p class="demo-prose">
+                            Choose a section in the contents rail and watch where you land. The
+                            highlight fades after five seconds unless you ask it to stay.
+                        </p>
+                        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                            <button class="chip @(_highlight ? "chip--on" : null)"
+                                    type="button" data-testid="toggle-highlight"
+                                    @onclick="() => _highlight = !_highlight">
+                                Highlight @(_highlight ? "on" : "off")
+                            </button>
+                            <button class="chip @(_persist ? "chip--on" : null)"
+                                    type="button" data-testid="toggle-persist"
+                                    @onclick="() => _persist = !_persist">
+                                Stay highlighted @(_persist ? "on" : "off")
+                            </button>
+                        </VetoStack>
+                    </VetoStack>
+                </VetoCard>
+
+                <VetoHandbookPage TestId="article"
+                                  Eyebrow="@Current.Eyebrow"
+                                  Title="@Current.Title"
+                                  Lead="@Current.Lead"
+                                  Sections="Current.Sections"
+                                  State="_handbook"
+                                  HighlightOnNavigate="_highlight"
+                                  HighlightPersists="_persist" />
+            </VetoStack>
+        </ChildContent>
+    </VetoDocsLayout>
+</div>
+
+@code {
+    private readonly VetoHandbookState _handbook = new();
+    private bool _interactive;
+    private bool _highlight = true;
+    private bool _persist;
+    private string? _note;
+
+    /// <summary>The page slug from the route. Null on the bare route, which is the introduction.</summary>
+    [Parameter]
+    public string? Section { get; set; }
+
+    private HandbookContent.Page Current => HandbookContent.Resolve(Section);
+
+    private static readonly IReadOnlyList<VetoNavEntry> Nav =
+    [
+        new VetoNavEntry { Label = "Introduction", Href = "/layouts/docs", Icon = VetoIcons.Home, MatchExact = true },
+        new VetoNavEntry
+        {
+            Label = "Guides",
+            Icon = VetoIcons.Document,
+            Children =
+            [
+                new VetoNavEntry { Label = "Getting started", Href = "/layouts/docs/start" },
+                new VetoNavEntry { Label = "Configuration", Href = "/layouts/docs/config" },
+                new VetoNavEntry { Label = "Deployment", Href = "/layouts/docs/deploy" }
+            ]
+        },
+        new VetoNavEntry
+        {
+            Label = "Reference",
+            Icon = VetoIcons.Terminal,
+            Children =
+            [
+                new VetoNavEntry { Label = "CLI", Href = "/layouts/docs/cli" },
+                new VetoNavEntry { Label = "API", Href = "/layouts/docs/api" }
+            ]
+        }
+    ];
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+
+    private void OnSearch () => _note = "Search clicked";
+}

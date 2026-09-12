@@ -1,0 +1,146 @@
+/* VetoCard - a grouping surface, flat, outlined or raised. */
+
+.veto-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    box-sizing: border-box;
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-md);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border-radius: var(--veto-radius-lg);
+    /* So a media image at the top of the card is clipped to the card's own corners rather
+       than poking square edges out of a rounded box. Nothing has to ask for it. */
+    overflow: hidden;
+}
+
+.veto-card--flat {
+    background-color: transparent;
+}
+
+.veto-card--outlined {
+    border: 1px solid var(--veto-color-border);
+}
+
+.veto-card--raised {
+    box-shadow: var(--veto-shadow-md);
+}
+
+/* Regions */
+
+.veto-card__header {
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+.veto-card--flat .veto-card__header,
+.veto-card--flat .veto-card__footer {
+    border-color: transparent;
+}
+
+.veto-card__title {
+    margin: 0;
+    font-size: var(--veto-font-size-lg);
+    font-weight: 600;
+}
+
+.veto-card__body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.veto-card__footer {
+    border-top: 1px solid var(--veto-color-border);
+}
+
+/*
+ * Padding is applied per region rather than to the card, so the header and footer rules run
+ * the full width of the card instead of stopping short of its edges.
+ */
+.veto-card--padding-0 .veto-card__header,
+.veto-card--padding-0 .veto-card__body,
+.veto-card--padding-0 .veto-card__footer { padding: 0; }
+
+.veto-card--padding-1 .veto-card__header,
+.veto-card--padding-1 .veto-card__body,
+.veto-card--padding-1 .veto-card__footer { padding: var(--veto-space-1); }
+
+.veto-card--padding-2 .veto-card__header,
+.veto-card--padding-2 .veto-card__body,
+.veto-card--padding-2 .veto-card__footer { padding: var(--veto-space-2); }
+
+.veto-card--padding-3 .veto-card__header,
+.veto-card--padding-3 .veto-card__body,
+.veto-card--padding-3 .veto-card__footer { padding: var(--veto-space-3); }
+
+.veto-card--padding-4 .veto-card__header,
+.veto-card--padding-4 .veto-card__body,
+.veto-card--padding-4 .veto-card__footer { padding: var(--veto-space-4); }
+
+.veto-card--padding-5 .veto-card__header,
+.veto-card--padding-5 .veto-card__body,
+.veto-card--padding-5 .veto-card__footer { padding: var(--veto-space-5); }
+
+.veto-card--padding-6 .veto-card__header,
+.veto-card--padding-6 .veto-card__body,
+.veto-card--padding-6 .veto-card__footer { padding: var(--veto-space-6); }
+
+/*
+ * Composed cards. When the card's children are VetoCardHeader / VetoCardContent /
+ * VetoCardFooter, the automatic body wrapper would add a second layer of padding around
+ * sections that already pad themselves - and would stop a media image reaching the card's
+ * edges. It is removed from the layout instead, so the sections become direct children of
+ * the card and the slot API above keeps working untouched for everyone else.
+ */
+.veto-card__body:has(> .veto-card-section),
+.veto-card__body:has(> img),
+.veto-card__body:has(> picture) {
+    display: contents;
+}
+
+/* Media: an image at the top of a card spans it edge to edge. */
+.veto-card img,
+.veto-card picture img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Interactive - rendered as a <button>, so the browser defaults need resetting. */
+
+.veto-card--interactive {
+    width: 100%;
+    text-align: start;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color var(--veto-transition), box-shadow var(--veto-transition), transform var(--veto-transition);
+}
+
+.veto-card--interactive:hover:not(:disabled) {
+    border-color: var(--veto-color-border-strong);
+    box-shadow: var(--veto-shadow-md);
+}
+
+.veto-card--interactive:focus-visible {
+    outline: none;
+    border-color: var(--veto-color-primary);
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-card--interactive:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.veto-card--disabled {
+    color: var(--veto-color-text-disabled);
+    background-color: var(--veto-color-surface-disabled);
+    cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-card--interactive:active:not(:disabled) {
+        transform: none;
+    }
+}

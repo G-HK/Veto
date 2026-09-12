@@ -1,0 +1,100 @@
+@namespace Veto.Components.Navigation
+@inherits Veto.Core.VetoComponentBase
+@using Veto.Components.Icon
+
+@* Children register with this component and draw nothing themselves, so the trail is laid out
+   in one place. Rendered first, and outside the nav, so the registrations exist by the time
+   the list below is built. *@
+<CascadingValue Value="this" IsFixed="true">
+    @ChildContent
+</CascadingValue>
+
+@if (Visible)
+{
+    <nav @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId"
+         aria-label="@AriaLabel">
+        <ol class="veto-breadcrumbs__list">
+            @for (var index = 0; index < Steps.Count; index++)
+            {
+                var step = Steps[index];
+                var last = index == Steps.Count - 1;
+
+                @if (index > 0)
+                {
+                    <li class="veto-breadcrumbs__separator" aria-hidden="true">
+                        @if (SeparatorContent is not null)
+                        {
+                            @SeparatorContent
+                        }
+                        else if (SeparatorIcon is not null)
+                        {
+                            <VetoIcon Icon="@SeparatorIcon" Size="VetoIconSize.Inherit" />
+                        }
+                        else
+                        {
+                            @Separator
+                        }
+                    </li>
+                }
+
+                <li class="veto-breadcrumbs__item"
+                    data-index="@index"
+                    data-current="@(last ? "true" : "false")"
+                    data-testid="@(TestId is null ? null : $"{TestId}-item-{index}")">
+                    @if (step.Collapsed)
+                    {
+                        <button type="button"
+                                class="veto-breadcrumbs__expand"
+                                aria-label="@ExpandLabel"
+                                title="@ExpandLabel"
+                                data-testid="@(TestId is null ? null : $"{TestId}-expand")"
+                                @onclick="Expand">@CollapsedSeparator</button>
+                    }
+                    else if (IsLink(step, last))
+                    {
+                        <a class="veto-breadcrumbs__link"
+                           href="@step.Href"
+                           aria-current="@(last ? "page" : null)"
+                           @onclick="() => OnStepClickAsync(step)">@RenderStep(step)</a>
+                    }
+                    else if (IsAction(step, last))
+                    {
+                        <button type="button"
+                                class="veto-breadcrumbs__action"
+                                aria-current="@(last ? "page" : null)"
+                                @onclick="() => OnStepClickAsync(step)">@RenderStep(step)</button>
+                    }
+                    else
+                    {
+                        <span class="veto-breadcrumbs__text" aria-current="@(last ? "page" : null)">@RenderStep(step)</span>
+                    }
+                </li>
+            }
+        </ol>
+    </nav>
+}
+
+@code {
+    private RenderFragment RenderStep ( Step step ) =>
+        @<text>
+            @if (step.Icon is not null)
+            {
+                <VetoIcon Icon="@step.Icon" Size="VetoIconSize.Inherit" Class="veto-breadcrumbs__icon" />
+            }
+            <span class="veto-breadcrumbs__label">
+                @if (step.Content is not null)
+                {
+                    @step.Content
+                }
+                else
+                {
+                    @step.Label
+                }
+            </span>
+        </text>;
+}

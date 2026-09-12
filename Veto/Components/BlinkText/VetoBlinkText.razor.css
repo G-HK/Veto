@@ -1,0 +1,75 @@
+/* VetoBlinkText - text printed a character at a time. */
+
+.veto-blink-text {
+    display: inline;
+    white-space: pre-wrap;
+    /* Long streamed text should wrap rather than push the layout wider. */
+    overflow-wrap: anywhere;
+}
+
+/*
+ * Clipped, not hidden. `display: none` or `visibility: hidden` would take it out of the
+ * accessibility tree, which is the one thing this copy exists for.
+ */
+.veto-blink-text__accessible {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.veto-blink-text__visible {
+    white-space: pre-wrap;
+}
+
+.veto-blink-text__scramble {
+    opacity: 0.55;
+    /* Glyphs ahead of the cursor are noise, not content - they should not be selectable. */
+    user-select: none;
+}
+
+.veto-blink-text__cursor {
+    display: inline-block;
+    margin-inline-start: 0.05em;
+    animation: veto-blink-text-blink 1.06s step-end infinite;
+    user-select: none;
+}
+
+@keyframes veto-blink-text-blink {
+    50% { opacity: 0; }
+}
+
+/*
+ * Holding the finished text's space. The two copies are stacked in one grid cell: the invisible
+ * sizer sets the box, the revealed text draws on top of it. Without this, a paragraph reflows
+ * line by line as it types and shoves everything below it down the page.
+ */
+.veto-blink-text--preserve-space {
+    display: inline-grid;
+}
+
+.veto-blink-text--preserve-space > .veto-blink-text__sizer,
+.veto-blink-text--preserve-space > .veto-blink-text__visible {
+    grid-area: 1 / 1;
+    white-space: pre-wrap;
+}
+
+.veto-blink-text--preserve-space > .veto-blink-text__sizer {
+    visibility: hidden;
+}
+
+/*
+ * Reduced motion: motion is the whole component, so it shows the finished text and stills the
+ * cursor rather than animating slowly. Nothing is lost - the text is the content.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .veto-blink-text__cursor {
+        animation: none;
+    }
+
+    .veto-blink-text__scramble {
+        display: none;
+    }
+}

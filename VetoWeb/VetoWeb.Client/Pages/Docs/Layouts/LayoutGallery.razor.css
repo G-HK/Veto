@@ -1,0 +1,189 @@
+.docs-heading {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.docs-prose {
+    max-width: 68ch;
+    margin: 0;
+    line-height: 1.65;
+    color: var(--veto-color-text-muted);
+}
+
+.docs-prose code {
+    font-family: var(--veto-font-mono);
+    font-size: 0.875em;
+    color: var(--veto-color-primary);
+}
+
+.gallery__preview {
+    border-bottom: 1px solid var(--veto-color-border);
+    background-color: var(--veto-color-surface-raised);
+}
+
+.gallery__body {
+    padding: var(--veto-space-4);
+}
+
+.gallery__name {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+.gallery__summary {
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+    line-height: 1.55;
+    color: var(--veto-color-text-muted);
+}
+
+.gallery__open {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-primary);
+    text-decoration: none;
+}
+
+.gallery__open:hover {
+    text-decoration: underline;
+}
+
+.gallery__docs {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+}
+
+/*
+ * Miniatures. Drawn from the same tokens as the real layouts, so they follow the theme and
+ * cannot drift out of date the way a screenshot would.
+ */
+
+.mini {
+    position: relative;
+    display: block;
+    height: 9rem;
+    overflow: hidden;
+}
+
+.mini span,
+.mini i {
+    position: absolute;
+    display: block;
+    background-color: var(--veto-color-border);
+    border-radius: 2px;
+}
+
+.mini__bar {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    height: 0.75rem;
+    background-color: var(--veto-color-border-strong);
+}
+
+.mini__rail {
+    top: 1.75rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    width: 2rem;
+}
+
+.mini__column {
+    top: 1.75rem;
+    right: 3.25rem;
+    bottom: 0.5rem;
+    left: 3rem;
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+}
+
+.mini__toc {
+    top: 1.75rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: 2.5rem;
+}
+
+/* Dock */
+
+.mini--dock .mini__surface {
+    inset: 0.5rem;
+    background: linear-gradient(140deg,
+        color-mix(in srgb, var(--veto-color-primary) 35%, transparent),
+        var(--veto-color-surface) 70%);
+    border-radius: var(--veto-radius-md);
+}
+
+.mini__dock {
+    right: 0;
+    bottom: 1rem;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: none;
+}
+
+.mini__dock i {
+    position: static;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border-strong);
+    border-radius: 4px;
+}
+
+/* The middle pair swell, so the miniature reads as a dock rather than a row of squares. */
+.mini__dock i:nth-child(2) { width: 1.6rem; height: 1.6rem; align-self: flex-end; }
+.mini__dock i:nth-child(3) { width: 1.4rem; height: 1.4rem; align-self: flex-end; }
+
+/* Dashboard */
+
+.mini__tiles {
+    top: 1.75rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    left: 3rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 0.25rem;
+    background: none;
+}
+
+.mini__tiles i {
+    position: static;
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+}
+
+.mini__tile--wide {
+    grid-column: span 2;
+}
+
+/* Shell miniature */
+
+.mini--shell .mini__body {
+    top: 1.75rem;
+    right: 0.5rem;
+    bottom: 1.5rem;
+    left: 3rem;
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+}
+
+.mini--shell .mini__rail {
+    bottom: 1.5rem;
+}
+
+.mini__foot {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    height: 0.6rem;
+}

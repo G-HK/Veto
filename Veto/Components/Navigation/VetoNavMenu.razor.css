@@ -1,0 +1,122 @@
+/* VetoNavMenu - a nav list that also works collapsed to an icon rail. */
+
+.veto-nav-menu {
+    display: flex;
+    flex-direction: column;
+    padding: var(--veto-space-2);
+    font-family: var(--veto-font-sans);
+}
+
+.veto-nav-menu__list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.veto-nav-menu__item {
+    min-width: 0;
+}
+
+.veto-nav-menu__link {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-3);
+    width: 100%;
+    box-sizing: border-box;
+    /* Indent follows nesting depth, so a child reads as belonging to its group. */
+    padding: var(--veto-space-2) var(--veto-space-3);
+    padding-inline-start: calc(var(--veto-space-3) + (var(--veto-nav-depth, 0) * var(--veto-space-4)));
+    font: inherit;
+    font-size: var(--veto-font-size-md);
+    text-align: start;
+    text-decoration: none;
+    color: var(--veto-color-text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--veto-radius-md);
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition);
+}
+
+.veto-nav-menu--dense .veto-nav-menu__link {
+    padding-block: var(--veto-space-1);
+}
+
+.veto-nav-menu__link:hover {
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+}
+
+.veto-nav-menu__link:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-nav-menu__link--active {
+    color: var(--veto-color-primary);
+    background-color: color-mix(in srgb, var(--veto-color-primary) 12%, transparent);
+    font-weight: 600;
+}
+
+.veto-nav-menu__link--disabled {
+    color: var(--veto-color-text-disabled);
+    cursor: not-allowed;
+}
+
+.veto-nav-menu__label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*
+ * With the underline on, the label stops stretching - otherwise the line would run the width of
+ * the row rather than the width of the words - and the line is drawn at the label's bottom edge
+ * rather than just below it, because this element keeps its overflow hidden for the ellipsis and
+ * anything outside the box would be clipped away.
+ */
+.veto-nav-menu__label.veto-underline-reveal {
+    flex: 0 1 auto;
+    --veto-underline-offset: 0;
+}
+
+.veto-nav-menu__icon,
+.veto-nav-menu__chevron {
+    flex: 0 0 auto;
+}
+
+.veto-nav-menu__badge {
+    flex: 0 0 auto;
+    padding: 0 var(--veto-space-2);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.4rem;
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border-radius: var(--veto-radius-full);
+}
+
+/*
+ * Icon rail. Labels stay in the DOM so they are still announced and still act as the
+ * accessible name - they are only visually clipped.
+ */
+.veto-nav-menu--icons-only .veto-nav-menu__link {
+    justify-content: center;
+    padding-inline: 0;
+}
+
+.veto-nav-menu--icons-only .veto-nav-menu__label,
+.veto-nav-menu--icons-only .veto-nav-menu__chevron,
+.veto-nav-menu--icons-only .veto-nav-menu__badge {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}

@@ -1,0 +1,146 @@
+/* VetoGauge - styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-gauge {
+    --veto-gauge-color: var(--veto-color-primary);
+    --veto-gauge-size: 12rem;
+
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    width: var(--veto-gauge-size);
+    font-family: var(--veto-font-sans);
+    color: var(--veto-color-text);
+}
+
+.veto-gauge__dial {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.veto-gauge__track {
+    stroke: var(--veto-color-surface-raised);
+}
+
+.veto-gauge__band {
+    opacity: 0.45;
+}
+
+.veto-gauge__value {
+    /* The dial sweeps to a new reading rather than jumping, which is what makes a polled
+       gauge readable instead of twitchy. */
+    transition: stroke-dashoffset var(--veto-transition), stroke var(--veto-transition);
+}
+
+.veto-gauge__needle {
+    transform-origin: 100px 100px;
+    transform: rotate(var(--veto-gauge-angle, 0deg));
+    transition: transform var(--veto-transition);
+}
+
+.veto-gauge__needle line,
+.veto-gauge__needle circle {
+    transition: stroke var(--veto-transition), fill var(--veto-transition);
+}
+
+.veto-gauge__hub {
+    fill: var(--veto-color-surface);
+}
+
+.veto-gauge__tick {
+    stroke: var(--veto-color-border-strong);
+}
+
+.veto-gauge__tick[data-major="true"] {
+    stroke: var(--veto-color-text-muted);
+}
+
+/* The tick labels are emitted as markup (Razor reserves <text>), so they carry no scope of
+   their own and have to be reached through ::deep from the dial, which does. */
+.veto-gauge__dial ::deep .veto-gauge__tick-label {
+    fill: var(--veto-color-text-muted);
+    font-size: 11px;
+    font-family: var(--veto-font-sans);
+}
+
+/* The readout sits inside the dial's open bottom rather than below it, so the gauge stays
+   as tall as its own circle. */
+.veto-gauge__readout {
+    position: absolute;
+    /* Inset rather than edge to edge: the readout lives inside the ring, so it must not run
+       out over the ticks and the numbers on either side of it. */
+    left: 18%;
+    right: 18%;
+    bottom: 12%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1em;
+    pointer-events: none;
+}
+
+.veto-gauge--needle .veto-gauge__readout {
+    bottom: 2%;
+}
+
+.veto-gauge__number {
+    font-size: var(--veto-gauge-value-size, 1.5rem);
+    /* Never wider than the dial it sits in: a long unit used to push the reading out over
+       the ticks rather than shrinking to fit between them. */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.veto-gauge__label {
+    font-size: var(--veto-gauge-label-size, var(--veto-font-size-sm));
+    color: var(--veto-color-text-muted);
+}
+
+.veto-gauge__error {
+    margin: var(--veto-space-1) 0 0;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-danger);
+    text-align: center;
+}
+
+/* Colours */
+
+.veto-gauge--secondary { --veto-gauge-color: var(--veto-color-secondary); }
+.veto-gauge--neutral   { --veto-gauge-color: var(--veto-color-text); }
+.veto-gauge--success   { --veto-gauge-color: var(--veto-color-success); }
+.veto-gauge--warning   { --veto-gauge-color: var(--veto-color-warning); }
+.veto-gauge--danger    { --veto-gauge-color: var(--veto-color-danger); }
+
+/* Sizes */
+
+.veto-gauge--sm {
+    --veto-gauge-size: 8rem;
+}
+
+.veto-gauge--sm .veto-gauge__number {
+    font-size: var(--veto-gauge-value-size, 1.125rem);
+}
+
+.veto-gauge--lg {
+    --veto-gauge-size: 17rem;
+}
+
+.veto-gauge--lg .veto-gauge__number {
+    font-size: var(--veto-gauge-value-size, 2.25rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-gauge__value,
+    .veto-gauge__needle,
+    .veto-gauge__needle line,
+    .veto-gauge__needle circle {
+        transition: none;
+    }
+}

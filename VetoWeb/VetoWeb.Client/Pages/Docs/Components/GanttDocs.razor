@@ -1,0 +1,388 @@
+@page "/docs/components/gantt"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.Gantt
+
+<PageTitle>Gantt — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Gantt"
+          Lead="Projects and tasks on the left, a scrollable timeline on the right. Filtering, zoom, date navigation and export are built in.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="A schedule"
+               Description="Projects collapse, tasks indent beneath them, and a summary bar spans its children as a slim rail rather than a block. Each category carries its own colour, and the filter chips are tinted to match - so the filter is also the key to the bars. Switch the scale, or use Today to jump back to now."
+               Code="@BasicCode">
+        <VetoGantt TestId="chart"
+                   Items="Tasks"
+                   TodayOverride="Today"
+                   @bind-Scale="_scale"
+                   @bind-SelectedId="_selectedId"
+                   Height="26rem"
+                   OnExport="OnExport" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-selection"
+               Title="Selection"
+               Description="Bars are buttons, so they are reachable by keyboard and announce themselves. OnItemSelected gives you the row that was activated; SelectedId can be bound both ways."
+               Code="@SelectionCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <span class="demo-value" data-testid="selection">@(_selectedId is null ? "Nothing selected — click a bar above." : $"Selected: {_selectedId}")</span>
+            <span class="demo-value" data-testid="export-note">@_exportNote</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-milestones"
+               Title="Milestones and colours"
+               Description="A milestone is a point rather than a span, drawn as the conventional diamond. Any row can carry its own colour - including a theme token, so it follows light and dark."
+               Code="@ColorCode">
+        <VetoGantt TestId="colors"
+                   Items="Milestones"
+                   TodayOverride="Today"
+                   Scale="VetoGanttScale.Week"
+                   ShowToolbar="false"
+                   SidebarWidth="12rem"
+                   Height="14rem"
+                   ScrollToTodayOnLoad="false" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-chain"
+               Title="Chained tasks"
+               Description="A row that cannot start until another finishes lists it in DependsOn, and the chain is drawn as an arrow from the end of one bar to the start of the next. Select a row and the arrows touching it are picked out, which is how you follow a chain through a crowded schedule. The last arrow here routes back on itself, because that dependency is already broken - the successor starts before its predecessor ends."
+               Code="@ChainCode">
+        <VetoGantt TestId="chain"
+                   Items="Chain"
+                   TodayOverride="Today"
+                   ShowToolbar="false"
+                   SidebarWidth="12rem"
+                   Height="15rem"
+                   ScrollToTodayOnLoad="false"
+                   @bind-SelectedId="_chainSelection" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-edit"
+               Title="Dragging, and remembering"
+               Description="Drag a bar to move it, or its edges to resize - snapped to whatever zoom is showing. Arrow keys do the same from the keyboard, with Shift to change the end instead. Changes are kept in this browser for you alone, so a reload finds them again; Reset clears them. A summary row cannot be dragged, because its dates are the span of its children."
+               Code="@EditCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoGantt TestId="editable"
+                       Items="Editable"
+                       TodayOverride="Today"
+                       Editable="true"
+                       PersistKey="veto-docs-gantt"
+                       SortBy="_sort"
+                       Height="17rem"
+                       SidebarWidth="13rem"
+                       ScrollToTodayOnLoad="false"
+                       ShowScalePicker="true"
+                       ShowCategoryFilter="false"
+                       ShowSearch="false"
+                       OnItemChanged="OnChanged" />
+
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center" Wrap="true">
+                <span class="demo-label">Order</span>
+                <button class="chip @(_sort == VetoGanttSort.Source ? "chip--on" : null)" type="button"
+                        data-testid="sort-source" @onclick="() => _sort = VetoGanttSort.Source">
+                    As supplied
+                </button>
+                <button class="chip @(_sort == VetoGanttSort.Name ? "chip--on" : null)" type="button"
+                        data-testid="sort-name" @onclick="() => _sort = VetoGanttSort.Name">
+                    Alphabetical
+                </button>
+                <button class="chip @(_sort == VetoGanttSort.Start ? "chip--on" : null)" type="button"
+                        data-testid="sort-start" @onclick="() => _sort = VetoGanttSort.Start">
+                    By start date
+                </button>
+            </VetoStack>
+
+            <span class="demo-value" data-testid="change-note">@(_change ?? "Drag a bar, or focus one and press an arrow key.")</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-loading"
+               Title="Waiting for data"
+               Description="Two different waits. Before anything has arrived, Loading draws a placeholder chart that holds the layout, so nothing jumps when the rows land. Once there are rows on screen, Refreshing veils them instead - replacing what someone is reading with grey boxes takes away what they had."
+               Code="@LoadingCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Neutral"
+                            TestId="load-first" OnClick="FirstLoadAsync">
+                    First load
+                </VetoButton>
+                <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Neutral"
+                            TestId="load-refresh" OnClick="RefreshAsync">
+                    Refresh
+                </VetoButton>
+            </VetoStack>
+
+            <VetoGantt TestId="loader"
+                       Items="Chain"
+                       TodayOverride="Today"
+                       Loading="_loading"
+                       Refreshing="_refreshing"
+                       ShowToolbar="false"
+                       SidebarWidth="12rem"
+                       Height="15rem"
+                       LoadingRows="4"
+                       ScrollToTodayOnLoad="false" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-empty"
+               Title="Nothing to show"
+               Description="A filter that matches nothing says so, rather than leaving an empty panel that looks broken."
+               Code="@EmptyCode">
+        <VetoGantt TestId="empty"
+                   Items="Tasks"
+                   TodayOverride="Today"
+                   Search="a task that does not exist"
+                   ShowToolbar="false"
+                   Height="9rem"
+                   ScrollToTodayOnLoad="false" />
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Export</h2>
+        <p class="docs-prose">
+            The CSV and JSON buttons download what is <em>currently filtered</em> - what the
+            reader can see, which is almost always what they meant. Dates are written as
+            <code>yyyy-MM-dd</code> rather than in the display format, so a spreadsheet in
+            another locale reads them as the same days.
+        </p>
+        <p class="docs-prose">
+            <code>OnExport</code> fires first. Set <code>Handled</code> on the request and the
+            component steps aside, leaving you the filtered rows to send to a server or turn
+            into a format it does not produce.
+        </p>
+        <VetoCode Code="@ExportCode" Language="csharp" TestId="export-code" />
+    </VetoStack>
+
+    <ParameterTable Title="Parameters" TestId="parameters" Rows="Parameters" />
+    <ParameterTable Title="VetoGanttItem" TestId="item-parameters" Rows="ItemRows" />
+
+</DocsPage>
+
+@code {
+    private VetoGanttScale _scale = VetoGanttScale.Day;
+    private string? _selectedId;
+    private string? _chainSelection;
+    private string? _exportNote;
+    private bool _loading;
+    private bool _refreshing;
+    private string? _change;
+    private VetoGanttSort _sort = VetoGanttSort.Source;
+
+    private void OnChanged ( VetoGanttChange change )
+        => _change = $"{change.Id}: {change.Edit} by {change.Days} days — now {change.Start:d MMM} to {change.End:d MMM}";
+
+    /// <summary>Stands in for a first fetch, where there is nothing on screen to keep.</summary>
+    private async Task FirstLoadAsync ()
+    {
+        _loading = true;
+        await Task.Delay(2200);
+        _loading = false;
+    }
+
+    /// <summary>Stands in for a refresh, where the rows already on screen should stay put.</summary>
+    private async Task RefreshAsync ()
+    {
+        _refreshing = true;
+        await Task.Delay(2200);
+        _refreshing = false;
+    }
+
+    // Fixed rather than relative to the real date, so the demo and its screenshots stay stable.
+    private static readonly DateOnly Today = new(2026, 3, 18);
+
+    private Task OnExport ( VetoGanttExportRequest request )
+    {
+        _exportNote = $"Exported {request.Items.Count} rows as {request.Format}.";
+        return Task.CompletedTask;
+    }
+
+    // Colours are per category, so the filter chips above the chart read as a key to the bars.
+    private const string Engineering = "var(--veto-color-primary)";
+    private const string Design = "var(--veto-color-secondary)";
+    private const string Research = "var(--veto-color-warning)";
+    private const string Marketing = "var(--veto-color-success)";
+
+    private static readonly IReadOnlyList<VetoGanttItem> Tasks =
+    [
+        new() { Id = "platform", Name = "Platform", Start = new(2026, 3, 2), End = new(2026, 4, 10), Category = "Engineering", Color = Engineering, Progress = 0.55 },
+        new() { Id = "design", Name = "Design system", ParentId = "platform", Start = new(2026, 3, 2), End = new(2026, 3, 13), Category = "Design", Color = Design, Progress = 1 },
+        new() { Id = "shell", Name = "App shell", ParentId = "platform", Start = new(2026, 3, 9), End = new(2026, 3, 24), Category = "Engineering", Color = Engineering, Progress = 0.8, DependsOn = ["design"] },
+        new() { Id = "components", Name = "Component library", ParentId = "platform", Start = new(2026, 3, 16), End = new(2026, 4, 10), Category = "Engineering", Color = Engineering, Progress = 0.35, DependsOn = ["design"] },
+
+        new() { Id = "mobile", Name = "Mobile", Start = new(2026, 3, 23), End = new(2026, 4, 24), Category = "Engineering", Color = Engineering, Progress = 0.1 },
+        new() { Id = "spike", Name = "Feasibility spike", ParentId = "mobile", Start = new(2026, 3, 23), End = new(2026, 3, 27), Category = "Research", Color = Research, Progress = 0.6 },
+        new() { Id = "build", Name = "Build", ParentId = "mobile", Start = new(2026, 3, 30), End = new(2026, 4, 24), Category = "Engineering", Color = Engineering, DependsOn = ["spike", "shell"] },
+
+        new() { Id = "launch", Name = "Launch", Start = new(2026, 4, 13), End = new(2026, 5, 1), Category = "Marketing", Color = Marketing, Progress = 0 },
+        new() { Id = "copy", Name = "Write the copy", ParentId = "launch", Start = new(2026, 4, 13), End = new(2026, 4, 22), Category = "Marketing", Color = Marketing, DependsOn = ["components"] },
+        new() { Id = "ship", Name = "Ship", ParentId = "launch", Start = new(2026, 5, 1), End = new(2026, 5, 1), Category = "Marketing", Color = Marketing, IsMilestone = true, DependsOn = ["build", "copy"] }
+    ];
+
+    private static readonly IReadOnlyList<VetoGanttItem> Milestones =
+    [
+        new() { Id = "a", Name = "Discovery", Start = new(2026, 3, 2), End = new(2026, 3, 20), Color = "var(--veto-color-success)", Progress = 1 },
+        new() { Id = "b", Name = "Alpha", Start = new(2026, 3, 20), End = new(2026, 3, 20), IsMilestone = true, Color = "var(--veto-color-warning)" },
+        new() { Id = "c", Name = "Hardening", Start = new(2026, 3, 23), End = new(2026, 4, 17), Color = "var(--veto-color-secondary)", Progress = 0.4 },
+        new() { Id = "d", Name = "Release", Start = new(2026, 4, 17), End = new(2026, 4, 17), IsMilestone = true, Color = "var(--veto-color-danger)" }
+    ];
+
+    // Deliberately not in alphabetical order, so the ordering toggle visibly does something.
+    private static readonly IReadOnlyList<VetoGanttItem> Editable =
+    [
+        new() { Id = "wiring", Name = "Wiring", Start = new(2026, 3, 9), End = new(2026, 3, 17), Color = Engineering, Progress = 0.7 },
+        new() { Id = "audit", Name = "Audit", Start = new(2026, 3, 4), End = new(2026, 3, 10), Color = Research, Progress = 1 },
+        new() { Id = "rollout", Name = "Rollout", Start = new(2026, 3, 20), End = new(2026, 3, 31), Color = Marketing },
+        new() { Id = "design", Name = "Blueprint", Start = new(2026, 3, 2), End = new(2026, 3, 6), Color = Design, Progress = 1 }
+    ];
+
+    private static readonly IReadOnlyList<VetoGanttItem> Chain =
+    [
+        new() { Id = "survey", Name = "Survey", Start = new(2026, 3, 2), End = new(2026, 3, 6), Progress = 1 },
+        new() { Id = "draft", Name = "Draft", Start = new(2026, 3, 9), End = new(2026, 3, 17), DependsOn = ["survey"], Progress = 0.5 },
+        new() { Id = "review", Name = "Review", Start = new(2026, 3, 18), End = new(2026, 3, 24), DependsOn = ["draft"] },
+        // Starts before Review finishes: the arrow routes back rather than cutting through.
+        new() { Id = "publish", Name = "Publish", Start = new(2026, 3, 20), End = new(2026, 3, 26), DependsOn = ["review"] }
+    ];
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Items", "IReadOnlyList<VetoGanttItem>", "[]", "The rows to chart. Hierarchy comes from each item's ParentId."),
+        new("Scale", "VetoGanttScale", "Day", "Day, Week or Month. Supports @bind-Scale."),
+        new("Search", "string?", "null", "Filters rows by name. Supports @bind-Search."),
+        new("SelectedId", "string?", "null", "The selected row. Supports @bind-SelectedId."),
+        new("Start / End", "DateOnly?", "null", "The axis range. Worked out from the items when null."),
+        new("TodayOverride", "DateOnly?", "null", "The day treated as today. Set it to keep a test or screenshot stable."),
+        new("SidebarWidth", "string", "\"18rem\"", "Width of the panel on the left."),
+        new("RowHeight", "double", "36", "Height of one row in pixels. A number because the dependency arrows are drawn from it."),
+        new("ShowDependencies", "bool", "true", "Whether dependency arrows are drawn."),
+        new("SortBy", "VetoGanttSort", "Source", "Source, Name, Start, End or Duration. Applied within each level of the tree."),
+        new("SortDescending", "bool", "false", "Reverses whatever SortBy produces."),
+        new("Editable", "bool", "false", "Lets bars be dragged to move, and arrow keys to do the same."),
+        new("Resizable", "bool", "true", "Whether dragging an edge changes duration. Requires Editable."),
+        new("OnItemChanged", "EventCallback<VetoGanttChange>", "—", "Raised after a move or resize. The chart does not edit your list."),
+        new("PersistKey", "string?", "null", "Remembers this reader's edits in their own browser under this key."),
+        new("PersistenceModuleUrl", "string?", "the PGlite CDN", "Where PGlite loads from. Null, or a failed load, falls back to localStorage."),
+        new("ShowResetButton", "bool", "true", "Shows a control that clears what was stored about this reader."),
+        new("Height", "string?", "null", "The chart's height. Null lets it grow to fit."),
+        new("BarColor", "string", "var(--veto-color-primary)", "Colour for bars with none of their own."),
+        new("ShowToolbar", "bool", "true", "Whether the toolbar renders at all."),
+        new("ShowSearch / ShowCategoryFilter", "bool", "true", "Which filters appear in the toolbar."),
+        new("ShowScalePicker / ShowNavigation", "bool", "true", "Whether the zoom picker and Today controls appear."),
+        new("Exportable", "bool", "true", "Whether the CSV and JSON buttons appear."),
+        new("ShowToday / ShowWeekends", "bool", "true", "The today marker and weekend shading."),
+        new("ShowProgress / ShowBarLabels / ShowDates", "bool", "true", "Progress fills, names on bars, dates in the sidebar."),
+        new("ScrollToTodayOnLoad", "bool", "true", "Whether the timeline scrolls to today on first render."),
+        new("ExportFileName", "string", "\"gantt\"", "Base name for exported files, without an extension."),
+        new("OnItemSelected", "EventCallback<VetoGanttItem>", "—", "Raised when a bar is activated."),
+        new("OnExport", "EventCallback<VetoGanttExportRequest>", "—", "Raised before an export; set Handled to take it over."),
+        new("Toolbar", "RenderFragment?", "null", "Extra controls at the end of the toolbar.")
+    ];
+
+    private static readonly ParameterTable.Row[] ItemRows =
+    [
+        new("Id", "string", "required", "Unique across the chart."),
+        new("Name", "string", "required", "Shown in the panel on the left."),
+        new("Start / End", "DateOnly", "required", "Inclusive at both ends."),
+        new("ParentId", "string?", "null", "The row this one sits under. Null for a top-level row."),
+        new("Color", "string?", "null", "Any CSS colour, including a --veto-* token."),
+        new("Progress", "double?", "null", "0 to 1. Null hides the progress fill for this row."),
+        new("Category", "string?", "null", "Used for the category filter."),
+        new("IsMilestone", "bool", "false", "Draws a point in time rather than a span."),
+        new("DependsOn", "IReadOnlyList<string>", "[]", "Ids of rows that must finish first. Each is drawn as an arrow into this row."),
+        new("Description", "string?", "null", "Extra detail in the row's tooltip.")
+    ];
+
+    private const string BasicCode = """
+        <VetoGantt Items="Tasks"
+                   @bind-Scale="_scale"
+                   @bind-SelectedId="_selectedId"
+                   Height="26rem" />
+
+        @code {
+            private static readonly IReadOnlyList<VetoGanttItem> Tasks =
+            [
+                new() { Id = "platform", Name = "Platform",
+                        Start = new(2026, 3, 2), End = new(2026, 4, 10),
+                        Category = "Engineering", Progress = 0.55 },
+                new() { Id = "design", Name = "Design system", ParentId = "platform",
+                        Start = new(2026, 3, 2), End = new(2026, 3, 13),
+                        Category = "Design", Progress = 1 }
+            ];
+        }
+        """;
+
+    private const string SelectionCode = """
+        <VetoGantt Items="Tasks" OnItemSelected="Open" @bind-SelectedId="_selectedId" />
+
+        @code {
+            private void Open(VetoGanttItem item) => _detail = item;
+        }
+        """;
+
+    private const string ColorCode = """
+        new() { Id = "b", Name = "Alpha",
+                Start = new(2026, 3, 20), End = new(2026, 3, 20),
+                IsMilestone = true,
+                Color = "var(--veto-color-warning)" }
+        """;
+
+    private const string ChainCode = """
+        new() { Id = "survey", Name = "Survey",
+                Start = new(2026, 3, 2), End = new(2026, 3, 6) },
+
+        new() { Id = "draft", Name = "Draft",
+                Start = new(2026, 3, 9), End = new(2026, 3, 17),
+                DependsOn = ["survey"] },
+
+        new() { Id = "review", Name = "Review",
+                Start = new(2026, 3, 18), End = new(2026, 3, 24),
+                DependsOn = ["draft"] }
+        """;
+
+    private const string EditCode = """
+        <VetoGantt Items="Tasks"
+                   Editable="true"
+                   PersistKey="schedule"
+                   SortBy="VetoGanttSort.Name"
+                   OnItemChanged="OnChanged" />
+
+        @code {
+            // The chart reports the change; it does not edit the list you gave it.
+            private void OnChanged(VetoGanttChange change)
+                => Store.Move(change.Id, change.Start, change.End);
+        }
+        """;
+
+    private const string LoadingCode = """
+        <!-- Nothing has arrived yet: a placeholder chart holds the layout -->
+        <VetoGantt Items="@(tasks ?? [])" Loading="tasks is null" />
+
+        <!-- Rows are already on screen: veil them rather than replacing them -->
+        <VetoGantt Items="tasks" Refreshing="_refreshing" />
+        """;
+
+    private const string EmptyCode = """
+        <VetoGantt Items="Tasks"
+                   Search="nothing matches this"
+                   EmptyText="No tasks match these filters." />
+        """;
+
+    private const string ExportCode = """
+        <VetoGantt Items="Tasks" OnExport="OnExport" ExportFileName="schedule" />
+
+        @code {
+            private async Task OnExport(VetoGanttExportRequest request)
+            {
+                // request.Items holds the rows as currently filtered.
+                if (request.Format == VetoGanttExportFormat.Csv)
+                {
+                    await Server.SaveAsync(request.Items);
+                    request.Handled = true;   // the component will not download anything
+                }
+            }
+        }
+        """;
+}

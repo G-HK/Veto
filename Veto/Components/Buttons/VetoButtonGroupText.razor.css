@@ -1,0 +1,73 @@
+/* VetoButtonGroupText - the non-interactive label inside a button group.
+ *
+ * The ancestor half of each selector needs no scope of its own: Blazor appends the scope
+ * only to the selector's subject, which here is always this component's own element.
+ */
+
+.veto-button-group__text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: var(--veto-space-2) var(--veto-space-4);
+    min-height: 2.5rem;
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-md);
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--veto-color-text-muted);
+    background-color: var(--veto-color-surface-raised);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+    /* Not a button, and must not be mistaken for one that simply refuses to work. */
+    cursor: default;
+    user-select: none;
+}
+
+/* Takes the group's height, like every button in it. */
+
+.veto-button-group--sm .veto-button-group__text {
+    padding: var(--veto-space-2) var(--veto-space-3);
+    min-height: 2rem;
+    font-size: var(--veto-font-size-sm);
+}
+
+.veto-button-group--lg .veto-button-group__text {
+    padding: var(--veto-space-3) var(--veto-space-5);
+    min-height: 3rem;
+    font-size: var(--veto-font-size-lg);
+}
+
+/* Attached: joins the shared border and gives up its own corners, except at the ends. */
+
+.veto-button-group--attached .veto-button-group__text {
+    border-radius: 0;
+}
+
+.veto-button-group--attached.veto-button-group--row > .veto-button-group__text:first-child {
+    border-start-start-radius: var(--veto-radius-md);
+    border-end-start-radius: var(--veto-radius-md);
+}
+
+.veto-button-group--attached.veto-button-group--row > .veto-button-group__text:last-child {
+    border-start-end-radius: var(--veto-radius-md);
+    border-end-end-radius: var(--veto-radius-md);
+}
+
+.veto-button-group--attached.veto-button-group--column > .veto-button-group__text:first-child {
+    border-start-start-radius: var(--veto-radius-md);
+    border-start-end-radius: var(--veto-radius-md);
+}
+
+.veto-button-group--attached.veto-button-group--column > .veto-button-group__text:last-child {
+    border-end-start-radius: var(--veto-radius-md);
+    border-end-end-radius: var(--veto-radius-md);
+}
+
+/* Borderless: plain text beside the buttons rather than a cap among them. */
+
+.veto-button-group__text--borderless {
+    background-color: transparent;
+    border-color: transparent;
+}

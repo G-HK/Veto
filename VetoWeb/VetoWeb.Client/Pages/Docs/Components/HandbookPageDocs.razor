@@ -1,0 +1,188 @@
+@page "/docs/components/handbook-page"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.Handbook
+
+<PageTitle>Handbook page — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Handbook page"
+          Lead="A documentation article and its contents rail, built from one list of sections so the two can never disagree about what is on the page.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="On its own"
+               Description="VetoHandbookPage renders an article and nothing else, so it drops into any layout. Sections come from a list rather than markup, which is what lets the contents rail be generated from the same source."
+               Code="@BasicCode">
+        <VetoHandbookPage TestId="basic"
+                          Eyebrow="Guides"
+                          Title="Getting started"
+                          Lead="Install the package and render your first component."
+                          Sections="Short" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-toc"
+               Title="With a contents rail"
+               Description="VetoHandbookToc takes the same list. Hover a heading to reveal its anchor link; both the rail and the anchors point at a path-qualified URL, which is what makes them work in an app that declares a base href."
+               Code="@TocCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Start" Wrap="true">
+            <VetoHandbookToc Sections="Short" TestId="rail" />
+            <VetoHandbookPage TestId="beside" Title="Configuration" Sections="Short" Class="docs-demo__narrow" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-highlight"
+               Title="Landing highlight"
+               Description="Share one VetoHandbookState between the page and the rail and choosing a section highlights where you landed. It fades after five seconds by default, which is long enough to notice and short enough not to linger."
+               Code="@HighlightCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                <button class="chip @(_highlight ? "chip--on" : null)" type="button"
+                        data-testid="opt-highlight" @onclick="() => _highlight = !_highlight">
+                    HighlightOnNavigate @(_highlight ? "true" : "false")
+                </button>
+                <button class="chip @(_persist ? "chip--on" : null)" type="button"
+                        data-testid="opt-persist" @onclick="() => _persist = !_persist">
+                    HighlightPersists @(_persist ? "true" : "false")
+                </button>
+                <button class="chip" type="button" data-testid="opt-duration" @onclick="CycleDuration">
+                    HighlightDuration @_duration ms
+                </button>
+            </VetoStack>
+
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Start" Wrap="true">
+                <VetoHandbookToc Sections="Short" State="_state" TestId="hl-rail" />
+                <VetoHandbookPage TestId="hl-page"
+                                  Title="Try it"
+                                  Sections="Short"
+                                  State="_state"
+                                  HighlightOnNavigate="_highlight"
+                                  HighlightPersists="_persist"
+                                  HighlightDuration="_duration"
+                                  Class="docs-demo__narrow" />
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Why the anchors are path-qualified</h2>
+        <p class="docs-prose">
+            A bare <code>#section</code> link resolves against the document's base URL, not the
+            address bar. Blazor apps nearly always declare <code>&lt;base href="/"&gt;</code>, so
+            such a link sends the reader to the home page instead of down the current one. Both
+            components build the full path alongside the fragment, so the link does what it looks
+            like it does.
+        </p>
+        <p class="docs-prose">
+            Sections also set <code>scroll-margin-top</code> from the layout's app-bar height, so
+            an anchored heading lands below a fixed bar rather than underneath it.
+        </p>
+    </VetoStack>
+
+    <ParameterTable Title="VetoHandbookPage" TestId="parameters" Rows="PageRows" />
+    <ParameterTable Title="VetoHandbookToc" TestId="toc-parameters" Rows="TocRows" />
+    <ParameterTable Title="VetoHandbookSection" TestId="section-parameters" Rows="SectionRows" />
+
+</DocsPage>
+
+@code {
+    private readonly VetoHandbookState _state = new();
+    private bool _highlight = true;
+    private bool _persist;
+    private int _duration = 5000;
+
+    private void CycleDuration () => _duration = _duration switch
+    {
+        5000 => 1500,
+        1500 => 10000,
+        _ => 5000
+    };
+
+    private static readonly IReadOnlyList<VetoHandbookSection> Short =
+    [
+        new VetoHandbookSection
+        {
+            Id = "install",
+            Title = "Install",
+            Body = "Add the package to any Blazor project. Veto targets .NET 10 and brings no runtime dependencies of its own."
+        },
+        new VetoHandbookSection
+        {
+            Id = "register",
+            Title = "Register the services",
+            Body = "Call AddVeto() in Program.cs. In a Blazor Web App call it in both projects, so components resolve while prerendering as well as after WebAssembly takes over."
+        },
+        new VetoHandbookSection
+        {
+            Id = "verify",
+            Title = "Verify",
+            Body = "Drop a component on a page. If it renders with a focus ring when you tab to it, the stylesheet is wired up correctly."
+        }
+    ];
+
+    private static readonly ParameterTable.Row[] PageRows =
+    [
+        new("Sections", "IReadOnlyList<VetoHandbookSection>", "[]", "The page's sections, in order."),
+        new("Title", "string?", "null", "The page heading."),
+        new("Eyebrow", "string?", "null", "A short label above the title."),
+        new("Lead", "string?", "null", "One sentence saying what the page covers."),
+        new("Header", "RenderFragment?", "null", "Extra content in the header, below the lead."),
+        new("State", "VetoHandbookState?", "null", "Share one instance with the contents rail to enable the landing highlight."),
+        new("HighlightOnNavigate", "bool", "true", "Highlights the section the reader jumps to."),
+        new("HighlightDuration", "int", "5000", "How long the highlight lasts, in milliseconds."),
+        new("HighlightPersists", "bool", "false", "Keeps the highlight until another section is chosen.")
+    ];
+
+    private static readonly ParameterTable.Row[] TocRows =
+    [
+        new("Sections", "IReadOnlyList<VetoHandbookSection>", "[]", "The same list the page was given."),
+        new("Title", "string?", "\"On this page\"", "The heading above the list. Null renders none."),
+        new("Label", "string", "\"On this page\"", "The navigation landmark's accessible name."),
+        new("State", "VetoHandbookState?", "null", "Share one instance with the page to enable the landing highlight.")
+    ];
+
+    private static readonly ParameterTable.Row[] SectionRows =
+    [
+        new("Id", "string", "required", "The anchor. Used as the element id and the link target, so keep it URL-safe."),
+        new("Title", "string", "required", "The section heading."),
+        new("Body", "string?", "null", "The body as plain text. Ignored when Content is set."),
+        new("Content", "RenderFragment?", "null", "The body as markup - code blocks, lists, components.")
+    ];
+
+    private const string BasicCode = """
+        <VetoHandbookPage Eyebrow="Guides"
+                          Title="Getting started"
+                          Lead="Install the package and render your first component."
+                          Sections="Sections" />
+
+        @code {
+            private static readonly IReadOnlyList<VetoHandbookSection> Sections =
+            [
+                new() { Id = "install", Title = "Install", Body = "…" },
+                new() { Id = "register", Title = "Register the services", Body = "…" }
+            ];
+        }
+        """;
+
+    private const string TocCode = """
+        <VetoDocsLayout Items="Nav">
+            <Toc><VetoHandbookToc Sections="Sections" /></Toc>
+            <ChildContent>
+                <VetoHandbookPage Title="Configuration" Sections="Sections" />
+            </ChildContent>
+        </VetoDocsLayout>
+        """;
+
+    private const string HighlightCode = """
+        <VetoHandbookToc Sections="Sections" State="_state" />
+
+        <VetoHandbookPage Title="Try it"
+                          Sections="Sections"
+                          State="_state"
+                          HighlightOnNavigate="true"
+                          HighlightDuration="5000"
+                          HighlightPersists="false" />
+
+        @code {
+            private readonly VetoHandbookState _state = new();
+        }
+        """;
+}

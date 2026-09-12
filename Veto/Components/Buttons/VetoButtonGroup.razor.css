@@ -1,0 +1,166 @@
+/* VetoButtonGroup - styled entirely from the tokens in wwwroot/VetoStyles.css.
+ *
+ * Almost everything here is addressed through ::deep. The group's children are separate
+ * components - VetoButton, VetoIconButton, VetoButtonGroupText, VetoButtonGroupSeparator -
+ * and each carries its own scope attribute, not this one's, so an unqualified descendant
+ * selector would silently match nothing. Rules whose subject is the label or the separator
+ * live in those components' own stylesheets instead, where the scope is theirs.
+ */
+
+.veto-button-group {
+    --veto-button-group-radius: var(--veto-radius-md);
+    --veto-button-group-gap: var(--veto-space-2);
+
+    display: inline-flex;
+    align-items: stretch;
+    vertical-align: middle;
+    font-family: var(--veto-font-sans);
+}
+
+.veto-button-group--column {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.veto-button-group--full-width {
+    display: flex;
+    width: 100%;
+}
+
+/* Detached: ordinary buttons with a gap between them. */
+
+.veto-button-group:not(.veto-button-group--attached) {
+    gap: var(--veto-button-group-gap);
+}
+
+/* Attached: the cluster reads as one segmented control rather than several buttons that
+   happen to be adjacent. Touching borders collapse into one and only the group's outer
+   corners stay rounded. */
+
+.veto-button-group--attached ::deep .veto-button {
+    border-radius: 0;
+}
+
+.veto-button-group--attached.veto-button-group--row > ::deep :first-child,
+.veto-button-group--attached.veto-button-group--row > ::deep :first-child .veto-button {
+    border-start-start-radius: var(--veto-button-group-radius);
+    border-end-start-radius: var(--veto-button-group-radius);
+}
+
+.veto-button-group--attached.veto-button-group--row > ::deep :last-child,
+.veto-button-group--attached.veto-button-group--row > ::deep :last-child .veto-button {
+    border-start-end-radius: var(--veto-button-group-radius);
+    border-end-end-radius: var(--veto-button-group-radius);
+}
+
+.veto-button-group--attached.veto-button-group--column > ::deep :first-child,
+.veto-button-group--attached.veto-button-group--column > ::deep :first-child .veto-button {
+    border-start-start-radius: var(--veto-button-group-radius);
+    border-start-end-radius: var(--veto-button-group-radius);
+}
+
+.veto-button-group--attached.veto-button-group--column > ::deep :last-child,
+.veto-button-group--attached.veto-button-group--column > ::deep :last-child .veto-button {
+    border-end-start-radius: var(--veto-button-group-radius);
+    border-end-end-radius: var(--veto-button-group-radius);
+}
+
+/* One shared border between neighbours rather than two stacked ones. */
+
+.veto-button-group--attached.veto-button-group--row > ::deep * + * {
+    margin-inline-start: -1px;
+}
+
+.veto-button-group--attached.veto-button-group--column > ::deep * + * {
+    margin-block-start: -1px;
+}
+
+/* A focused or hovered button has to come forward, or its ring is clipped by whichever
+   neighbour is overlapping it. */
+.veto-button-group--attached ::deep .veto-button:focus-visible,
+.veto-button-group--attached ::deep .veto-button:hover {
+    position: relative;
+    z-index: 1;
+}
+
+.veto-button-group--full-width > ::deep * {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.veto-button-group--full-width ::deep .veto-button {
+    width: 100%;
+}
+
+/* Size. Set once on the group and applied to every button in it - which is what stops a
+   group coming out uneven because one button was left at the default. */
+
+.veto-button-group--sm ::deep .veto-button {
+    font-size: var(--veto-font-size-sm);
+    padding: var(--veto-space-2) var(--veto-space-3);
+    min-height: 2rem;
+}
+
+.veto-button-group--md ::deep .veto-button {
+    font-size: var(--veto-font-size-md);
+    padding: var(--veto-space-2) var(--veto-space-4);
+    min-height: 2.5rem;
+}
+
+.veto-button-group--lg ::deep .veto-button {
+    font-size: var(--veto-font-size-lg);
+    padding: var(--veto-space-3) var(--veto-space-5);
+    min-height: 3rem;
+}
+
+/* An icon button stays square whatever the group's size says. */
+
+.veto-button-group--sm ::deep .veto-icon-button {
+    width: 2rem;
+    min-width: 2rem;
+    height: 2rem;
+    min-height: 2rem;
+    padding: 0;
+}
+
+.veto-button-group--md ::deep .veto-icon-button {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    min-height: 2.5rem;
+    padding: 0;
+}
+
+.veto-button-group--lg ::deep .veto-icon-button {
+    width: 3rem;
+    min-width: 3rem;
+    height: 3rem;
+    min-height: 3rem;
+    padding: 0;
+}
+
+/* Separators="true" draws a line between every child. Done as a border on the following
+   neighbour so it works whether or not the group is attached, and so it never needs an
+   element of its own. */
+
+.veto-button-group--separated.veto-button-group--row > ::deep * + *:not(.veto-button-group__separator) {
+    border-inline-start: 1px solid var(--veto-color-border);
+}
+
+.veto-button-group--separated.veto-button-group--column > ::deep * + *:not(.veto-button-group__separator) {
+    border-block-start: 1px solid var(--veto-color-border);
+}
+
+/* Toolbar: several groups on one line, wrapping when the window is narrow. */
+
+.veto-button-group--toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--veto-space-2);
+}
+
+.veto-button-group--toolbar.veto-button-group--column {
+    flex-direction: column;
+    align-items: flex-start;
+}

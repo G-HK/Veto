@@ -1,0 +1,57 @@
+@namespace Veto.Components.Layout
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    @if (IsInteractive)
+    {
+        <button @ref="RootElement"
+                @attributes="InnerAttributes"
+                id="@ElementId"
+                class="@CssClass"
+                style="@CssStyle"
+                data-testid="@TestId"
+                type="button"
+                disabled="@Disabled"
+                @onclick="OnClick">
+            @RenderBody()
+        </button>
+    }
+    else
+    {
+        <div @ref="RootElement"
+             @attributes="InnerAttributes"
+             id="@ElementId"
+             class="@CssClass"
+             style="@CssStyle"
+             data-testid="@TestId">
+            @RenderBody()
+        </div>
+    }
+}
+
+@code {
+    private RenderFragment RenderBody () =>
+        @<text>
+            @if (Header is not null || !string.IsNullOrWhiteSpace(Title))
+            {
+                <div class="veto-card__header">
+                    @if (Header is not null)
+                    {
+                        @Header
+                    }
+                    else
+                    {
+                        <h3 class="veto-card__title">@Title</h3>
+                    }
+                </div>
+            }
+
+            <div class="veto-card__body">@ChildContent</div>
+
+            @if (Footer is not null)
+            {
+                <div class="veto-card__footer">@Footer</div>
+            }
+        </text>;
+}

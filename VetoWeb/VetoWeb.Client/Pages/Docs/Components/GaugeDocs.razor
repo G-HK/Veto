@@ -1,0 +1,303 @@
+@page "/docs/components/gauge"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.Gauge
+
+<PageTitle>Gauge — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Gauge"
+          Lead="A dial that reads one number against a range - a CPU meter, a disk-usage ring, or the speedometer and tachometer off a car's dashboard.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Basic"
+               Description="Zero to a hundred, drawn as a filled arc with the reading in the middle. Drag the slider and the dial sweeps to the new value rather than jumping - the arc is revealed with a dash offset precisely so it can be animated."
+               Code="@BasicCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoGauge TestId="basic" Value="_basic" Label="CPU" Unit="%" />
+            <VetoSlider TValue="double" TestId="basic-input" Label="Value" Min="0" Max="100" ShowValue="true" @bind-Value="_basic" Style="min-width:16rem" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-bands"
+               Title="Bands, and a dial that colours itself"
+               Description="Bands colour stretches of the dial - the amber zone before a disk fills up, the red line on a tachometer. With FollowBands the reading itself takes the colour of whichever band it falls in, so the gauge turns red on its own rather than waiting to be told."
+               Code="@BandCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoGauge TestId="banded"
+                       Value="_banded"
+                       Label="Disk"
+                       Unit="%"
+                       Bands="DiskBands"
+                       FollowBands="true" />
+            <VetoSlider TValue="double" TestId="banded-input" Label="Usage" Min="0" Max="100" ShowValue="true" @bind-Value="_banded" Style="min-width:16rem" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-needle"
+               Title="Needle, ticks and a car's dashboard"
+               Description="Needle swaps the filled arc for a swinging pointer, which is the shape the instrument in front of a driver actually takes. ShowTicks marks the scale and ShowTickLabels numbers the major ones. The tachometer below carries a red line and follows it."
+               Code="@NeedleCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoGauge TestId="speedo"
+                       Needle="true"
+                       Value="_speed"
+                       Min="0"
+                       Max="240"
+                       Label="Speed"
+                       Unit=" km/h"
+                       Size="VetoSize.Large"
+                       ValueFontSize="1.5rem"
+                       ShowTicks="true"
+                       TickEvery="10"
+                       MajorTickEvery="4"
+                       ShowTickLabels="true" />
+
+            <VetoGauge TestId="tacho"
+                       Needle="true"
+                       Value="_rpm"
+                       Min="0"
+                       Max="8000"
+                       Label="RPM"
+                       Format="N0"
+                       Size="VetoSize.Large"
+                       ShowTicks="true"
+                       TickEvery="250"
+                       MajorTickEvery="4"
+                       ShowTickLabels="true"
+                       ValueFontSize="1.5rem"
+                       Bands="RpmBands"
+                       FollowBands="true" />
+
+            <VetoStack Gap="VetoSpacing.Medium" Style="min-width:16rem">
+                <VetoSlider TValue="double" TestId="speed-input" Label="Speed" Min="0" Max="240" ShowValue="true" Suffix=" km/h" @bind-Value="_speed" />
+                <VetoSlider TValue="double" TestId="rpm-input" Label="RPM" Min="0" Max="8000" Step="50" ShowValue="true" @bind-Value="_rpm" />
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-live"
+               Title="Live values"
+               Description="Two ways in, and they layer. ValueProvider is a function the gauge calls every PollInterval - use it when the number comes from a hub, a counter, or an endpoint that needs your own headers. PollUrl is the shortcut for the common case: the gauge GETs that URL with the app's HttpClient and reads a number out of it, optionally at PollJsonPath. Neither polls at all until PollInterval is positive. The gauge below is driven by a provider that makes up a plausible CPU trace."
+               Code="@LiveCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoGauge TestId="live"
+                       Label="CPU"
+                       Unit="%"
+                       ValueProvider="NextSampleAsync"
+                       PollInterval="1000"
+                       Bands="CpuBands"
+                       FollowBands="true"
+                       OnValueChanged="v => _samples++" />
+            <VetoStack Gap="VetoSpacing.Small" Align="VetoAlign.Start">
+                <span class="demo-value" data-testid="live-samples">@_samples samples</span>
+                <VetoButton TestId="live-toggle" Size="VetoSize.Small" Variant="VetoVariant.Outlined" OnClick="ToggleLive">
+                    @(_liveRunning ? "Pause" : "Resume")
+                </VetoButton>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-tuning"
+               Title="Tuning the dial"
+               Description="The needle, the hub it turns on and the printed reading are all adjustable. A long unit - km/h - makes the default reading too wide for the dial, so ValueFontSize brings it back inside; TickLabelSize and TickLabelOffset do the same for a crowded scale. Ticks and their numbers are drawn inside the arc, which is both what a car's instrument looks like and what keeps them inside the drawing."
+               Code="@TuningCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoGauge TestId="tuned"
+                       Needle="true"
+                       Value="140"
+                       Min="0"
+                       Max="240"
+                       Label="Speed"
+                       Unit=" km/h"
+                       Size="VetoSize.Large"
+                       ValueFontSize="1.125rem"
+                       LabelFontSize="0.75rem"
+                       ShowTicks="true"
+                       TickEvery="20"
+                       MajorTickEvery="2"
+                       ShowTickLabels="true"
+                       TickLabelSize="9"
+                       TickLabelOffset="18"
+                       NeedleWidth="5"
+                       NeedleColor="var(--veto-color-danger)"
+                       HubRadius="10"
+                       HubColor="var(--veto-color-text)" />
+
+            <VetoGauge TestId="hubless"
+                       Needle="true"
+                       Value="70"
+                       Label="No hub"
+                       Unit="%"
+                       Size="VetoSize.Large"
+                       NeedleWidth="2"
+                       HubRadius="0" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-shapes"
+               Title="Sizes, colours and sweep"
+               Description="Three sizes and the library's colour roles. StartAngle and EndAngle are the dial's own geometry: the default pair leaves the bottom open the way a car's instruments do, and a half circle is the usual choice for a dashboard tile."
+               Code="@ShapeCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" Align="VetoAlign.Center">
+            <VetoGauge TestId="size-sm" Size="VetoSize.Small" Value="34" Label="Small" Unit="%" />
+            <VetoGauge TestId="size-lg" Size="VetoSize.Large" Value="72" Label="Large" Unit="%" Color="VetoColor.Success" />
+            <VetoGauge TestId="half" Value="61" Label="Half circle" Unit="%" StartAngle="-90" EndAngle="90" Color="VetoColor.Warning" />
+            <VetoGauge TestId="full" Value="45" Label="Full circle" Unit="%" StartAngle="0" EndAngle="360" RoundCaps="false" Color="VetoColor.Danger" />
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private double _basic = 42;
+    private double _banded = 55;
+    private double _speed = 88;
+    private double _rpm = 3200;
+    private int _samples;
+    private bool _liveRunning = true;
+
+    private double _cpu = 28;
+    private readonly Random _random = new(20260912);
+
+    private static readonly VetoGaugeBand[] DiskBands =
+    [
+        new(0, 70, "var(--veto-color-success)", "Healthy"),
+        new(70, 90, "var(--veto-color-warning)", "Filling up"),
+        new(90, 100, "var(--veto-color-danger)", "Nearly full"),
+    ];
+
+    private static readonly VetoGaugeBand[] CpuBands =
+    [
+        new(0, 60, "var(--veto-color-success)", "Idle"),
+        new(60, 85, "var(--veto-color-warning)", "Busy"),
+        new(85, 100, "var(--veto-color-danger)", "Saturated"),
+    ];
+
+    private static readonly VetoGaugeBand[] RpmBands =
+    [
+        new(6500, 8000, "var(--veto-color-danger)", "Red line"),
+    ];
+
+    /// <summary>
+    /// Stands in for a metrics endpoint: a random walk that stays inside the dial, so the demo
+    /// shows a plausible trace rather than a value jumping about at random.
+    /// </summary>
+    private Task<double> NextSampleAsync ()
+    {
+        if (_liveRunning)
+        {
+            _cpu = Math.Clamp(_cpu + (_random.NextDouble() - 0.45) * 18, 2, 99);
+        }
+
+        return Task.FromResult(_cpu);
+    }
+
+    private void ToggleLive () => _liveRunning = !_liveRunning;
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Value", "double", "0", "The number the dial is showing."),
+        new("Min / Max", "double", "0 / 100", "The ends of the scale."),
+        new("Needle", "bool", "false", "A swinging pointer instead of a filled arc."),
+        new("StartAngle / EndAngle", "double", "-135 / 135", "The dial's sweep, in degrees clockwise from the top."),
+        new("Thickness", "double", "14", "How thick the dial is drawn, in the SVG's own 200-unit box."),
+        new("RoundCaps", "bool", "true", "Round the arc's ends. Ignored for a needle."),
+        new("Bands", "IReadOnlyList<VetoGaugeBand>?", "null", "Coloured stretches of the dial: From, To, Color and an optional Label."),
+        new("FollowBands", "bool", "false", "The reading takes the colour of the band it falls in."),
+        new("Color", "VetoColor", "Primary", "The reading's colour when no band applies."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Label / Unit / Format", "string?", "null", "The name under the reading, what it is measured in, and how it is formatted."),
+        new("ShowValue", "bool", "true", "Print the reading in the middle of the dial."),
+        new("ShowTicks / TickEvery / MajorTickEvery / ShowTickLabels", "bool / double / int / bool", "false / 10 / 5 / false", "The tick marks around the dial."),
+        new("TickLabelSize / TickLabelOffset", "double", "11 / 15", "How big a tick's number is, and how far in from the dial it sits."),
+        new("NeedleLength / NeedleWidth / NeedleColor", "double? / double / string?", "null / 3 / null", "The needle. Null length stops it short of the numbers; null colour follows the reading."),
+        new("HubRadius / HubColor", "double / string?", "7 / null", "The hub the needle turns on. Zero draws none."),
+        new("ValueFontSize / LabelFontSize", "string?", "null", "Any CSS length. Worth setting when a long unit makes the reading too wide for the dial."),
+        new("ValueProvider", "Func<Task<double>>?", "null", "Called every PollInterval for the current value. The general way in."),
+        new("PollUrl / PollJsonPath", "string?", "null", "GET this URL and read the number at this dotted path. Needs an HttpClient registered."),
+        new("PollInterval", "int", "0", "How often to poll, in milliseconds. Zero never polls."),
+        new("OnValueChanged / OnPollError", "EventCallback", "—", "Raised after a poll changes the reading, and when one fails."),
+        new("RefreshAsync()", "Task", "—", "Fetch the value once, now, whether or not the gauge is polling."),
+    ];
+
+    private const string BasicCode = """
+        <VetoGauge Value="_cpu" Label="CPU" Unit="%" />
+        """;
+
+    private const string BandCode = """
+        <VetoGauge Value="_disk" Label="Disk" Unit="%"
+                   Bands="DiskBands" FollowBands="true" />
+
+        @code {
+            private static readonly VetoGaugeBand[] DiskBands =
+            [
+                new(0,  70,  "var(--veto-color-success)", "Healthy"),
+                new(70, 90,  "var(--veto-color-warning)", "Filling up"),
+                new(90, 100, "var(--veto-color-danger)",  "Nearly full"),
+            ];
+        }
+        """;
+
+    private const string NeedleCode = """
+        <VetoGauge Needle="true"
+                   Value="_rpm"
+                   Min="0" Max="8000"
+                   Label="RPM" Format="N0"
+                   Size="VetoSize.Large"
+                   ShowTicks="true" TickEvery="250" MajorTickEvery="4"
+                   ShowTickLabels="true"
+                   Bands="RpmBands"
+                   FollowBands="true" />
+
+        @code {
+            private static readonly VetoGaugeBand[] RpmBands =
+                [new(6500, 8000, "var(--veto-color-danger)", "Red line")];
+        }
+        """;
+
+    private const string LiveCode = """
+        @* A function the gauge calls on a timer - your HttpClient, your auth, your shape. *@
+        <VetoGauge Label="CPU" Unit="%"
+                   ValueProvider="NextSampleAsync"
+                   PollInterval="1000" />
+
+        @code {
+            private async Task<double> NextSampleAsync()
+                => await Http.GetFromJsonAsync<double>("/api/cpu");
+        }
+
+        @* Or the shortcut, when the endpoint is plain: *@
+        <VetoGauge PollUrl="/api/metrics"
+                   PollJsonPath="cpu.percent"
+                   PollInterval="2000" />
+        """;
+
+    private const string TuningCode = """
+        <VetoGauge Needle="true" Value="140" Max="240"
+                   Label="Speed" Unit=" km/h"
+                   Size="VetoSize.Large"
+
+                   @* A long unit needs a smaller reading, or it runs out over the ticks. *@
+                   ValueFontSize="1.125rem"
+                   LabelFontSize="0.75rem"
+
+                   ShowTicks="true" TickEvery="20" MajorTickEvery="2"
+                   ShowTickLabels="true" TickLabelSize="9" TickLabelOffset="18"
+
+                   NeedleWidth="5"
+                   NeedleColor="var(--veto-color-danger)"
+                   HubRadius="10"
+                   HubColor="var(--veto-color-text)" />
+
+        @* HubRadius="0" draws no hub at all. *@
+        <VetoGauge Needle="true" Value="70" NeedleWidth="2" HubRadius="0" />
+        """;
+
+    private const string ShapeCode = """
+        <VetoGauge Size="VetoSize.Small" Value="34" Label="Small" Unit="%" />
+        <VetoGauge Value="61" StartAngle="-90" EndAngle="90" Label="Half circle" />
+        <VetoGauge Value="45" StartAngle="0" EndAngle="360" RoundCaps="false" Label="Full circle" />
+        """;
+}

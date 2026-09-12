@@ -1,0 +1,109 @@
+@page "/layouts/dock"
+@layout BareLayout
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Dock layout — Veto</PageTitle>
+
+<div class="demo-root" data-testid="page" data-ready="@(_interactive ? "true" : null)">
+    <VetoDockLayout TestId="layout"
+                    Position="_position"
+                    Appearance="_appearance"
+                    AutoHide="_autoHide">
+        <Wallpaper>
+            <div class="wallpaper"></div>
+        </Wallpaper>
+
+        <Items>
+            <VetoDockItem Icon="@VetoIcons.Home" Label="Home" TestId="dock-home" IsActive="true" ShowIndicator="true" OnClick='() => Open("Home")' />
+            <VetoDockItem Icon="@VetoIcons.Folder" Label="Files" TestId="dock-files" ShowIndicator="true" OnClick='() => Open("Files")' />
+            <VetoDockItem Icon="@VetoIcons.Terminal" Label="Terminal" TestId="dock-terminal" OnClick='() => Open("Terminal")' />
+            <VetoDockItem Icon="@VetoIcons.Bell" Label="Notifications" Badge="3" TestId="dock-bell" OnClick='() => Open("Notifications")' />
+            <VetoDockItem Icon="@VetoIcons.Settings" Label="Settings" TestId="dock-settings" OnClick='() => Open("Settings")' />
+        </Items>
+
+        <ChildContent>
+            <VetoContainer Size="VetoContainerSize.Medium" Padding="VetoSpacing.ExtraLarge" Class="demo-body">
+                <VetoStack Gap="VetoSpacing.ExtraLarge">
+                    <VetoStack Gap="VetoSpacing.Small">
+                        <a class="demo-back" href="/docs/layouts">&larr; Back to layouts</a>
+                        <h1 class="demo-title">Dock layout</h1>
+                        <p class="demo-lead">
+                            Content fills the frame and the dock floats over it. Move the pointer
+                            along the dock to see the magnification fall away across neighbours.
+                        </p>
+                    </VetoStack>
+
+                    <VetoCard Title="Try it" Elevation="VetoElevation.Raised">
+                        <VetoStack Gap="VetoSpacing.Large">
+                            <VetoStack Gap="VetoSpacing.Small">
+                                <span class="demo-label">Position</span>
+                                <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                                    @foreach (var position in Positions)
+                                    {
+                                        <button class="chip @(_position == position ? "chip--on" : null)"
+                                                type="button"
+                                                data-testid="@($"position-{position.ToString().ToLowerInvariant()}")"
+                                                @onclick="() => _position = position">
+                                            @position
+                                        </button>
+                                    }
+                                </VetoStack>
+                            </VetoStack>
+
+                            <VetoStack Gap="VetoSpacing.Small">
+                                <span class="demo-label">Appearance</span>
+                                <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                                    <button class="chip @(_appearance == VetoDockAppearance.Magnified ? "chip--on" : null)"
+                                            type="button" data-testid="appearance-magnified"
+                                            @onclick="() => _appearance = VetoDockAppearance.Magnified">
+                                        Magnified &middot; macOS
+                                    </button>
+                                    <button class="chip @(_appearance == VetoDockAppearance.Flat ? "chip--on" : null)"
+                                            type="button" data-testid="appearance-flat"
+                                            @onclick="() => _appearance = VetoDockAppearance.Flat">
+                                        Flat &middot; Windows
+                                    </button>
+                                </VetoStack>
+                            </VetoStack>
+
+                            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+                                <button class="chip @(_autoHide ? "chip--on" : null)"
+                                        type="button" data-testid="auto-hide"
+                                        @onclick="() => _autoHide = !_autoHide">
+                                    Auto-hide @(_autoHide ? "on" : "off")
+                                </button>
+                                <span class="demo-hint">Move the pointer to the edge to bring it back.</span>
+                            </VetoStack>
+                        </VetoStack>
+                    </VetoCard>
+
+                    <VetoCard Title="Opened" TestId="opened">
+                        <span class="demo-value" data-testid="opened-value">@(_opened ?? "Nothing yet - pick something from the dock.")</span>
+                    </VetoCard>
+                </VetoStack>
+            </VetoContainer>
+        </ChildContent>
+    </VetoDockLayout>
+</div>
+
+@code {
+    private bool _interactive;
+    private string? _opened;
+    private VetoAnchor _position = VetoAnchor.Bottom;
+    private VetoDockAppearance _appearance = VetoDockAppearance.Magnified;
+    private bool _autoHide;
+
+    private static readonly VetoAnchor[] Positions =
+        [VetoAnchor.Bottom, VetoAnchor.Top, VetoAnchor.Left, VetoAnchor.Right];
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+
+    private void Open ( string what ) => _opened = $"{what} opened";
+}

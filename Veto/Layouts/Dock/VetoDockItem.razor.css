@@ -1,0 +1,139 @@
+/* VetoDockItem - one icon in the dock, with its hover label, badge and running indicator. */
+
+.veto-dock__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: var(--veto-dock-item-size, 3rem);
+    height: var(--veto-dock-item-size, 3rem);
+    padding: 0;
+    font: inherit;
+    color: var(--veto-color-text);
+    text-decoration: none;
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-lg);
+    cursor: pointer;
+    /* Items grow away from the edge the dock is pinned to, not through it. */
+    transform: scale(var(--veto-dock-scale, 1));
+    transform-origin: bottom center;
+    transition: transform 90ms ease-out, background-color var(--veto-transition), border-color var(--veto-transition);
+}
+
+.veto-dock--top .veto-dock__item { transform-origin: top center; }
+.veto-dock--left .veto-dock__item { transform-origin: left center; }
+.veto-dock--right .veto-dock__item { transform-origin: right center; }
+
+.veto-dock__icon {
+    display: flex;
+    /* The icon inherits the font size so it scales with the item rather than being re-measured. */
+    font-size: calc(var(--veto-dock-item-size, 3rem) * 0.45);
+}
+
+.veto-dock__item:hover {
+    border-color: var(--veto-color-primary);
+}
+
+.veto-dock__item:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-dock__item--active {
+    color: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+}
+
+.veto-dock__item--disabled {
+    color: var(--veto-color-text-disabled);
+    cursor: not-allowed;
+}
+
+/* Hover label */
+
+.veto-dock__tooltip {
+    position: absolute;
+    bottom: calc(100% + var(--veto-space-2));
+    left: 50%;
+    padding: var(--veto-space-1) var(--veto-space-2);
+    font-size: var(--veto-font-size-sm);
+    white-space: nowrap;
+    color: var(--veto-color-surface);
+    background-color: var(--veto-color-text);
+    border-radius: var(--veto-radius-sm);
+    /* Scaled back by the item's own magnification, so the label stays a readable size. */
+    transform: translateX(-50%) scale(calc(1 / var(--veto-dock-scale, 1)));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--veto-transition);
+}
+
+.veto-dock--top .veto-dock__tooltip {
+    top: calc(100% + var(--veto-space-2));
+    bottom: auto;
+}
+
+.veto-dock--left .veto-dock__tooltip,
+.veto-dock--right .veto-dock__tooltip {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%) scale(calc(1 / var(--veto-dock-scale, 1)));
+}
+
+.veto-dock--left .veto-dock__tooltip { left: calc(100% + var(--veto-space-2)); }
+
+.veto-dock--right .veto-dock__tooltip {
+    right: calc(100% + var(--veto-space-2));
+    left: auto;
+}
+
+.veto-dock__item:hover .veto-dock__tooltip,
+.veto-dock__item:focus-visible .veto-dock__tooltip {
+    opacity: 1;
+}
+
+/* Badge and running indicator */
+
+.veto-dock__badge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    min-width: 1rem;
+    padding: 0 0.25rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: 1rem;
+    text-align: center;
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-danger);
+    border-radius: var(--veto-radius-full);
+}
+
+.veto-dock__indicator {
+    position: absolute;
+    bottom: -0.3125rem;
+    left: 50%;
+    width: 0.25rem;
+    height: 0.25rem;
+    background-color: var(--veto-color-primary);
+    border-radius: var(--veto-radius-full);
+    transform: translateX(-50%);
+}
+
+.veto-dock--left .veto-dock__indicator,
+.veto-dock--right .veto-dock__indicator {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+}
+
+.veto-dock--left .veto-dock__indicator { left: -0.3125rem; }
+.veto-dock--right .veto-dock__indicator { right: -0.3125rem; left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-dock__item {
+        transition: none;
+    }
+}

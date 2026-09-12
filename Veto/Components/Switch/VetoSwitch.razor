@@ -1,0 +1,79 @@
+@namespace Veto.Components.Switch
+@typeparam TValue
+@inherits VetoInputBase<TValue>
+@using Veto.Components.Icon
+
+@if (Visible)
+{
+    <div class="@RootCssClass" style="@RootCssStyle" data-testid="@TestId" data-state="@StateName">
+        <div class="veto-switch__row">
+            @if (HasLabel && LabelPlacement != VetoSwitchLabelPlacement.End)
+            {
+                @RenderLabel()
+            }
+
+            <button @ref="InputElement"
+                    @attributes="InnerAttributes"
+                    id="@ElementId"
+                    type="button"
+                    class="veto-switch__button @FieldValidationClass"
+                    role="@Role"
+                    aria-checked="@AriaChecked"
+                    aria-label="@(HasLabel ? null : AccessibleName)"
+                    aria-required="@(Required ? "true" : null)"
+                    aria-readonly="@(ReadOnly ? "true" : null)"
+                    aria-invalid="@(HasErrors ? "true" : null)"
+                    aria-describedby="@DescribedBy"
+                    disabled="@Disabled"
+                    @onclick="AdvanceAsync"
+                    @onkeydown="OnKeyDownAsync">
+                <span class="veto-switch__track" aria-hidden="true">
+                    <span class="veto-switch__thumb">
+                        @if (ShowIcons && ThumbIcon is not null)
+                        {
+                            <VetoIcon Icon="@ThumbIcon" Size="VetoIconSize.Inherit" Class="veto-switch__icon" />
+                        }
+                    </span>
+                </span>
+            </button>
+
+            @if (ShowStateText)
+            {
+                <span class="veto-switch__state" data-testid="@(TestId is null ? null : $"{TestId}-state")">@StateText</span>
+            }
+
+            @if (HasLabel && LabelPlacement == VetoSwitchLabelPlacement.End)
+            {
+                @RenderLabel()
+            }
+        </div>
+
+        @if (HasErrors)
+        {
+            <p class="veto-switch__message veto-switch__message--error" id="@ErrorId" role="alert">
+                @ValidationMessages.First()
+            </p>
+        }
+        else if (!string.IsNullOrWhiteSpace(HelperText))
+        {
+            <p class="veto-switch__message" id="@HelperId">@HelperText</p>
+        }
+
+        @if (!string.IsNullOrEmpty(NameAttributeValue))
+        {
+            @* Lets the switch post its value like any other form control under static rendering. *@
+            <input type="hidden" name="@NameAttributeValue" value="@CurrentValueAsString" />
+        }
+    </div>
+}
+
+@code {
+    private RenderFragment RenderLabel () =>
+        @<label class="veto-switch__label" for="@ElementId">
+            @Label
+            @if (Required)
+            {
+                <span class="veto-switch__required" aria-hidden="true">*</span>
+            }
+        </label>;
+}

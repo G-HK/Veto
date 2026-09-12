@@ -1,0 +1,194 @@
+@namespace Veto.Components.Cron
+@inherits Veto.Core.VetoComponentBase
+@using Veto.Components.Buttons
+
+@if (Visible)
+{
+    <div @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId"
+         data-mode="@Mode.ToString().ToLowerInvariant()"
+         data-valid="@(IsValid ? "true" : "false")">
+
+        @if (!string.IsNullOrWhiteSpace(Label))
+        {
+            <label class="veto-cron__label" for="@ExpressionId">@Label</label>
+        }
+
+        @if (ShowModes)
+        {
+            <VetoButtonGroup TestId="@(TestId is null ? null : $"{TestId}-modes")"
+                             Size="VetoSize.Small"
+                             Label="Schedule shape"
+                             Class="veto-cron__modes">
+                @foreach (var mode in Modes)
+                {
+                    var current = mode;
+                    <VetoButton Variant="@(Mode == current ? VetoVariant.Filled : VetoVariant.Outlined)"
+                                Color="@(Mode == current ? VetoColor.Primary : VetoColor.Neutral)"
+                                Disabled="@Disabled"
+                                TestId="@(TestId is null ? null : $"{TestId}-mode-{current.ToString().ToLowerInvariant()}")"
+                                OnClick="() => SelectModeAsync(current)">@current</VetoButton>
+                }
+            </VetoButtonGroup>
+        }
+
+        <div class="veto-cron__builder" data-testid="@(TestId is null ? null : $"{TestId}-builder")">
+            @switch (Mode)
+            {
+                case VetoCronMode.Minutes:
+                    <span class="veto-cron__text">Every</span>
+                    @Number("interval", _everyMinutes, 1, 59, v => { _everyMinutes = v; return RebuildAsync(); })
+                    <span class="veto-cron__text">minutes</span>
+                    break;
+
+                case VetoCronMode.Hourly:
+                    <span class="veto-cron__text">Every</span>
+                    @Number("interval", _everyHours, 1, 23, v => { _everyHours = v; return RebuildAsync(); })
+                    <span class="veto-cron__text">hours, at</span>
+                    @Number("minute", _minute, 0, 59, v => { _minute = v; return RebuildAsync(); })
+                    <span class="veto-cron__text">minutes past</span>
+                    break;
+
+                case VetoCronMode.Daily:
+                    <span class="veto-cron__text">Every</span>
+                    @Number("interval", _everyDays, 1, 31, v => { _everyDays = v; return RebuildAsync(); })
+                    <span class="veto-cron__text">days at</span>
+                    @TimeOfDay()
+                    break;
+
+                case VetoCronMode.Weekly:
+                    <span class="veto-cron__text">On</span>
+                    <div class="veto-cron__days" role="group" aria-label="Days of the week">
+                        @for (var d = 0; d < 7; d++)
+                        {
+                            var day = d;
+                            <button type="button"
+                                    class="veto-cron__day"
+                                    disabled="@Disabled"
+                                    aria-pressed="@(_weekdays.Contains(day) ? "true" : "false")"
+                                    data-testid="@(TestId is null ? null : $"{TestId}-day-{day}")"
+                                    @onclick="() => ToggleDayAsync(day)">@DayLabels[day]</button>
+                        }
+                    </div>
+                    <span class="veto-cron__text">at</span>
+                    @TimeOfDay()
+                    break;
+
+                case VetoCronMode.Monthly:
+                    <span class="veto-cron__text">On day</span>
+                    @Number("day", _dayOfMonth, 1, 31, v => { _dayOfMonth = v; return RebuildAsync(); })
+                    <span class="veto-cron__text">of every</span>
+                    @Number("interval", _everyMonths, 1, 12, v => { _everyMonths = v; return RebuildAsync(); })
+                    <span class="veto-cron__text">months at</span>
+                    @TimeOfDay()
+                    break;
+
+                case VetoCronMode.Yearly:
+                    <span class="veto-cron__text">On</span>
+                    @Number("day", _dayOfMonth, 1, 31, v => { _dayOfMonth = v; return RebuildAsync(); })
+                    @Select("month", _month, 1, 12, MonthLabels, v => { _month = v; return RebuildAsync(); })
+                    <span class="veto-cron__text">at</span>
+                    @TimeOfDay()
+                    break;
+
+                default:
+                    <span class="veto-cron__text">Type the expression below.</span>
+                    break;
+            }
+        </div>
+
+        @if (ShowExpression)
+        {
+            <div class="veto-cron__expression">
+                <input id="@ExpressionId"
+                       class="veto-cron__input"
+                       type="text"
+                       spellcheck="false"
+                       autocomplete="off"
+                       value="@Value"
+                       disabled="@Disabled"
+                       readonly="@ReadOnly"
+                       aria-label="Cron expression"
+                       aria-invalid="@(IsValid ? null : "true")"
+                       aria-describedby="@MessageId"
+                       data-testid="@(TestId is null ? null : $"{TestId}-input")"
+                       @oninput="OnExpressionInputAsync" />
+                <span class="veto-cron__fields" aria-hidden="true">@FieldLegend</span>
+            </div>
+        }
+
+        @if (ShowDescription)
+        {
+            <p class="veto-cron__description"
+               id="@MessageId"
+               data-testid="@(TestId is null ? null : $"{TestId}-description")"
+               role="@(IsValid ? null : "alert")">@Description</p>
+        }
+
+        @if (IsValid && Warning is not null)
+        {
+            <p class="veto-cron__warning"
+               data-testid="@(TestId is null ? null : $"{TestId}-warning")">@Warning</p>
+        }
+
+        @if (ShowNextRuns && IsValid)
+        {
+            <div class="veto-cron__runs" data-testid="@(TestId is null ? null : $"{TestId}-runs")">
+                <span class="veto-cron__runs-title">@NextRunsLabel</span>
+                @if (NextRuns.Count == 0)
+                {
+                    <span class="veto-cron__run veto-cron__run--none">Never - no date matches this expression.</span>
+                }
+                else
+                {
+                    @foreach (var run in NextRuns)
+                    {
+                        <span class="veto-cron__run">@run.ToString(NextRunFormat, Culture)</span>
+                    }
+                }
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(HelperText))
+        {
+            <p class="veto-cron__helper">@HelperText</p>
+        }
+    </div>
+}
+
+@code {
+    private RenderFragment Number ( string name, int value, int min, int max, Func<int, Task> set ) =>
+        @<input class="veto-cron__number"
+                type="number"
+                min="@min"
+                max="@max"
+                value="@value"
+                disabled="@(Disabled || ReadOnly)"
+                aria-label="@name"
+                data-testid="@(TestId is null ? null : $"{TestId}-{name}")"
+                @onchange="e => SetNumberAsync(e, min, max, set)" />;
+
+    private RenderFragment Select ( string name, int value, int min, int max, string[] labels, Func<int, Task> set ) =>
+        @<select class="veto-cron__select"
+                 disabled="@(Disabled || ReadOnly)"
+                 aria-label="@name"
+                 data-testid="@(TestId is null ? null : $"{TestId}-{name}")"
+                 @onchange="e => SetNumberAsync(e, min, max, set)">
+            @for (var i = min; i <= max; i++)
+            {
+                var option = i;
+                <option value="@option" selected="@(option == value)">@labels[option - min]</option>
+            }
+        </select>;
+
+    private RenderFragment TimeOfDay () =>
+        @<text>
+            @Number("hour", _hour, 0, 23, v => { _hour = v; return RebuildAsync(); })
+            <span class="veto-cron__colon" aria-hidden="true">:</span>
+            @Number("minute", _minute, 0, 59, v => { _minute = v; return RebuildAsync(); })
+        </text>;
+}

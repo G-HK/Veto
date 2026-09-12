@@ -1,0 +1,63 @@
+/* VetoKbd - key caps, styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-kbd {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+    /* The outer <kbd> is only a wrapper for the chord; every cap is drawn on the inner ones. */
+    font-family: inherit;
+    font-size: inherit;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+
+.veto-kbd__key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 1.75em;
+    padding: 0.25em 0.5em;
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-sm);
+    /* The second shadow is the key's edge - what makes it read as a cap rather than a chip. */
+    box-shadow: 0 1px 0 var(--veto-color-border-strong), var(--veto-shadow-sm);
+}
+
+.veto-kbd__separator {
+    color: var(--veto-color-text-muted);
+    font-size: var(--veto-font-size-sm);
+    user-select: none;
+}
+
+/* Sizes. Small is the one that runs inline inside body text without pushing the lines apart. */
+
+.veto-kbd--sm .veto-kbd__key {
+    min-width: 1.5em;
+    padding: 0.15em 0.35em;
+    font-size: 0.75em;
+}
+
+.veto-kbd--sm .veto-kbd__separator {
+    font-size: 0.75em;
+}
+
+.veto-kbd--lg .veto-kbd__key {
+    min-width: 2em;
+    padding: 0.35em 0.65em;
+    font-size: var(--veto-font-size-md);
+}
+
+/* Borderless: the cap becomes tinted text. The background stays, because without it and
+   without the border there would be nothing left to say this is a key at all. */
+
+.veto-kbd--borderless .veto-kbd__key {
+    border-color: transparent;
+    box-shadow: none;
+}

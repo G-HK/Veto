@@ -1,0 +1,42 @@
+/*
+ * VetoMainContent.
+ *
+ * The offset classes name the drawer's edge, variant and breakpoint; the media queries here
+ * decide whether the offset actually applies. Keeping the breakpoint decision in CSS - in both
+ * this file and VetoDrawer's - is what stops the drawer and the content from ever disagreeing
+ * about where the boundary is.
+ */
+
+.veto-main-content {
+    grid-row: 2;
+    /* Column two by default; a drawer anchored right swaps them. */
+    grid-column: 2;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
+}
+
+.veto-main-content--drawer-right {
+    grid-column: 1;
+}
+
+.veto-main-content--scrollable {
+    overflow-y: auto;
+}
+
+/* A persistent drawer is a sibling in the grid row, so no offset is needed; an overlay one
+   needs none either. Only a fixed-position drawer that is also docked requires padding, which
+   is the responsive variant above its breakpoint. */
+
+@media (min-width: 640px) {
+    .veto-main-content--drawer-variant-responsive.veto-main-content--drawer-breakpoint-sm.veto-main-content--drawer-left {
+        padding-inline-start: 0;
+    }
+}
+
+/*
+ * Responsive drawers become `position: static` above their breakpoint and therefore take part
+ * in the grid, so the content needs no padding at all. Below the breakpoint they are fixed and
+ * overlay the content, which also needs no padding. The offset classes are kept because an app
+ * can restyle on them, and because the tests assert on them.
+ */

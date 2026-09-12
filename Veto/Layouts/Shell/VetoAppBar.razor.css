@@ -1,0 +1,41 @@
+/* VetoAppBar - a row across the top, above the drawer in stacking order. */
+
+.veto-appbar {
+    grid-row: 1;
+    /* Spans every column, so it runs the full width of the frame above the drawer. */
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-3);
+    box-sizing: border-box;
+    padding-inline: var(--veto-space-4);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    /* Above the drawer, so a clipped drawer tucks underneath it. */
+    z-index: 20;
+}
+
+.veto-appbar--dense {
+    padding-inline: var(--veto-space-3);
+}
+
+.veto-appbar--bordered {
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+.veto-appbar--elevated {
+    box-shadow: var(--veto-shadow-sm);
+}
+
+.veto-appbar--translucent {
+    /* Solid first: where backdrop-filter is unsupported the bar stays opaque and legible
+       rather than letting content show through unblurred. */
+    background-color: var(--veto-color-surface);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+    .veto-appbar--translucent {
+        background-color: color-mix(in srgb, var(--veto-color-surface) 80%, transparent);
+        backdrop-filter: blur(12px) saturate(160%);
+    }
+}

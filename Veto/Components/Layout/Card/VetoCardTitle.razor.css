@@ -1,0 +1,18 @@
+/* VetoCardTitle - the heading of a composed card's header. */
+
+.veto-card-title {
+    margin: 0;
+    font-size: var(--veto-font-size-lg);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--veto-color-text);
+}
+
+/* The figure on a statistic tile: big, tight, and lined up on its digits so a column of
+   tiles does not jitter as the numbers change. */
+.veto-card-title--display {
+    font-size: 1.875rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}

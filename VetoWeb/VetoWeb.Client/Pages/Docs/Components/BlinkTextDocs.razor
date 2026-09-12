@@ -1,0 +1,218 @@
+@page "/docs/components/blink-text"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.BlinkText
+@using System.Runtime.CompilerServices
+
+<PageTitle>Blink text — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Blink text"
+          Lead="Text printed a character at a time, with a blinking cursor and longer pauses at punctuation. Feed it a finished string or a stream.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Typing"
+               Description="A full paragraph, so the pauses are visible at work: longer at a full stop than at a comma, which is what makes it read like speech rather than a ticker. The text below it does not move as the passage types, because PreserveSpace holds the finished footprint."
+               Code="@BasicCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <p class="terminal" data-testid="terminal">
+                <VetoBlinkText TestId="basic"
+                               Text="@(_run == 0 ? Line : Line + " ")"
+                               CharactersPerSecond="34"
+                               OnCompleted="() => _done = true" />
+            </p>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+                <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Neutral"
+                            TestId="restart" OnClick="Restart">
+                    Restart
+                </VetoButton>
+                <span class="demo-value" data-testid="done">@(_done ? "Finished" : "Typing…")</span>
+            </VetoStack>
+
+            <p class="docs-prose" data-testid="below">
+                This paragraph sits below the one being typed, and stays exactly where it is.
+            </p>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-scramble"
+               Title="Scramble"
+               Description="A few glyphs flicker ahead of the cursor before settling into the real characters - the effect the falling-code screens are known for. The scramble is never longer than the text still to come, so it cannot imply more than there is."
+               Code="@ScrambleCode">
+        <p class="terminal terminal--green" data-testid="matrix">
+            <VetoBlinkText TestId="scramble"
+                           Text="Wake up, Neo... The Matrix has you."
+                           CharactersPerSecond="16"
+                           Scramble="true"
+                           Loop="true"
+                           CursorCharacter="_" />
+        </p>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-stream"
+               Title="From a stream"
+               Description="Give it an IAsyncEnumerable and chunks are appended as they arrive, then drained at the reveal rate. Text from a slow or uneven source reads at a steady pace instead of landing in lurches - which is the difference between a model's output looking considered and looking stuck."
+               Code="@StreamCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <p class="terminal" data-testid="stream-output">
+                <VetoBlinkText TestId="stream"
+                               Stream="_stream"
+                               CharactersPerSecond="60"
+                               PreserveSpace="false" />
+            </p>
+            <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Neutral"
+                        TestId="stream-start" OnClick="StartStream">
+                Start the stream
+            </VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-pauses"
+               Title="Where it pauses"
+               Description="PauseOn maps a character to extra milliseconds. Pass your own to pause on anything - a pipe between fields, a slash in a path, a full stop you want to linger on."
+               Code="@PauseCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <p class="terminal" data-testid="pauses">
+                <VetoBlinkText TestId="paused"
+                               Text="scanning | 12 hosts | 3 open ports | done"
+                               CharactersPerSecond="70"
+                               PauseOn="PipePauses"
+                               Loop="true" />
+            </p>
+            <p class="docs-prose">By word instead of by character, for longer passages:</p>
+            <p class="terminal" data-testid="words">
+                <VetoBlinkText TestId="by-word"
+                               Text="@WordLine"
+                               ByWord="true"
+                               CharactersPerSecond="7"
+                               Loop="true" />
+            </p>
+        </VetoStack>
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">What a screen reader gets</h2>
+        <p class="docs-prose">
+            The whole text, once. The animated copy is hidden from assistive technology and a
+            clipped copy of the finished text sits alongside it - announcing a character at a
+            time would be unusable. Under <code>prefers-reduced-motion</code> the text appears
+            complete and the cursor stops blinking: the motion is the decoration, the text is
+            the content.
+        </p>
+        <p class="docs-prose">
+            <code>PreserveSpace</code> holds the finished text's footprint while it types, so a
+            paragraph does not reflow line by line and shove the page around beneath it. It needs
+            a known length, so it applies to <code>Text</code> rather than <code>Stream</code>.
+        </p>
+    </VetoStack>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    // A long passage on purpose: a short line finishes before you can see the pauses working,
+    // and it never reflows, so it cannot show what PreserveSpace is for.
+    private const string Line =
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " +
+        "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud " +
+        "exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure " +
+        "dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur; " +
+        "excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt " +
+        "mollit anim id est laborum.";
+
+    private const string WordLine =
+        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque " +
+        "laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi " +
+        "architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas " +
+        "sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos.";
+
+    private int _run;
+    private bool _done;
+    private IAsyncEnumerable<string>? _stream;
+
+    private static readonly IReadOnlyDictionary<char, int> PipePauses = new Dictionary<char, int>
+    {
+        ['|'] = 600
+    };
+
+    private void Restart ()
+    {
+        // Changing the text is what restarts the reveal, so the alternating trailing space gives
+        // it something to notice without changing what the reader sees.
+        _done = false;
+        _run = _run == 0 ? 1 : 0;
+    }
+
+    private void StartStream () => _stream = ProduceAsync();
+
+    /// <summary>Stands in for a slow endpoint, arriving in uneven chunks.</summary>
+    private static async IAsyncEnumerable<string> ProduceAsync (
+        [EnumeratorCancellation] CancellationToken token = default )
+    {
+        string[] chunks =
+        [
+            "Lorem ipsum dolor sit amet,", " consectetur adipiscing elit,",
+            " sed do eiusmod tempor incididunt", " ut labore et dolore magna aliqua.\n",
+            "Ut enim ad minim veniam,", " quis nostrud exercitation ullamco laboris",
+            " nisi ut aliquip ex ea commodo consequat."
+        ];
+
+        foreach (var chunk in chunks)
+        {
+            await Task.Delay(Random.Shared.Next(180, 520), token);
+            yield return chunk;
+        }
+    }
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Text", "string?", "null", "The text to reveal. Changing it restarts the reveal."),
+        new("Stream", "IAsyncEnumerable<string>?", "null", "Chunks appended as they arrive, drained at the reveal rate."),
+        new("CharactersPerSecond", "double", "45", "How fast the text appears."),
+        new("ByWord", "bool", "false", "Reveal whole words rather than single characters."),
+        new("PauseOn", "IReadOnlyDictionary<char, int>", "commas and sentence ends", "Extra milliseconds after particular characters."),
+        new("StartDelay", "int", "0", "Milliseconds to wait before starting."),
+        new("Cursor / CursorCharacter", "bool / string", "true / \"▋\"", "The blinking cursor."),
+        new("CursorWhenComplete", "bool", "false", "Whether the cursor stays once finished."),
+        new("Scramble", "bool", "false", "Flicker random glyphs ahead of the cursor."),
+        new("ScrambleLength", "int", "3", "How many glyphs flicker."),
+        new("ScrambleCharacters", "string", "katakana and digits", "The glyphs used while scrambling."),
+        new("Loop / LoopDelay", "bool / int", "false / 1600", "Start again once complete, after a hold."),
+        new("PreserveSpace", "bool", "true", "Hold the finished text's space so the layout does not reflow. Text only."),
+        new("Instant", "bool", "false", "Show the text immediately, skipping the reveal."),
+        new("OnCompleted", "EventCallback", "—", "Raised once the whole text has been revealed.")
+    ];
+
+    private const string BasicCode = """
+        <VetoBlinkText Text="Initialising the component library."
+                       CharactersPerSecond="34"
+                       OnCompleted="OnDone" />
+        """;
+
+    private const string ScrambleCode = """
+        <VetoBlinkText Text="Wake up, Neo... The Matrix has you."
+                       CharactersPerSecond="16"
+                       Scramble="true"
+                       Loop="true"
+                       CursorCharacter="_" />
+        """;
+
+    private const string StreamCode = """
+        <VetoBlinkText Stream="_stream" CharactersPerSecond="60" PreserveSpace="false" />
+
+        @code {
+            private IAsyncEnumerable<string>? _stream;
+
+            private void Start() => _stream = Client.StreamAsync(prompt);
+        }
+        """;
+
+    private const string PauseCode = """
+        <VetoBlinkText Text="scanning | 12 hosts | 3 open ports | done"
+                       PauseOn="@(new Dictionary<char, int> { ['|'] = 600 })" />
+
+        <VetoBlinkText Text="One word at a time reads faster."
+                       ByWord="true"
+                       CharactersPerSecond="6" />
+        """;
+}

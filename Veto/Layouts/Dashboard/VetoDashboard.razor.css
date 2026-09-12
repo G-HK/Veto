@@ -1,0 +1,31 @@
+/* VetoDashboard - a grid of tiles that reflows by breakpoint. */
+
+.veto-dashboard {
+    display: grid;
+    grid-template-columns: repeat(var(--veto-dashboard-columns, 1), minmax(0, 1fr));
+    grid-auto-rows: var(--veto-dashboard-row-height, 11rem);
+    min-width: 0;
+}
+
+.veto-dashboard--gap-0 { gap: 0; }
+.veto-dashboard--gap-1 { gap: var(--veto-space-1); }
+.veto-dashboard--gap-2 { gap: var(--veto-space-2); }
+.veto-dashboard--gap-3 { gap: var(--veto-space-3); }
+.veto-dashboard--gap-4 { gap: var(--veto-space-4); }
+.veto-dashboard--gap-5 { gap: var(--veto-space-5); }
+.veto-dashboard--gap-6 { gap: var(--veto-space-6); }
+
+@media (min-width: 960px) {
+    .veto-dashboard {
+        grid-template-columns: repeat(var(--veto-dashboard-columns-md, var(--veto-dashboard-columns, 1)), minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1280px) {
+    .veto-dashboard {
+        grid-template-columns: repeat(
+            var(--veto-dashboard-columns-lg, var(--veto-dashboard-columns-md, var(--veto-dashboard-columns, 1))),
+            minmax(0, 1fr)
+        );
+    }
+}

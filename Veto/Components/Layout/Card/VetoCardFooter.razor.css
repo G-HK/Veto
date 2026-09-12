@@ -1,0 +1,28 @@
+/* VetoCardFooter - the actions of a composed card. */
+
+.veto-card-footer {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--veto-space-2);
+    padding: var(--veto-space-5);
+    min-width: 0;
+}
+
+/* Whatever came before already paid for the space above. */
+.veto-card-content + .veto-card-footer,
+.veto-card-header + .veto-card-footer {
+    padding-top: 0;
+}
+
+.veto-card-footer--bordered {
+    padding-top: var(--veto-space-4);
+    border-top: 1px solid var(--veto-color-border);
+}
+
+.veto-card-footer--start { justify-content: flex-start; }
+.veto-card-footer--center { justify-content: center; }
+.veto-card-footer--end { justify-content: flex-end; }
+.veto-card-footer--space-between { justify-content: space-between; }
+.veto-card-footer--space-around { justify-content: space-around; }
+.veto-card-footer--space-evenly { justify-content: space-evenly; }

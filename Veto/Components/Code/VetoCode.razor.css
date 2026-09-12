@@ -1,0 +1,43 @@
+/* VetoCode - a scrollable source listing. */
+
+.veto-code {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    background-color: var(--veto-color-surface-raised);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+}
+
+.veto-code__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--veto-space-2);
+    padding: var(--veto-space-1) var(--veto-space-1) var(--veto-space-1) var(--veto-space-3);
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+.veto-code__language {
+    font-family: var(--veto-font-mono);
+    font-size: 0.75rem;
+    color: var(--veto-color-text-muted);
+}
+
+.veto-code__pre {
+    /* The listing scrolls inside its own box; the page never scrolls sideways. */
+    max-height: var(--veto-code-max-height, none);
+    margin: 0;
+    padding: var(--veto-space-3) var(--veto-space-4);
+    overflow: auto;
+}
+
+.veto-code__code {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    line-height: 1.65;
+    color: var(--veto-color-text);
+    white-space: pre;
+    tab-size: 4;
+}

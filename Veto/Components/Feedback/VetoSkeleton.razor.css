@@ -1,0 +1,72 @@
+/* VetoSkeleton - placeholders in the shape of what is coming. */
+
+.veto-skeleton {
+    display: block;
+    background-color: color-mix(in srgb, var(--veto-color-text) 9%, transparent);
+    border-radius: var(--veto-radius-sm);
+}
+
+.veto-skeleton--text {
+    height: 0.75em;
+    margin-block: 0.25em;
+    border-radius: var(--veto-radius-full);
+}
+
+.veto-skeleton--rectangle {
+    height: 6rem;
+    border-radius: var(--veto-radius-md);
+}
+
+.veto-skeleton--circle {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--veto-radius-full);
+}
+
+/* Several lines: the container carries no fill of its own, only the lines inside it. */
+.veto-skeleton--multiline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    height: auto;
+    background: none;
+}
+
+.veto-skeleton__line {
+    display: block;
+    height: 0.75em;
+    background-color: color-mix(in srgb, var(--veto-color-text) 9%, transparent);
+    border-radius: var(--veto-radius-full);
+}
+
+/* Shimmer */
+
+.veto-skeleton--animated:not(.veto-skeleton--multiline),
+.veto-skeleton--animated .veto-skeleton__line {
+    background-image: linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--veto-color-surface) 70%, transparent),
+        transparent
+    );
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    animation: veto-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes veto-skeleton-shimmer {
+    from { background-position: -120% 0; }
+    to { background-position: 220% 0; }
+}
+
+/*
+ * A shimmer travelling across the screen is the sort of motion this preference exists for. The
+ * placeholders stay - they still show where content will land - they just stop moving.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .veto-skeleton--animated:not(.veto-skeleton--multiline),
+    .veto-skeleton--animated .veto-skeleton__line {
+        background-image: none;
+        animation: none;
+    }
+}

@@ -1,0 +1,222 @@
+/*
+ * VetoDrawer.
+ *
+ * The responsive behaviour lives here rather than in C#. Only the open/closed state is
+ * tracked in code, so there is no viewport listener, no flash of the wrong layout while
+ * WebAssembly boots, and the drawer is already correct in prerendered HTML.
+ *
+ * Breakpoints: sm 640px, md 960px, lg 1280px.
+ */
+
+.veto-drawer {
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: var(--veto-drawer-width, 16rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--veto-color-surface);
+    z-index: 15;
+    transition: transform var(--veto-transition), width var(--veto-transition);
+}
+
+.veto-drawer--bordered.veto-drawer--left { border-right: 1px solid var(--veto-color-border); }
+.veto-drawer--bordered.veto-drawer--right { border-left: 1px solid var(--veto-color-border); }
+.veto-drawer--bordered.veto-drawer--top { border-bottom: 1px solid var(--veto-color-border); }
+.veto-drawer--bordered.veto-drawer--bottom { border-top: 1px solid var(--veto-color-border); }
+
+/* Side drawers sit in the frame's middle row, alongside the content. */
+.veto-drawer--side {
+    grid-row: 2;
+    grid-column: 1;
+    height: 100%;
+}
+
+.veto-drawer--side.veto-drawer--right {
+    grid-column: 2;
+}
+
+/*
+ * Top and bottom anchors are overlays: they share the middle row with the content, so a docked
+ * one would sit on top of it. Use them with the Temporary variant, which takes them out of flow.
+ */
+.veto-drawer--horizontal {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: auto;
+}
+
+/* ---------------------------------------------------------------- Persistent */
+
+.veto-drawer--persistent.veto-drawer--closed {
+    width: 0;
+    border-width: 0;
+}
+
+/* ---------------------------------------------------------------- Mini rail */
+
+.veto-drawer--mini {
+    width: var(--veto-drawer-mini-width, 4rem);
+}
+
+.veto-drawer--mini.veto-drawer--open {
+    width: var(--veto-drawer-width, 16rem);
+}
+
+/* Pointer only: hover expansion must not fire from a tap, which would leave a touch user
+   with a drawer that opens and will not close. */
+@media (hover: hover) and (pointer: fine) {
+    .veto-drawer--mini.veto-drawer--hover-expand:hover,
+    .veto-drawer--mini.veto-drawer--hover-expand:focus-within {
+        width: var(--veto-drawer-width, 16rem);
+    }
+}
+
+/* ---------------------------------------------------------------- Temporary overlay */
+
+.veto-drawer--temporary {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    box-shadow: var(--veto-shadow-md);
+}
+
+.veto-drawer--temporary.veto-drawer--left { left: 0; }
+.veto-drawer--temporary.veto-drawer--right { right: 0; }
+
+.veto-drawer--temporary.veto-drawer--left.veto-drawer--closed { transform: translateX(-100%); }
+.veto-drawer--temporary.veto-drawer--right.veto-drawer--closed { transform: translateX(100%); }
+
+.veto-drawer--temporary.veto-drawer--top,
+.veto-drawer--temporary.veto-drawer--bottom {
+    right: 0;
+    left: 0;
+    height: auto;
+    bottom: auto;
+}
+
+.veto-drawer--temporary.veto-drawer--bottom { top: auto; bottom: 0; }
+.veto-drawer--temporary.veto-drawer--top.veto-drawer--closed { transform: translateY(-100%); }
+.veto-drawer--temporary.veto-drawer--bottom.veto-drawer--closed { transform: translateY(100%); }
+
+/* ---------------------------------------------------------------- Responsive */
+
+/*
+ * Below its breakpoint the responsive drawer is an overlay; above it, it pushes content.
+ * Written mobile-first, so the overlay rules come first and the desktop rules override them.
+ */
+
+.veto-drawer--responsive {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    box-shadow: var(--veto-shadow-md);
+}
+
+.veto-drawer--responsive.veto-drawer--left { left: 0; }
+.veto-drawer--responsive.veto-drawer--right { right: 0; }
+.veto-drawer--responsive.veto-drawer--left.veto-drawer--closed { transform: translateX(-100%); }
+.veto-drawer--responsive.veto-drawer--right.veto-drawer--closed { transform: translateX(100%); }
+
+@media (min-width: 640px) {
+    .veto-drawer--responsive.veto-drawer--breakpoint-sm {
+        position: static;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .veto-drawer--responsive.veto-drawer--breakpoint-sm.veto-drawer--closed {
+        width: 0;
+        border-width: 0;
+    }
+}
+
+@media (min-width: 960px) {
+    .veto-drawer--responsive.veto-drawer--breakpoint-md {
+        position: static;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .veto-drawer--responsive.veto-drawer--breakpoint-md.veto-drawer--closed {
+        width: 0;
+        border-width: 0;
+    }
+}
+
+@media (min-width: 1280px) {
+    .veto-drawer--responsive.veto-drawer--breakpoint-lg {
+        position: static;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .veto-drawer--responsive.veto-drawer--breakpoint-lg.veto-drawer--closed {
+        width: 0;
+        border-width: 0;
+    }
+}
+
+/* The rail step: between MiniBreakpoint and Breakpoint the drawer is docked but narrow. */
+
+@media (min-width: 640px) and (max-width: 959.98px) {
+    .veto-drawer--responsive.veto-drawer--mini-breakpoint-sm.veto-drawer--breakpoint-md {
+        position: static;
+        width: var(--veto-drawer-mini-width, 4rem);
+        box-shadow: none;
+        transform: none;
+    }
+}
+
+@media (min-width: 960px) and (max-width: 1279.98px) {
+    .veto-drawer--responsive.veto-drawer--mini-breakpoint-md.veto-drawer--breakpoint-lg {
+        position: static;
+        width: var(--veto-drawer-mini-width, 4rem);
+        box-shadow: none;
+        transform: none;
+    }
+}
+
+/* ---------------------------------------------------------------- Scrim */
+
+.veto-drawer-scrim {
+    position: fixed;
+    inset: 0;
+    background-color: rgb(0 0 0 / 0.45);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 14;
+    transition: opacity var(--veto-transition);
+}
+
+.veto-drawer-scrim--visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/*
+ * A temporary drawer always overlays, so its scrim always applies. A responsive drawer only
+ * overlays below its own breakpoint, so only that scrim is dismissed above it - keyed to the
+ * drawer's actual breakpoint rather than a fixed width.
+ */
+@media (min-width: 640px) {
+    .veto-drawer-scrim--responsive.veto-drawer-scrim--breakpoint-sm { display: none; }
+}
+
+@media (min-width: 960px) {
+    .veto-drawer-scrim--responsive.veto-drawer-scrim--breakpoint-md { display: none; }
+}
+
+@media (min-width: 1280px) {
+    .veto-drawer-scrim--responsive.veto-drawer-scrim--breakpoint-lg { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-drawer,
+    .veto-drawer-scrim {
+        transition: none;
+    }
+}

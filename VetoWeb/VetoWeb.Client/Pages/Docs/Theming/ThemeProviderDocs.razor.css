@@ -1,0 +1,28 @@
+.theme-line {
+    font-size: var(--veto-font-size-md);
+}
+
+.theme-line strong {
+    font-family: var(--veto-font-mono);
+    color: var(--veto-color-primary);
+}
+
+.docs-heading {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.docs-prose {
+    max-width: 68ch;
+    margin: 0;
+    line-height: 1.65;
+    color: var(--veto-color-text-muted);
+}
+
+.docs-prose code {
+    font-family: var(--veto-font-mono);
+    font-size: 0.875em;
+    color: var(--veto-color-primary);
+}

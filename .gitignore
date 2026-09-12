@@ -1,0 +1,32 @@
+## .NET build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+
+## Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Test and tooling output
+[Tt]est[Rr]esult*/
+playwright-report/
+test-results/
+*.trx
+*.coverage
+coverage*.json
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+
+## OS noise
+Thumbs.db
+.DS_Store

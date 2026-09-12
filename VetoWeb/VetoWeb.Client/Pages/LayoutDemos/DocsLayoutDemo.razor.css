@@ -1,0 +1,110 @@
+.demo-root {
+    height: 100dvh;
+}
+
+.brand {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.demo-back {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+}
+
+.demo-back:hover {
+    color: var(--veto-color-primary);
+}
+
+.demo-title {
+    margin: 0;
+    font-size: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.demo-lead {
+    max-width: 60ch;
+    margin: 0;
+    line-height: 1.65;
+    color: var(--veto-color-text-muted);
+}
+
+.demo-heading {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.demo-prose {
+    max-width: 68ch;
+    margin: 0;
+    line-height: 1.7;
+    color: var(--veto-color-text-muted);
+}
+
+.toc {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-2);
+}
+
+.toc__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+}
+
+.toc__link {
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+    border-left: 2px solid var(--veto-color-border);
+    padding-left: var(--veto-space-3);
+    line-height: 1.5;
+}
+
+.toc__link:hover {
+    color: var(--veto-color-primary);
+    border-left-color: var(--veto-color-primary);
+}
+
+.demo-eyebrow {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 500;
+    color: var(--veto-color-primary);
+}
+
+.demo-note {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--veto-space-2) var(--veto-space-3);
+    font: inherit;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-full);
+    cursor: pointer;
+}
+
+.chip:hover { border-color: var(--veto-color-primary); }
+
+.chip:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.chip--on {
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+}

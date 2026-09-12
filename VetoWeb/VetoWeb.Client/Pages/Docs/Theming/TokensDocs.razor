@@ -1,0 +1,98 @@
+@page "/docs/theming/tokens"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Tokens — Veto</PageTitle>
+
+<DocsPage Eyebrow="Theming"
+          Title="Tokens"
+          Lead="Every value a Veto component uses is a CSS custom property. No component hard-codes a colour, a radius or a gap.">
+
+    <DemoBlock TestId="demo-colour"
+               Title="Colour"
+               Description="These swatches read the properties live, so switching theme updates them without any component re-rendering."
+               Code="@ColourCode">
+        <VetoGrid Columns="2" ColumnsSmall="3" ColumnsLarge="4" Gap="VetoSpacing.Medium" TestId="colour-tokens">
+            @foreach (var token in ColourTokens)
+            {
+                <VetoStack Gap="VetoSpacing.ExtraSmall">
+                    <span class="swatch" style="@($"background: var({token})")"></span>
+                    <code class="swatch__token">@token</code>
+                </VetoStack>
+            }
+        </VetoGrid>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-spacing"
+               Title="Spacing"
+               Description="A seven-step scale. The VetoSpacing enum maps onto it, so a Gap of Medium and a padding of Medium are the same distance."
+               Code="@SpacingCode">
+        <VetoStack Gap="VetoSpacing.Small" TestId="spacing-tokens">
+            @foreach (var (token, name) in SpacingTokens)
+            {
+                <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+                    <code class="scale__token">@token</code>
+                    <span class="scale__bar" style="@($"width: var({token})")"></span>
+                    <span class="scale__name">@name</span>
+                </VetoStack>
+            }
+        </VetoStack>
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">The full set</h2>
+        <p class="docs-prose">
+            Override any of these through <code>VetoTheme</code>, or set them yourself in CSS if you
+            need something the theme model does not expose yet.
+        </p>
+        <ParameterTable Title="Tokens" TestId="token-table" Rows="AllTokens" />
+    </VetoStack>
+
+</DocsPage>
+
+@code {
+    private static readonly string[] ColourTokens =
+    [
+        "--veto-color-primary", "--veto-color-primary-hover", "--veto-color-secondary",
+        "--veto-color-success", "--veto-color-warning", "--veto-color-danger",
+        "--veto-color-surface", "--veto-color-surface-raised", "--veto-color-text",
+        "--veto-color-text-muted", "--veto-color-border", "--veto-color-border-strong"
+    ];
+
+    private static readonly (string Token, string Name)[] SpacingTokens =
+    [
+        ("--veto-space-1", "ExtraSmall"),
+        ("--veto-space-2", "Small"),
+        ("--veto-space-3", "Medium"),
+        ("--veto-space-4", "Large"),
+        ("--veto-space-5", "ExtraLarge"),
+        ("--veto-space-6", "Huge")
+    ];
+
+    private static readonly ParameterTable.Row[] AllTokens =
+    [
+        new("--veto-color-*", "colour", "—", "Accents, surfaces, text and borders. Twelve in all."),
+        new("--veto-radius-sm/md/lg/full", "length", "4px / 6px / 10px / 9999px", "Corner radii."),
+        new("--veto-space-1…6", "length", "0.25rem … 2rem", "The spacing scale VetoSpacing maps onto."),
+        new("--veto-font-sans", "font stack", "system-ui, …", "Body and UI typeface."),
+        new("--veto-font-mono", "font stack", "ui-monospace, …", "Code typeface."),
+        new("--veto-font-size-sm/md/lg", "length", "0.8125 / 0.9375 / 1.0625rem", "Type scale."),
+        new("--veto-shadow-sm/md", "shadow", "—", "Elevation."),
+        new("--veto-focus-ring", "shadow", "—", "The focus ring every component uses."),
+        new("--veto-transition", "duration", "150ms ease", "Set to 0ms automatically under prefers-reduced-motion.")
+    ];
+
+    private const string ColourCode = """
+        /* Components only ever reference tokens */
+        .my-panel {
+            color: var(--veto-color-text);
+            background: var(--veto-color-surface-raised);
+            border: 1px solid var(--veto-color-border);
+            border-radius: var(--veto-radius-md);
+        }
+        """;
+
+    private const string SpacingCode = """
+        <VetoStack Gap="VetoSpacing.Medium">   <!-- --veto-space-3 -->
+        <VetoCard Padding="VetoSpacing.Large"> <!-- --veto-space-4 -->
+        """;
+}

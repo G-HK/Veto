@@ -1,0 +1,229 @@
+@page "/docs/components/button-group"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Button group — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Button group"
+          Lead="Related buttons clustered into one control - attached, sized together, and separated where the grouping needs saying out loud.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Basic"
+               Description="Buttons in a group share their touching borders and only the outer corners stay rounded, so the cluster reads as one segmented control rather than three buttons that happen to be adjacent. Give the group a Label whenever the buttons alone do not say what the cluster is for."
+               Code="@BasicCode">
+        <VetoButtonGroup TestId="basic" Label="View mode">
+            <VetoButton Variant="VetoVariant.Outlined" TestId="basic-day">Day</VetoButton>
+            <VetoButton Variant="VetoVariant.Outlined" TestId="basic-week">Week</VetoButton>
+            <VetoButton Variant="VetoVariant.Outlined" TestId="basic-month">Month</VetoButton>
+        </VetoButtonGroup>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes"
+               Description="Size is set once on the group and applied to every button inside it, so a group cannot come out uneven because one button was left at the default. Setting Size on the individual buttons as well still works and is sometimes clearer - but it is no longer something you have to remember."
+               Code="@SizeCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoButtonGroup TestId="size-sm" Size="VetoSize.Small" Label="Small">
+                <VetoButton Variant="VetoVariant.Outlined">Cut</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Copy</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Paste</VetoButton>
+            </VetoButtonGroup>
+            <VetoButtonGroup TestId="size-md" Label="Medium">
+                <VetoButton Variant="VetoVariant.Outlined">Cut</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Copy</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Paste</VetoButton>
+            </VetoButtonGroup>
+            <VetoButtonGroup TestId="size-lg" Size="VetoSize.Large" Label="Large">
+                <VetoButton Variant="VetoVariant.Outlined">Cut</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Copy</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Paste</VetoButton>
+            </VetoButtonGroup>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-separators"
+               Title="Separators: all of them, or only some"
+               Description="Separators draws a line between every child at once. For a line between only some of them - which is what clusters two related actions and then breaks before the next pair - leave it off and place a VetoButtonGroupSeparator exactly where the break belongs."
+               Code="@SeparatorCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoButtonGroup TestId="sep-all" Separators="true" Label="Every button separated">
+                <VetoButton Variant="VetoVariant.Outlined">One</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Two</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Three</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Four</VetoButton>
+            </VetoButtonGroup>
+
+            <VetoButtonGroup TestId="sep-some" Label="Separated in one place">
+                <VetoButton Variant="VetoVariant.Outlined">One</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Two</VetoButton>
+                <VetoButtonGroupSeparator TestId="sep-some-line" />
+                <VetoButton Variant="VetoVariant.Outlined">Three</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Four</VetoButton>
+            </VetoButtonGroup>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-text"
+               Title="A label inside the group"
+               Description="ButtonGroupText embeds a non-interactive label in the cluster. It takes the group's height and joins the shared border, but is drawn on a muted background so nobody mistakes it for a button that refuses to work. Use it to name a toolbar section, or to prefix a group with a unit."
+               Code="@TextCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoButtonGroup TestId="text-zoom" Label="Zoom">
+                <VetoButtonGroupText TestId="text-zoom-label">Zoom</VetoButtonGroupText>
+                <VetoButton Variant="VetoVariant.Outlined">50%</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">100%</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">200%</VetoButton>
+            </VetoButtonGroup>
+
+            <VetoButtonGroup TestId="text-unit" Label="Duration">
+                <VetoButton Variant="VetoVariant.Outlined">15</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">30</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">60</VetoButton>
+                <VetoButtonGroupText>minutes</VetoButtonGroupText>
+            </VetoButtonGroup>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-toolbar"
+               Title="A real toolbar"
+               Description="Several groups on one line, separated from each other - the pattern every rich-text editor and design tool converges on. Related actions cluster; unrelated ones are held apart. The outer container is the toolbar; the clusters inside it are groups, and a toolbar never contains another toolbar."
+               Code="@ToolbarCode">
+        <VetoButtonGroup TestId="toolbar" IsToolbar="true" Label="Formatting" Attached="false">
+            <VetoButtonGroup TestId="toolbar-history" Size="VetoSize.Small" Label="History">
+                <VetoIconButton Icon="@VetoIcons.Undo" Label="Undo" Variant="VetoVariant.Outlined" />
+                <VetoIconButton Icon="@VetoIcons.Redo" Label="Redo" Variant="VetoVariant.Outlined" />
+            </VetoButtonGroup>
+
+            <VetoButtonGroupSeparator />
+
+            <VetoButtonGroup TestId="toolbar-style" Size="VetoSize.Small" Label="Text style">
+                <VetoIconButton Icon="@VetoIcons.Bold" Label="Bold" Variant="VetoVariant.Outlined" />
+                <VetoIconButton Icon="@VetoIcons.Italic" Label="Italic" Variant="VetoVariant.Outlined" />
+                <VetoIconButton Icon="@VetoIcons.Underline" Label="Underline" Variant="VetoVariant.Outlined" />
+            </VetoButtonGroup>
+
+            <VetoButtonGroupSeparator />
+
+            <VetoButtonGroup TestId="toolbar-align" Size="VetoSize.Small" Label="Alignment">
+                <VetoIconButton Icon="@VetoIcons.AlignLeft" Label="Align left" Variant="VetoVariant.Outlined" />
+                <VetoIconButton Icon="@VetoIcons.AlignCenter" Label="Align centre" Variant="VetoVariant.Outlined" />
+                <VetoIconButton Icon="@VetoIcons.AlignRight" Label="Align right" Variant="VetoVariant.Outlined" />
+                <VetoIconButton Icon="@VetoIcons.AlignJustify" Label="Justify" Variant="VetoVariant.Outlined" />
+            </VetoButtonGroup>
+
+            <VetoButtonGroupSeparator />
+
+            <VetoButtonGroup TestId="toolbar-insert" Size="VetoSize.Small" Label="Insert">
+                <VetoIconButton Icon="@VetoIcons.Link" Label="Insert link" Variant="VetoVariant.Outlined" />
+                <VetoIconButton Icon="@VetoIcons.ListBullet" Label="Bulleted list" Variant="VetoVariant.Outlined" />
+            </VetoButtonGroup>
+        </VetoButtonGroup>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-layout"
+               Title="Detached, vertical and full width"
+               Description="Attached is what makes the cluster one control; turn it off for a plain spaced row. Orientation runs the group down instead of across, and FullWidth stretches it so the buttons share the space evenly."
+               Code="@LayoutCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Start">
+            <VetoButtonGroup TestId="detached" Attached="false" Label="Detached">
+                <VetoButton Variant="VetoVariant.Outlined">Cancel</VetoButton>
+                <VetoButton>Save</VetoButton>
+            </VetoButtonGroup>
+
+            <VetoButtonGroup TestId="vertical" Orientation="VetoOrientation.Vertical" Label="Vertical">
+                <VetoButton Variant="VetoVariant.Outlined">Top</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Middle</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">Bottom</VetoButton>
+            </VetoButtonGroup>
+
+            <VetoButtonGroup TestId="full-width" FullWidth="true" Label="Full width">
+                <VetoButton Variant="VetoVariant.Outlined">One third</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">One third</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined">One third</VetoButton>
+            </VetoButtonGroup>
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("ChildContent", "RenderFragment?", "null", "The buttons, separators and labels in the group."),
+        new("Size", "VetoSize", "Medium", "The height every button in the group takes."),
+        new("Orientation", "VetoOrientation", "Horizontal", "Whether the group runs across or down."),
+        new("Attached", "bool", "true", "Share touching borders and round only the outer corners."),
+        new("Separators", "bool", "false", "Draw a line between every child."),
+        new("FullWidth", "bool", "false", "Stretch to fill, buttons sharing the width evenly."),
+        new("Label", "string?", "null", "The group's accessible name."),
+        new("IsToolbar", "bool", "false", "Report as an ARIA toolbar rather than a group. For the outermost container only."),
+        new("VetoButtonGroupSeparator", "component", "—", "A line placed by hand, between only some of the buttons."),
+        new("VetoButtonGroupText", "component", "—", "A non-interactive label inside the group, on a muted background."),
+    ];
+
+    private const string BasicCode = """
+        <VetoButtonGroup Label="View mode">
+            <VetoButton Variant="VetoVariant.Outlined">Day</VetoButton>
+            <VetoButton Variant="VetoVariant.Outlined">Week</VetoButton>
+            <VetoButton Variant="VetoVariant.Outlined">Month</VetoButton>
+        </VetoButtonGroup>
+        """;
+
+    private const string SizeCode = """
+        @* Set once on the group - every button in it takes the same height. *@
+        <VetoButtonGroup Size="VetoSize.Small" Label="Small">
+            <VetoButton Variant="VetoVariant.Outlined">Cut</VetoButton>
+            <VetoButton Variant="VetoVariant.Outlined">Copy</VetoButton>
+        </VetoButtonGroup>
+        """;
+
+    private const string SeparatorCode = """
+        @* Between every button: *@
+        <VetoButtonGroup Separators="true">
+            <VetoButton Variant="VetoVariant.Outlined">One</VetoButton>
+            <VetoButton Variant="VetoVariant.Outlined">Two</VetoButton>
+        </VetoButtonGroup>
+
+        @* Between only some of them: *@
+        <VetoButtonGroup>
+            <VetoButton Variant="VetoVariant.Outlined">One</VetoButton>
+            <VetoButton Variant="VetoVariant.Outlined">Two</VetoButton>
+            <VetoButtonGroupSeparator />
+            <VetoButton Variant="VetoVariant.Outlined">Three</VetoButton>
+        </VetoButtonGroup>
+        """;
+
+    private const string TextCode = """
+        <VetoButtonGroup Label="Zoom">
+            <VetoButtonGroupText>Zoom</VetoButtonGroupText>
+            <VetoButton Variant="VetoVariant.Outlined">50%</VetoButton>
+            <VetoButton Variant="VetoVariant.Outlined">100%</VetoButton>
+        </VetoButtonGroup>
+        """;
+
+    private const string ToolbarCode = """
+        <VetoButtonGroup IsToolbar="true" Attached="false" Label="Formatting">
+
+            <VetoButtonGroup Size="VetoSize.Small" Label="History">
+                <VetoIconButton Icon="@VetoIcons.Undo" Label="Undo" Variant="VetoVariant.Outlined" />
+                <VetoIconButton Icon="@VetoIcons.Redo" Label="Redo" Variant="VetoVariant.Outlined" />
+            </VetoButtonGroup>
+
+            <VetoButtonGroupSeparator />
+
+            <VetoButtonGroup Size="VetoSize.Small" Label="Text style">
+                <VetoIconButton Icon="@VetoIcons.Bold" Label="Bold" Variant="VetoVariant.Outlined" />
+                <VetoIconButton Icon="@VetoIcons.Italic" Label="Italic" Variant="VetoVariant.Outlined" />
+            </VetoButtonGroup>
+
+        </VetoButtonGroup>
+        """;
+
+    private const string LayoutCode = """
+        <VetoButtonGroup Attached="false">...</VetoButtonGroup>
+        <VetoButtonGroup Orientation="VetoOrientation.Vertical">...</VetoButtonGroup>
+        <VetoButtonGroup FullWidth="true">...</VetoButtonGroup>
+        """;
+}

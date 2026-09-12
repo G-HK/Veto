@@ -1,0 +1,246 @@
+@page "/docs/components/rating"
+@rendermode InteractiveWebAssembly
+@using System.ComponentModel.DataAnnotations
+@using Veto.Components.Rating
+
+<PageTitle>Rating — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Rating"
+          Lead="A row of icons the user picks a score from - stars by default, any icon you like, and halves that work for all of them.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Basic"
+               Description="Six stars out of the box. Click one to score, click it again to clear. The whole row is a single tab stop that reports itself as a slider, so the arrow keys work and a screen reader hears '3 of 6' once rather than six unrelated buttons."
+               Code="@BasicCode">
+        <VetoStack Gap="VetoSpacing.Small" Align="VetoAlign.Start">
+            <VetoRating TValue="int"
+                        TestId="basic"
+                        Label="How was it?"
+                        ShowValue="true"
+                        HelperText="Six stars by default; Max changes that."
+                        @bind-Value="_basic" />
+            <span class="demo-value" data-testid="basic-output">@_basic</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-max"
+               Title="How many icons"
+               Description="Max is the length of the row and so the top score. Five for the familiar scale, ten for a finer one, three when there are only three answers."
+               Code="@MaxCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoRating TValue="int" TestId="max-3" Max="3" Label="Out of three" ShowValue="true" @bind-Value="_outOfThree" />
+            <VetoRating TValue="int" TestId="max-10" Max="10" Label="Out of ten" ShowValue="true" @bind-Value="_outOfTen" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-half"
+               Title="Half scores"
+               Description="Set AllowHalf and bind to a fractional type, and the left half of an icon becomes its own target. The half is drawn by clipping a filled copy of the icon over an empty one, so it works for every icon rather than only the ones that ship a purpose-drawn half glyph - the hearts below prove it."
+               Code="@HalfCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoRating TValue="double"
+                        TestId="half"
+                        AllowHalf="true"
+                        Label="Stars"
+                        ShowValue="true"
+                        @bind-Value="_half" />
+            <VetoRating TValue="double"
+                        TestId="half-heart"
+                        AllowHalf="true"
+                        Icon="@VetoIcons.Heart"
+                        Color="VetoColor.Danger"
+                        Label="Hearts"
+                        ShowValue="true"
+                        @bind-Value="_halfHeart" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-icons"
+               Title="Any icon"
+               Description="Icon takes any SVG markup - a VetoIcons constant or your own. EmptyIcon draws the unearned slots differently when the shape alone should say 'not yet'."
+               Code="@IconsCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoRating TValue="int" TestId="icon-bolt" Icon="@VetoIcons.Bolt" Color="VetoColor.Warning" Label="Bolts" @bind-Value="_scratch" />
+            <VetoRating TValue="int" TestId="icon-circle" Icon="@VetoIcons.Circle" Color="VetoColor.Primary" Label="Pips" @bind-Value="_scratch" />
+            <VetoRating TValue="int" TestId="icon-empty" Icon="@VetoIcons.Star" EmptyIcon="@VetoIcons.Circle" Label="Stars over pips" @bind-Value="_scratch" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes and colours"
+               Description="Three sizes and the library's colour roles. The icons scale with the row's font size, so a rating sits correctly inside any text."
+               Code="@SizesCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoRating TValue="int" TestId="size-sm" Size="VetoSize.Small" Label="Small" @bind-Value="_scratch" />
+            <VetoRating TValue="int" Size="VetoSize.Medium" Label="Medium" @bind-Value="_scratch" />
+            <VetoRating TValue="int" TestId="size-lg" Size="VetoSize.Large" Label="Large" @bind-Value="_scratch" />
+            <VetoRating TValue="int" TestId="color-success" Color="VetoColor.Success" Label="Success" @bind-Value="_scratch" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-labels"
+               Title="Named scores"
+               Description="ItemLabels names each score. The name goes into the icon's tooltip, its accessible name, and the value a screen reader announces - a number out of six says much less than 'Great'."
+               Code="@LabelsCode">
+        <VetoRating TValue="int"
+                    TestId="named"
+                    Max="5"
+                    ItemLabels="Names"
+                    ShowValue="true"
+                    Label="Service"
+                    @bind-Value="_named" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-states"
+               Title="Read-only and disabled"
+               Description="A read-only rating is the common case - most ratings on a page are being displayed, not collected. Both drop their hit targets entirely rather than merely ignoring clicks."
+               Code="@StatesCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoRating TValue="double" TestId="readonly" AllowHalf="true" ReadOnly="true" ShowValue="true" Label="Average score" @bind-Value="_average" />
+            <VetoRating TValue="int" TestId="disabled" Disabled="true" Label="Disabled" @bind-Value="_locked" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-validation"
+               Title="Validation"
+               Description="Inside an EditForm the rating behaves like any other input: the model's attributes decide what counts, and the message replaces the helper text."
+               Code="@ValidationCode">
+        <EditForm Model="_form" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+                <VetoRating TestId="score"
+                            Label="Score this release"
+                            Required="true"
+                            HelperText="Pick at least one star."
+                            @bind-Value="_form.Score" />
+                <button class="demo-submit" type="submit" data-testid="submit">Save</button>
+                <span class="demo-value" data-testid="submit-value">@_submitted</span>
+            </VetoStack>
+        </EditForm>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private int _basic = 3;
+    private int _outOfThree = 2;
+    private int _outOfTen = 7;
+    private double _half = 2.5;
+    private double _halfHeart = 3.5;
+    private int _scratch = 4;
+    private int _named = 4;
+    private double _average = 4.5;
+    private int _locked = 2;
+    private readonly FormModel _form = new();
+    private string? _submitted;
+
+    private static readonly string[] Names = ["Terrible", "Poor", "Fair", "Good", "Great"];
+
+    private void OnValidSubmit () => _submitted = $"Saved: {_form.Score}";
+
+    private sealed class FormModel
+    {
+        [Range( 1, 6, ErrorMessage = "Pick at least one star." )]
+        public int Score { get; set; }
+    }
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Value", "TValue", "default", "The score. Use @bind-Value. TValue is any number type."),
+        new("Max", "int", "6", "How many icons the row holds, and so the top score."),
+        new("Icon", "string", "VetoIcons.Star", "The icon the row is drawn from - any SVG markup."),
+        new("EmptyIcon", "string?", "null", "A different icon for the unearned slots. Defaults to Icon."),
+        new("AllowHalf", "bool", "false", "Allow half scores. Needs a fractional TValue such as double."),
+        new("Clearable", "bool", "true", "Picking the current score again clears it back to zero."),
+        new("HoverPreview", "bool", "true", "Preview the score under the pointer before it is picked."),
+        new("ShowValue", "bool", "false", "Print the score after the row."),
+        new("ItemLabels", "IReadOnlyList<string>?", "null", "A name per score, used for tooltips and for what is announced."),
+        new("Color", "VetoColor", "Warning", "The colour the earned icons take."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Disabled / ReadOnly / Required", "bool", "false", "The usual input states."),
+        new("OnValueChanged", "EventCallback<TValue>", "—", "Raised after the score changes."),
+        new("SetValueAsync(double)", "Task", "—", "Set the score from code; respects Disabled and ReadOnly.")
+    ];
+
+    private const string BasicCode = """
+        <VetoRating TValue="int"
+                    Label="How was it?"
+                    ShowValue="true"
+                    @bind-Value="_score" />
+        """;
+
+    private const string MaxCode = """
+        <VetoRating TValue="int" Max="3" Label="Out of three" @bind-Value="_a" />
+        <VetoRating TValue="int" Max="10" Label="Out of ten" @bind-Value="_b" />
+        """;
+
+    private const string HalfCode = """
+        <VetoRating TValue="double"
+                    AllowHalf="true"
+                    Label="Stars"
+                    ShowValue="true"
+                    @bind-Value="_score" />
+
+        <VetoRating TValue="double"
+                    AllowHalf="true"
+                    Icon="@VetoIcons.Heart"
+                    Color="VetoColor.Danger"
+                    Label="Hearts"
+                    @bind-Value="_hearts" />
+        """;
+
+    private const string IconsCode = """
+        <VetoRating TValue="int" Icon="@VetoIcons.Bolt" Color="VetoColor.Warning" @bind-Value="_v" />
+        <VetoRating TValue="int" Icon="@VetoIcons.Circle" Color="VetoColor.Primary" @bind-Value="_v" />
+        <VetoRating TValue="int" Icon="@VetoIcons.Star" EmptyIcon="@VetoIcons.Circle" @bind-Value="_v" />
+        """;
+
+    private const string SizesCode = """
+        <VetoRating TValue="int" Size="VetoSize.Small" Label="Small" @bind-Value="_v" />
+        <VetoRating TValue="int" Size="VetoSize.Large" Label="Large" @bind-Value="_v" />
+        <VetoRating TValue="int" Color="VetoColor.Success" Label="Success" @bind-Value="_v" />
+        """;
+
+    private const string LabelsCode = """
+        <VetoRating TValue="int"
+                    Max="5"
+                    ItemLabels="Names"
+                    ShowValue="true"
+                    Label="Service"
+                    @bind-Value="_score" />
+
+        @code {
+            private static readonly string[] Names =
+                ["Terrible", "Poor", "Fair", "Good", "Great"];
+        }
+        """;
+
+    private const string StatesCode = """
+        <VetoRating TValue="double" AllowHalf="true" ReadOnly="true" @bind-Value="_average" />
+        <VetoRating TValue="int" Disabled="true" @bind-Value="_v" />
+        """;
+
+    private const string ValidationCode = """
+        <EditForm Model="_form" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+
+            <VetoRating Label="Score this release"
+                        Required="true"
+                        HelperText="Pick at least one star."
+                        @bind-Value="_form.Score" />
+
+            <button type="submit">Save</button>
+        </EditForm>
+
+        @code {
+            private sealed class FormModel
+            {
+                [Range(1, 6, ErrorMessage = "Pick at least one star.")]
+                public int Score { get; set; }
+            }
+        }
+        """;
+}

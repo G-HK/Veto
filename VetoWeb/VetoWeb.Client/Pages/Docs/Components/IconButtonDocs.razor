@@ -1,0 +1,105 @@
+@page "/docs/components/icon-button"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Icon button — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Icon button"
+          Lead="A button whose entire content is an icon. Always give it a label - it is the only thing a screen reader has to go on.">
+
+    <DemoBlock TestId="demo-variants"
+               Title="Variants and colours"
+               Description="Transparent by default, so it sits comfortably in a toolbar. Outlined and filled give it more presence when it is the primary action."
+               Code="@VariantsCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+            <VetoIconButton Icon="@VetoIcons.Search" Label="Search" TestId="text" />
+            <VetoIconButton Icon="@VetoIcons.Plus" Label="Add" Variant="VetoVariant.Outlined" TestId="outlined" />
+            <VetoIconButton Icon="@VetoIcons.Check" Label="Confirm" Variant="VetoVariant.Filled" TestId="filled" />
+            <VetoIconButton Icon="@VetoIcons.Trash" Label="Delete" Color="VetoColor.Danger" TestId="danger" />
+            <VetoIconButton Icon="@VetoIcons.User" Label="Account" Round="true" Variant="VetoVariant.Outlined" TestId="round" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes"
+               Description="Every size keeps a target of at least 2rem square, so the button stays comfortably tappable."
+               Code="@SizesCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+            <VetoIconButton Icon="@VetoIcons.Settings" Label="Settings" Size="VetoSize.Small" TestId="small" />
+            <VetoIconButton Icon="@VetoIcons.Settings" Label="Settings" Size="VetoSize.Medium" />
+            <VetoIconButton Icon="@VetoIcons.Settings" Label="Settings" Size="VetoSize.Large" TestId="large" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-toggle"
+               Title="As a toggle"
+               Description="Setting Pressed turns the button into a toggle and reports its state through aria-pressed, so assistive technology announces it as on or off."
+               Code="@ToggleCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+            <VetoIconButton Icon="@VetoIcons.Bell"
+                            Label="Notifications"
+                            TestId="toggle"
+                            Pressed="_on"
+                            OnClick="Toggle" />
+            <span class="demo-value" data-testid="toggle-value">@(_on ? "On" : "Off")</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-link"
+               Title="As a link"
+               Description="Give it an Href and it renders an anchor instead of a button, so navigation stays real navigation - middle-click, open in new tab and the status bar all keep working."
+               Code="@LinkCode">
+        <VetoIconButton Icon="@VetoIcons.ExternalLink"
+                        Label="Open documentation"
+                        TestId="link"
+                        Href="/docs/usage" />
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private bool _on;
+
+    private void Toggle () => _on = !_on;
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Icon", "string?", "null", "The icon's SVG markup, normally a VetoIcons constant."),
+        new("Label", "string?", "null", "Accessible name and tooltip. Always supply one."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Variant", "VetoVariant", "Text", "Text, Outlined or Filled."),
+        new("Color", "VetoColor", "Neutral", "The colour role."),
+        new("Round", "bool", "false", "Renders a circle rather than a rounded square."),
+        new("Pressed", "bool?", "null", "Makes it a toggle and sets aria-pressed. Null for a plain button."),
+        new("Disabled", "bool", "false", "Disables the button."),
+        new("Href", "string?", "null", "Renders an anchor and navigates instead of raising OnClick."),
+        new("OnClick", "EventCallback<MouseEventArgs>", "—", "Raised when activated.")
+    ];
+
+    private const string VariantsCode = """
+        <VetoIconButton Icon="@VetoIcons.Search" Label="Search" />
+        <VetoIconButton Icon="@VetoIcons.Plus" Label="Add" Variant="VetoVariant.Outlined" />
+        <VetoIconButton Icon="@VetoIcons.Check" Label="Confirm" Variant="VetoVariant.Filled" />
+        <VetoIconButton Icon="@VetoIcons.Trash" Label="Delete" Color="VetoColor.Danger" />
+        """;
+
+    private const string SizesCode = """
+        <VetoIconButton Icon="@VetoIcons.Settings" Label="Settings" Size="VetoSize.Small" />
+        <VetoIconButton Icon="@VetoIcons.Settings" Label="Settings" Size="VetoSize.Large" />
+        """;
+
+    private const string ToggleCode = """
+        <VetoIconButton Icon="@VetoIcons.Bell"
+                        Label="Notifications"
+                        Pressed="_on"
+                        OnClick="() => _on = !_on" />
+        """;
+
+    private const string LinkCode = """
+        <VetoIconButton Icon="@VetoIcons.ExternalLink"
+                        Label="Open documentation"
+                        Href="/docs/usage" />
+        """;
+}

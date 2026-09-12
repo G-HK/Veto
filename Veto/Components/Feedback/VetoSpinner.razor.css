@@ -1,0 +1,48 @@
+/* VetoSpinner - an indeterminate wait. */
+
+.veto-spinner {
+    display: inline-block;
+    flex: 0 0 auto;
+    color: currentColor;
+}
+
+.veto-spinner__track {
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: var(--veto-spinner-thickness, 2px) solid color-mix(in srgb, currentColor 22%, transparent);
+    /* One side in full colour is what makes the rotation visible. */
+    border-top-color: currentColor;
+    border-radius: var(--veto-radius-full);
+    animation: veto-spinner-turn 720ms linear infinite;
+}
+
+.veto-spinner--sm { width: 0.875rem; height: 0.875rem; }
+.veto-spinner--md { width: 1.25rem; height: 1.25rem; }
+.veto-spinner--lg { width: 2rem; height: 2rem; }
+
+.veto-spinner--primary { color: var(--veto-color-primary); }
+.veto-spinner--secondary { color: var(--veto-color-secondary); }
+.veto-spinner--success { color: var(--veto-color-success); }
+.veto-spinner--warning { color: var(--veto-color-warning); }
+.veto-spinner--danger { color: var(--veto-color-danger); }
+.veto-spinner--neutral { color: var(--veto-color-text-muted); }
+
+@keyframes veto-spinner-turn {
+    to { transform: rotate(360deg); }
+}
+
+/*
+ * Reduced motion still needs to show that something is happening, so the spin becomes a pulse
+ * rather than stopping dead and looking like a broken ring.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .veto-spinner__track {
+        animation: veto-spinner-pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes veto-spinner-pulse {
+        50% { opacity: 0.35; }
+    }
+}

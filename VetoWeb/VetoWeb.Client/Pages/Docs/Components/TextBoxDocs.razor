@@ -1,0 +1,190 @@
+@page "/docs/components/text-box"
+@rendermode InteractiveWebAssembly
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>Text box — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Text box"
+          Lead="A single-line input with a label, helper text and validation, generic over the value it binds to.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Basic"
+               Description="A label, a placeholder and helper text. The label is wired to the input, so clicking it focuses the field."
+               Code="@BasicCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <VetoTextBox TValue="string"
+                         TestId="basic"
+                         Label="Project name"
+                         Placeholder="e.g. Veto"
+                         HelperText="Shown until the field becomes invalid."
+                         @bind-Value="_basic" />
+            <span class="demo-value" data-testid="basic-value">@(_basic ?? "null")</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-immediate"
+               Title="Binding on every keystroke"
+               Description="By default the value updates when the field loses focus, matching a plain two-way binding. Immediate updates as you type - what you want for a search box."
+               Code="@ImmediateCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <VetoTextBox TValue="string"
+                         TestId="immediate"
+                         Label="Search"
+                         Immediate="true"
+                         Placeholder="Type here"
+                         @bind-Value="_immediate" />
+            <span class="demo-value" data-testid="immediate-value">@(_immediate ?? "null")</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-typed"
+               Title="Any bindable type"
+               Description="The component is generic. Bind it to an int?, a DateOnly, a Guid or an enum and input is converted and rejected for you."
+               Code="@TypedCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" Align="VetoAlign.Start">
+            <VetoTextBox TValue="int?" TestId="number" Label="Quantity" Type="number" @bind-Value="_quantity" />
+            <VetoTextBox TValue="DateOnly?" TestId="date" Label="Due" Type="date" @bind-Value="_due" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes and variants"
+               Description="Three sizes and three visual treatments, all driven by modifier classes rather than inline styles."
+               Code="@SizesCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+                <VetoTextBox TValue="string" TestId="size-sm" Label="Small" Size="VetoSize.Small" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" Label="Medium" Size="VetoSize.Medium" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" TestId="size-lg" Label="Large" Size="VetoSize.Large" @bind-Value="_scratch" />
+            </VetoStack>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+                <VetoTextBox TValue="string" Label="Outlined" Variant="VetoVariant.Outlined" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" TestId="variant-filled" Label="Filled" Variant="VetoVariant.Filled" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" TestId="variant-text" Label="Text" Variant="VetoVariant.Text" @bind-Value="_scratch" />
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-states"
+               Title="Disabled and read-only"
+               Description="Disabled cannot be focused. Read-only can be focused and copied from, but not edited - the right choice for a value the user needs to read."
+               Code="@StatesCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+            <VetoTextBox TValue="string" TestId="disabled" Label="Disabled" Disabled="true" @bind-Value="_fixed" />
+            <VetoTextBox TValue="string" TestId="readonly" Label="Read-only" ReadOnly="true" @bind-Value="_fixed" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-validation"
+               Title="Validation"
+               Description="Inside an EditForm the field picks up the model's validation attributes. An invalid field sets aria-invalid, replaces its helper text with the message, and announces it."
+               Code="@ValidationCode">
+        <EditForm Model="_form" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+                <VetoTextBox TestId="username"
+                             Label="Username"
+                             Required="true"
+                             HelperText="Between 3 and 20 characters."
+                             @bind-Value="_form.Username" />
+                <button class="demo-submit" type="submit" data-testid="submit">Save</button>
+                <span class="demo-value" data-testid="submit-value">@_submitted</span>
+            </VetoStack>
+        </EditForm>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private string? _basic;
+    private string? _immediate;
+    private string? _scratch;
+    private string _fixed = "Cannot edit this";
+    private int? _quantity = 1;
+    private DateOnly? _due = new(2026, 9, 30);
+    private readonly FormModel _form = new();
+    private string? _submitted;
+
+    private void OnValidSubmit () => _submitted = $"Saved: {_form.Username}";
+
+    private sealed class FormModel
+    {
+        [Required( ErrorMessage = "Username is required." )]
+        [StringLength( 20, MinimumLength = 3, ErrorMessage = "Username must be 3-20 characters." )]
+        public string? Username { get; set; }
+    }
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Value", "TValue?", "default", "The bound value. Use @bind-Value."),
+        new("Label", "string?", "null", "Text for the field's label. No label element is rendered without it."),
+        new("HelperText", "string?", "null", "Guidance under the field, replaced by the validation message while invalid."),
+        new("Placeholder", "string?", "null", "Shown while the field is empty."),
+        new("Type", "string", "\"text\"", "The input's type: text, email, password, search, tel, url, number, date."),
+        new("Immediate", "bool", "false", "Update the bound value on every keystroke instead of on blur."),
+        new("Format", "string?", "null", "Format used to convert the value to and from its string form."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Variant", "VetoVariant", "Outlined", "Outlined, Filled or Text."),
+        new("Disabled", "bool", "false", "Cannot be focused or edited."),
+        new("ReadOnly", "bool", "false", "Can be focused and copied from, but not edited."),
+        new("Required", "bool", "false", "Renders the required marker and sets aria-required. Enforcement comes from the model."),
+        new("OnValueChanged", "EventCallback<TValue?>", "—", "Raised after the bound value changes.")
+    ];
+
+    private const string BasicCode = """
+        <VetoTextBox TValue="string"
+                     Label="Project name"
+                     Placeholder="e.g. Veto"
+                     HelperText="Shown until the field becomes invalid."
+                     @bind-Value="_name" />
+        """;
+
+    private const string ImmediateCode = """
+        <VetoTextBox TValue="string"
+                     Label="Search"
+                     Immediate="true"
+                     @bind-Value="_query" />
+        """;
+
+    private const string TypedCode = """
+        <VetoTextBox TValue="int?" Label="Quantity" Type="number" @bind-Value="_quantity" />
+        <VetoTextBox TValue="DateOnly?" Label="Due" Type="date" @bind-Value="_due" />
+        """;
+
+    private const string SizesCode = """
+        <VetoTextBox TValue="string" Label="Small" Size="VetoSize.Small" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Filled" Variant="VetoVariant.Filled" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Text" Variant="VetoVariant.Text" @bind-Value="_v" />
+        """;
+
+    private const string StatesCode = """
+        <VetoTextBox TValue="string" Label="Disabled" Disabled="true" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Read-only" ReadOnly="true" @bind-Value="_v" />
+        """;
+
+    private const string ValidationCode = """
+        <EditForm Model="_form" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+
+            <VetoTextBox Label="Username"
+                         Required="true"
+                         HelperText="Between 3 and 20 characters."
+                         @bind-Value="_form.Username" />
+
+            <button type="submit">Save</button>
+        </EditForm>
+
+        @code {
+            private sealed class FormModel
+            {
+                [Required(ErrorMessage = "Username is required.")]
+                [StringLength(20, MinimumLength = 3,
+                    ErrorMessage = "Username must be 3-20 characters.")]
+                public string? Username { get; set; }
+            }
+        }
+        """;
+}

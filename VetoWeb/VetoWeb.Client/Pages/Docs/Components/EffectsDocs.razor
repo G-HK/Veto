@@ -1,0 +1,132 @@
+@page "/docs/components/effects"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.Buttons
+@using Veto.Components.TextBox
+
+<PageTitle>Glow and ping — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Glow and ping"
+          Lead="Two ways of saying look here, available on every Veto component rather than on a chosen few.">
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <p class="docs-prose">
+            <code>Glow</code> and <code>Ping</code> are parameters on the base class every component
+            derives from, so they are already on the button, the text box, the card and everything
+            else - including components written after this page. Both are off by default. A glow
+            means something; a page where everything glows means nothing.
+        </p>
+    </VetoStack>
+
+    <DemoBlock TestId="demo-glow"
+               Title="Breathing glow"
+               Description="A neon halo that fades in and out. On a component with a colour role of its own, it takes that role's colour without being asked."
+               Code="@GlowCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true">
+            <VetoButton Glow="true" TestId="glow-primary">Primary</VetoButton>
+            <VetoButton Glow="true" Color="VetoColor.Danger" TestId="glow-danger">Danger</VetoButton>
+            <VetoButton Glow="true" Color="VetoColor.Success" Variant="VetoVariant.Outlined" TestId="glow-success">Success</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-glow-color"
+               Title="Any colour you like"
+               Description="GlowColor takes any CSS colour and overrides both the role and the theme."
+               Code="@GlowColorCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true">
+            <VetoButton Glow="true" GlowColor="#22d3ee" Variant="VetoVariant.Outlined" TestId="glow-cyan">Cyan</VetoButton>
+            <VetoButton Glow="true" GlowColor="#a855f7" Variant="VetoVariant.Outlined" TestId="glow-violet">Violet</VetoButton>
+            <VetoButton Glow="true" GlowColor="#f59e0b" Variant="VetoVariant.Outlined" TestId="glow-amber">Amber</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-ping"
+               Title="Ping ring"
+               Description="A ring expands out of the border, fades, and rests before the next one. For something that arrived while the reader was looking elsewhere."
+               Code="@PingCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Huge" Wrap="true" Align="VetoAlign.Center">
+            <VetoButton Ping="true" TestId="ping-button">
+                Inbox (3)
+            </VetoButton>
+            <VetoIconButton Icon="@VetoIcons.Bell" Ping="true" PingColor="#f43f5e" Label="Notifications" TestId="ping-icon" />
+            <VetoButton Ping="true" Glow="true" Color="VetoColor.Warning" Variant="VetoVariant.Outlined" TestId="ping-both">
+                Both at once
+            </VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-inputs"
+               Title="Not only buttons"
+               Description="The same two parameters are on every component. Here they are on a text box and a card."
+               Code="@InputsCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoTextBox TValue="string" @bind-Value="_name"
+                         Label="Your name"
+                         Placeholder="Start typing"
+                         Glow="true"
+                         TestId="glow-textbox" />
+
+            <VetoCard Title="Something changed" Elevation="VetoElevation.Outlined" Padding="VetoSpacing.ExtraLarge"
+                      Ping="true" PingColor="#22c55e" TestId="ping-card">
+                A card can ask for attention too.
+            </VetoCard>
+        </VetoStack>
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">What to know before using them</h2>
+        <p class="docs-prose">
+            Both effects are drawn on a pseudo-element of the component's root, which keeps them out
+            of the way of whatever box-shadow that component already uses for elevation and focus.
+            The ring is drawn outside the border, so an ancestor with <code>overflow: hidden</code>
+            will cut it off.
+        </p>
+        <p class="docs-prose">
+            Neither effect is readable by a screen reader. A ping is a way of drawing the eye to
+            something that is <em>also</em> said in words - a count, a status, a message - never the
+            only place the news appears.
+        </p>
+        <p class="docs-prose">
+            Under <code>prefers-reduced-motion</code> both stop moving but stay on screen, holding a
+            steady glow and a steady ring. Removing them outright would take the message away along
+            with the movement, which is not what that preference asks for.
+        </p>
+    </VetoStack>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private string? _name;
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Glow", "bool", "false", "Surrounds the component with a neon glow that breathes in and out."),
+        new("GlowColor", "string?", "null", "Any CSS colour. Defaults to the component's colour role, then to the theme accent."),
+        new("Ping", "bool", "false", "Sends a ring expanding out of the border and fading, over and over."),
+        new("PingColor", "string?", "null", "The ring's colour. Defaults the same way the glow does.")
+    ];
+
+    private const string GlowCode = """
+        <VetoButton Glow="true">Primary</VetoButton>
+        <VetoButton Glow="true" Color="VetoColor.Danger">Danger</VetoButton>
+        """;
+
+    private const string GlowColorCode = """
+        <VetoButton Glow="true" GlowColor="#22d3ee" Variant="VetoVariant.Outlined">Cyan</VetoButton>
+        """;
+
+    private const string PingCode = """
+        <VetoButton Ping="true">Inbox (3)</VetoButton>
+        <VetoIconButton Icon="@VetoIcons.Bell" Ping="true" PingColor="#f43f5e" Label="Notifications" />
+        """;
+
+    private const string InputsCode = """
+        <VetoTextBox TValue="string" @bind-Value="_name" Label="Your name" Glow="true" />
+
+        <VetoCard Title="Something changed" Ping="true" PingColor="#22c55e">
+            A card can ask for attention too.
+        </VetoCard>
+        """;
+}

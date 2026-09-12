@@ -1,0 +1,160 @@
+@page "/layouts/dashboard"
+@page "/layouts/dashboard/{Section}"
+@layout BareLayout
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Dashboard layout — Veto</PageTitle>
+
+<div class="demo-root" data-testid="page" data-ready="@(_interactive ? "true" : null)">
+    <VetoDashboardLayout TestId="layout" Title="Operations" Items="Nav">
+        <Toolbar>
+            <VetoIconButton Icon="@VetoIcons.Search" Label="Search" TestId="tool-search" OnClick='() => Note("Search")' />
+            <VetoIconButton Icon="@VetoIcons.Bell" Label="Alerts" TestId="tool-alerts" OnClick='() => Note("Alerts")' />
+            <VetoThemeToggle />
+        </Toolbar>
+
+        <ChildContent>
+            <VetoStack Gap="VetoSpacing.Large">
+                <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center" Gap="VetoSpacing.Medium" Wrap="true">
+                    <a class="demo-back" href="/docs/layouts">&larr; Back to layouts</a>
+                    <VetoSpacer />
+                    <span class="demo-hint" data-testid="status">@(_note ?? "Resize the window: four columns, then two, then one.")</span>
+                </VetoStack>
+
+                @if (CurrentSection is "overview")
+                {
+                    <VetoDashboard Columns="1" ColumnsMedium="2" ColumnsLarge="4" TestId="grid">
+                        <VetoDashboardTile Title="Requests" Icon="@VetoIcons.Terminal" TestId="tile-requests">
+                            <VetoStack Gap="VetoSpacing.ExtraSmall">
+                                <span class="metric">18.4k</span>
+                                <span class="metric__delta metric__delta--up">+12% this week</span>
+                            </VetoStack>
+                        </VetoDashboardTile>
+
+                        <VetoDashboardTile Title="Errors" Icon="@VetoIcons.Warning" TestId="tile-errors">
+                            <VetoStack Gap="VetoSpacing.ExtraSmall">
+                                <span class="metric">37</span>
+                                <span class="metric__delta metric__delta--down">-4% this week</span>
+                            </VetoStack>
+                        </VetoDashboardTile>
+
+                        <VetoDashboardTile Title="Throughput"
+                                           Icon="@VetoIcons.Grid"
+                                           ColumnSpanMedium="2"
+                                           TestId="tile-throughput">
+                            <Actions>
+                                <VetoIconButton Icon="@VetoIcons.Settings"
+                                                Label="Configure throughput"
+                                                Size="VetoSize.Small"
+                                                TestId="tile-configure"
+                                                OnClick='() => Note("Configure throughput")' />
+                            </Actions>
+                            <ChildContent>
+                                <div class="spark" role="img" aria-label="Throughput over the last twelve hours">
+                                    @foreach (var value in Series)
+                                    {
+                                        <span class="spark__bar" style="@($"height: {value}%")"></span>
+                                    }
+                                </div>
+                            </ChildContent>
+                        </VetoDashboardTile>
+
+                        <VetoDashboardTile Title="Recent deploys"
+                                           Icon="@VetoIcons.Document"
+                                           ColumnSpanMedium="2"
+                                           RowSpan="2"
+                                           TestId="tile-deploys">
+                            <VetoStack Gap="VetoSpacing.Small">
+                                @foreach (var deploy in Deploys)
+                                {
+                                    <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center" Gap="VetoSpacing.Small">
+                                        <VetoIcon Icon="@(deploy.Ok ? VetoIcons.Success : VetoIcons.Error)"
+                                                  Class="@(deploy.Ok ? "row__ok" : "row__bad")" />
+                                        <span class="row__name">@deploy.Name</span>
+                                        <VetoSpacer />
+                                        <span class="row__when">@deploy.When</span>
+                                    </VetoStack>
+                                }
+                            </VetoStack>
+                        </VetoDashboardTile>
+
+                        <VetoDashboardTile Title="Queue depth" Icon="@VetoIcons.Folder" TestId="tile-queue">
+                            <span class="metric">240</span>
+                        </VetoDashboardTile>
+
+                        <VetoDashboardTile Title="Uptime" Icon="@VetoIcons.Success" TestId="tile-uptime">
+                            <span class="metric">99.98%</span>
+                        </VetoDashboardTile>
+                    </VetoDashboard>
+                }
+                else
+                {
+                    <VetoCard Title="@SectionTitle" TestId="section-panel">
+                        <VetoStack Gap="VetoSpacing.Medium">
+                            <p class="demo-prose">
+                                Every entry in the navigation is a real route, so the drawer's
+                                active-page highlight and the browser's back button both behave
+                                the way they would in a real app.
+                            </p>
+                            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                                <a class="chip" href="/layouts/dashboard">Back to the overview</a>
+                            </VetoStack>
+                        </VetoStack>
+                    </VetoCard>
+                }
+            </VetoStack>
+        </ChildContent>
+    </VetoDashboardLayout>
+</div>
+
+@code {
+    private bool _interactive;
+    private string? _note;
+
+    /// <summary>The section from the route. Null on the bare route, which is the overview.</summary>
+    [Parameter]
+    public string? Section { get; set; }
+
+    private string CurrentSection => string.IsNullOrWhiteSpace(Section) ? "overview" : Section.ToLowerInvariant();
+
+    private string SectionTitle => CurrentSection switch
+    {
+        "services" => "Services",
+        "deploys" => "Deploys",
+        "alerts" => "Alerts",
+        "settings" => "Settings",
+        _ => "Overview"
+    };
+
+    private static readonly int[] Series = [38, 52, 46, 61, 74, 58, 69, 83, 71, 90, 66, 78];
+
+    private sealed record Deploy ( string Name, string When, bool Ok );
+
+    private static readonly Deploy[] Deploys =
+    [
+        new("web · 4f21a9c", "12 minutes ago", true),
+        new("api · 9b0de41", "1 hour ago", true),
+        new("worker · 71cc8a2", "3 hours ago", false),
+        new("web · 2ad77f0", "yesterday", true)
+    ];
+
+    private static readonly IReadOnlyList<VetoNavEntry> Nav =
+    [
+        new VetoNavEntry { Label = "Overview", Href = "/layouts/dashboard", Icon = VetoIcons.Home, MatchExact = true },
+        new VetoNavEntry { Label = "Services", Href = "/layouts/dashboard/services", Icon = VetoIcons.Grid },
+        new VetoNavEntry { Label = "Deploys", Href = "/layouts/dashboard/deploys", Icon = VetoIcons.Document, Badge = "4" },
+        new VetoNavEntry { Label = "Alerts", Href = "/layouts/dashboard/alerts", Icon = VetoIcons.Bell },
+        new VetoNavEntry { Label = "Settings", Href = "/layouts/dashboard/settings", Icon = VetoIcons.Settings }
+    ];
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+
+    private void Note ( string what ) => _note = $"{what} clicked";
+}

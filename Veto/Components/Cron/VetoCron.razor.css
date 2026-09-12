@@ -1,0 +1,257 @@
+/* VetoCron - styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-cron {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-3);
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-md);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text);
+}
+
+.veto-cron__label {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+}
+
+.veto-cron__modes {
+    flex-wrap: wrap;
+}
+
+/* The builder row: controls sitting inside a sentence, so the schedule reads as English
+   rather than as a form. */
+
+.veto-cron__builder {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--veto-space-2);
+    padding: var(--veto-space-3) var(--veto-space-4);
+    background-color: var(--veto-color-surface-raised);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+}
+
+.veto-cron__text {
+    color: var(--veto-color-text-muted);
+}
+
+.veto-cron__colon {
+    color: var(--veto-color-text-muted);
+    margin-inline: calc(var(--veto-space-1) * -1);
+}
+
+.veto-cron__number,
+.veto-cron__select {
+    box-sizing: border-box;
+    padding: var(--veto-space-1) var(--veto-space-2);
+    font-family: inherit;
+    font-size: var(--veto-font-size-md);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-sm);
+}
+
+.veto-cron__number {
+    width: 4.5rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.veto-cron__number:focus-visible,
+.veto-cron__select:focus-visible,
+.veto-cron__input:focus-visible,
+.veto-cron__day:focus-visible {
+    outline: none;
+    border-color: var(--veto-color-primary);
+    box-shadow: var(--veto-focus-ring);
+}
+
+/* Weekday toggles */
+
+.veto-cron__days {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--veto-space-1);
+}
+
+.veto-cron__day {
+    min-width: 2.75rem;
+    padding: var(--veto-space-1) var(--veto-space-2);
+    font: inherit;
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-sm);
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition),
+                border-color var(--veto-transition);
+}
+
+.veto-cron__day:hover:not(:disabled) {
+    border-color: var(--veto-color-border-strong);
+}
+
+.veto-cron__day[aria-pressed="true"] {
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+}
+
+/* The expression itself, always visible: the builder is meant to teach cron, not hide it. */
+
+.veto-cron__expression {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+}
+
+.veto-cron__input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--veto-space-2) var(--veto-space-3);
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-md);
+    letter-spacing: 0.08em;
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+}
+
+.veto-cron--invalid .veto-cron__input {
+    border-color: var(--veto-color-danger);
+}
+
+.veto-cron__fields {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    letter-spacing: 0.08em;
+    color: var(--veto-color-text-muted);
+    padding-inline-start: var(--veto-space-3);
+    white-space: pre;
+}
+
+.veto-cron__description {
+    margin: 0;
+    font-weight: 600;
+}
+
+.veto-cron--invalid .veto-cron__description {
+    color: var(--veto-color-danger);
+    font-weight: 400;
+}
+
+.veto-cron__warning {
+    margin: 0;
+    padding: var(--veto-space-2) var(--veto-space-3);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+    border-inline-start: 3px solid var(--veto-color-warning);
+    border-radius: var(--veto-radius-sm);
+}
+
+.veto-cron__helper {
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+/* Next runs */
+
+.veto-cron__runs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+}
+
+.veto-cron__runs-title {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+}
+
+.veto-cron__run {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--veto-color-text-muted);
+}
+
+.veto-cron__run--none {
+    font-family: var(--veto-font-sans);
+    color: var(--veto-color-danger);
+}
+
+/* Sizes */
+
+.veto-cron--sm {
+    font-size: var(--veto-font-size-sm);
+    gap: var(--veto-space-2);
+}
+
+.veto-cron--lg {
+    font-size: var(--veto-font-size-lg);
+}
+
+/* Disabled and read-only */
+
+.veto-cron--disabled {
+    color: var(--veto-color-text-disabled);
+}
+
+.veto-cron--disabled .veto-cron__builder,
+.veto-cron--disabled .veto-cron__input {
+    background-color: var(--veto-color-surface-disabled);
+}
+
+.veto-cron__number:disabled,
+.veto-cron__select:disabled,
+.veto-cron__day:disabled,
+.veto-cron__input:disabled {
+    color: var(--veto-color-text-disabled);
+    cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-cron__day {
+        transition: none;
+    }
+}
+
+/* Borderless: every box goes - the builder's and each control's - so the schedule reads as a
+   sentence rather than as a form. The focus ring deliberately stays, because the borders were
+   decoration and the ring is how a keyboard user knows where they are. */
+
+.veto-cron--borderless .veto-cron__builder {
+    padding-inline: 0;
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.veto-cron--borderless .veto-cron__number,
+.veto-cron--borderless .veto-cron__select,
+.veto-cron--borderless .veto-cron__day,
+.veto-cron--borderless .veto-cron__input {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+/* A selected day still has to look selected without a border to do it with. */
+.veto-cron--borderless .veto-cron__day[aria-pressed="true"] {
+    background-color: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+}
+
+.veto-cron--borderless .veto-cron__warning {
+    background-color: transparent;
+}
+
+/* An invalid expression still says so - losing the border must not lose the error. */
+.veto-cron--borderless.veto-cron--invalid .veto-cron__input {
+    border-color: var(--veto-color-danger);
+}

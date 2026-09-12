@@ -1,0 +1,36 @@
+@namespace Veto.Components.Handbook
+@inherits Veto.Core.VetoComponentBase
+@inject NavigationManager Nav
+@implements IDisposable
+
+@if (Visible && Sections.Count > 0)
+{
+    <nav @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId"
+         aria-label="@Label">
+        @if (!string.IsNullOrWhiteSpace(Title))
+        {
+            <span class="veto-handbook-toc__title">@Title</span>
+        }
+
+        <ol class="veto-handbook-toc__list">
+            @foreach (var section in Sections)
+            {
+                <li>
+                    <a class="veto-handbook-toc__link @(IsCurrent(section) ? "veto-handbook-toc__link--current" : null)"
+                       href="@AnchorHref(section)"
+                       data-testid="@LinkTestId(section)"
+                       aria-current="@(IsCurrent(section) ? "true" : null)"
+                       @onclick="() => Select(section)"
+                       @onclick:preventDefault="false">
+                        @section.Title
+                    </a>
+                </li>
+            }
+        </ol>
+    </nav>
+}

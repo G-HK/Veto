@@ -1,0 +1,46 @@
+@namespace Veto.Components.TextBox
+@typeparam TValue
+@inherits VetoInputBase<TValue>
+
+@if (Visible)
+{
+    <div class="@RootCssClass" style="@RootCssStyle" data-testid="@TestId">
+        @if (!string.IsNullOrWhiteSpace(Label))
+        {
+            <label class="veto-textbox__label" for="@ElementId">
+                @Label
+                @if (Required)
+                {
+                    <span class="veto-textbox__required" aria-hidden="true">*</span>
+                }
+            </label>
+        }
+
+        <input @ref="InputElement"
+               @attributes="InnerAttributes"
+               id="@ElementId"
+               name="@NameAttributeValue"
+               class="veto-textbox__input @FieldValidationClass"
+               type="@Type"
+               value="@CurrentValueAsString"
+               placeholder="@Placeholder"
+               disabled="@Disabled"
+               readonly="@ReadOnly"
+               aria-required="@(Required ? "true" : null)"
+               aria-invalid="@(HasErrors ? "true" : null)"
+               aria-describedby="@DescribedBy"
+               @oninput="OnInputAsync"
+               @onchange="OnChangeAsync" />
+
+        @if (HasErrors)
+        {
+            <p class="veto-textbox__message veto-textbox__message--error" id="@ErrorId" role="alert">
+                @ValidationMessages.First()
+            </p>
+        }
+        else if (!string.IsNullOrWhiteSpace(HelperText))
+        {
+            <p class="veto-textbox__message" id="@HelperId">@HelperText</p>
+        }
+    </div>
+}

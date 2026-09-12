@@ -1,0 +1,125 @@
+/* VetoBreadcrumbs - styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-breadcrumbs {
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-md);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text-muted);
+}
+
+.veto-breadcrumbs__list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--veto-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.veto-breadcrumbs__item {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.veto-breadcrumbs__separator {
+    display: inline-flex;
+    align-items: center;
+    color: var(--veto-color-border-strong);
+    user-select: none;
+}
+
+.veto-breadcrumbs__link,
+.veto-breadcrumbs__text,
+.veto-breadcrumbs__action,
+.veto-breadcrumbs__expand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--veto-space-1);
+    min-width: 0;
+    border-radius: var(--veto-radius-sm);
+}
+
+.veto-breadcrumbs__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.veto-breadcrumbs__link {
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+    transition: color var(--veto-transition);
+}
+
+.veto-breadcrumbs__link:hover {
+    color: var(--veto-color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.veto-breadcrumbs__link:focus-visible,
+.veto-breadcrumbs__action:focus-visible,
+.veto-breadcrumbs__expand:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+/* The last step is where you already are, so it is the one that reads as solid. */
+.veto-breadcrumbs__item[data-current="true"] .veto-breadcrumbs__text,
+.veto-breadcrumbs__item[data-current="true"] .veto-breadcrumbs__action,
+.veto-breadcrumbs__item[data-current="true"] .veto-breadcrumbs__link {
+    color: var(--veto-color-text);
+    font-weight: 600;
+}
+
+.veto-breadcrumbs__action {
+    padding: 0;
+    font: inherit;
+    color: var(--veto-color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color var(--veto-transition);
+}
+
+.veto-breadcrumbs__action:hover {
+    color: var(--veto-color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.veto-breadcrumbs__expand {
+    padding: 0 var(--veto-space-1);
+    font: inherit;
+    line-height: 1;
+    color: var(--veto-color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition);
+}
+
+.veto-breadcrumbs__expand:hover {
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+}
+
+/* Sizes */
+
+.veto-breadcrumbs--sm {
+    font-size: var(--veto-font-size-sm);
+}
+
+.veto-breadcrumbs--sm .veto-breadcrumbs__list {
+    gap: var(--veto-space-1);
+}
+
+.veto-breadcrumbs--lg {
+    font-size: var(--veto-font-size-lg);
+}
+
+.veto-breadcrumbs--lg .veto-breadcrumbs__list {
+    gap: var(--veto-space-3);
+}

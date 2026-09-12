@@ -1,0 +1,52 @@
+@* Frame for every documentation page: title, lead paragraph, then sections. *@
+
+<VetoContainer Size="VetoContainerSize.Large" Padding="VetoSpacing.ExtraLarge" Class="docs-page">
+    <div data-testid="page" data-ready="@(_interactive ? "true" : null)">
+        <VetoStack Gap="VetoSpacing.Huge">
+            <VetoStack Gap="VetoSpacing.Small">
+                @if (Eyebrow is not null)
+                {
+                    <span class="docs-page__eyebrow">@Eyebrow</span>
+                }
+                <h1 class="docs-page__title">@Title</h1>
+                @if (Lead is not null)
+                {
+                    <p class="docs-page__lead">@Lead</p>
+                }
+            </VetoStack>
+
+            @ChildContent
+        </VetoStack>
+    </div>
+</VetoContainer>
+
+@code {
+    private bool _interactive;
+
+    /// <summary>The page's heading.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>A short label above the title - the section of the docs this page belongs to.</summary>
+    [Parameter]
+    public string? Eyebrow { get; set; }
+
+    /// <summary>One sentence saying what the thing is for.</summary>
+    [Parameter]
+    public string? Lead { get; set; }
+
+    /// <summary>The page's sections.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        // The end-to-end tests wait on data-ready, so every docs page reports interactivity
+        // from one place rather than each page remembering to.
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+}

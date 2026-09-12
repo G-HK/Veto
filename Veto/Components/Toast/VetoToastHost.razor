@@ -1,0 +1,95 @@
+@namespace Veto.Components.Toast
+@inherits Veto.Core.VetoComponentBase
+@implements IDisposable
+@inject IVetoToastService Service
+@using Veto.Components.Icon
+
+@if (Visible)
+{
+    @foreach (var stack in Stacks)
+    {
+        <div class="@StackClass(stack.Key)"
+             style="@CssStyle"
+             data-testid="@(TestId is null ? null : $"{TestId}-{Slug(stack.Key)}")"
+             data-position="@Slug(stack.Key)"
+             role="region"
+             aria-label="@AriaLabel">
+            @foreach (var toast in stack.Value)
+            {
+                @* Keyed on the repeat count as well as the id: a repeat folded into an existing
+                   toast has to recreate the element, or the progress bar would carry on counting
+                   down from where the first one left off instead of starting again. *@
+                <div @key="(toast.Id, toast.Count)"
+                     class="@ToastClass(toast)"
+                     style="@ToastStyle(toast)"
+                     data-testid="@(toast.Options.TestId ?? (TestId is null ? null : $"{TestId}-toast"))"
+                     data-state="@(toast.Leaving ? "leaving" : toast.Entered ? "entered" : "entering")"
+                     data-animation="@Slug(Resolve(toast.Options.Animation, Animation))"
+                     data-type="@Slug(toast.Type)"
+                     data-sticky="@(toast.IsSticky ? "true" : "false")"
+                     role="@(toast.Type is VetoToastType.Error or VetoToastType.Warning ? "alert" : "status")"
+                     aria-live="@(toast.Type is VetoToastType.Error or VetoToastType.Warning ? "assertive" : "polite")"
+                     @onclick="() => OnToastClickAsync(toast)"
+                     @onmouseenter="() => SetPaused(toast, true)"
+                     @onmouseleave="() => SetPaused(toast, false)">
+
+                    @if (!toast.Options.HideIcon && IconFor(toast) is { } icon)
+                    {
+                        <span class="veto-toast__icon" aria-hidden="true">
+                            <VetoIcon Icon="@icon" Size="VetoIconSize.Inherit" />
+                        </span>
+                    }
+
+                    <div class="veto-toast__body">
+                        @if (!string.IsNullOrWhiteSpace(toast.Options.Title))
+                        {
+                            <p class="veto-toast__title">@toast.Options.Title</p>
+                        }
+
+                        <div class="veto-toast__message">
+                            @if (toast.Options.Content is not null)
+                            {
+                                @toast.Options.Content
+                            }
+                            else
+                            {
+                                @toast.Message
+                            }
+                        </div>
+                    </div>
+
+                    @if (toast.Count > 1)
+                    {
+                        <span class="veto-toast__count"
+                              data-testid="@(toast.Options.TestId is null ? null : $"{toast.Options.TestId}-count")"
+                              aria-label="@($"Repeated {toast.Count} times")">@toast.Count</span>
+                    }
+
+                    @if (Resolve(toast.Options.ShowCloseButton, ShowCloseButton))
+                    {
+                        <button type="button"
+                                class="veto-toast__close"
+                                aria-label="@CloseLabel"
+                                title="@CloseLabel"
+                                data-testid="@(toast.Options.TestId is null ? null : $"{toast.Options.TestId}-close")"
+                                @onclick="() => Dismiss(toast)"
+                                @onclick:stopPropagation="true">
+                            <VetoIcon Icon="@VetoIcons.Close" Size="VetoIconSize.Inherit" />
+                        </button>
+                    }
+
+                    @if (ShowsProgress(toast))
+                    {
+                        @* The countdown is a CSS animation rather than a re-render per frame:
+                           five toasts ticking at 60fps through the renderer would cost more than
+                           the whole rest of the page. *@
+                        <div class="veto-toast__progress"
+                             data-testid="@(toast.Options.TestId is null ? null : $"{toast.Options.TestId}-progress")"
+                             style="animation-duration:@(ResolveDuration(toast))ms"
+                             aria-hidden="true"></div>
+                    }
+                </div>
+            }
+        </div>
+    }
+}

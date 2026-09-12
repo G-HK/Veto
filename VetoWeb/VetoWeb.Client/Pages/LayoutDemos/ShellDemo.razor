@@ -1,0 +1,187 @@
+@page "/layouts/shell"
+@page "/layouts/shell/{Section}"
+@layout BareLayout
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Shell — Veto</PageTitle>
+
+<div class="demo-root" data-testid="page" data-ready="@(_interactive ? "true" : null)">
+    <VetoLayout State="_layout" TestId="layout">
+        <VetoAppBar TestId="appbar" Dense="_dense" Translucent="true">
+            <VetoIconButton Icon="@VetoIcons.Menu"
+                            Label="Toggle navigation"
+                            TestId="toggle"
+                            OnClick="ToggleDrawer" />
+            <span class="brand">Shell</span>
+            <VetoSpacer />
+            <VetoIconButton Icon="@VetoIcons.Sidebar"
+                            Label="Swap the drawer to the other side"
+                            TestId="swap-side"
+                            OnClick="SwapSide" />
+            <VetoThemeToggle />
+        </VetoAppBar>
+
+        <VetoDrawer @bind-Open="_drawerOpen"
+                    TestId="drawer"
+                    Variant="_variant"
+                    Anchor="_anchor"
+                    Width="15rem">
+            <VetoNavMenu Items="Nav" TestId="nav" />
+        </VetoDrawer>
+
+        <VetoMainContent TestId="main">
+            <VetoContainer Size="VetoContainerSize.Large" Padding="VetoSpacing.ExtraLarge" Class="demo-body">
+                <VetoStack Gap="VetoSpacing.ExtraLarge">
+                    <VetoStack Gap="VetoSpacing.Small">
+                        <a class="demo-back" href="/docs/layouts">&larr; Back to layouts</a>
+                        <h1 class="demo-title">Shell</h1>
+                        <p class="demo-lead">
+                            The frame every other layout is assembled from: an app bar, a drawer, a
+                            content region and a footer. Change the drawer's behaviour below and
+                            watch the same pieces rearrange.
+                        </p>
+                    </VetoStack>
+
+                    <VetoCard Title="Drawer variant" TestId="variant-card">
+                        <VetoStack Gap="VetoSpacing.Medium">
+                            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                                @foreach (var variant in Variants)
+                                {
+                                    <button class="chip @(_variant == variant ? "chip--on" : null)"
+                                            type="button"
+                                            data-testid="@($"variant-{variant.ToString().ToLowerInvariant()}")"
+                                            @onclick="() => SetVariant(variant)">
+                                        @variant
+                                    </button>
+                                }
+                            </VetoStack>
+                            <p class="demo-prose" data-testid="variant-explainer">@VariantExplainer</p>
+                        </VetoStack>
+                    </VetoCard>
+
+                    <VetoCard Title="What the pieces are doing" TestId="state-card">
+                        <dl class="state">
+                            <dt>Drawer</dt>
+                            <dd data-testid="state-open">@(_drawerOpen ? "Open" : "Closed")</dd>
+                            <dt>Anchor</dt>
+                            <dd data-testid="state-anchor">@_anchor</dd>
+                            <dt>App bar</dt>
+                            <dd data-testid="state-appbar">@(_dense ? "Dense" : "Regular")</dd>
+                            <dt>Section</dt>
+                            <dd data-testid="state-section">@SectionTitle</dd>
+                        </dl>
+                        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true" Class="state__actions">
+                            <button class="chip @(_dense ? "chip--on" : null)" type="button" data-testid="dense" @onclick="() => _dense = !_dense">
+                                Dense app bar
+                            </button>
+                        </VetoStack>
+                    </VetoCard>
+
+                    <VetoCard Title="The markup" TestId="markup-card">
+                        <VetoCode Code="@ShellCode" Language="razor" />
+                    </VetoCard>
+                </VetoStack>
+            </VetoContainer>
+        </VetoMainContent>
+
+        <VetoFooter TestId="footer">
+            <span>Shell &middot; app bar, drawer, content, footer</span>
+            <VetoSpacer />
+            <a class="footer__link" href="/docs/layouts/shell">Reference</a>
+        </VetoFooter>
+    </VetoLayout>
+</div>
+
+@code {
+    private readonly VetoLayoutState _layout = new();
+    private bool _interactive;
+    private bool _drawerOpen = true;
+    private bool _dense;
+    private VetoDrawerVariant _variant = VetoDrawerVariant.Responsive;
+    private VetoAnchor _anchor = VetoAnchor.Left;
+
+    /// <summary>The section from the route, so every navigation entry resolves to a real page.</summary>
+    [Parameter]
+    public string? Section { get; set; }
+
+    private string SectionTitle => string.IsNullOrWhiteSpace(Section)
+        ? "Overview"
+        : char.ToUpperInvariant(Section[0]) + Section[1..];
+
+    private static readonly VetoDrawerVariant[] Variants =
+    [
+        VetoDrawerVariant.Responsive,
+        VetoDrawerVariant.Persistent,
+        VetoDrawerVariant.Temporary,
+        VetoDrawerVariant.Mini
+    ];
+
+    private string VariantExplainer => _variant switch
+    {
+        VetoDrawerVariant.Persistent => "Always visible, pushing the content aside. The toggle collapses it to nothing.",
+        VetoDrawerVariant.Temporary => "Always an overlay with a scrim, at any width. Escape closes it, and the page behind stops scrolling.",
+        VetoDrawerVariant.Mini => "Collapsed to an icon rail, expanding on hover or when toggled.",
+        _ => "Docked above 960px and an overlay below it. Narrow the window past that and the same drawer changes behaviour."
+    };
+
+    private static readonly IReadOnlyList<VetoNavEntry> Nav =
+    [
+        new VetoNavEntry { Label = "Overview", Href = "/layouts/shell", Icon = VetoIcons.Home, MatchExact = true },
+        new VetoNavEntry { Label = "Projects", Href = "/layouts/shell/projects", Icon = VetoIcons.Folder },
+        new VetoNavEntry { Label = "Activity", Href = "/layouts/shell/activity", Icon = VetoIcons.Terminal, Badge = "9" },
+        new VetoNavEntry
+        {
+            Label = "Team",
+            Icon = VetoIcons.User,
+            Children =
+            [
+                new VetoNavEntry { Label = "Members", Href = "/layouts/shell/members" },
+                new VetoNavEntry { Label = "Roles", Href = "/layouts/shell/roles" }
+            ]
+        },
+        new VetoNavEntry { Label = "Settings", Href = "/layouts/shell/settings", Icon = VetoIcons.Settings }
+    ];
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleDrawer () => _drawerOpen = !_drawerOpen;
+
+    private void SwapSide () => _anchor = _anchor == VetoAnchor.Left ? VetoAnchor.Right : VetoAnchor.Left;
+
+    private void SetVariant ( VetoDrawerVariant variant )
+    {
+        _variant = variant;
+
+        // A temporary drawer that arrived already open would cover the page it is meant to sit
+        // beside, so switching to it starts closed.
+        _drawerOpen = variant != VetoDrawerVariant.Temporary;
+    }
+
+    private const string ShellCode = """
+        <VetoLayout>
+            <VetoAppBar>
+                <VetoIconButton Icon="@VetoIcons.Menu"
+                                Label="Toggle navigation"
+                                OnClick="() => _open = !_open" />
+                Shell
+                <VetoSpacer />
+                <VetoThemeToggle />
+            </VetoAppBar>
+
+            <VetoDrawer @bind-Open="_open" Variant="VetoDrawerVariant.Responsive">
+                <VetoNavMenu Items="Nav" />
+            </VetoDrawer>
+
+            <VetoMainContent>@Body</VetoMainContent>
+
+            <VetoFooter>…</VetoFooter>
+        </VetoLayout>
+        """;
+}

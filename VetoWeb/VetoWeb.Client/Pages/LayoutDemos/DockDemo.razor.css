@@ -1,0 +1,79 @@
+.demo-root {
+    height: 100dvh;
+}
+
+.wallpaper {
+    height: 100%;
+    background:
+        radial-gradient(120% 90% at 15% 0%, color-mix(in srgb, var(--veto-color-primary) 38%, transparent), transparent 60%),
+        radial-gradient(100% 80% at 90% 100%, color-mix(in srgb, var(--veto-color-primary) 22%, transparent), transparent 55%),
+        var(--veto-color-surface);
+}
+
+.demo-body {
+    padding-block: var(--veto-space-6);
+}
+
+.demo-back {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+}
+
+.demo-back:hover {
+    color: var(--veto-color-primary);
+}
+
+.demo-title {
+    margin: 0;
+    font-size: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.demo-lead {
+    max-width: 54ch;
+    margin: 0;
+    line-height: 1.6;
+    color: var(--veto-color-text-muted);
+}
+
+.demo-label {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+}
+
+.demo-hint,
+.demo-value {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.chip {
+    padding: var(--veto-space-2) var(--veto-space-3);
+    font: inherit;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-full);
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition), border-color var(--veto-transition);
+}
+
+.chip:hover {
+    border-color: var(--veto-color-primary);
+}
+
+.chip:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.chip--on {
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+}

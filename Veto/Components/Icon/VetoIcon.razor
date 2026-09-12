@@ -1,0 +1,35 @@
+@namespace Veto.Components.Icon
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    <svg @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId"
+         viewBox="@ViewBox"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="@StrokeWidth"
+         stroke-linecap="round"
+         stroke-linejoin="round"
+         role="@(IsDecorative ? null : "img")"
+         aria-hidden="@(IsDecorative ? "true" : null)"
+         aria-label="@(IsDecorative ? null : Title)"
+         focusable="false">
+        @if (!IsDecorative)
+        {
+            <title>@Title</title>
+        }
+        @if (ChildContent is not null)
+        {
+            @ChildContent
+        }
+        else
+        {
+            @((MarkupString)(Icon ?? string.Empty))
+        }
+    </svg>
+}

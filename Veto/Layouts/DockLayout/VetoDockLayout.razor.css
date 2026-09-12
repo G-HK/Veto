@@ -1,0 +1,37 @@
+/*
+ * VetoDockLayout - the content fills the frame and the dock floats over it, so the surface is
+ * padded on the docked edge to keep content from disappearing underneath.
+ */
+
+.veto-dock-layout {
+    position: relative;
+    display: grid;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    background-color: var(--veto-color-surface);
+}
+
+.veto-dock-layout__wallpaper {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.veto-dock-layout__surface {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.veto-dock-layout--scrollable .veto-dock-layout__surface {
+    overflow: auto;
+}
+
+/* Room for the dock, so content can still be scrolled clear of it. */
+.veto-dock-layout--dock-bottom .veto-dock-layout__surface { padding-bottom: 6rem; }
+.veto-dock-layout--dock-top .veto-dock-layout__surface { padding-top: 6rem; }
+.veto-dock-layout--dock-left .veto-dock-layout__surface { padding-left: 6rem; }
+.veto-dock-layout--dock-right .veto-dock-layout__surface { padding-right: 6rem; }

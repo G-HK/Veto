@@ -1,0 +1,296 @@
+/* VetoSlider - styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-slider {
+    --veto-slider-accent: var(--veto-color-primary);
+    --veto-slider-ring: var(--veto-focus-ring);
+    --veto-slider-thumb: 1.125rem;
+    --veto-slider-rail: 0.3125rem;
+    --veto-slider-mark: 0.375rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-md);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text);
+}
+
+.veto-slider__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--veto-space-3);
+}
+
+.veto-slider__label {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text);
+}
+
+.veto-slider__required {
+    margin-inline-start: var(--veto-space-1);
+    color: var(--veto-color-danger);
+}
+
+.veto-slider__value {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--veto-color-text-muted);
+}
+
+/* The rail and its fill are drawn by Veto; the native inputs above them are transparent and
+   contribute nothing but their thumbs, so the browser keeps pointer capture and keyboard. */
+
+.veto-slider__control {
+    position: relative;
+    height: var(--veto-slider-thumb);
+    /* Half a thumb of side padding keeps a thumb at either end from hanging off the box. */
+    margin-inline: calc(var(--veto-slider-thumb) / 2);
+}
+
+.veto-slider--mark-labels .veto-slider__control {
+    margin-bottom: 1.5rem;
+}
+
+.veto-slider__rail {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: var(--veto-slider-rail);
+    transform: translateY(-50%);
+    background-color: var(--veto-color-surface-raised);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-full);
+}
+
+.veto-slider__fill {
+    position: absolute;
+    inset-block: -1px;
+    left: var(--veto-slider-start, 0%);
+    right: calc(100% - var(--veto-slider-end, 0%));
+    background-color: var(--veto-slider-accent);
+    border-radius: var(--veto-radius-full);
+    transition: left var(--veto-transition), right var(--veto-transition);
+}
+
+.veto-slider__mark {
+    position: absolute;
+    top: 50%;
+    width: var(--veto-slider-mark);
+    height: var(--veto-slider-mark);
+    transform: translate(-50%, -50%);
+    background-color: var(--veto-color-border-strong);
+    border-radius: var(--veto-radius-full);
+}
+
+.veto-slider__mark[data-active="true"] {
+    background-color: var(--veto-color-primary-contrast);
+}
+
+.veto-slider__mark-labels {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(50% + var(--veto-slider-thumb) / 2 + var(--veto-space-1));
+    height: 1.25rem;
+}
+
+.veto-slider__mark-label {
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.veto-slider__mark-label[data-active="true"] {
+    color: var(--veto-color-text);
+}
+
+/* The native inputs */
+
+.veto-slider__input {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    width: 100%;
+    height: var(--veto-slider-thumb);
+    margin: 0;
+    padding: 0;
+    transform: translateY(-50%);
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    /* In range mode the two inputs overlap, so only their thumbs may take the pointer -
+       otherwise the input on top swallows every click meant for the one beneath. */
+    pointer-events: none;
+}
+
+.veto-slider:not(.veto-slider--range) .veto-slider__input {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.veto-slider__input:focus {
+    outline: none;
+}
+
+.veto-slider__input::-webkit-slider-runnable-track {
+    height: 100%;
+    background: transparent;
+    border: none;
+}
+
+.veto-slider__input::-moz-range-track {
+    height: 100%;
+    background: transparent;
+    border: none;
+}
+
+.veto-slider__input::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    pointer-events: auto;
+    box-sizing: border-box;
+    width: var(--veto-slider-thumb);
+    height: var(--veto-slider-thumb);
+    background-color: var(--veto-color-surface);
+    border: 2px solid var(--veto-slider-accent);
+    border-radius: var(--veto-radius-full);
+    box-shadow: var(--veto-shadow-sm);
+    cursor: grab;
+    transition: box-shadow var(--veto-transition), border-color var(--veto-transition);
+}
+
+.veto-slider__input::-moz-range-thumb {
+    pointer-events: auto;
+    box-sizing: border-box;
+    width: var(--veto-slider-thumb);
+    height: var(--veto-slider-thumb);
+    background-color: var(--veto-color-surface);
+    border: 2px solid var(--veto-slider-accent);
+    border-radius: var(--veto-radius-full);
+    box-shadow: var(--veto-shadow-sm);
+    cursor: grab;
+    transition: box-shadow var(--veto-transition), border-color var(--veto-transition);
+}
+
+.veto-slider__input:focus-visible::-webkit-slider-thumb {
+    box-shadow: var(--veto-slider-ring);
+}
+
+.veto-slider__input:focus-visible::-moz-range-thumb {
+    box-shadow: var(--veto-slider-ring);
+}
+
+.veto-slider__input:active::-webkit-slider-thumb {
+    cursor: grabbing;
+}
+
+.veto-slider__input:active::-moz-range-thumb {
+    cursor: grabbing;
+}
+
+/* Colours */
+
+.veto-slider--secondary {
+    --veto-slider-accent: var(--veto-color-secondary);
+}
+
+.veto-slider--neutral {
+    --veto-slider-accent: var(--veto-color-border-strong);
+}
+
+.veto-slider--success {
+    --veto-slider-accent: var(--veto-color-success);
+}
+
+.veto-slider--warning {
+    --veto-slider-accent: var(--veto-color-warning);
+}
+
+.veto-slider--danger {
+    --veto-slider-accent: var(--veto-color-danger);
+    --veto-slider-ring: var(--veto-focus-ring-danger);
+}
+
+/* Sizes */
+
+.veto-slider--sm {
+    --veto-slider-thumb: 0.875rem;
+    --veto-slider-rail: 0.25rem;
+    --veto-slider-mark: 0.3125rem;
+    font-size: var(--veto-font-size-sm);
+}
+
+.veto-slider--lg {
+    --veto-slider-thumb: 1.5rem;
+    --veto-slider-rail: 0.4375rem;
+    --veto-slider-mark: 0.5rem;
+    font-size: var(--veto-font-size-lg);
+}
+
+/* Variants. Filled sinks the empty rail into the surface; text strips its border. */
+
+.veto-slider--filled .veto-slider__rail {
+    background-color: var(--veto-color-surface-disabled);
+    border-color: transparent;
+}
+
+.veto-slider--text .veto-slider__rail {
+    background-color: transparent;
+    border-color: var(--veto-color-border);
+}
+
+/* Disabled, read-only and invalid */
+
+.veto-slider--disabled {
+    color: var(--veto-color-text-disabled);
+}
+
+.veto-slider--disabled .veto-slider__label,
+.veto-slider--disabled .veto-slider__value,
+.veto-slider--disabled .veto-slider__mark-label {
+    color: var(--veto-color-text-disabled);
+}
+
+.veto-slider--disabled .veto-slider__fill {
+    background-color: var(--veto-color-border-strong);
+}
+
+.veto-slider--disabled .veto-slider__input::-webkit-slider-thumb {
+    border-color: var(--veto-color-border-strong);
+    cursor: not-allowed;
+}
+
+.veto-slider--disabled .veto-slider__input::-moz-range-thumb {
+    border-color: var(--veto-color-border-strong);
+    cursor: not-allowed;
+}
+
+.veto-slider--readonly .veto-slider__input::-webkit-slider-thumb {
+    cursor: default;
+}
+
+.veto-slider--readonly .veto-slider__input::-moz-range-thumb {
+    cursor: default;
+}
+
+.veto-slider--invalid {
+    --veto-slider-accent: var(--veto-color-danger);
+    --veto-slider-ring: var(--veto-focus-ring-danger);
+}
+
+/* Messages */
+
+.veto-slider__message {
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.veto-slider__message--error {
+    color: var(--veto-color-danger);
+}

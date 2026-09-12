@@ -1,0 +1,38 @@
+/* VetoLink - a bare link whose underline is drawn by the shared effect classes. */
+
+.veto-link {
+    display: inline;
+    color: var(--veto-color-primary);
+    font-family: inherit;
+
+    /* Reset here rather than only on the reveal class, or Underline="None" would fall back to
+       the browser's own underline and be the one mode that draws a line. */
+    text-decoration: none;
+    font-size: inherit;
+    cursor: pointer;
+    border-radius: var(--veto-radius-sm);
+    transition: color var(--veto-transition);
+}
+
+.veto-link:hover {
+    color: var(--veto-color-primary-hover);
+}
+
+/* Focus is shown by the ring as well as the underline: the underline is a flourish, the ring is
+   the guarantee, and a link whose accent colour has been overridden still needs to be findable. */
+.veto-link:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-link--inherit {
+    color: inherit;
+}
+
+.veto-link--inherit:hover {
+    color: inherit;
+}
+
+.veto-link--active {
+    font-weight: 600;
+}

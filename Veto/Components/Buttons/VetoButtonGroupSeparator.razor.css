@@ -1,0 +1,33 @@
+/* VetoButtonGroupSeparator - a hand-placed line between two buttons in a group.
+ *
+ * The orientation comes from the enclosing group's modifier class. That works from this
+ * component's own stylesheet because Blazor appends the scope only to the selector's
+ * subject - the separator itself - and leaves the ancestor half alone.
+ */
+
+.veto-button-group__separator {
+    flex: none;
+    align-self: stretch;
+    background-color: var(--veto-color-border);
+}
+
+.veto-button-group--row > .veto-button-group__separator {
+    width: 1px;
+    margin-inline: var(--veto-space-1);
+}
+
+.veto-button-group--column > .veto-button-group__separator {
+    height: 1px;
+    margin-block: var(--veto-space-1);
+}
+
+/* An attached group already shares its borders, so the line sits flush rather than opening
+   a gap that the shared border would then have to jump. */
+
+.veto-button-group--attached.veto-button-group--row > .veto-button-group__separator {
+    margin-inline: 0;
+}
+
+.veto-button-group--attached.veto-button-group--column > .veto-button-group__separator {
+    margin-block: 0;
+}

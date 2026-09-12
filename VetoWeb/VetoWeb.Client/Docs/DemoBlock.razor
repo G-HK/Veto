@@ -1,0 +1,42 @@
+@* One worked example: what it does, the live component, and the markup that produced it. *@
+
+<VetoStack Gap="VetoSpacing.Medium" TestId="@TestId">
+    <VetoStack Gap="VetoSpacing.ExtraSmall">
+        <h3 class="demo-block__title">@Title</h3>
+        @if (Description is not null)
+        {
+            <p class="demo-block__description">@Description</p>
+        }
+    </VetoStack>
+
+    <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.ExtraLarge" Class="demo-block__stage">
+        @ChildContent
+    </VetoCard>
+
+    @if (Code is not null)
+    {
+        <VetoCode Code="@Code" Language="razor" TestId="@(TestId is null ? null : $"{TestId}-code")" />
+    }
+</VetoStack>
+
+@code {
+    /// <summary>What this example demonstrates.</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>Why it matters, or what to notice.</summary>
+    [Parameter]
+    public string? Description { get; set; }
+
+    /// <summary>The live example.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>The markup that produced the example.</summary>
+    [Parameter]
+    public string? Code { get; set; }
+
+    /// <summary>Test hook for the block.</summary>
+    [Parameter]
+    public string? TestId { get; set; }
+}

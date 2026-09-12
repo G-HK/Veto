@@ -1,0 +1,19 @@
+/*
+ * VetoSpacer - by default it takes whatever room is going, which is what pushes siblings
+ * apart in a VetoStack. Give it a Size and it becomes a fixed gap instead.
+ */
+
+.veto-spacer {
+    flex: 1 1 auto;
+}
+
+.veto-spacer--fixed {
+    flex: 0 0 auto;
+}
+
+.veto-spacer--fixed.veto-spacer--size-1 { width: var(--veto-space-1); height: var(--veto-space-1); }
+.veto-spacer--fixed.veto-spacer--size-2 { width: var(--veto-space-2); height: var(--veto-space-2); }
+.veto-spacer--fixed.veto-spacer--size-3 { width: var(--veto-space-3); height: var(--veto-space-3); }
+.veto-spacer--fixed.veto-spacer--size-4 { width: var(--veto-space-4); height: var(--veto-space-4); }
+.veto-spacer--fixed.veto-spacer--size-5 { width: var(--veto-space-5); height: var(--veto-space-5); }
+.veto-spacer--fixed.veto-spacer--size-6 { width: var(--veto-space-6); height: var(--veto-space-6); }

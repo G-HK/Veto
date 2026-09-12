@@ -1,0 +1,469 @@
+/*
+ * VetoGantt.
+ *
+ * The sidebar and the timeline are two independently scrolling columns of the same height, so
+ * rows must line up between them: both use --veto-gantt-row-height and nothing inside a row is
+ * allowed to grow beyond it.
+ */
+
+.veto-gantt {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    font-family: var(--veto-font-sans);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-lg);
+    overflow: hidden;
+}
+
+/* Toolbar */
+
+.veto-gantt__toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-3);
+    flex-wrap: wrap;
+    padding: var(--veto-space-3);
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+.veto-gantt__spacer {
+    flex: 1 1 auto;
+}
+
+.veto-gantt__search {
+    width: 14rem;
+}
+
+.veto-gantt__filters,
+.veto-gantt__scales,
+.veto-gantt__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-1);
+}
+
+.veto-gantt__chip {
+    padding: var(--veto-space-1) var(--veto-space-3);
+    font: inherit;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    background-color: transparent;
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-full);
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition), border-color var(--veto-transition);
+}
+
+.veto-gantt__chip:hover {
+    color: var(--veto-color-text);
+    border-color: var(--veto-color-border-strong);
+}
+
+.veto-gantt__chip:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-gantt__chip--on {
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+}
+
+/*
+ * A category chip is tinted with that category's own colour, so the filter doubles as a key to
+ * the bars. A tint rather than a solid fill: the colours come from the app and could be any
+ * hue, and a tint keeps the label legible against all of them in both themes.
+ */
+.veto-gantt__chip--category {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--veto-space-2);
+}
+
+.veto-gantt__chip--category.veto-gantt__chip--on {
+    color: var(--veto-color-text);
+    background-color: color-mix(in srgb, var(--veto-gantt-chip-color) 20%, transparent);
+    border-color: var(--veto-gantt-chip-color);
+}
+
+.veto-gantt__swatch {
+    width: 0.625rem;
+    height: 0.625rem;
+    flex: 0 0 auto;
+    background-color: var(--veto-gantt-chip-color, var(--veto-color-border-strong));
+    border-radius: var(--veto-radius-full);
+}
+
+/* Filtered out: the swatch hollows out, so off reads as off at a glance. */
+.veto-gantt__chip--category:not(.veto-gantt__chip--on) .veto-gantt__swatch {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--veto-gantt-chip-color);
+    opacity: 0.55;
+}
+
+/* Frame */
+
+.veto-gantt__frame {
+    display: grid;
+    grid-template-columns: var(--veto-gantt-sidebar, 18rem) minmax(0, 1fr);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.veto-gantt__sidebar {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    border-right: 1px solid var(--veto-color-border);
+    background-color: var(--veto-color-surface);
+}
+
+/*
+ * Matches the two-row timeline header exactly, so the first row of names sits level with the
+ * first row of bars. Any change to the header's height has to be mirrored here.
+ */
+.veto-gantt__sidebar-head {
+    display: flex;
+    align-items: flex-end;
+    height: 3.25rem;
+    padding: var(--veto-space-2) var(--veto-space-3);
+    box-sizing: border-box;
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+.veto-gantt__row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: var(--veto-gantt-row-height, 2.25rem);
+    box-sizing: border-box;
+    border-bottom: 1px solid color-mix(in srgb, var(--veto-color-border) 55%, transparent);
+}
+
+.veto-gantt__row--label {
+    gap: var(--veto-space-1);
+    padding-inline: var(--veto-space-2);
+    /* Indent follows depth, so a task reads as belonging to its project. */
+    padding-inline-start: calc(var(--veto-space-2) + (var(--veto-gantt-depth, 0) * var(--veto-space-4)));
+}
+
+.veto-gantt__row--selected {
+    background-color: color-mix(in srgb, var(--veto-color-primary) 8%, transparent);
+}
+
+.veto-gantt__twisty {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    color: var(--veto-color-text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--veto-radius-sm);
+    cursor: pointer;
+}
+
+.veto-gantt__twisty:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-gantt__twisty--empty {
+    cursor: default;
+}
+
+.veto-gantt__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--veto-font-size-sm);
+}
+
+.veto-gantt__dates {
+    flex: 0 0 auto;
+    font-size: 0.6875rem;
+    color: var(--veto-color-text-muted);
+    white-space: nowrap;
+}
+
+.veto-gantt__empty {
+    padding: var(--veto-space-5) var(--veto-space-3);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+/* Loading */
+
+.veto-gantt__frame--loading .veto-gantt__row {
+    padding-inline: var(--veto-space-3);
+}
+
+.veto-gantt__skeleton-head {
+    display: flex;
+    align-items: flex-end;
+    height: 3.25rem;
+    padding: var(--veto-space-2) var(--veto-space-3);
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+/* Sized like a real bar, so nothing shifts when the data arrives. */
+.veto-gantt__skeleton-bar {
+    height: calc(var(--veto-gantt-row-height, 36px) - 0.75rem);
+}
+
+/* Timeline */
+
+.veto-gantt__scroller {
+    min-width: 0;
+    overflow: auto;
+}
+
+.veto-gantt__canvas {
+    position: relative;
+}
+
+.veto-gantt__head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 3.25rem;
+    box-sizing: border-box;
+    background-color: var(--veto-color-surface);
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+.veto-gantt__head-row {
+    position: relative;
+    height: 1.625rem;
+}
+
+.veto-gantt__head-row--groups {
+    border-bottom: 1px solid color-mix(in srgb, var(--veto-color-border) 55%, transparent);
+}
+
+.veto-gantt__head-cell {
+    position: absolute;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    box-sizing: border-box;
+    font-size: 0.6875rem;
+    color: var(--veto-color-text-muted);
+    border-left: 1px solid color-mix(in srgb, var(--veto-color-border) 45%, transparent);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.veto-gantt__head-row--groups .veto-gantt__head-cell {
+    justify-content: flex-start;
+    padding-inline-start: var(--veto-space-2);
+    font-weight: 600;
+    color: var(--veto-color-text);
+}
+
+.veto-gantt__head-cell--weekend {
+    color: var(--veto-color-text-disabled);
+}
+
+.veto-gantt__grid {
+    position: relative;
+}
+
+.veto-gantt__weekend {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: color-mix(in srgb, var(--veto-color-text) 4%, transparent);
+    pointer-events: none;
+}
+
+.veto-gantt__today {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--veto-color-danger);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Dependency arrows */
+
+.veto-gantt__links {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* Above the grid, below the bars, and never in the way of a click. */
+    z-index: 1;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.veto-gantt__link {
+    fill: none;
+    stroke: var(--veto-color-border-strong);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    transition: stroke var(--veto-transition);
+}
+
+/*
+ * Arrows touching the selected row are picked out, which is how you follow a chain through a
+ * dense schedule without reading every line.
+ */
+.veto-gantt__link--active {
+    stroke: var(--veto-color-primary);
+    stroke-width: 2;
+}
+
+/* Bars */
+
+.veto-gantt__bar {
+    position: absolute;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    height: calc(var(--veto-gantt-row-height, 2.25rem) - 0.75rem);
+    padding: 0 var(--veto-space-2);
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 0.75rem;
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-gantt-item-color, var(--veto-gantt-bar-color));
+    border: none;
+    border-radius: var(--veto-radius-sm);
+    transform: translateY(-50%);
+    cursor: pointer;
+    overflow: hidden;
+    /* Above the arrow layer, so a bar is always clickable. */
+    z-index: 2;
+    transition: filter var(--veto-transition), box-shadow var(--veto-transition);
+}
+
+.veto-gantt__bar:hover {
+    filter: brightness(1.08);
+}
+
+.veto-gantt__bar:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+/*
+ * A summary bar sits above its children, so it is drawn as a slim rail rather than a filled
+ * block - otherwise it reads as a task in its own right.
+ */
+.veto-gantt__bar--summary {
+    height: 0.5rem;
+    border-radius: var(--veto-radius-full);
+    opacity: 0.85;
+}
+
+.veto-gantt__bar--summary .veto-gantt__bar-label {
+    display: none;
+}
+
+/*
+ * Drawn from the right: it covers what is still to do, leaving the completed part in the bar's
+ * full colour. Shading the completed part instead would make a task at 80% look 20% done.
+ */
+.veto-gantt__remaining {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: color-mix(in srgb, var(--veto-color-surface) 62%, transparent);
+    pointer-events: none;
+}
+
+.veto-gantt__bar-label {
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.veto-gantt__milestone {
+    position: absolute;
+    top: 50%;
+    width: 0.75rem;
+    height: 0.75rem;
+    padding: 0;
+    background-color: var(--veto-gantt-item-color, var(--veto-gantt-bar-color));
+    border: none;
+    /* Rotated square: the conventional milestone marker. */
+    transform: translate(-50%, -50%) rotate(45deg);
+    cursor: pointer;
+    z-index: 2;
+}
+
+.veto-gantt__milestone:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-gantt__chip,
+    .veto-gantt__bar {
+        transition: none;
+    }
+}
+
+/* Editable bars */
+
+.veto-gantt__bar--editable {
+    cursor: grab;
+}
+
+.veto-gantt__bar--editable[data-dragging] {
+    /* No transition while the pointer is down: the bar must track the cursor exactly. */
+    transition: none;
+    box-shadow: var(--veto-shadow-md);
+    z-index: 3;
+}
+
+/* Grips at each end, so it is discoverable that the edges do something different. */
+.veto-gantt__bar--editable::before,
+.veto-gantt__bar--editable::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: color-mix(in srgb, var(--veto-color-surface) 55%, transparent);
+    opacity: 0;
+    transition: opacity var(--veto-transition);
+}
+
+.veto-gantt__bar--editable::before { left: 0; }
+.veto-gantt__bar--editable::after { right: 0; }
+
+.veto-gantt__bar--editable:hover::before,
+.veto-gantt__bar--editable:hover::after,
+.veto-gantt__bar--editable:focus-visible::before,
+.veto-gantt__bar--editable:focus-visible::after {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-gantt__bar--editable::before,
+    .veto-gantt__bar--editable::after {
+        transition: none;
+    }
+}

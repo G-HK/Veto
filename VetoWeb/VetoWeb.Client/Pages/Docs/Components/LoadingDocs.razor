@@ -1,0 +1,203 @@
+@page "/docs/components/loading"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.Feedback
+
+<PageTitle>Loading — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Loading"
+          Lead="Four ways to show that something is on its way. Which one to reach for depends on what you know and what is already on screen.">
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Choosing one</h2>
+        <p class="docs-prose">
+            <strong>Nothing on screen yet, and you know the shape of what is coming</strong> —
+            <code>VetoSkeleton</code>. It holds the layout so nothing jumps when the data lands.
+        </p>
+        <p class="docs-prose">
+            <strong>Content already on screen, being refreshed</strong> —
+            <code>VetoLoadingOverlay</code>. Replacing what someone is reading with placeholders
+            takes away what they had.
+        </p>
+        <p class="docs-prose">
+            <strong>You can say how far along it is</strong> — <code>VetoProgress</code>. A bar
+            that fills tells someone how long to wait; a spinner only tells them to wait.
+        </p>
+        <p class="docs-prose">
+            <strong>Small, inline, and the duration is unknown</strong> —
+            <code>VetoSpinner</code>. Inside a button, beside a label.
+        </p>
+    </VetoStack>
+
+    <DemoBlock TestId="demo-spinner"
+               Title="Spinner"
+               Description="Decorative by default. Give it a Label only when it is the sole sign that something is happening - beside text that already says so, a second announcement is noise."
+               Code="@SpinnerCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Center" Wrap="true">
+            <VetoSpinner TestId="spinner-sm" Size="VetoSize.Small" />
+            <VetoSpinner TestId="spinner-md" Size="VetoSize.Medium" />
+            <VetoSpinner TestId="spinner-lg" Size="VetoSize.Large" />
+            <VetoSpinner TestId="spinner-danger" Size="VetoSize.Large" Color="VetoColor.Danger" />
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Align="VetoAlign.Center">
+                <VetoSpinner TestId="spinner-labelled" Label="Checking availability" />
+                <span class="demo-value">Inline, with an accessible name</span>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-progress"
+               Title="Progress"
+               Description="Determinate when a total is known, indeterminate when it is not. Both report themselves as a progress bar, so the value is announced rather than only drawn."
+               Code="@ProgressCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoProgress TestId="progress" Value="_progress" Label="Uploading" ShowValue="true" />
+            <VetoProgress TestId="progress-success" Value="100" Color="VetoColor.Success" Size="VetoSize.Small" AccessibleLabel="Complete" />
+            <VetoProgress TestId="progress-indeterminate" Indeterminate="true" Label="Contacting the server" />
+
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Neutral"
+                            TestId="progress-less" OnClick="() => _progress = Math.Max(0, _progress - 20)">
+                    Less
+                </VetoButton>
+                <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Neutral"
+                            TestId="progress-more" OnClick="() => _progress = Math.Min(100, _progress + 20)">
+                    More
+                </VetoButton>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-skeleton"
+               Title="Skeleton"
+               Description="Placeholders in the shape of the content that replaces them. The last line of a multi-line block is short, the way a real paragraph ends. Hidden from assistive technology - announce the wait once on the region, not once per grey box."
+               Code="@SkeletonCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Start" Wrap="true">
+            <VetoSkeleton TestId="skeleton-circle" Variant="VetoSkeletonVariant.Circle" />
+            <VetoStack Gap="VetoSpacing.Small" Class="docs-demo__narrow">
+                <VetoSkeleton TestId="skeleton-text" Lines="3" />
+            </VetoStack>
+            <VetoSkeleton TestId="skeleton-rect" Variant="VetoSkeletonVariant.Rectangle" Width="12rem" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-overlay"
+               Title="Loading overlay"
+               Description="For a refresh, where the old content should stay put. It is marked inert while the veil is up, so a control that is about to be replaced cannot be clicked or tabbed into behind it."
+               Code="@OverlayCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoButton Size="VetoSize.Small" TestId="overlay-toggle" OnClick="ToggleOverlay">
+                @(_refreshing ? "Stop" : "Refresh for two seconds")
+            </VetoButton>
+
+            <VetoLoadingOverlay Loading="_refreshing" Label="Refreshing" TestId="overlay">
+                <VetoCard Title="Team" Padding="VetoSpacing.Large">
+                    <VetoStack Gap="VetoSpacing.Small">
+                        <span>Ada Lovelace — 12 open</span>
+                        <span>Grace Hopper — 4 open</span>
+                        <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" TestId="overlay-inner">
+                            Open the board
+                        </VetoButton>
+                    </VetoStack>
+                </VetoCard>
+            </VetoLoadingOverlay>
+        </VetoStack>
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Reduced motion</h2>
+        <p class="docs-prose">
+            All four respect <code>prefers-reduced-motion</code>, and none of them simply stop.
+            A still spinner reads as a broken ring, so it pulses instead; the indeterminate bar
+            fills the track and pulses rather than sweeping across it; the skeleton keeps its
+            placeholders and drops only the shimmer. Something that is working should still look
+            like it is working.
+        </p>
+    </VetoStack>
+
+    <ParameterTable Title="VetoSpinner" TestId="spinner-parameters" Rows="SpinnerRows" />
+    <ParameterTable Title="VetoProgress" TestId="progress-parameters" Rows="ProgressRows" />
+    <ParameterTable Title="VetoSkeleton" TestId="skeleton-parameters" Rows="SkeletonRows" />
+    <ParameterTable Title="VetoLoadingOverlay" TestId="overlay-parameters" Rows="OverlayRows" />
+
+</DocsPage>
+
+@code {
+    private double _progress = 40;
+    private bool _refreshing;
+
+    private async Task ToggleOverlay ()
+    {
+        if (_refreshing)
+        {
+            _refreshing = false;
+            return;
+        }
+
+        _refreshing = true;
+        await Task.Delay(2000);
+        _refreshing = false;
+    }
+
+    private static readonly ParameterTable.Row[] SpinnerRows =
+    [
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Color", "VetoColor?", "null", "Inherits the surrounding text colour when null."),
+        new("Label", "string?", "null", "Accessible name. Null keeps the spinner decorative and silent."),
+        new("Thickness", "string", "\"2px\"", "The stroke's thickness.")
+    ];
+
+    private static readonly ParameterTable.Row[] ProgressRows =
+    [
+        new("Value", "double", "0", "How far along the work is, from 0 to Max."),
+        new("Max", "double", "100", "The value that counts as finished."),
+        new("Indeterminate", "bool", "false", "Animates continuously instead of filling."),
+        new("Label", "string?", "null", "Text above the bar."),
+        new("ShowValue", "bool", "false", "Shows the percentage beside the label."),
+        new("Size", "VetoSize", "Medium", "The bar's thickness."),
+        new("Color", "VetoColor", "Primary", "The colour role."),
+        new("Rounded", "bool", "true", "Rounds the ends of the bar."),
+        new("AccessibleLabel", "string", "\"Progress\"", "Name used when no Label is given.")
+    ];
+
+    private static readonly ParameterTable.Row[] SkeletonRows =
+    [
+        new("Variant", "VetoSkeletonVariant", "Text", "Text, Rectangle or Circle."),
+        new("Lines", "int", "1", "How many lines to draw. Text only."),
+        new("Width / Height", "string?", "null", "CSS lengths. Text and circles size themselves."),
+        new("Animated", "bool", "true", "Whether the shimmer runs.")
+    ];
+
+    private static readonly ParameterTable.Row[] OverlayRows =
+    [
+        new("Loading", "bool", "false", "Whether the veil is showing."),
+        new("Label", "string", "\"Loading\"", "What is being waited for. Announced, and shown beside the spinner."),
+        new("Indicator", "RenderFragment?", "null", "Replaces the default spinner and label."),
+        new("Dim", "bool", "true", "Whether the content is dimmed as well as veiled.")
+    ];
+
+    private const string SpinnerCode = """
+        <!-- Decorative: something nearby already says what is happening -->
+        <VetoSpinner />
+
+        <!-- The only sign: give it a name -->
+        <VetoSpinner Label="Checking availability" />
+        """;
+
+    private const string ProgressCode = """
+        <VetoProgress Value="_percent" Label="Uploading" ShowValue="true" />
+
+        <VetoProgress Indeterminate="true" Label="Contacting the server" />
+        """;
+
+    private const string SkeletonCode = """
+        <VetoSkeleton Variant="VetoSkeletonVariant.Circle" />
+        <VetoSkeleton Lines="3" />
+        <VetoSkeleton Variant="VetoSkeletonVariant.Rectangle" Width="12rem" />
+        """;
+
+    private const string OverlayCode = """
+        <VetoLoadingOverlay Loading="_refreshing" Label="Refreshing">
+            <VetoCard Title="Team">…</VetoCard>
+        </VetoLoadingOverlay>
+        """;
+}

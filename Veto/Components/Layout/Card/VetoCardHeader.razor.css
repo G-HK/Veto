@@ -1,0 +1,20 @@
+/* VetoCardHeader - the title/description block of a composed card. */
+
+.veto-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+    padding: var(--veto-space-5);
+    min-width: 0;
+}
+
+.veto-card-header--bordered {
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+/* An image directly above the header runs to the card's edges, so the header must not add a
+   second gap on top of the one the image already provides. */
+.veto-card img + .veto-card-header,
+.veto-card picture + .veto-card-header {
+    padding-top: var(--veto-space-4);
+}

@@ -1,0 +1,256 @@
+@page "/docs/components/switch"
+@rendermode InteractiveWebAssembly
+@using System.ComponentModel.DataAnnotations
+@using Veto.Components.Switch
+
+<PageTitle>Switch — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Switch"
+          Lead="A sliding on/off control - and, bound to a bool?, a three-state one that also carries an indeterminate value.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="On and off"
+               Description="Bound to a bool. Click the control or its label, or focus it and press Space."
+               Code="@BasicCode">
+        <VetoStack Gap="VetoSpacing.Small" Align="VetoAlign.Start">
+            <VetoSwitch TValue="bool"
+                        TestId="basic"
+                        Label="Email notifications"
+                        HelperText="We will only mail you about things you asked for."
+                        @bind-Value="_basic" />
+            <span class="demo-value" data-testid="basic-value">@_basic</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-three-state"
+               Title="Three states"
+               Description="Set ThreeState and bind to a bool?, and the switch cycles off, on, indeterminate. Indeterminate is null - the state for a question nobody has answered yet, which a plain bool has nowhere to put. The thumb sits centred so the third state reads at a glance, and the control reports itself as an ARIA checkbox with aria-checked=&quot;mixed&quot;, the only role allowed to say so."
+               Code="@ThreeStateCode">
+        <VetoStack Gap="VetoSpacing.Small" Align="VetoAlign.Start">
+            <VetoSwitch TValue="bool?"
+                        TestId="tri"
+                        ThreeState="true"
+                        ShowIcons="true"
+                        ShowStateText="true"
+                        Label="Archived"
+                        HelperText="Off, on, or left undecided."
+                        @bind-Value="_tri" />
+            <span class="demo-value" data-testid="tri-value">@(_tri?.ToString() ?? "null")</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-order"
+               Title="Cycle order"
+               Description="Which way a three-state switch walks. The default puts on second, so the first press of an unset switch reads as a plain 'turn it on'. OffIndeterminateOn suits filters, where 'unset' sits naturally between exclude and include."
+               Code="@OrderCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Start">
+            <VetoSwitch TValue="bool?"
+                        TestId="order-default"
+                        ThreeState="true"
+                        ShowStateText="true"
+                        Label="Off → On → Indeterminate"
+                        @bind-Value="_orderDefault" />
+            <VetoSwitch TValue="bool?"
+                        TestId="order-middle"
+                        ThreeState="true"
+                        ShowStateText="true"
+                        Order="VetoSwitchOrder.OffIndeterminateOn"
+                        Label="Off → Indeterminate → On"
+                        @bind-Value="_orderMiddle" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes, colours and variants"
+               Description="The same size, colour and variant enums the rest of the library uses, all driven by modifier classes rather than inline styles."
+               Code="@SizesCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" Align="VetoAlign.Center">
+                <VetoSwitch TValue="bool" TestId="size-sm" Size="VetoSize.Small" Label="Small" @bind-Value="_scratch" />
+                <VetoSwitch TValue="bool" Size="VetoSize.Medium" Label="Medium" @bind-Value="_scratch" />
+                <VetoSwitch TValue="bool" TestId="size-lg" Size="VetoSize.Large" Label="Large" @bind-Value="_scratch" />
+            </VetoStack>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" Align="VetoAlign.Center">
+                <VetoSwitch TValue="bool" Color="VetoColor.Primary" Label="Primary" @bind-Value="_scratch" />
+                <VetoSwitch TValue="bool" TestId="color-success" Color="VetoColor.Success" Label="Success" @bind-Value="_scratch" />
+                <VetoSwitch TValue="bool" Color="VetoColor.Warning" Label="Warning" @bind-Value="_scratch" />
+                <VetoSwitch TValue="bool" Color="VetoColor.Danger" Label="Danger" @bind-Value="_scratch" />
+            </VetoStack>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" Align="VetoAlign.Center">
+                <VetoSwitch TValue="bool" Variant="VetoVariant.Outlined" Label="Outlined" @bind-Value="_scratch" />
+                <VetoSwitch TValue="bool" TestId="variant-filled" Variant="VetoVariant.Filled" Label="Filled" @bind-Value="_scratch" />
+                <VetoSwitch TValue="bool" Variant="VetoVariant.Text" Label="Text" @bind-Value="_scratch" />
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-label"
+               Title="Label placement and state text"
+               Description="The label goes after the control by default; put it first to line a column of switches up on the left, or above it to match the other inputs. ShowStateText prints the current state next to the control, and the three texts are yours to set."
+               Code="@LabelCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoSwitch TValue="bool" TestId="label-start" LabelPlacement="VetoSwitchLabelPlacement.Start" Label="Label first" @bind-Value="_scratch" />
+            <VetoSwitch TValue="bool" TestId="label-top" LabelPlacement="VetoSwitchLabelPlacement.Top" Label="Label above" @bind-Value="_scratch" />
+            <VetoSwitch TValue="bool"
+                        TestId="custom-text"
+                        ShowStateText="true"
+                        OnText="Public"
+                        OffText="Private"
+                        Label="Visibility"
+                        @bind-Value="_visibility" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-states"
+               Title="Disabled and read-only"
+               Description="Disabled cannot be focused. Read-only can be focused - so its state can still be read out - but will not change."
+               Code="@StatesCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Start">
+            <VetoSwitch TValue="bool" TestId="disabled" Label="Disabled" Disabled="true" @bind-Value="_locked" />
+            <VetoSwitch TValue="bool" TestId="readonly" Label="Read-only" ReadOnly="true" @bind-Value="_locked" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-validation"
+               Title="Validation"
+               Description="Inside an EditForm the switch picks up the model's validation attributes like any other input: it sets aria-invalid, swaps its helper text for the message, and announces it."
+               Code="@ValidationCode">
+        <EditForm Model="_form" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+                <VetoSwitch TestId="terms"
+                            Label="I accept the terms"
+                            Required="true"
+                            HelperText="Required before you can continue."
+                            @bind-Value="_form.AcceptedTerms" />
+                <button class="demo-submit" type="submit" data-testid="submit">Save</button>
+                <span class="demo-value" data-testid="submit-value">@_submitted</span>
+            </VetoStack>
+        </EditForm>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private bool _basic = true;
+    private bool? _tri;
+    // Both order demos start at off, so the two cycles diverge on the very first press.
+    private bool? _orderDefault = false;
+    private bool? _orderMiddle = false;
+    private bool _scratch;
+    private bool _visibility;
+    private bool _locked = true;
+    private readonly FormModel _form = new();
+    private string? _submitted;
+
+    private void OnValidSubmit () => _submitted = "Saved";
+
+    private sealed class FormModel
+    {
+        [Range( typeof( bool ), "true", "true", ErrorMessage = "You must accept the terms." )]
+        public bool AcceptedTerms { get; set; }
+    }
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Value", "TValue?", "default", "The bound value. Use @bind-Value. TValue must be bool or bool?."),
+        new("ThreeState", "bool", "false", "Cycle off, on and indeterminate instead of two states. Requires TValue of bool?."),
+        new("Order", "VetoSwitchOrder", "OffOnIndeterminate", "The order a three-state switch walks its states in."),
+        new("Label", "string?", "null", "Text for the switch's label. No label element is rendered without it."),
+        new("LabelPlacement", "VetoSwitchLabelPlacement", "End", "End, Start or Top."),
+        new("HelperText", "string?", "null", "Guidance under the control, replaced by the validation message while invalid."),
+        new("ShowStateText", "bool", "false", "Render the current state's text beside the control."),
+        new("OnText / OffText / IndeterminateText", "string", "\"On\" / \"Off\" / \"Indeterminate\"", "The state texts. Also the accessible name when there is no label."),
+        new("ShowIcons", "bool", "false", "Draw an icon on the thumb for the current state."),
+        new("OnIcon / OffIcon / IndeterminateIcon", "string?", "Check / Close / Minus", "The thumb icons, when ShowIcons is set."),
+        new("Color", "VetoColor", "Primary", "The accent the track takes when on."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Variant", "VetoVariant", "Outlined", "Outlined, Filled or Text."),
+        new("Disabled", "bool", "false", "Cannot be focused or changed."),
+        new("ReadOnly", "bool", "false", "Can be focused, but will not change."),
+        new("Required", "bool", "false", "Renders the required marker and sets aria-required. Enforcement comes from the model."),
+        new("OnValueChanged", "EventCallback<TValue?>", "—", "Raised after the bound value changes."),
+        new("State", "bool?", "—", "Read-only: the current state, with null for indeterminate."),
+        new("ToggleAsync() / SetStateAsync(bool?)", "Task", "—", "Drive the switch from code; both respect Disabled and ReadOnly.")
+    ];
+
+    private const string BasicCode = """
+        <VetoSwitch TValue="bool"
+                    Label="Email notifications"
+                    HelperText="We will only mail you about things you asked for."
+                    @bind-Value="_notify" />
+        """;
+
+    private const string ThreeStateCode = """
+        <VetoSwitch TValue="bool?"
+                    ThreeState="true"
+                    ShowIcons="true"
+                    ShowStateText="true"
+                    Label="Archived"
+                    @bind-Value="_archived" />
+
+        @code {
+            private bool? _archived;   // null is the indeterminate state
+        }
+        """;
+
+    private const string OrderCode = """
+        <VetoSwitch TValue="bool?" ThreeState="true" Label="Default" @bind-Value="_a" />
+
+        <VetoSwitch TValue="bool?"
+                    ThreeState="true"
+                    Order="VetoSwitchOrder.OffIndeterminateOn"
+                    Label="Indeterminate in the middle"
+                    @bind-Value="_b" />
+        """;
+
+    private const string SizesCode = """
+        <VetoSwitch TValue="bool" Size="VetoSize.Small" Label="Small" @bind-Value="_v" />
+        <VetoSwitch TValue="bool" Color="VetoColor.Success" Label="Success" @bind-Value="_v" />
+        <VetoSwitch TValue="bool" Variant="VetoVariant.Filled" Label="Filled" @bind-Value="_v" />
+        """;
+
+    private const string LabelCode = """
+        <VetoSwitch TValue="bool"
+                    LabelPlacement="VetoSwitchLabelPlacement.Start"
+                    Label="Label first"
+                    @bind-Value="_v" />
+
+        <VetoSwitch TValue="bool"
+                    ShowStateText="true"
+                    OnText="Public"
+                    OffText="Private"
+                    Label="Visibility"
+                    @bind-Value="_visibility" />
+        """;
+
+    private const string StatesCode = """
+        <VetoSwitch TValue="bool" Label="Disabled" Disabled="true" @bind-Value="_v" />
+        <VetoSwitch TValue="bool" Label="Read-only" ReadOnly="true" @bind-Value="_v" />
+        """;
+
+    private const string ValidationCode = """
+        <EditForm Model="_form" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+
+            <VetoSwitch Label="I accept the terms"
+                        Required="true"
+                        HelperText="Required before you can continue."
+                        @bind-Value="_form.AcceptedTerms" />
+
+            <button type="submit">Save</button>
+        </EditForm>
+
+        @code {
+            private sealed class FormModel
+            {
+                [Range(typeof(bool), "true", "true",
+                    ErrorMessage = "You must accept the terms.")]
+                public bool AcceptedTerms { get; set; }
+            }
+        }
+        """;
+}

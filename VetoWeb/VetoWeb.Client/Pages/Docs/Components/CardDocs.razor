@@ -1,0 +1,205 @@
+@page "/docs/components/card"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Card — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Card"
+          Lead="A surface that groups related content - composed from header, content and footer sections, or driven by plain parameters when that is all you need.">
+
+    <DemoBlock TestId="demo-composed"
+               Title="Header, content, footer"
+               Description="The composed form. VetoCardHeader holds a VetoCardTitle and a VetoCardDescription for structured metadata; VetoCardContent holds the body; VetoCardFooter holds the actions. Each section pads itself, so the card needs no padding of its own and the sections never double up."
+               Code="@ComposedCode">
+        <div class="demo-card-row">
+            <VetoCard TestId="composed" Padding="VetoSpacing.None" Elevation="VetoElevation.Outlined">
+                <VetoCardHeader TestId="composed-header">
+                    <VetoCardTitle TestId="composed-title">Deploy to production</VetoCardTitle>
+                    <VetoCardDescription TestId="composed-description">
+                        Three commits are waiting. The last deploy was four days ago.
+                    </VetoCardDescription>
+                </VetoCardHeader>
+                <VetoCardContent TestId="composed-content">
+                    <p class="demo-prose">
+                        Deploying runs the full test suite first. If anything fails the release is
+                        held and nothing reaches production.
+                    </p>
+                </VetoCardContent>
+                <VetoCardFooter TestId="composed-footer" Justify="VetoJustify.End">
+                    <VetoButton Variant="VetoVariant.Text">Cancel</VetoButton>
+                    <VetoButton Color="VetoColor.Primary">Deploy</VetoButton>
+                </VetoCardFooter>
+            </VetoCard>
+        </div>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-media"
+               Title="Media card"
+               Description="Put an image at the top of the card, before the header. The card clips to its own rounded corners without being asked, so the image's top edge is rounded and its sides run flush - which is what blog posts, product listings and portfolio items all want."
+               Code="@MediaCode">
+        <div class="demo-card-row">
+            <VetoCard TestId="media" Padding="VetoSpacing.None" Elevation="VetoElevation.Raised">
+                <img class="demo-card-media"
+                     data-testid="media-image"
+                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234f46e5'/%3E%3Cstop offset='1' stop-color='%23db2777'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='200' fill='url(%23g)'/%3E%3C/svg%3E"
+                     alt="" />
+                <VetoCardHeader>
+                    <VetoCardTitle>Building a component library</VetoCardTitle>
+                    <VetoCardDescription>12 September 2026 · 8 minute read</VetoCardDescription>
+                </VetoCardHeader>
+                <VetoCardContent>
+                    <p class="demo-prose">
+                        What a component contract is for, and why the second component is the one
+                        that tells you whether the first one was designed properly.
+                    </p>
+                </VetoCardContent>
+                <VetoCardFooter>
+                    <VetoButton Variant="VetoVariant.Outlined" Size="VetoSize.Small">Read</VetoButton>
+                </VetoCardFooter>
+            </VetoCard>
+        </div>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-stats"
+               Title="Statistic tiles"
+               Description="A grid of cards, each reversing the usual order inside the header: description first, then title. That puts the label above the figure, which is the order a KPI reads in. There is no parameter for it - writing the two children the other way round is the whole feature. Level=&quot;0&quot; keeps the figures out of the page's heading outline, where twenty of them would do real damage."
+               Code="@StatsCode">
+        <VetoGrid Columns="1" ColumnsMedium="2" ColumnsLarge="4" Gap="VetoSpacing.Medium" TestId="stats">
+            @foreach (var stat in Stats)
+            {
+                <VetoGridItem>
+                    <VetoCard TestId="@($"stat-{stat.Key}")" Padding="VetoSpacing.None">
+                        <VetoCardHeader>
+                            <VetoCardDescription>@stat.Label</VetoCardDescription>
+                            <VetoCardTitle Level="0" Display="true" TestId="@($"stat-{stat.Key}-value")">@stat.Value</VetoCardTitle>
+                            <VetoCardDescription>
+                                <span class="@(stat.Up ? "demo-trend demo-trend--up" : "demo-trend demo-trend--down")">
+                                    <VetoIcon Icon="@(stat.Up ? VetoIcons.TrendUp : VetoIcons.TrendDown)" Size="VetoIconSize.Inherit" />
+                                    @stat.Change
+                                </span>
+                                on last month
+                            </VetoCardDescription>
+                        </VetoCardHeader>
+                    </VetoCard>
+                </VetoGridItem>
+            }
+        </VetoGrid>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-slots"
+               Title="The plain form"
+               Description="When a card is just a padded box with a heading, the parameters are less ceremony than the sections. Title, Header and Footer still work exactly as they did - the composed form is an addition, not a replacement."
+               Code="@SlotCode">
+        <div class="demo-card-row">
+            <VetoCard TestId="slots" Title="Storage">
+                <p class="demo-prose">41.2 GB of 100 GB used.</p>
+            </VetoCard>
+        </div>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-elevation"
+               Title="Elevation and interactivity"
+               Description="Flat, outlined or raised. Giving a card OnClick makes the whole surface activate - and renders it as a button, so it is focusable, keyboard operable and announced as a control rather than being a div that happens to respond to clicks."
+               Code="@ElevationCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+            <VetoCard TestId="flat" Elevation="VetoElevation.Flat" Title="Flat">Sits on the background.</VetoCard>
+            <VetoCard TestId="outlined" Elevation="VetoElevation.Outlined" Title="Outlined">A hairline border.</VetoCard>
+            <VetoCard TestId="raised" Elevation="VetoElevation.Raised" Title="Raised">A soft shadow.</VetoCard>
+            <VetoCard TestId="clickable" Title="Clickable" OnClick="() => _clicks++">Activated @_clicks times.</VetoCard>
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private int _clicks;
+
+    private sealed record Stat ( string Key, string Label, string Value, string Change, bool Up );
+
+    private static readonly Stat[] Stats =
+    [
+        new("revenue", "Revenue", "$48,290", "+12.4%", true),
+        new("users", "Active users", "2,411", "+3.1%", true),
+        new("churn", "Churn", "1.8%", "-0.4%", false),
+        new("latency", "P95 latency", "184 ms", "+22 ms", false),
+    ];
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("VetoCardHeader", "component", "—", "The title/description block. Bordered draws a hairline under it."),
+        new("VetoCardTitle", "component", "—", "The heading. Level sets h1-h6, or 0 for a plain div. Display renders it at figure size."),
+        new("VetoCardDescription", "component", "—", "The muted supporting line. Before the title for a KPI label, after it for a subtitle."),
+        new("VetoCardContent", "component", "—", "The body of a composed card."),
+        new("VetoCardFooter", "component", "—", "The actions. Justify distributes them; Bordered draws a hairline above."),
+        new("Title / Header / Footer", "string? / RenderFragment?", "null", "The plain form, unchanged."),
+        new("ChildContent", "RenderFragment?", "null", "The card's content."),
+        new("Elevation", "VetoElevation", "Outlined", "Flat, Outlined or Raised."),
+        new("Padding", "VetoSpacing", "Large", "Padding inside each region. Use None with the composed sections, which pad themselves."),
+        new("OnClick", "EventCallback<MouseEventArgs>", "—", "Makes the whole card activate, and renders it as a button."),
+        new("Disabled", "bool", "false", "Disables an interactive card."),
+    ];
+
+    private const string ComposedCode = """
+        <VetoCard Padding="VetoSpacing.None">
+            <VetoCardHeader>
+                <VetoCardTitle>Deploy to production</VetoCardTitle>
+                <VetoCardDescription>Three commits are waiting.</VetoCardDescription>
+            </VetoCardHeader>
+
+            <VetoCardContent>
+                <p>Deploying runs the full test suite first.</p>
+            </VetoCardContent>
+
+            <VetoCardFooter Justify="VetoJustify.End">
+                <VetoButton Variant="VetoVariant.Text">Cancel</VetoButton>
+                <VetoButton Color="VetoColor.Primary">Deploy</VetoButton>
+            </VetoCardFooter>
+        </VetoCard>
+        """;
+
+    private const string MediaCode = """
+        @* The image goes before the header. The card clips to its own corners already,
+           so nothing has to ask for the rounded top. *@
+        <VetoCard Padding="VetoSpacing.None" Elevation="VetoElevation.Raised">
+            <img src="/media/post.jpg" alt="" />
+
+            <VetoCardHeader>
+                <VetoCardTitle>Building a component library</VetoCardTitle>
+                <VetoCardDescription>12 September 2026 · 8 minute read</VetoCardDescription>
+            </VetoCardHeader>
+
+            <VetoCardContent>
+                <p>What a component contract is for.</p>
+            </VetoCardContent>
+        </VetoCard>
+        """;
+
+    private const string StatsCode = """
+        <VetoGrid Columns="1" ColumnsMedium="2" ColumnsLarge="4" Gap="VetoSpacing.Medium">
+            <VetoGridItem>
+                <VetoCard Padding="VetoSpacing.None">
+                    <VetoCardHeader>
+                        @* Description first: the label sits above the figure. *@
+                        <VetoCardDescription>Revenue</VetoCardDescription>
+                        <VetoCardTitle Level="0" Display="true">$48,290</VetoCardTitle>
+                        <VetoCardDescription>+12.4% on last month</VetoCardDescription>
+                    </VetoCardHeader>
+                </VetoCard>
+            </VetoGridItem>
+        </VetoGrid>
+        """;
+
+    private const string SlotCode = """
+        <VetoCard Title="Storage">
+            <p>41.2 GB of 100 GB used.</p>
+        </VetoCard>
+        """;
+
+    private const string ElevationCode = """
+        <VetoCard Elevation="VetoElevation.Flat" Title="Flat">Sits on the background.</VetoCard>
+        <VetoCard Elevation="VetoElevation.Raised" Title="Raised">A soft shadow.</VetoCard>
+        <VetoCard Title="Clickable" OnClick="Activate">Renders as a button.</VetoCard>
+        """;
+}

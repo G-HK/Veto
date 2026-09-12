@@ -1,0 +1,124 @@
+@page "/docs/components/tilt"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Tilt 3D — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Tilt 3D"
+          Lead="Tilts its content in three dimensions as the pointer crosses it, as though the surface were being pushed.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Basic"
+               Description="Wrap anything. Move the pointer across the card and watch the surface follow it; move away and it settles back."
+               Code="@BasicCode">
+        <VetoTilt3D TestId="basic">
+            <VetoCard Title="Hover me" Elevation="VetoElevation.Raised" Padding="VetoSpacing.ExtraLarge" Class="tilt-card">
+                The whole card is the tilt surface.
+            </VetoCard>
+        </VetoTilt3D>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-strength"
+               Title="How far it tilts"
+               Description="MaxTilt is the angle at the edges; Perspective is how near the vanishing point sits. A shorter perspective exaggerates the same angle."
+               Code="@StrengthCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true">
+            <VetoTilt3D MaxTilt="5" TestId="subtle">
+                <VetoCard Title="Subtle" Padding="VetoSpacing.Large" Class="tilt-card tilt-card--small">MaxTilt 5</VetoCard>
+            </VetoTilt3D>
+            <VetoTilt3D MaxTilt="14" TestId="medium">
+                <VetoCard Title="Default-ish" Padding="VetoSpacing.Large" Class="tilt-card tilt-card--small">MaxTilt 14</VetoCard>
+            </VetoTilt3D>
+            <VetoTilt3D MaxTilt="25" Perspective="600px" TestId="strong">
+                <VetoCard Title="Strong" Padding="VetoSpacing.Large" Class="tilt-card tilt-card--small">25°, 600px</VetoCard>
+            </VetoTilt3D>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-glare"
+               Title="Glare"
+               Description="A highlight that follows the pointer, like light moving across something glossy. It is drawn over the content and ignores pointer events, so nothing underneath stops working."
+               Code="@GlareCode">
+        <VetoTilt3D Glare="true" MaxTilt="16" Scale="1.04" TestId="glare">
+            <VetoCard Elevation="VetoElevation.Raised" Padding="VetoSpacing.Huge" Class="tilt-card tilt-card--dark">
+                <VetoStack Gap="VetoSpacing.Small">
+                    <span class="tilt-card__eyebrow">Veto</span>
+                    <span class="tilt-card__headline">Components for Blazor</span>
+                </VetoStack>
+            </VetoCard>
+        </VetoTilt3D>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-settle"
+               Title="Settling"
+               Description="Reset returns the surface to flat when the pointer leaves. Turn it off and it holds the last angle, which suits a surface the pointer keeps coming back to."
+               Code="@SettleCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true">
+            <VetoTilt3D ResetDuration="900" TestId="slow">
+                <VetoCard Title="Slow settle" Padding="VetoSpacing.Large" Class="tilt-card tilt-card--small">900ms</VetoCard>
+            </VetoTilt3D>
+            <VetoTilt3D Reset="false" TestId="hold">
+                <VetoCard Title="Holds its angle" Padding="VetoSpacing.Large" Class="tilt-card tilt-card--small">Reset off</VetoCard>
+            </VetoTilt3D>
+            <VetoTilt3D Disabled="true" TestId="disabled">
+                <VetoCard Title="Disabled" Padding="VetoSpacing.Large" Class="tilt-card tilt-card--small">No effect</VetoCard>
+            </VetoTilt3D>
+        </VetoStack>
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">When it does nothing</h2>
+        <p class="docs-prose">
+            The effect never attaches for a visitor who has asked for reduced motion, or for a
+            coarse pointer - a finger has no hover position for the surface to follow, and a tilt
+            that only fires on tap reads as a glitch. In both cases the content renders exactly as
+            it would otherwise; only the movement is gone.
+        </p>
+        <p class="docs-prose">
+            The pointer is tracked in JavaScript, which writes two custom properties that the CSS
+            transform reads. Nothing crosses into .NET while the pointer moves - a per-frame interop
+            call would cost frames in WebAssembly, and a great deal more over a Server circuit.
+        </p>
+    </VetoStack>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("MaxTilt", "double", "12", "Tilt at the edges, in degrees."),
+        new("Perspective", "string", "\"1000px\"", "Depth of the perspective. Shorter exaggerates the effect."),
+        new("Scale", "double", "1.02", "How much the surface grows while hovered. 1 leaves it unscaled."),
+        new("Glare", "bool", "false", "Adds a highlight that follows the pointer."),
+        new("Reset", "bool", "true", "Returns the surface to flat when the pointer leaves."),
+        new("ResetDuration", "int", "400", "How long the settle takes, in milliseconds."),
+        new("Disabled", "bool", "false", "Turns the effect off without changing the content or layout.")
+    ];
+
+    private const string BasicCode = """
+        <VetoTilt3D>
+            <VetoCard Title="Hover me" Elevation="VetoElevation.Raised">
+                The whole card is the tilt surface.
+            </VetoCard>
+        </VetoTilt3D>
+        """;
+
+    private const string StrengthCode = """
+        <VetoTilt3D MaxTilt="5">…</VetoTilt3D>
+        <VetoTilt3D MaxTilt="25" Perspective="600px">…</VetoTilt3D>
+        """;
+
+    private const string GlareCode = """
+        <VetoTilt3D Glare="true" MaxTilt="16" Scale="1.04">
+            <VetoCard Elevation="VetoElevation.Raised">…</VetoCard>
+        </VetoTilt3D>
+        """;
+
+    private const string SettleCode = """
+        <VetoTilt3D ResetDuration="900">…</VetoTilt3D>
+        <VetoTilt3D Reset="false">…</VetoTilt3D>
+        <VetoTilt3D Disabled="true">…</VetoTilt3D>
+        """;
+}

@@ -1,0 +1,31 @@
+@namespace Veto.Components.Layout
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    @if (HasLabel)
+    {
+        <div @ref="RootElement"
+             @attributes="InnerAttributes"
+             id="@ElementId"
+             class="@CssClass"
+             style="@CssStyle"
+             data-testid="@TestId"
+             role="separator"
+             aria-orientation="@OrientationName">
+            <span class="veto-divider__line" aria-hidden="true"></span>
+            <span class="veto-divider__label">@(ChildContent ?? RenderLabel())</span>
+            <span class="veto-divider__line" aria-hidden="true"></span>
+        </div>
+    }
+    else
+    {
+        <hr @ref="RootElement"
+            @attributes="InnerAttributes"
+            id="@ElementId"
+            class="@CssClass"
+            style="@CssStyle"
+            data-testid="@TestId"
+            aria-orientation="@OrientationName" />
+    }
+}

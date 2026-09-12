@@ -1,0 +1,22 @@
+/* VetoLayout - the frame. Positioning is CSS grid; the pieces place themselves into it. */
+
+.veto-layout {
+    display: grid;
+    /*
+     * Columns are declared explicitly. Left implicit, the browser auto-places each piece into
+     * whatever cell is free: the drawer takes column one, the content an implicit column two,
+     * and the app bar ends up confined to column one rather than spanning the frame - so a
+     * trailing VetoSpacer pushes its content to the edge of the drawer instead of the window.
+     */
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    min-height: 100%;
+    font-family: var(--veto-font-sans);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+}
+
+.veto-layout--fill {
+    height: 100dvh;
+    overflow: hidden;
+}

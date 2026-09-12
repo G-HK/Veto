@@ -1,0 +1,128 @@
+﻿@page "/"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Veto — components for Blazor WebAssembly</PageTitle>
+
+<VetoContainer Size="VetoContainerSize.Large" Padding="VetoSpacing.ExtraLarge" Class="home">
+    <div data-testid="page" data-ready="@(_interactive ? "true" : null)">
+
+        <section class="hero">
+            <VetoStack Gap="VetoSpacing.ExtraLarge">
+                <VetoStack Gap="VetoSpacing.Medium">
+                    <h1 class="hero__title">Components for<br />Blazor WebAssembly.</h1>
+                    <p class="hero__lead">
+                        Veto is a component library with no CSS framework underneath it, no icon font,
+                        and no runtime dependencies. Every component styles itself from CSS custom
+                        properties, so one theme changes all of them.
+                    </p>
+                </VetoStack>
+
+                <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
+                    <a class="hero__cta" href="/docs/installation">Get started</a>
+                    <a class="hero__link" href="/docs/components/text-box">Browse components</a>
+                    <a class="hero__link" href="/docs/layouts">See the layouts</a>
+                </VetoStack>
+
+                <VetoCode Code="@InstallSnippet" Language="powershell" TestId="hero-install" />
+            </VetoStack>
+        </section>
+
+        <VetoDivider Class="home__rule" />
+
+        <section>
+            <VetoStack Gap="VetoSpacing.ExtraLarge">
+                <h2 class="home__heading">What you get</h2>
+
+                <VetoGrid Columns="1" ColumnsMedium="3" Gap="VetoSpacing.Large">
+                    <VetoCard Title="One theme, every component" Padding="VetoSpacing.Large">
+                        Components read <code>--veto-*</code> custom properties and never hard-code a
+                        colour. Override a handful of tokens and the whole library follows, in light
+                        and dark.
+                    </VetoCard>
+                    <VetoCard Title="Real form integration" Padding="VetoSpacing.Large">
+                        Inputs derive from Blazor's own <code>InputBase&lt;T&gt;</code>, so
+                        <code>@@bind-Value</code>, <code>EditForm</code> and validation work exactly
+                        as they already do.
+                    </VetoCard>
+                    <VetoCard Title="Tested in a browser" Padding="VetoSpacing.Large">
+                        Every component ships with Playwright specs that drive this site in a real
+                        browser — keyboard, ARIA and computed layout, not just rendered markup.
+                    </VetoCard>
+                </VetoGrid>
+            </VetoStack>
+        </section>
+
+        <VetoDivider Class="home__rule" />
+
+        <section>
+            <VetoStack Gap="VetoSpacing.ExtraLarge">
+                <VetoStack Gap="VetoSpacing.ExtraSmall">
+                    <h2 class="home__heading">Components</h2>
+                    <p class="home__subheading">Each one has its own page, with worked examples and a parameter reference.</p>
+                </VetoStack>
+
+                <VetoGrid Columns="1" ColumnsSmall="2" ColumnsLarge="4" Gap="VetoSpacing.Medium" TestId="component-grid">
+                    @foreach (var entry in Catalogue)
+                    {
+                        <a class="catalogue__link" href="@entry.Href">
+                            <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.Large" Class="catalogue__card">
+                                <VetoStack Gap="VetoSpacing.Small">
+                                    <VetoIcon Icon="@entry.Icon" Size="VetoIconSize.Large" Class="catalogue__icon" />
+                                    <span class="catalogue__name">@entry.Name</span>
+                                    <span class="catalogue__summary">@entry.Summary</span>
+                                </VetoStack>
+                            </VetoCard>
+                        </a>
+                    }
+                </VetoGrid>
+            </VetoStack>
+        </section>
+
+    </div>
+</VetoContainer>
+
+@code {
+    private bool _interactive;
+
+    private const string InstallSnippet = """
+        dotnet add package Veto
+        """;
+
+    private sealed record CatalogueEntry ( string Name, string Summary, string Href, string Icon );
+
+    private static readonly CatalogueEntry[] Catalogue =
+    [
+        new("Text box", "Labelled input with validation", "/docs/components/text-box", VetoIcons.Edit),
+        new("Switch", "On/off, or three-state with null", "/docs/components/switch", VetoIcons.Settings),
+        new("Slider", "One value or a span, with marks", "/docs/components/slider", VetoIcons.Minus),
+        new("Rating", "Score out of any icon, halves included", "/docs/components/rating", VetoIcons.Star),
+        new("Breadcrumbs", "Where you are, collapsing when long", "/docs/components/breadcrumbs", VetoIcons.ChevronRight),
+        new("Toast", "Notifications, six corners, eleven animations", "/docs/components/toast", VetoIcons.Bell),
+        new("Button group", "Clustered actions and toolbars", "/docs/components/button-group", VetoIcons.Grid),
+        new("Gauge", "A dial for one live number", "/docs/components/gauge", VetoIcons.Settings),
+        new("Keyboard key", "Key caps and shortcut lists", "/docs/components/kbd", VetoIcons.Terminal),
+        new("Cron", "Build a schedule, read it back in words", "/docs/components/cron", VetoIcons.Bell),
+        new("Icon", "SVG icons, no font required", "/docs/components/icon", VetoIcons.Palette),
+        new("Button", "Labelled action, optionally a link", "/docs/components/button", VetoIcons.Check),
+        new("Icon button", "Icon-only action", "/docs/components/icon-button", VetoIcons.Plus),
+        new("Card", "Grouping surface", "/docs/components/card", VetoIcons.Document),
+        new("Stack", "Row and column layout", "/docs/components/stack", VetoIcons.Sidebar),
+        new("Grid", "Responsive grid", "/docs/components/grid", VetoIcons.Grid),
+        new("Container", "Reading-width wrapper", "/docs/components/container", VetoIcons.Document),
+        new("Divider", "Rule with an optional label", "/docs/components/divider", VetoIcons.Minus),
+        new("Tilt 3D", "Pointer-tracking 3D tilt", "/docs/components/tilt", VetoIcons.Grid),
+        new("Handbook page", "Documentation article and contents rail", "/docs/components/handbook-page", VetoIcons.Document),
+        new("Gantt", "Schedules with filters and export", "/docs/components/gantt", VetoIcons.Grid),
+        new("Loading", "Spinners, progress, skeletons", "/docs/components/loading", VetoIcons.Settings),
+        new("Blink text", "Typewriter reveal, streaming", "/docs/components/blink-text", VetoIcons.Terminal)
+    ];
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+}

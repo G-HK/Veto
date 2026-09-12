@@ -1,0 +1,70 @@
+@page "/docs/components/divider"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Divider — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Divider"
+          Lead="A rule that separates content, with an optional label sitting in a gap in the line.">
+
+    <DemoBlock TestId="demo-plain"
+               Title="Plain"
+               Description="With no label it renders a real hr element, which already carries the separator role."
+               Code="@PlainCode">
+        <VetoStack Gap="VetoSpacing.None">
+            <span>Above</span>
+            <VetoDivider TestId="plain" />
+            <span>Below</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-labelled"
+               Title="Labelled"
+               Description="A label breaks the rule to make room for itself. Useful between two alternatives, such as either side of a sign-in form."
+               Code="@LabelledCode">
+        <VetoDivider Label="or" TestId="labelled" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-vertical"
+               Title="Vertical"
+               Description="Orientation describes the rule itself, not the content it separates - so a vertical divider draws a vertical line, and reports aria-orientation to match. It needs a parent that gives it a height."
+               Code="@VerticalCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center" Gap="VetoSpacing.None">
+            <span>Left</span>
+            <VetoDivider Orientation="VetoOrientation.Vertical" TestId="vertical" Class="divider-demo" />
+            <span>Right</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Orientation", "VetoOrientation", "Horizontal", "Which way the rule itself runs."),
+        new("Label", "string?", "null", "Text to sit in a gap in the rule."),
+        new("ChildContent", "RenderFragment?", "null", "Content for the gap. Takes precedence over Label.")
+    ];
+
+    private const string PlainCode = """
+        <span>Above</span>
+        <VetoDivider />
+        <span>Below</span>
+        """;
+
+    private const string LabelledCode = """
+        <VetoDivider Label="or" />
+        """;
+
+    private const string VerticalCode = """
+        <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center">
+            <span>Left</span>
+            <VetoDivider Orientation="VetoOrientation.Vertical" Class="rule" />
+            <span>Right</span>
+        </VetoStack>
+
+        <!-- .rule { height: 1.5rem } -->
+        """;
+}

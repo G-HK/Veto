@@ -1,0 +1,33 @@
+@namespace Veto.Components.Feedback
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    <div @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId"
+         aria-busy="@(Loading ? "true" : "false")">
+
+        <div class="veto-loading-overlay__content" inert="@Loading">
+            @ChildContent
+        </div>
+
+        @if (Loading)
+        {
+            <div class="veto-loading-overlay__veil" role="status" aria-label="@Label">
+                @if (Indicator is not null)
+                {
+                    @Indicator
+                }
+                else
+                {
+                    <VetoSpinner Size="VetoSize.Large" />
+                    <span class="veto-loading-overlay__label">@Label</span>
+                }
+            </div>
+        }
+    </div>
+}

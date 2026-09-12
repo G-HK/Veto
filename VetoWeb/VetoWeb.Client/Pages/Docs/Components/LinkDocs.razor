@@ -1,0 +1,145 @@
+@page "/docs/components/link"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Link — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Link"
+          Lead="A link that starts bare and draws a thin neon underline out from its middle when the pointer or the keyboard reaches it.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="The reveal"
+               Description="Hover one. Then press Tab and walk through them without the mouse - the line answers focus as well, because a link that only responds to a pointer is invisible to anyone who is not using one."
+               Code="@BasicCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true">
+            <VetoLink Href="/docs/installation" TestId="reveal">Installation</VetoLink>
+            <VetoLink Href="/docs/usage" TestId="reveal-usage">Usage</VetoLink>
+            <VetoLink Href="/docs/theming/tokens" TestId="reveal-tokens">Design tokens</VetoLink>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-modes"
+               Title="Three ways to underline"
+               Description="Reveal is the default. Always suits a link buried in a paragraph, where it has to be findable standing still. None is for a link whose surroundings already make it obvious."
+               Code="@ModesCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true">
+            <VetoLink Href="/docs/usage" Underline="VetoUnderline.Reveal" TestId="mode-reveal">Reveal</VetoLink>
+            <VetoLink Href="/docs/usage" Underline="VetoUnderline.Always" TestId="mode-always">Always</VetoLink>
+            <VetoLink Href="/docs/usage" Underline="VetoUnderline.None" TestId="mode-none">None</VetoLink>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-prose"
+               Title="Inside a paragraph"
+               Description="Inherit takes the colour of the surrounding text, so a link in the middle of a sentence does not turn a run of words into an accent-coloured stripe. The underline keeps its own colour."
+               Code="@ProseCode">
+        <p class="docs-prose link-prose">
+            Every Veto component styles itself from
+            <VetoLink Href="/docs/theming/tokens" Inherit="true" TestId="prose-tokens">design tokens</VetoLink>,
+            which is how an app can
+            <VetoLink Href="/docs/theming/provider" Inherit="true" UnderlineColor="#f43f5e" TestId="prose-theme">rebrand the whole library</VetoLink>
+            by setting two or three custom properties rather than restyling anything.
+        </p>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-color"
+               Title="Colour"
+               Description="UnderlineColor sets the line and its halo. These three are set to Always so the colours are visible standing still; on a Reveal link the same colour arrives with the line."
+               Code="@ColorCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true">
+            <VetoLink Href="/docs/usage" UnderlineColor="#22d3ee" Underline="VetoUnderline.Always" TestId="color-cyan">Cyan</VetoLink>
+            <VetoLink Href="/docs/usage" UnderlineColor="#a855f7" Underline="VetoUnderline.Always" TestId="color-violet">Violet</VetoLink>
+            <VetoLink Href="/docs/usage" UnderlineColor="#f59e0b" Underline="VetoUnderline.Always" TestId="color-amber">Amber</VetoLink>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-nav"
+               Title="As a navigation menu"
+               Description="VetoNavMenu takes the same option. The line belongs to the label but answers the whole row, so it appears wherever in the row the pointer crosses - and the current page is still marked the way it always was."
+               Code="@NavCode">
+        <div class="link-nav">
+            <VetoNavMenu Items="NavItems"
+                         Underline="VetoUnderline.Reveal"
+                         Label="Example"
+                         TestId="link-menu" />
+        </div>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-current"
+               Title="Knowing where it is"
+               Description="The first of these points at the page you are reading. It carries aria-current and sets itself in a heavier weight, without anything on this page telling it to."
+               Code="@CurrentCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true">
+            <VetoLink Href="/docs/components/link" TestId="current-self">This page</VetoLink>
+            <VetoLink Href="/docs/usage" TestId="current-other">Some other page</VetoLink>
+        </VetoStack>
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Current page</h2>
+        <p class="docs-prose">
+            A link knows whether it points at the page being shown. It marks itself with
+            <code>aria-current</code> and a modifier class, matching on a path prefix so a link to
+            <code>/docs</code> stays lit throughout the documentation. Set <code>MatchExact</code>
+            on a link to the root, which every other path begins with.
+        </p>
+        <p class="docs-prose">
+            The reveal is a flourish on top of the focus ring, not a replacement for it. The ring is
+            still drawn, because an app is free to change the accent colour to something that does
+            not stand out against its own background.
+        </p>
+    </VetoStack>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private static readonly IReadOnlyList<VetoNavEntry> NavItems =
+    [
+        new VetoNavEntry { Label = "Overview", Href = "/", Icon = VetoIcons.Home, MatchExact = true },
+        new VetoNavEntry { Label = "Installation", Href = "/docs/installation", Icon = VetoIcons.Document },
+        new VetoNavEntry { Label = "Usage", Href = "/docs/usage", Icon = VetoIcons.Terminal }
+    ];
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Href", "string?", "null", "Where the link goes."),
+        new("Underline", "VetoUnderline", "Reveal", "None, Reveal, or Always."),
+        new("UnderlineColor", "string?", "null", "Any CSS colour. Defaults to the theme accent."),
+        new("Inherit", "bool", "false", "Takes the surrounding text's colour instead of the accent."),
+        new("Target", "string?", "null", "The link's target. A new tab is given a safe rel automatically."),
+        new("Rel", "string?", "null", "Overrides that rel."),
+        new("MatchExact", "bool", "false", "Matches the current URL exactly rather than as a prefix.")
+    ];
+
+    private const string BasicCode = """
+        <VetoLink Href="/docs/installation">Installation</VetoLink>
+        """;
+
+    private const string ModesCode = """
+        <VetoLink Href="/docs/usage" Underline="VetoUnderline.Reveal">Reveal</VetoLink>
+        <VetoLink Href="/docs/usage" Underline="VetoUnderline.Always">Always</VetoLink>
+        <VetoLink Href="/docs/usage" Underline="VetoUnderline.None">None</VetoLink>
+        """;
+
+    private const string ProseCode = """
+        <p>
+            Every Veto component styles itself from
+            <VetoLink Href="/docs/theming/tokens" Inherit="true">design tokens</VetoLink>.
+        </p>
+        """;
+
+    private const string ColorCode = """
+        <VetoLink Href="/docs/usage" UnderlineColor="#22d3ee" Underline="VetoUnderline.Always">Cyan</VetoLink>
+        """;
+
+    private const string CurrentCode = """
+        <VetoLink Href="/docs/components/link">This page</VetoLink>
+        <VetoLink Href="/docs/usage">Some other page</VetoLink>
+        """;
+
+    private const string NavCode = """
+        <VetoNavMenu Items="NavItems" Underline="VetoUnderline.Reveal" Label="Example" />
+        """;
+}

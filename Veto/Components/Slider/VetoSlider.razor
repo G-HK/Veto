@@ -1,0 +1,109 @@
+@namespace Veto.Components.Slider
+@typeparam TValue where TValue : struct, System.Numerics.INumber<TValue>
+@inherits VetoInputBase<TValue>
+
+@if (Visible)
+{
+    <div class="@RootCssClass"
+         style="@RootCssStyle"
+         data-testid="@TestId"
+         data-value="@FormatNumber(LowerNumber)"
+         data-upper-value="@(Range ? FormatNumber(UpperNumber) : null)">
+
+        @if (HasLabel || ShowValue)
+        {
+            <div class="veto-slider__header">
+                @if (HasLabel)
+                {
+                    <label class="veto-slider__label" for="@ElementId">
+                        @Label
+                        @if (Required)
+                        {
+                            <span class="veto-slider__required" aria-hidden="true">*</span>
+                        }
+                    </label>
+                }
+                @if (ShowValue)
+                {
+                    <output class="veto-slider__value"
+                            data-testid="@(TestId is null ? null : $"{TestId}-value")">@ValueText</output>
+                }
+            </div>
+        }
+
+        <div class="veto-slider__control" style="@ControlStyle">
+            <div class="veto-slider__rail" aria-hidden="true">
+                <div class="veto-slider__fill"></div>
+                @foreach (var mark in VisibleMarks)
+                {
+                    <span class="veto-slider__mark"
+                          style="left:@(PercentCss(mark.Value))%"
+                          data-active="@(IsSelected(mark.Value) ? "true" : "false")"></span>
+                }
+            </div>
+
+            <input @ref="InputElement"
+                   @attributes="InnerAttributes"
+                   id="@ElementId"
+                   name="@NameAttributeValue"
+                   class="veto-slider__input veto-slider__input--lower @FieldValidationClass"
+                   type="range"
+                   min="@FormatNumber(MinNumber)"
+                   max="@FormatNumber(MaxNumber)"
+                   step="@StepAttribute"
+                   value="@ValueAttribute(LowerNumber)"
+                   disabled="@Disabled"
+                   aria-label="@LowerAriaLabel"
+                   aria-valuetext="@TextFor(LowerNumber)"
+                   aria-required="@(Required ? "true" : null)"
+                   aria-readonly="@(ReadOnly ? "true" : null)"
+                   aria-invalid="@(HasErrors ? "true" : null)"
+                   aria-describedby="@DescribedBy"
+                   @oninput="OnLowerInputAsync"
+                   @onchange="OnLowerChangeAsync" />
+
+            @if (Range)
+            {
+                <input class="veto-slider__input veto-slider__input--upper"
+                       id="@UpperElementId"
+                       type="range"
+                       min="@FormatNumber(MinNumber)"
+                       max="@FormatNumber(MaxNumber)"
+                       step="@StepAttribute"
+                       value="@ValueAttribute(UpperNumber)"
+                       disabled="@Disabled"
+                       aria-label="@UpperThumbLabel"
+                       aria-valuetext="@TextFor(UpperNumber)"
+                       aria-readonly="@(ReadOnly ? "true" : null)"
+                       @oninput="OnUpperInputAsync"
+                       @onchange="OnUpperChangeAsync" />
+            }
+
+            @if (ShowMarkLabels && HasMarkLabels)
+            {
+                <div class="veto-slider__mark-labels" aria-hidden="true">
+                    @foreach (var mark in VisibleMarks)
+                    {
+                        @if (mark.Label is not null)
+                        {
+                            <span class="veto-slider__mark-label"
+                                  style="left:@(PercentCss(mark.Value))%"
+                                  data-active="@(IsSelected(mark.Value) ? "true" : "false")">@mark.Label</span>
+                        }
+                    }
+                </div>
+            }
+        </div>
+
+        @if (HasErrors)
+        {
+            <p class="veto-slider__message veto-slider__message--error" id="@ErrorId" role="alert">
+                @ValidationMessages.First()
+            </p>
+        }
+        else if (!string.IsNullOrWhiteSpace(HelperText))
+        {
+            <p class="veto-slider__message" id="@HelperId">@HelperText</p>
+        }
+    </div>
+}

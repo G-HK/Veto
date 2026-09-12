@@ -1,0 +1,34 @@
+@namespace Veto.Components.Feedback
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    <div @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId">
+
+        @if (Label is not null || ShowValue)
+        {
+            <div class="veto-progress__header">
+                <span class="veto-progress__label">@Label</span>
+                @if (ShowValue && !Indeterminate)
+                {
+                    <span class="veto-progress__value" data-testid="@(TestId is null ? null : $"{TestId}-value")">@ValueText</span>
+                }
+            </div>
+        }
+
+        <div class="veto-progress__track"
+             role="progressbar"
+             aria-label="@(Label ?? AccessibleLabel)"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-valuenow="@(Indeterminate ? null : Percent.ToString("0"))"
+             aria-valuetext="@(Indeterminate ? "Working" : null)">
+            <span class="veto-progress__fill" style="@FillStyle"></span>
+        </div>
+    </div>
+}

@@ -1,0 +1,17 @@
+.demo-block__title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.demo-block__description {
+    max-width: 68ch;
+    margin: 0;
+    font-size: var(--veto-font-size-md);
+    line-height: 1.6;
+    color: var(--veto-color-text-muted);
+}
+
+/* .demo-block__stage lives in app.css: it is applied to a child component's root element,
+   which never receives this component's CSS-isolation scope attribute. */

@@ -1,0 +1,25 @@
+/* VetoContainer - reading-width constraint. */
+
+.veto-container {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.veto-container--centered {
+    margin-inline: auto;
+}
+
+.veto-container--small { max-width: 30rem; }
+.veto-container--medium { max-width: 48rem; }
+.veto-container--large { max-width: 64rem; }
+.veto-container--extralarge { max-width: 80rem; }
+.veto-container--full { max-width: none; }
+
+.veto-container--padding-0 { padding-inline: 0; }
+.veto-container--padding-1 { padding-inline: var(--veto-space-1); }
+.veto-container--padding-2 { padding-inline: var(--veto-space-2); }
+.veto-container--padding-3 { padding-inline: var(--veto-space-3); }
+.veto-container--padding-4 { padding-inline: var(--veto-space-4); }
+.veto-container--padding-5 { padding-inline: var(--veto-space-5); }
+.veto-container--padding-6 { padding-inline: var(--veto-space-6); }

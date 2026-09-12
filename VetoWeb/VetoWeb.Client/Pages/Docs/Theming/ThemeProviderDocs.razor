@@ -1,0 +1,107 @@
+@page "/docs/theming/provider"
+@rendermode InteractiveWebAssembly
+@implements IDisposable
+@inject IVetoThemeService ThemeService
+
+<PageTitle>Theme provider — Veto</PageTitle>
+
+<DocsPage Eyebrow="Theming"
+          Title="Theme provider"
+          Lead="Light, dark, or follow the operating system - remembered between visits and applied before the first paint.">
+
+    <DemoBlock TestId="demo-toggle"
+               Title="The toggle"
+               Description="Two states, or three if you want to hand control back to the operating system. Both are the same component."
+               Code="@ToggleCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Center" Wrap="true">
+            <VetoThemeToggle TestId="switch" />
+            <VetoThemeToggle TestId="segmented" ShowSystemOption="true" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-state"
+               Title="Reading the theme from code"
+               Description="Inject IVetoThemeService anywhere to read or change the theme. No component required, and every toggle on the page stays in step because they all share the service."
+               Code="@StateCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <span class="theme-line">Mode: <strong data-testid="mode">@ThemeService.Mode</strong></span>
+            <span class="theme-line">Resolved: <strong data-testid="resolved">@(ThemeService.IsDark ? "Dark" : "Light")</strong></span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-brand"
+               Title="Rebranding"
+               Description="Override the tokens you care about and leave the rest. This site's red palette is exactly this - a VetoTheme, with no component CSS anywhere."
+               Code="@BrandCode">
+        <VetoCode Code="@SiteTheme" Language="csharp" TestId="site-theme" />
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Avoiding the flash</h2>
+        <p class="docs-prose">
+            A prerendered page is HTML long before WebAssembly starts. Without the boot script the
+            page renders light, then snaps to dark once the app takes over - on every navigation. The
+            script is tiny and synchronous on purpose: deferred, async, or module scripts all run
+            after the first paint, which is exactly too late.
+        </p>
+        <VetoCode Code="@BootScript" Language="html" TestId="boot-script" />
+    </VetoStack>
+
+</DocsPage>
+
+@code {
+    protected override void OnInitialized () => ThemeService.Changed += OnThemeChangedAsync;
+
+    private Task OnThemeChangedAsync () => InvokeAsync(StateHasChanged);
+
+    public void Dispose () => ThemeService.Changed -= OnThemeChangedAsync;
+
+    private const string ToggleCode = """
+        <VetoThemeToggle />
+        <VetoThemeToggle ShowSystemOption="true" />
+        """;
+
+    private const string StateCode = """
+        @inject IVetoThemeService ThemeService
+
+        <span>Mode: @ThemeService.Mode</span>
+        <span>Resolved: @(ThemeService.IsDark ? "Dark" : "Light")</span>
+
+        @code {
+            // Change it from anywhere
+            private Task GoDark() => ThemeService.SetModeAsync(VetoThemeMode.Dark);
+        }
+        """;
+
+    private const string BrandCode = """
+        <VetoThemeProvider Theme="AppTheme" />
+        """;
+
+    private const string SiteTheme = """
+        public static readonly VetoTheme Theme = new()
+        {
+            Light = new VetoPalette
+            {
+                Primary = "#C2121F",
+                Surface = "#FFFFFF",
+                Text    = "#1A1517",
+                Border  = "#E7DDDE"
+            },
+            Dark = new VetoPalette
+            {
+                Primary = "#FF3B47",
+                Surface = "#0B0A0B",
+                Text    = "#F4EFEF",
+                Border  = "#2E2729"
+            },
+            RadiusMedium = "6px"
+        };
+        """;
+
+    private const string BootScript = """
+        <head>
+            <script src="_content/Veto/veto-theme-init.js"></script>
+            <link rel="stylesheet" href="_content/Veto/VetoStyles.css" />
+        </head>
+        """;
+}

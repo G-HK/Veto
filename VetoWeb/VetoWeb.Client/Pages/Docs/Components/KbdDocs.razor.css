@@ -1,0 +1,10 @@
+.demo-inline {
+    margin: 0;
+    line-height: 2;
+    color: var(--veto-color-text);
+}
+
+.demo-shortcut-card {
+    width: 26rem;
+    max-width: 100%;
+}

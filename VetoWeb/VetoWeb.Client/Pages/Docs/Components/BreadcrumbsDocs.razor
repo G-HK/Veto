@@ -1,0 +1,211 @@
+@page "/docs/components/breadcrumbs"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Breadcrumbs — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Breadcrumbs"
+          Lead="A trail of steps showing where you are. Navigation when the steps are links - and a plain trail when they are not.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Basic"
+               Description="A list of items, in order from the root to where you are now. The last step is the current page: it renders as text with aria-current, not as a link back to itself."
+               Code="@BasicCode">
+        <VetoBreadcrumbs TestId="basic" Items="Trail" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-children"
+               Title="Written as children"
+               Description="The same trail as nested children instead of a list, for when a step needs markup of its own rather than a plain label. The children draw nothing themselves - the trail lays them out, so the separators and the current step stay consistent either way."
+               Code="@ChildrenCode">
+        <VetoBreadcrumbs TestId="children">
+            <VetoBreadcrumb Href="/" Icon="@VetoIcons.Home">Home</VetoBreadcrumb>
+            <VetoBreadcrumb Href="/docs">Docs</VetoBreadcrumb>
+            <VetoBreadcrumb>Breadcrumbs <span class="demo-count">new</span></VetoBreadcrumb>
+        </VetoBreadcrumbs>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-separators"
+               Title="Separators"
+               Description="Any character, any icon, or arbitrary markup. A chevron is the usual choice when the trail sits under a page title."
+               Code="@SeparatorsCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoBreadcrumbs TestId="sep-chevron" Items="Trail" SeparatorIcon="@VetoIcons.ChevronRight" />
+            <VetoBreadcrumbs TestId="sep-arrow" Items="Trail" Separator="›" />
+            <VetoBreadcrumbs TestId="sep-dot" Items="Trail" Separator="•" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-not-navigation"
+               Title="Trails that are not navigation"
+               Description="A step is only a link when it carries an Href, so the same component draws a file path or the steps of a wizard. Rename the trail with AriaLabel when it is not navigation, so it is not announced as navigation it is not."
+               Code="@PlainCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoBreadcrumbs TestId="path"
+                             Items="Path"
+                             Separator="/"
+                             AriaLabel="File path" />
+            <VetoBreadcrumbs TestId="wizard"
+                             Items="Wizard"
+                             SeparatorIcon="@VetoIcons.ChevronRight"
+                             AriaLabel="Checkout steps" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-collapse"
+               Title="Long trails collapse"
+               Description="Set MaxItems and the middle of a long trail becomes a button rather than wrapping onto a second line. ItemsBeforeCollapse and ItemsAfterCollapse decide how much stays visible; clicking the button restores the rest."
+               Code="@CollapseCode">
+        <VetoBreadcrumbs TestId="collapsed"
+                         Items="DeepTrail"
+                         MaxItems="4"
+                         ItemsBeforeCollapse="1"
+                         ItemsAfterCollapse="2"
+                         SeparatorIcon="@VetoIcons.ChevronRight" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes"
+               Description="Three sizes, matching the rest of the library."
+               Code="@SizesCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoBreadcrumbs TestId="size-sm" Items="Trail" Size="VetoSize.Small" />
+            <VetoBreadcrumbs Items="Trail" Size="VetoSize.Medium" />
+            <VetoBreadcrumbs TestId="size-lg" Items="Trail" Size="VetoSize.Large" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-click"
+               Title="Reacting to a step"
+               Description="OnItemClick fires with the step that was activated - useful when the trail drives state rather than the router."
+               Code="@ClickCode">
+        <VetoStack Gap="VetoSpacing.Small" Align="VetoAlign.Start">
+            <VetoBreadcrumbs TestId="clickable" Items="Wizard" OnItemClick="OnStepClicked" LinkCurrent="true" />
+            <span class="demo-value" data-testid="clicked">@_clicked</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private string? _clicked;
+
+    private void OnStepClicked ( VetoBreadcrumbItem item ) => _clicked = $"Clicked: {item.Label}";
+
+    private static readonly VetoBreadcrumbItem[] Trail =
+    [
+        new("Home", "/", VetoIcons.Home),
+        new("Docs", "/docs"),
+        new("Components", "/docs/components/button"),
+        new("Breadcrumbs")
+    ];
+
+    private static readonly VetoBreadcrumbItem[] Path =
+    [
+        new("Veto", Icon: VetoIcons.Folder),
+        new("Components"),
+        new("Navigation"),
+        new("VetoBreadcrumbs.razor", Icon: VetoIcons.Document)
+    ];
+
+    private static readonly VetoBreadcrumbItem[] Wizard =
+    [
+        new("Basket"),
+        new("Delivery"),
+        new("Payment")
+    ];
+
+    private static readonly VetoBreadcrumbItem[] DeepTrail =
+    [
+        new("Home", "/", VetoIcons.Home),
+        new("Docs", "/docs"),
+        new("Components", "/docs/components/button"),
+        new("Navigation", "/docs/components/link"),
+        new("Trails", "/docs/components/breadcrumbs"),
+        new("Breadcrumbs")
+    ];
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Items", "IReadOnlyList<VetoBreadcrumbItem>?", "null", "The steps, root first. Each is a Label plus an optional Href, Icon and Disabled."),
+        new("ChildContent", "RenderFragment?", "null", "VetoBreadcrumb children, for steps that need markup of their own."),
+        new("Separator", "string", "\"/\"", "What is drawn between two steps."),
+        new("SeparatorIcon", "string?", "null", "SVG markup between two steps. Beats Separator."),
+        new("SeparatorContent", "RenderFragment?", "null", "Arbitrary markup between two steps. Beats both."),
+        new("MaxItems", "int", "0", "Collapse the middle above this many steps. Zero never collapses."),
+        new("ItemsBeforeCollapse / ItemsAfterCollapse", "int", "1 / 1", "How much of a collapsed trail stays visible at each end."),
+        new("CollapsedSeparator", "string", "\"…\"", "What the expand button shows in place of the hidden steps."),
+        new("ExpandLabel", "string", "\"Show the rest of the trail\"", "Accessible name for the expand button."),
+        new("AriaLabel", "string", "\"Breadcrumb\"", "The trail's accessible name. Rename it when the trail is not navigation."),
+        new("LinkCurrent", "bool", "false", "Render the last step as a link too."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("OnItemClick", "EventCallback<VetoBreadcrumbItem>", "—", "Raised when a step is activated.")
+    ];
+
+    private const string BasicCode = """
+        <VetoBreadcrumbs Items="Trail" />
+
+        @code {
+            private static readonly VetoBreadcrumbItem[] Trail =
+            [
+                new("Home", "/", VetoIcons.Home),
+                new("Docs", "/docs"),
+                new("Components", "/docs/components/button"),
+                new("Breadcrumbs")          // no Href: this is where you are
+            ];
+        }
+        """;
+
+    private const string ChildrenCode = """
+        <VetoBreadcrumbs>
+            <VetoBreadcrumb Href="/" Icon="@VetoIcons.Home">Home</VetoBreadcrumb>
+            <VetoBreadcrumb Href="/docs">Docs</VetoBreadcrumb>
+            <VetoBreadcrumb>Breadcrumbs <span class="badge">new</span></VetoBreadcrumb>
+        </VetoBreadcrumbs>
+        """;
+
+    private const string SeparatorsCode = """
+        <VetoBreadcrumbs Items="Trail" SeparatorIcon="@VetoIcons.ChevronRight" />
+        <VetoBreadcrumbs Items="Trail" Separator="›" />
+        <VetoBreadcrumbs Items="Trail" Separator="•" />
+        """;
+
+    private const string PlainCode = """
+        @* No Href on a step, so nothing here is a link. *@
+        <VetoBreadcrumbs Items="Path" AriaLabel="File path" />
+
+        @code {
+            private static readonly VetoBreadcrumbItem[] Path =
+            [
+                new("Veto", Icon: VetoIcons.Folder),
+                new("Components"),
+                new("Navigation"),
+                new("VetoBreadcrumbs.razor", Icon: VetoIcons.Document)
+            ];
+        }
+        """;
+
+    private const string CollapseCode = """
+        <VetoBreadcrumbs Items="DeepTrail"
+                         MaxItems="4"
+                         ItemsBeforeCollapse="1"
+                         ItemsAfterCollapse="2"
+                         SeparatorIcon="@VetoIcons.ChevronRight" />
+        """;
+
+    private const string SizesCode = """
+        <VetoBreadcrumbs Items="Trail" Size="VetoSize.Small" />
+        <VetoBreadcrumbs Items="Trail" Size="VetoSize.Large" />
+        """;
+
+    private const string ClickCode = """
+        <VetoBreadcrumbs Items="Steps" OnItemClick="OnStepClicked" LinkCurrent="true" />
+
+        @code {
+            private void OnStepClicked(VetoBreadcrumbItem item)
+                => _clicked = $"Clicked: {item.Label}";
+        }
+        """;
+}

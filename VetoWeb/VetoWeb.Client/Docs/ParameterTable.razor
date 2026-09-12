@@ -1,0 +1,48 @@
+@* A component's parameter reference. *@
+
+<VetoStack Gap="VetoSpacing.Medium">
+    <h3 class="demo-block__title">@Title</h3>
+
+    <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.None" Class="param-table__card">
+        <div class="param-table__scroll">
+            <table class="param-table" data-testid="@TestId">
+                <thead>
+                    <tr>
+                        <th scope="col">Parameter</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Default</th>
+                        <th scope="col">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Rows)
+                    {
+                        <tr>
+                            <th scope="row"><code>@row.Name</code></th>
+                            <td><code>@row.Type</code></td>
+                            <td><code>@row.Default</code></td>
+                            <td>@row.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </VetoCard>
+</VetoStack>
+
+@code {
+    /// <summary>One parameter's reference entry.</summary>
+    public sealed record Row ( string Name, string Type, string Default, string Description );
+
+    /// <summary>Heading above the table.</summary>
+    [Parameter]
+    public string Title { get; set; } = "Parameters";
+
+    /// <summary>The parameters to list.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Row> Rows { get; set; } = [];
+
+    /// <summary>Test hook for the table.</summary>
+    [Parameter]
+    public string? TestId { get; set; }
+}

@@ -1,0 +1,107 @@
+/* VetoTextBox - styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-textbox {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+    font-family: var(--veto-font-sans);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text);
+}
+
+.veto-textbox__label {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text);
+}
+
+.veto-textbox__required {
+    margin-inline-start: var(--veto-space-1);
+    color: var(--veto-color-danger);
+}
+
+.veto-textbox__input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: var(--veto-font-size-md);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+    padding: var(--veto-space-2) var(--veto-space-3);
+    transition: border-color var(--veto-transition), box-shadow var(--veto-transition), background-color var(--veto-transition);
+}
+
+.veto-textbox__input::placeholder {
+    color: var(--veto-color-text-muted);
+}
+
+.veto-textbox__input:hover:not(:disabled):not([readonly]) {
+    border-color: var(--veto-color-border-strong);
+}
+
+.veto-textbox__input:focus-visible {
+    outline: none;
+    border-color: var(--veto-color-primary);
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-textbox__input:disabled {
+    background-color: var(--veto-color-surface-disabled);
+    color: var(--veto-color-text-disabled);
+    cursor: not-allowed;
+}
+
+.veto-textbox__input[readonly] {
+    background-color: var(--veto-color-surface-raised);
+    cursor: default;
+}
+
+.veto-textbox__message {
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.veto-textbox__message--error {
+    color: var(--veto-color-danger);
+}
+
+/* Size modifiers */
+.veto-textbox--sm .veto-textbox__input {
+    font-size: var(--veto-font-size-sm);
+    padding: var(--veto-space-1) var(--veto-space-2);
+}
+
+.veto-textbox--lg .veto-textbox__input {
+    font-size: var(--veto-font-size-lg);
+    padding: var(--veto-space-3) var(--veto-space-4);
+}
+
+/* Variant modifiers */
+.veto-textbox--filled .veto-textbox__input {
+    background-color: var(--veto-color-surface-raised);
+    border-color: transparent;
+}
+
+.veto-textbox--text .veto-textbox__input {
+    background-color: transparent;
+    border-width: 0 0 1px 0;
+    border-radius: 0;
+    padding-inline: 0;
+}
+
+/* State modifiers */
+.veto-textbox--invalid .veto-textbox__input {
+    border-color: var(--veto-color-danger);
+}
+
+.veto-textbox--invalid .veto-textbox__input:focus-visible {
+    border-color: var(--veto-color-danger);
+    box-shadow: var(--veto-focus-ring-danger);
+}
+
+.veto-textbox--disabled .veto-textbox__label {
+    color: var(--veto-color-text-disabled);
+}

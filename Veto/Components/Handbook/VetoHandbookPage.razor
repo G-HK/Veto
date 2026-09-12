@@ -1,0 +1,53 @@
+@namespace Veto.Components.Handbook
+@inherits Veto.Core.VetoComponentBase
+@inject NavigationManager Nav
+
+@if (Visible)
+{
+    <article @ref="RootElement"
+             @attributes="InnerAttributes"
+             id="@ElementId"
+             class="@CssClass"
+             style="@CssStyle"
+             data-testid="@TestId">
+
+        <header class="veto-handbook-page__header">
+            @if (!string.IsNullOrWhiteSpace(Eyebrow))
+            {
+                <span class="veto-handbook-page__eyebrow">@Eyebrow</span>
+            }
+
+            <h1 class="veto-handbook-page__title">@Title</h1>
+
+            @if (!string.IsNullOrWhiteSpace(Lead))
+            {
+                <p class="veto-handbook-page__lead">@Lead</p>
+            }
+
+            @Header
+        </header>
+
+        @foreach (var section in Sections)
+        {
+            <section class="veto-handbook-page__section @HighlightClass(section)"
+                     id="@section.Id"
+                     data-testid="@SectionTestId(section)">
+                <h2 class="veto-handbook-page__heading">
+                    <a class="veto-handbook-page__anchor" href="@AnchorHref(section)" aria-label="@($"Link to {section.Title}")">#</a>
+                    @section.Title
+                </h2>
+
+                @if (section.Content is not null)
+                {
+                    @section.Content
+                }
+                else if (!string.IsNullOrWhiteSpace(section.Body))
+                {
+                    <p class="veto-handbook-page__body">@section.Body</p>
+                }
+            </section>
+        }
+
+        @ChildContent
+    </article>
+}

@@ -1,0 +1,22 @@
+.demo-value {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    min-height: 1.25rem;
+}
+
+.demo-submit {
+    padding: var(--veto-space-2) var(--veto-space-4);
+    font: inherit;
+    font-weight: 600;
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border: none;
+    border-radius: var(--veto-radius-md);
+    cursor: pointer;
+}
+
+.demo-submit:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}

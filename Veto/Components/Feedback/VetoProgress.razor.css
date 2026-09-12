@@ -1,0 +1,87 @@
+/* VetoProgress - determinate or indeterminate. */
+
+.veto-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+    min-width: 0;
+    font-family: var(--veto-font-sans);
+}
+
+.veto-progress__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--veto-space-3);
+    font-size: var(--veto-font-size-sm);
+}
+
+.veto-progress__label {
+    color: var(--veto-color-text);
+}
+
+.veto-progress__value {
+    font-variant-numeric: tabular-nums;
+    color: var(--veto-color-text-muted);
+}
+
+.veto-progress__track {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--veto-color-surface-raised);
+    border: 1px solid var(--veto-color-border);
+}
+
+.veto-progress--rounded .veto-progress__track,
+.veto-progress--rounded .veto-progress__fill {
+    border-radius: var(--veto-radius-full);
+}
+
+.veto-progress--sm .veto-progress__track { height: 0.25rem; }
+.veto-progress--md .veto-progress__track { height: 0.5rem; }
+.veto-progress--lg .veto-progress__track { height: 0.75rem; }
+
+.veto-progress__fill {
+    display: block;
+    height: 100%;
+    background-color: var(--veto-progress-color, var(--veto-color-primary));
+    transition: width var(--veto-transition);
+}
+
+.veto-progress--primary { --veto-progress-color: var(--veto-color-primary); }
+.veto-progress--secondary { --veto-progress-color: var(--veto-color-secondary); }
+.veto-progress--success { --veto-progress-color: var(--veto-color-success); }
+.veto-progress--warning { --veto-progress-color: var(--veto-color-warning); }
+.veto-progress--danger { --veto-progress-color: var(--veto-color-danger); }
+.veto-progress--neutral { --veto-progress-color: var(--veto-color-text-muted); }
+
+/* Indeterminate: a band that sweeps the track rather than a width that grows. */
+.veto-progress--indeterminate .veto-progress__fill {
+    width: 40%;
+    animation: veto-progress-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes veto-progress-sweep {
+    from { transform: translateX(-105%); }
+    to { transform: translateX(255%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-progress__fill {
+        transition: none;
+    }
+
+    /*
+     * A sweeping band is exactly the kind of movement reduced motion is asking about. It becomes
+     * a full-width pulse: still clearly working, without travelling across the screen.
+     */
+    .veto-progress--indeterminate .veto-progress__fill {
+        width: 100%;
+        animation: veto-progress-pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes veto-progress-pulse {
+        50% { opacity: 0.4; }
+    }
+}

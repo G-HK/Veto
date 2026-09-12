@@ -1,0 +1,63 @@
+/*
+ * VetoTilt3D.
+ *
+ * The outer element owns the perspective and the inner one is what rotates - perspective has
+ * to be established on an ancestor of the transformed element, not on the element itself, or
+ * the rotation renders flat.
+ */
+
+.veto-tilt-3d {
+    display: inline-block;
+    perspective: var(--veto-tilt-perspective, 1000px);
+}
+
+.veto-tilt-3d__surface {
+    position: relative;
+    height: 100%;
+    transform:
+        rotateX(var(--veto-tilt-x, 0deg))
+        rotateY(var(--veto-tilt-y, 0deg))
+        scale(var(--veto-tilt-scale, 1));
+    transform-style: preserve-3d;
+    /*
+     * Only the settle is animated. While the pointer is moving the transform has to track it
+     * exactly, so a transition there would leave the surface lagging behind the cursor.
+     */
+    transition: transform var(--veto-tilt-reset-duration, 400ms) cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+}
+
+.veto-tilt-3d__surface[data-tilting="true"] {
+    transition: none;
+}
+
+/* Glare */
+
+.veto-tilt-3d__glare {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+        circle at var(--veto-tilt-glare-x, 50%) var(--veto-tilt-glare-y, 50%),
+        rgb(255 255 255 / 0.35),
+        transparent 55%
+    );
+    opacity: var(--veto-tilt-glare-opacity, 0);
+    pointer-events: none;
+    transition: opacity var(--veto-transition);
+}
+
+.veto-tilt-3d--disabled .veto-tilt-3d__surface {
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-tilt-3d__surface {
+        transform: none;
+        transition: none;
+    }
+
+    .veto-tilt-3d__glare {
+        display: none;
+    }
+}

@@ -1,0 +1,91 @@
+/*
+ * Site-wide resets only. All component styling comes from Veto's own scoped CSS and the
+ * --veto-* tokens, which VetoDocsTheme overrides with the site's red palette.
+ */
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: var(--veto-font-sans);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    -webkit-font-smoothing: antialiased;
+}
+
+*:focus-visible {
+    outline: none;
+}
+
+a {
+    color: var(--veto-color-primary);
+}
+
+/*
+ * Applied to a child component's root element, so it cannot live in a scoped stylesheet -
+ * CSS isolation would append a scope attribute the element does not carry, and the rule would
+ * silently never match.
+ */
+.demo-block__stage {
+    background-image: radial-gradient(circle at 1px 1px, var(--veto-color-border) 1px, transparent 0);
+    background-size: 16px 16px;
+}
+
+/*
+ * Tilt demo cards. Global rather than scoped because these classes are applied to a child
+ * component's root element via Class, which never receives a parent's CSS-isolation scope.
+ */
+.tilt-card {
+    width: 22rem;
+    max-width: 100%;
+}
+
+.tilt-card--small {
+    width: 13rem;
+}
+
+.tilt-card--dark {
+    color: #F4EFEF;
+    background: linear-gradient(140deg, #2A1013, #0B0A0B 60%);
+    border-color: #3A2A2C;
+}
+
+.tilt-card__eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--veto-color-primary);
+}
+
+.tilt-card__headline {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+/* Footer content, global because these sit inside a child component's slot. */
+.footer__row {
+    width: 100%;
+}
+
+.footer__link {
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+}
+
+.footer__link:hover {
+    color: var(--veto-color-primary);
+}
+
+/*
+ * Narrows a handbook page inside a demo stage so it sits beside its contents rail. Global
+ * because it is passed as Class to a child component, which never receives a parent's scope.
+ */
+.docs-demo__narrow {
+    flex: 1 1 22rem;
+    max-width: 34rem;
+}

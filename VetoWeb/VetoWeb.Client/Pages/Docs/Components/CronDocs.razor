@@ -1,0 +1,282 @@
+@page "/docs/components/cron"
+@rendermode InteractiveWebAssembly
+@using System.Globalization
+@using Veto.Components.Cron
+@using CronExpressionDescriptor
+
+<PageTitle>Cron — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Cron"
+          Lead="A visual builder for a cron expression, read back in plain language, with the next few runs worked out.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Building a schedule"
+               Description="The tabs are the familiar phrasings of a schedule; each one writes the expression underneath. The expression stays visible and editable throughout - the builder is meant to teach cron, not hide it - and anything the tabs cannot say can still be typed by hand."
+               Code="@BasicCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <VetoCron TestId="basic" @bind-Value="_basic" Now="Pinned" />
+            <span class="demo-value" data-testid="basic-value">@_basic</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-description"
+               Title="What the expression actually means"
+               Description="Every expression is read back as a sentence, and the next runs are worked out from it. Between them they catch the mistakes a cron expression is famous for - the schedule that looks daily and fires every minute, or the one that looks monthly and never fires at all."
+               Code="@DescribeCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            @foreach (var sample in Samples)
+            {
+                <div class="demo-sample" data-testid="@($"sample-{sample.Key}")">
+                    <code class="demo-cron">@sample.Expression</code>
+                    <span class="demo-sample-text" data-testid="@($"sample-{sample.Key}-text")">
+                        @VetoCronDescriber.Describe(sample.Expression)
+                    </span>
+                </div>
+            }
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-warning"
+               Title="The day trap"
+               Description="When both day-of-month and day-of-week are restricted, cron fires when EITHER matches - not both. It surprises nearly everyone, so the builder says so rather than letting the expression quietly mean something else. Notice the next runs: the 1st, and every Monday."
+               Code="@WarningCode">
+        <VetoCron TestId="trap" Value="0 0 1 * MON" Now="Pinned" ShowModes="false" NextRunCount="5" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-invalid"
+               Title="When it will not parse"
+               Description="The error names the field that is wrong rather than rejecting the whole expression, because the field is what you have to go and fix."
+               Code="@InvalidCode">
+        <VetoCron TestId="invalid" Value="0 99 * * *" Now="Pinned" ShowModes="false" ShowNextRuns="false" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-language"
+               Title="Other languages"
+               Description="The built-in describer is English only, deliberately: Veto ships with no package dependencies, and one sentence is not the feature to break that for. Describer is the seam. Hand it CronExpressionDescriptor - which the docs site references, and your project would too - and you get its two dozen languages without the library ever depending on it."
+               Code="@LanguageCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoButtonGroup TestId="languages" Size="VetoSize.Small" Label="Language">
+                @foreach (var language in Languages)
+                {
+                    var current = language;
+                    <VetoButton Variant="@(_locale == current.Code ? VetoVariant.Filled : VetoVariant.Outlined)"
+                                Color="@(_locale == current.Code ? VetoColor.Primary : VetoColor.Neutral)"
+                                TestId="@($"lang-{current.Code}")"
+                                OnClick="() => _locale = current.Code">@current.Name</VetoButton>
+                }
+            </VetoButtonGroup>
+
+            <VetoCron TestId="localised"
+                      @bind-Value="_localised"
+                      Now="Pinned"
+                      ShowNextRuns="false"
+                      Describer="DescribeWithPackage" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-shapes"
+               Title="Fewer tabs, or none"
+               Description="AllowedModes narrows the builder to the shapes a particular schedule is allowed to take, and ShowModes false leaves just the expression, its description and the runs - which is what you want when the component is reviewing an expression rather than building one."
+               Code="@ShapeCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoCron TestId="narrow"
+                      @bind-Value="_narrow"
+                      Now="Pinned"
+                      Label="Backup schedule"
+                      HelperText="Backups may run daily or weekly."
+                      AllowedModes="NarrowModes"
+                      InitialMode="VetoCronMode.Weekly"
+                      NextRunCount="3" />
+
+            <VetoCron TestId="review"
+                      Value="*/10 * * * *"
+                      Now="Pinned"
+                      ShowModes="false"
+                      ShowExpression="false"
+                      Label="Health check"
+                      NextRunCount="3" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-borderless"
+               Title="Without the boxes"
+               Description="Bordered false drops every border - the box around the builder and the box around each control inside it - leaving the schedule reading as a sentence on the page rather than as a form. The focus ring stays: the borders were decoration, the ring is how a keyboard user knows where they are."
+               Code="@BorderlessCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoCron TestId="borderless"
+                      @bind-Value="_borderless"
+                      Now="Pinned"
+                      Bordered="false"
+                      InitialMode="VetoCronMode.Weekly"
+                      NextRunCount="3" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-states"
+               Title="Disabled and read-only"
+               Description="Read-only still shows the description and the runs - which is the point of showing a schedule nobody may edit."
+               Code="@StateCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoCron TestId="readonly" Value="0 3 * * 0" Now="Pinned" ReadOnly="true" ShowModes="false" NextRunCount="2" Label="Read-only" />
+            <VetoCron TestId="disabled" Value="0 3 * * 0" Now="Pinned" Disabled="true" ShowNextRuns="false" Label="Disabled" />
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    /// <summary>
+    /// Pinned so the listed runs are the same on every visit - a moving "next run" makes both a
+    /// screenshot and a test meaningless.
+    /// </summary>
+    private static readonly DateTime Pinned = new(2026, 9, 12, 8, 0, 0);
+
+    private string _basic = "0 9 * * 1-5";
+    private string _localised = "0 9 * * 1-5";
+    private string _narrow = "30 2 * * 0";
+    private string _locale = "en";
+    private string _borderless = "0 7 * * 1,3,5";
+
+    private sealed record Language ( string Code, string Name );
+
+    private static readonly Language[] Languages =
+    [
+        new("en", "English"),
+        new("fr", "Français"),
+        new("de", "Deutsch"),
+        new("es", "Español"),
+        new("nl", "Nederlands"),
+        new("pt-BR", "Português"),
+    ];
+
+    private static readonly VetoCronMode[] NarrowModes =
+        [VetoCronMode.Daily, VetoCronMode.Weekly, VetoCronMode.Advanced];
+
+    private sealed record Sample ( string Key, string Expression );
+
+    private static readonly Sample[] Samples =
+    [
+        new("minute", "* * * * *"),
+        new("quarter", "*/15 * * * *"),
+        new("workday", "0 9 * * 1-5"),
+        new("twice", "0 9,17 * * *"),
+        new("monthly", "0 0 1 * *"),
+        new("newyear", "0 0 1 1 *"),
+    ];
+
+    /// <summary>
+    /// The seam in action: CronExpressionDescriptor does the describing, and Veto never learns
+    /// the package exists. Falls back to the built-in describer if it throws on an expression
+    /// it does not like - the component must not go blank mid-edit.
+    /// </summary>
+    private string? DescribeWithPackage ( string expression )
+    {
+        try
+        {
+            return ExpressionDescriptor.GetDescription(expression, new Options
+            {
+                Locale = _locale,
+                Use24HourTimeFormat = true,
+                ThrowExceptionOnParseError = true,
+            });
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Value", "string", "\"0 9 * * *\"", "The cron expression. Use @bind-Value."),
+        new("Describer", "Func<string, string?>?", "null", "Turns an expression into a sentence. Null uses the built-in English describer; return null to fall back to it."),
+        new("AllowedModes", "IReadOnlyList<VetoCronMode>?", "null", "Which tabs are offered. Null offers all seven."),
+        new("InitialMode", "VetoCronMode", "Daily", "The tab shown first."),
+        new("ShowModes / ShowExpression / ShowDescription / ShowNextRuns", "bool", "true", "Which parts are shown."),
+        new("NextRunCount", "int", "5", "How many upcoming runs to list."),
+        new("NextRunFormat", "string", "\"ddd dd MMM yyyy, HH:mm\"", "How each run is formatted."),
+        new("Now", "DateTime?", "null", "The moment the runs count from. Set it to pin the list for a screenshot or a test."),
+        new("Culture", "CultureInfo?", "null", "The culture the runs are formatted in."),
+        new("IncludeSeconds", "bool", "false", "Parse the expression as six fields, seconds first."),
+        new("Label / HelperText", "string?", "null", "Text above and below the builder."),
+        new("Disabled / ReadOnly", "bool", "false", "The usual states. Read-only still shows the description and the runs."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Bordered", "bool", "true", "False drops every border - the builder's box and each control's - keeping the focus ring."),
+        new("OnValidChanged", "EventCallback<VetoCronExpression>", "—", "Raised when the expression changes and parses."),
+        new("IsValid / Expression", "bool / VetoCronExpression?", "—", "Read-only: whether the expression parses, and its parsed form."),
+    ];
+
+    private const string BasicCode = """
+        <VetoCron @bind-Value="_schedule" />
+        """;
+
+    private const string DescribeCode = """
+        @* The describer is usable on its own, without the builder: *@
+        @VetoCronDescriber.Describe("0 9 * * 1-5")
+        @* "At 09:00, only on Monday, Tuesday, Wednesday, Thursday and Friday" *@
+
+        @* So is the scheduler: *@
+        VetoCronExpression.TryParse("0 9 * * 1-5", out var cron, out var error);
+        var next = VetoCronSchedule.Next(cron, DateTime.Now, 5);
+        """;
+
+    private const string WarningCode = """
+        @* Fires on the 1st AND on every Monday - not only on a Monday the 1st. *@
+        <VetoCron Value="0 0 1 * MON" ShowModes="false" />
+        """;
+
+    private const string InvalidCode = """
+        <VetoCron Value="0 99 * * *" />
+        @* "Hours: '99' is outside 0-23." *@
+        """;
+
+    private const string LanguageCode = """
+        @* In your project, not in Veto: *@
+        @using CronExpressionDescriptor
+
+        <VetoCron @bind-Value="_schedule" Describer="Describe" />
+
+        @code {
+            private string _locale = "fr";
+
+            private string? Describe(string expression)
+            {
+                try
+                {
+                    return ExpressionDescriptor.GetDescription(expression, new Options
+                    {
+                        Locale = _locale,
+                        Use24HourTimeFormat = true,
+                        ThrowExceptionOnParseError = true,
+                    });
+                }
+                catch
+                {
+                    return null;   // fall back to the built-in describer
+                }
+            }
+        }
+        """;
+
+    private const string ShapeCode = """
+        <VetoCron @bind-Value="_backup"
+                  Label="Backup schedule"
+                  AllowedModes="[VetoCronMode.Daily, VetoCronMode.Weekly, VetoCronMode.Advanced]"
+                  InitialMode="VetoCronMode.Weekly" />
+
+        @* Reviewing a schedule rather than building one: *@
+        <VetoCron Value="*/10 * * * *" ShowModes="false" ShowExpression="false" />
+        """;
+
+    private const string BorderlessCode = """
+        <VetoCron @bind-Value="_schedule" Bordered="false" />
+        """;
+
+    private const string StateCode = """
+        <VetoCron Value="0 3 * * 0" ReadOnly="true" ShowModes="false" />
+        <VetoCron Value="0 3 * * 0" Disabled="true" />
+        """;
+}

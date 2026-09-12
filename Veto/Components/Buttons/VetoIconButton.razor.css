@@ -1,0 +1,79 @@
+/* VetoIconButton - a square (or round) target holding a single icon. */
+
+.veto-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    font: inherit;
+    color: var(--veto-color-text);
+    text-decoration: none;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--veto-radius-md);
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition),
+                border-color var(--veto-transition), box-shadow var(--veto-transition);
+}
+
+.veto-icon-button--round {
+    border-radius: var(--veto-radius-full);
+}
+
+/* Size - kept at or above 2rem so the target stays comfortably tappable. */
+.veto-icon-button--sm { width: 2rem; height: 2rem; }
+.veto-icon-button--md { width: 2.5rem; height: 2.5rem; }
+.veto-icon-button--lg { width: 3rem; height: 3rem; }
+
+/* Colour roles */
+.veto-icon-button--primary { color: var(--veto-color-primary); }
+.veto-icon-button--secondary { color: var(--veto-color-secondary); }
+.veto-icon-button--success { color: var(--veto-color-success); }
+.veto-icon-button--warning { color: var(--veto-color-warning); }
+.veto-icon-button--danger { color: var(--veto-color-danger); }
+
+/* Variants */
+.veto-icon-button--outlined {
+    border-color: var(--veto-color-border);
+}
+
+.veto-icon-button--filled {
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+}
+
+.veto-icon-button--filled.veto-icon-button--danger {
+    background-color: var(--veto-color-danger);
+}
+
+.veto-icon-button--filled.veto-icon-button--neutral {
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+}
+
+/* States */
+.veto-icon-button:hover:not(:disabled):not(.veto-icon-button--disabled) {
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.veto-icon-button--filled:hover:not(:disabled) {
+    background-color: var(--veto-color-primary-hover);
+}
+
+.veto-icon-button:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-icon-button[aria-pressed="true"] {
+    color: var(--veto-color-primary);
+    background-color: color-mix(in srgb, var(--veto-color-primary) 14%, transparent);
+}
+
+.veto-icon-button:disabled,
+.veto-icon-button--disabled {
+    color: var(--veto-color-text-disabled);
+    background: none;
+    cursor: not-allowed;
+}

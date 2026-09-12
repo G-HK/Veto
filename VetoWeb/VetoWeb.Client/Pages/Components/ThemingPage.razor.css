@@ -1,0 +1,82 @@
+.demo-page {
+    max-width: 46rem;
+    padding: var(--veto-space-4);
+    font-family: var(--veto-font-sans);
+    color: var(--veto-color-text);
+}
+
+.demo-section {
+    margin-block: var(--veto-space-6);
+}
+
+.demo-section h2 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--veto-color-text-muted);
+    margin-bottom: var(--veto-space-3);
+}
+
+.demo-output {
+    margin-top: var(--veto-space-2);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.demo-state {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--veto-space-1) var(--veto-space-4);
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+}
+
+.demo-state dt {
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+}
+
+.demo-state dd {
+    margin: 0;
+    font-family: var(--veto-font-mono);
+}
+
+.demo-swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: var(--veto-space-3);
+}
+
+.demo-swatch {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+}
+
+.demo-swatch__chip {
+    height: 2.5rem;
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+}
+
+.demo-swatch__name {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+}
+
+.demo-swatch__token {
+    font-size: 0.75rem;
+    color: var(--veto-color-text-muted);
+}
+
+.demo-code {
+    overflow-x: auto;
+    padding: var(--veto-space-4);
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    line-height: 1.6;
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+}

@@ -1,0 +1,24 @@
+/* VetoFooter */
+
+.veto-footer {
+    grid-row: 3;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-3);
+    box-sizing: border-box;
+    padding: var(--veto-space-3) var(--veto-space-4);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    background-color: var(--veto-color-surface);
+    z-index: 10;
+}
+
+.veto-footer--bordered {
+    border-top: 1px solid var(--veto-color-border);
+}
+
+.veto-footer--sticky {
+    position: sticky;
+    bottom: 0;
+}

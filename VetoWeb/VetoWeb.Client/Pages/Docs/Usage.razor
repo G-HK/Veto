@@ -1,0 +1,121 @@
+@page "/docs/usage"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Usage — Veto</PageTitle>
+
+<DocsPage Eyebrow="Getting started"
+          Title="Usage"
+          Lead="What every Veto component has in common, so the second one you learn costs less than the first.">
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">The shared contract</h2>
+        <p class="docs-prose">
+            Every component - input, layout, overlay - takes the same six parameters. Learn them once.
+        </p>
+        <ParameterTable Title="On every component" TestId="contract-table" Rows="Contract" />
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Your classes never get overwritten</h2>
+        <p class="docs-prose">
+            <code>Class</code> is appended after the component's own classes, and unmatched attributes
+            are splatted onto the element. A component never discards what you passed it.
+        </p>
+        <VetoCode Code="@Splat" Language="razor" TestId="usage-splat" />
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Forms work the way Blazor's do</h2>
+        <p class="docs-prose">
+            Inputs derive from Blazor's own <code>InputBase&lt;T&gt;</code>. That is not a wrapper -
+            it means <code>@@bind-Value</code>, <code>EditForm</code>, <code>DataAnnotationsValidator</code>
+            and <code>ValidationMessage</code> behave exactly as they already do, because it is the
+            same machinery.
+        </p>
+        <VetoCode Code="@Forms" Language="razor" TestId="usage-forms" />
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Styling is tokens, not overrides</h2>
+        <p class="docs-prose">
+            Components read <code>--veto-*</code> custom properties and never hard-code a colour. To
+            rebrand, override the tokens - don't restyle the components.
+        </p>
+        <VetoCode Code="@Theming" Language="csharp" TestId="usage-theming" />
+        <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.Large">
+            <p class="docs-prose" style="margin-bottom: var(--veto-space-3)">
+                This site is doing exactly that. Its red palette is a <code>VetoTheme</code>, not a
+                single line of component CSS. Flip the theme and watch every component follow:
+            </p>
+            <VetoThemeToggle ShowSystemOption="true" TestId="usage-theme-toggle" />
+        </VetoCard>
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Testing against Veto</h2>
+        <p class="docs-prose">
+            Every component renders <code>data-testid</code> when you give it a <code>TestId</code>,
+            which gives your end-to-end tests a selector that survives restyling and refactoring.
+        </p>
+        <VetoCode Code="@Testing" Language="csharp" TestId="usage-testing" />
+    </VetoStack>
+
+</DocsPage>
+
+@code {
+    private static readonly ParameterTable.Row[] Contract =
+    [
+        new("Class", "string?", "null", "Extra CSS classes, appended after the component's own so yours always win."),
+        new("Style", "string?", "null", "Inline styles, appended after the component's own."),
+        new("Id", "string?", "null", "The root element's id. Generated when you don't supply one, so labels and aria references always resolve."),
+        new("TestId", "string?", "null", "Rendered as data-testid. The stable selector for end-to-end tests."),
+        new("Visible", "bool", "true", "When false the component renders nothing at all."),
+        new("AdditionalAttributes", "IReadOnlyDictionary<string, object>?", "null", "Any attribute you pass that isn't a parameter, splatted onto the root element.")
+    ];
+
+    private const string Splat = """
+        <VetoTextBox TValue="string"
+                     Label="Email"
+                     Class="my-field"
+                     Style="max-width: 20rem"
+                     autocomplete="email"
+                     maxlength="120"
+                     @bind-Value="_email" />
+
+        <!-- renders: class="veto-textbox veto-textbox--md … my-field" -->
+        """;
+
+    private const string Forms = """
+        <EditForm Model="_model" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+
+            <VetoTextBox Label="Username"
+                         Required="true"
+                         HelperText="Between 3 and 20 characters."
+                         @bind-Value="_model.Username" />
+
+            <button type="submit">Save</button>
+        </EditForm>
+        """;
+
+    private const string Theming = """
+        <VetoThemeProvider Theme="AppTheme" />
+
+        @code {
+            private static readonly VetoTheme AppTheme = new()
+            {
+                Light = new() { Primary = "#C2121F", Surface = "#FFFFFF" },
+                Dark  = new() { Primary = "#FF3B47", Surface = "#0B0A0B" },
+                RadiusMedium = "6px"
+            };
+        }
+        """;
+
+    private const string Testing = """
+        // Razor
+        <VetoTextBox TestId="username" Label="Username" @bind-Value="_name" />
+
+        // Playwright
+        await Page.GetByTestId("username").Locator("input").FillAsync("veto-user");
+        """;
+}

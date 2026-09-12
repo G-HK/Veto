@@ -1,0 +1,171 @@
+@page "/docs/components/kbd"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.Kbd
+
+<PageTitle>Keyboard key — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Keyboard key"
+          Lead="Keys and key combinations drawn as physical caps - for documentation, tooltips and menu hints, anywhere the reader has to tell a key they press from the prose around it.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="A key, and a combination"
+               Description="A combination is written as one string and split for you. Each key gets its own cap inside an outer kbd, which is what the HTML spec prescribes for a chord - and what stops the whole thing reading as one long pill."
+               Code="@BasicCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <div class="demo-inline">
+                Press <VetoKbd TestId="single" Keys="Esc" /> to close, or
+                <VetoKbd TestId="combo" Keys="Ctrl+Shift+P" /> to open the command palette.
+            </div>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes"
+               Description="Small is the one that runs inline inside body text without pushing the lines apart - which is the common case, and why a shortcut row defaults to it. Medium and large suit a standalone hint or a key being taught rather than mentioned."
+               Code="@SizeCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <p class="demo-inline">
+                Inline in a sentence, the small size sits on the line: press
+                <VetoKbd TestId="size-sm" Keys="Ctrl+K" Size="VetoSize.Small" /> and carry on reading.
+            </p>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center" Wrap="true">
+                <VetoKbd TestId="size-sm-alone" Keys="Ctrl+K" Size="VetoSize.Small" />
+                <VetoKbd TestId="size-md" Keys="Ctrl+K" Size="VetoSize.Medium" />
+                <VetoKbd TestId="size-lg" Keys="Ctrl+K" Size="VetoSize.Large" />
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-symbols"
+               Title="Symbols"
+               Description="Symbols swaps the modifiers that have a conventional glyph - ⌘ for Cmd, ⇧ for Shift, ⌥ for Alt. It looks right on a Mac, but a screen reader makes a poor job of reading a glyph aloud, so it is off unless you ask for it."
+               Code="@SymbolCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoKbd TestId="plain" Keys="Cmd+Shift+Enter" />
+            <VetoKbd TestId="symbols" Keys="Cmd+Shift+Enter" Symbols="true" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-separator"
+               Title="Separators"
+               Description="The separator is both what the string is split on and what is drawn between the caps, so a combination written with a different character still parses. Turn it off entirely for keys that simply sit next to each other - the vim-style two-key sequence, where no key is held."
+               Code="@SeparatorCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoKbd TestId="sep-plus" Keys="Ctrl+Alt+Del" />
+            <VetoKbd TestId="sep-dash" Keys="Ctrl-Alt-Del" Separator="-" />
+            <VetoKbd TestId="sep-none" Keys="g+g" ShowSeparator="false" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-borderless"
+               Title="Without the cap"
+               Description="Bordered false drops the border and the raised edge, leaving the key as tinted text. For dense hints - a menu, a tooltip - where a row of little 3D caps is more furniture than the hint is worth."
+               Code="@BorderlessCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoKbd TestId="capped" Keys="Ctrl+Shift+P" />
+            <VetoKbd TestId="flat" Keys="Ctrl+Shift+P" Bordered="false" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-list"
+               Title="A shortcut reference list"
+               Description="The real pattern: descriptions on the left, keys aligned down the right. A column of them is scannable because the eye runs down one column of keys rather than hunting for them at the end of sentences of different lengths. It is a description list underneath - each row really is a term and its definition - and the left/right layout sits on top of that rather than replacing it."
+               Code="@ListCode">
+        <VetoCard Padding="VetoSpacing.Large" Elevation="VetoElevation.Outlined" Class="demo-shortcut-card">
+            <VetoShortcutList TestId="shortcuts" Divided="true">
+                <VetoShortcut TestId="sc-palette" Description="Open the command palette" Keys="Ctrl+K" />
+                <VetoShortcut TestId="sc-save" Description="Save the current file" Keys="Ctrl+S" />
+                <VetoShortcut TestId="sc-saveall" Description="Save everything" Keys="Ctrl+Alt+S" />
+                <VetoShortcut TestId="sc-find" Description="Find in this file" Keys="Ctrl+F" />
+                <VetoShortcut TestId="sc-findall" Description="Find across the project" Keys="Ctrl+Shift+F" />
+                <VetoShortcut TestId="sc-close" Description="Close the tab" Keys="Ctrl+W" />
+                <VetoShortcut TestId="sc-reopen" Description="Reopen the tab you just closed" Keys="Ctrl+Shift+T" />
+            </VetoShortcutList>
+        </VetoCard>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-list-sizes"
+               Title="A compact list"
+               Description="Size on the list sets how much room each row takes, which is what turns a reference page into a menu hint panel. The keys keep their own size independently."
+               Code="@CompactCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Start">
+            <VetoCard Padding="VetoSpacing.Medium" Class="demo-shortcut-card">
+                <VetoShortcutList TestId="compact" Size="VetoSize.Small">
+                    <VetoShortcut Description="Next result" Keys="Enter" />
+                    <VetoShortcut Description="Previous result" Keys="Shift+Enter" />
+                    <VetoShortcut Description="Dismiss" Keys="Esc" />
+                </VetoShortcutList>
+            </VetoCard>
+
+            <VetoCard Padding="VetoSpacing.Medium" Class="demo-shortcut-card">
+                <VetoShortcutList TestId="roomy" Size="VetoSize.Large" Divided="true">
+                    <VetoShortcut Description="Next result" Keys="Enter" Size="VetoSize.Medium" />
+                    <VetoShortcut Description="Previous result" Keys="Shift+Enter" Size="VetoSize.Medium" />
+                </VetoShortcutList>
+            </VetoCard>
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Keys", "string?", "null", "The key or combination as one string, e.g. Ctrl+Shift+P."),
+        new("ChildContent", "RenderFragment?", "null", "A single key whose content needs markup, instead of Keys."),
+        new("Separator", "string", "\"+\"", "What Keys is split on, and what is drawn between the caps."),
+        new("ShowSeparator", "bool", "true", "Draw the separator character. Off for keys pressed in sequence."),
+        new("Symbols", "bool", "false", "Draw modifiers as their conventional glyphs (⌘, ⇧, ⌥)."),
+        new("Size", "VetoSize", "Medium", "Small for running inline in body text."),
+        new("Bordered", "bool", "true", "False drops the border and the raised edge, leaving the key as tinted text."),
+        new("VetoShortcut", "component", "—", "One row: Description (or ChildContent) left, Keys (or KeysContent) right."),
+        new("VetoShortcutList", "component", "—", "The rows. Divided draws a hairline between them; Size sets the row height."),
+    ];
+
+    private const string BasicCode = """
+        Press <VetoKbd Keys="Esc" /> to close, or
+        <VetoKbd Keys="Ctrl+Shift+P" /> to open the command palette.
+        """;
+
+    private const string SizeCode = """
+        <VetoKbd Keys="Ctrl+K" Size="VetoSize.Small" />
+        <VetoKbd Keys="Ctrl+K" Size="VetoSize.Medium" />
+        <VetoKbd Keys="Ctrl+K" Size="VetoSize.Large" />
+        """;
+
+    private const string SymbolCode = """
+        <VetoKbd Keys="Cmd+Shift+Enter" />
+        <VetoKbd Keys="Cmd+Shift+Enter" Symbols="true" />
+        """;
+
+    private const string SeparatorCode = """
+        <VetoKbd Keys="Ctrl+Alt+Del" />
+        <VetoKbd Keys="Ctrl-Alt-Del" Separator="-" />
+
+        @* Pressed one after the other, not held together: *@
+        <VetoKbd Keys="g+g" ShowSeparator="false" />
+        """;
+
+    private const string BorderlessCode = """
+        <VetoKbd Keys="Ctrl+Shift+P" Bordered="false" />
+        """;
+
+    private const string ListCode = """
+        <VetoShortcutList Divided="true">
+            <VetoShortcut Description="Open the command palette" Keys="Ctrl+K" />
+            <VetoShortcut Description="Save the current file"    Keys="Ctrl+S" />
+            <VetoShortcut Description="Find across the project"  Keys="Ctrl+Shift+F" />
+            <VetoShortcut Description="Reopen the tab you just closed" Keys="Ctrl+Shift+T" />
+        </VetoShortcutList>
+        """;
+
+    private const string CompactCode = """
+        <VetoShortcutList Size="VetoSize.Small">
+            <VetoShortcut Description="Next result" Keys="Enter" />
+            <VetoShortcut Description="Dismiss" Keys="Esc" />
+        </VetoShortcutList>
+        """;
+}

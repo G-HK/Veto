@@ -1,0 +1,175 @@
+@page "/docs/components/button"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Button — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Button"
+          Lead="A labelled button with optional icons and a loading state. Becomes a real link when you give it an Href.">
+
+    <DemoBlock TestId="demo-variants"
+               Title="Variants"
+               Description="Filled for the one action you want taken, outlined for the alternatives, text for the ones that should stay out of the way."
+               Code="@VariantsCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
+            <VetoButton TestId="filled" Variant="VetoVariant.Filled">Save changes</VetoButton>
+            <VetoButton TestId="outlined" Variant="VetoVariant.Outlined">Cancel</VetoButton>
+            <VetoButton TestId="text" Variant="VetoVariant.Text">Learn more</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-colors"
+               Title="Colour roles"
+               Description="Each role sets one custom property that every variant reads, so a role costs one rule rather than one per variant."
+               Code="@ColorsCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                <VetoButton Color="VetoColor.Primary">Primary</VetoButton>
+                <VetoButton Color="VetoColor.Secondary">Secondary</VetoButton>
+                <VetoButton Color="VetoColor.Neutral" TestId="neutral">Neutral</VetoButton>
+                <VetoButton Color="VetoColor.Success">Success</VetoButton>
+                <VetoButton Color="VetoColor.Warning">Warning</VetoButton>
+                <VetoButton Color="VetoColor.Danger" TestId="danger">Delete</VetoButton>
+            </VetoStack>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                <VetoButton Variant="VetoVariant.Outlined" Color="VetoColor.Danger">Delete</VetoButton>
+                <VetoButton Variant="VetoVariant.Text" Color="VetoColor.Danger">Delete</VetoButton>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               Title="Sizes and shape"
+               Description="Three sizes, each with a minimum height that keeps the target comfortably clickable. FullWidth stretches to the container; Rounded fully rounds the ends."
+               Code="@SizesCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
+                <VetoButton TestId="small" Size="VetoSize.Small">Small</VetoButton>
+                <VetoButton Size="VetoSize.Medium">Medium</VetoButton>
+                <VetoButton TestId="large" Size="VetoSize.Large">Large</VetoButton>
+                <VetoButton Rounded="true" Variant="VetoVariant.Outlined">Rounded</VetoButton>
+            </VetoStack>
+            <VetoButton TestId="full-width" FullWidth="true" Variant="VetoVariant.Outlined">Full width</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-icons"
+               Title="With icons"
+               Description="An icon before the label or after it. Icons inherit the button's font size, so they scale with it rather than needing their own."
+               Code="@IconsCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
+            <VetoButton TestId="start-icon" StartIcon="@VetoIcons.Check">Confirm</VetoButton>
+            <VetoButton TestId="end-icon" EndIcon="@VetoIcons.ChevronRight" Variant="VetoVariant.Outlined">Next</VetoButton>
+            <VetoButton StartIcon="@VetoIcons.Trash" Color="VetoColor.Danger" Variant="VetoVariant.Text">Delete</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-states"
+               Title="Loading and disabled"
+               Description="A loading button keeps its colours and disables itself while it waits - it is busy, not unavailable. The label stays in place, so the button does not change width and shift the layout around it."
+               Code="@StatesCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
+                <VetoButton TestId="action" StartIcon="@VetoIcons.Check" Loading="_saving" OnClick="SaveAsync">
+                    Save changes
+                </VetoButton>
+                <VetoButton TestId="disabled" Disabled="true">Disabled</VetoButton>
+            </VetoStack>
+            <span class="demo-value" data-testid="save-state">@_saveState</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-link"
+               Title="As a link"
+               Description="With an Href the button renders an anchor, so middle-click, open-in-new-tab and the browser's status bar all behave. A disabled button never renders as a link, because a disabled anchor is still clickable."
+               Code="@LinkCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
+            <VetoButton TestId="link" Href="/docs/usage" EndIcon="@VetoIcons.ChevronRight">Read the usage guide</VetoButton>
+            <VetoButton TestId="disabled-link" Href="/docs/usage" Disabled="true">Disabled link</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private bool _saving;
+    private string? _saveState;
+
+    private async Task SaveAsync ()
+    {
+        _saving = true;
+        _saveState = "Saving…";
+
+        // Stands in for real work, so the loading state is visible for long enough to look at.
+        await Task.Delay(1200);
+
+        _saving = false;
+        _saveState = "Saved";
+    }
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("ChildContent", "RenderFragment?", "null", "The button's label."),
+        new("StartIcon", "string?", "null", "An icon before the label."),
+        new("EndIcon", "string?", "null", "An icon after the label."),
+        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Variant", "VetoVariant", "Filled", "Filled, Outlined or Text."),
+        new("Color", "VetoColor", "Primary", "Primary, Secondary, Neutral, Success, Warning or Danger."),
+        new("FullWidth", "bool", "false", "Stretches to the width of the container."),
+        new("Rounded", "bool", "false", "Fully rounds the ends."),
+        new("Loading", "bool", "false", "Swaps the leading icon for a spinner and disables the button."),
+        new("Disabled", "bool", "false", "Disables the button. A disabled button never renders as a link."),
+        new("Type", "string", "\"button\"", "The type attribute. Defaults to button so it never submits a form by accident."),
+        new("Href", "string?", "null", "Renders an anchor and navigates instead of raising OnClick."),
+        new("Target", "string?", "null", "The link target, when Href is set."),
+        new("OnClick", "EventCallback<MouseEventArgs>", "—", "Raised when the button is activated.")
+    ];
+
+    private const string VariantsCode = """
+        <VetoButton Variant="VetoVariant.Filled">Save changes</VetoButton>
+        <VetoButton Variant="VetoVariant.Outlined">Cancel</VetoButton>
+        <VetoButton Variant="VetoVariant.Text">Learn more</VetoButton>
+        """;
+
+    private const string ColorsCode = """
+        <VetoButton Color="VetoColor.Danger">Delete</VetoButton>
+        <VetoButton Color="VetoColor.Danger" Variant="VetoVariant.Outlined">Delete</VetoButton>
+        """;
+
+    private const string SizesCode = """
+        <VetoButton Size="VetoSize.Small">Small</VetoButton>
+        <VetoButton Size="VetoSize.Large">Large</VetoButton>
+        <VetoButton Rounded="true">Rounded</VetoButton>
+        <VetoButton FullWidth="true">Full width</VetoButton>
+        """;
+
+    private const string IconsCode = """
+        <VetoButton StartIcon="@VetoIcons.Check">Confirm</VetoButton>
+        <VetoButton EndIcon="@VetoIcons.ChevronRight">Next</VetoButton>
+        """;
+
+    private const string StatesCode = """
+        <VetoButton StartIcon="@VetoIcons.Check" Loading="_saving" OnClick="SaveAsync">
+            Save changes
+        </VetoButton>
+
+        @code {
+            private bool _saving;
+
+            private async Task SaveAsync()
+            {
+                _saving = true;
+                await SaveTheThing();
+                _saving = false;
+            }
+        }
+        """;
+
+    private const string LinkCode = """
+        <VetoButton Href="/docs/usage" EndIcon="@VetoIcons.ChevronRight">
+            Read the usage guide
+        </VetoButton>
+        """;
+}

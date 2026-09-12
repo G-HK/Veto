@@ -1,0 +1,62 @@
+/* VetoDashboardTile - a panel on the dashboard grid. */
+
+.veto-dashboard-tile {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Spans are clamped to the column count so a wide tile cannot overflow a narrow grid. */
+    grid-column: span min(var(--veto-tile-span, 1), var(--veto-dashboard-columns, 1));
+    grid-row: span var(--veto-tile-rows, 1);
+    overflow: hidden;
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-lg);
+}
+
+@media (min-width: 960px) {
+    .veto-dashboard-tile {
+        grid-column: span min(
+            var(--veto-tile-span-md, var(--veto-tile-span, 1)),
+            var(--veto-dashboard-columns-md, var(--veto-dashboard-columns, 1))
+        );
+    }
+}
+
+@media (min-width: 1280px) {
+    .veto-dashboard-tile {
+        grid-column: span min(
+            var(--veto-tile-span-lg, var(--veto-tile-span-md, var(--veto-tile-span, 1))),
+            var(--veto-dashboard-columns-lg, var(--veto-dashboard-columns-md, var(--veto-dashboard-columns, 1)))
+        );
+    }
+}
+
+.veto-dashboard-tile__header {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-2);
+    padding: var(--veto-space-3) var(--veto-space-4);
+    border-bottom: 1px solid var(--veto-color-border);
+}
+
+.veto-dashboard-tile__icon {
+    color: var(--veto-color-primary);
+}
+
+.veto-dashboard-tile__title {
+    flex: 1 1 auto;
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.veto-dashboard-tile__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: var(--veto-space-4);
+    overflow: auto;
+}

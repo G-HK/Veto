@@ -1,0 +1,33 @@
+@namespace Veto.Layouts.DashboardLayout
+@inherits Veto.Core.VetoComponentBase
+@using Veto.Components.Navigation
+@using Veto.Layouts.Shell
+
+@if (Visible)
+{
+    <VetoLayout State="_layout" TestId="@TestId" Class="@CssClass" Style="@CssStyle">
+        <VetoAppBar TestId="@Sub("appbar")">
+            <VetoIconButton Icon="@VetoIcons.Menu"
+                            Label="Toggle navigation"
+                            TestId="@Sub("toggle")"
+                            OnClick="ToggleDrawer" />
+            <span class="veto-dashboard-layout__title">@Title</span>
+            <VetoSpacer />
+            @Toolbar
+        </VetoAppBar>
+
+        <VetoDrawer @bind-Open="_drawerOpen"
+                    TestId="@Sub("drawer")"
+                    Variant="VetoDrawerVariant.Responsive"
+                    Width="@DrawerWidth">
+            <VetoNavMenu Items="Items" TestId="@Sub("nav")" />
+            @DrawerFooter
+        </VetoDrawer>
+
+        <VetoMainContent TestId="@Sub("main")">
+            <div class="veto-dashboard-layout__content">
+                @ChildContent
+            </div>
+        </VetoMainContent>
+    </VetoLayout>
+}

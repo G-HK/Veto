@@ -1,0 +1,101 @@
+.demo-root {
+    height: 100dvh;
+}
+
+.brand {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.demo-body {
+    padding-block: var(--veto-space-6) 4rem;
+}
+
+.demo-back {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+}
+
+.demo-back:hover { color: var(--veto-color-primary); }
+
+.demo-title {
+    margin: 0;
+    font-size: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.demo-lead {
+    max-width: 58ch;
+    margin: 0;
+    line-height: 1.6;
+    color: var(--veto-color-text-muted);
+}
+
+.demo-prose {
+    max-width: 68ch;
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+    line-height: 1.6;
+    color: var(--veto-color-text-muted);
+}
+
+.state {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--veto-space-1) var(--veto-space-5);
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+}
+
+.state dt {
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+}
+
+.state dd {
+    margin: 0;
+    font-family: var(--veto-font-mono);
+}
+
+.state__actions {
+    margin-top: var(--veto-space-4);
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--veto-space-2) var(--veto-space-3);
+    font: inherit;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text);
+    text-decoration: none;
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-full);
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition), border-color var(--veto-transition);
+}
+
+.chip:hover { border-color: var(--veto-color-primary); }
+
+.chip:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.chip--on {
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+}
+
+.footer__link {
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+}
+
+.footer__link:hover { color: var(--veto-color-primary); }

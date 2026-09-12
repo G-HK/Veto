@@ -1,0 +1,42 @@
+/* VetoLoadingOverlay - a veil over content that is being refreshed. */
+
+.veto-loading-overlay {
+    position: relative;
+    min-width: 0;
+}
+
+.veto-loading-overlay__content {
+    transition: opacity var(--veto-transition);
+}
+
+.veto-loading-overlay--loading.veto-loading-overlay--dim .veto-loading-overlay__content {
+    opacity: 0.45;
+}
+
+.veto-loading-overlay__veil {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--veto-space-3);
+    /* Translucent rather than opaque: the point is that the old content stays visible. */
+    background-color: color-mix(in srgb, var(--veto-color-surface) 45%, transparent);
+    color: var(--veto-color-text-muted);
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-sm);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+    .veto-loading-overlay__veil {
+        backdrop-filter: blur(1px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-loading-overlay__content {
+        transition: none;
+    }
+}

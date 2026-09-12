@@ -1,0 +1,135 @@
+@page "/docs/layouts/shell"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Shell — Veto</PageTitle>
+
+<DocsPage Eyebrow="Layouts"
+          Title="Shell"
+          Lead="The app frame: an app bar, a drawer, a content region and a footer. This page is inside one.">
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Putting it together</h2>
+        <p class="docs-prose">
+            The pieces go inside <code>VetoLayout</code> in any order - the frame positions them, so
+            the markup reads top to bottom instead of being nested to match the picture. They
+            coordinate through shared state, which is how the content region knows to move when a
+            drawer opens without either component knowing about the other.
+        </p>
+        <VetoCode Code="@ShellCode" Language="razor" TestId="shell-code" />
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Drawer behaviour</h2>
+        <p class="docs-prose">
+            Every behaviour ships; pick one with <code>Variant</code>. Nothing is forced on you, and
+            the default responds to the viewport.
+        </p>
+        <ParameterTable Title="Variants" TestId="variants" Rows="Variants" />
+        <p class="docs-prose">
+            The responsive behaviour is pure CSS. Only the open state is tracked in code, which means
+            no viewport listener, no layout shift while WebAssembly boots, and a drawer that is
+            already correct in prerendered HTML.
+        </p>
+        <VetoCode Code="@DrawerCode" Language="razor" TestId="drawer-code" />
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Navigation</h2>
+        <p class="docs-prose">
+            <code>VetoNavMenu</code> takes its entries as data, so the same navigation can feed a
+            drawer, a dock and a footer without being written out three times. Active entries are
+            matched against the URL and marked with <code>aria-current</code>, and a group containing
+            the current page starts expanded.
+        </p>
+        <VetoCode Code="@NavCode" Language="csharp" TestId="nav-code" />
+    </VetoStack>
+
+    <ParameterTable Title="VetoDrawer" TestId="drawer-parameters" Rows="DrawerRows" />
+    <ParameterTable Title="VetoAppBar" TestId="appbar-parameters" Rows="AppBarRows" />
+
+</DocsPage>
+
+@code {
+    private static readonly ParameterTable.Row[] Variants =
+    [
+        new("Persistent", "—", "—", "Always visible, pushing content aside."),
+        new("Temporary", "—", "—", "Hidden until opened, then overlaid with a scrim. Escape closes it and the page behind stops scrolling."),
+        new("Mini", "—", "—", "Collapsed to an icon rail, expanding on hover or toggle."),
+        new("Responsive", "—", "default", "Persistent above the breakpoint, temporary below. With MiniBreakpoint set it steps full, rail, overlay.")
+    ];
+
+    private static readonly ParameterTable.Row[] DrawerRows =
+    [
+        new("Open", "bool", "true", "Whether the drawer is open. Supports @bind-Open."),
+        new("Variant", "VetoDrawerVariant", "Responsive", "Persistent, Temporary, Mini or Responsive."),
+        new("Anchor", "VetoAnchor", "Left", "Left, Right, Top or Bottom."),
+        new("Width", "string", "\"16rem\"", "Width when fully open."),
+        new("MiniWidth", "string", "\"4rem\"", "Width when collapsed to a rail."),
+        new("Breakpoint", "VetoBreakpoint", "Medium", "Where a responsive drawer switches between docked and overlay."),
+        new("MiniBreakpoint", "VetoBreakpoint?", "null", "Adds the rail step between the two."),
+        new("ClipMode", "VetoClipMode", "Clipped", "Whether the drawer starts below the app bar or runs full height."),
+        new("ExpandOnHover", "bool", "true", "Expands a mini drawer while the pointer is over it. Pointer devices only.")
+    ];
+
+    private static readonly ParameterTable.Row[] AppBarRows =
+    [
+        new("Height", "string", "\"3.5rem\"", "The bar's height. The content region offsets itself by it."),
+        new("Dense", "bool", "false", "Reduces height and padding."),
+        new("Bordered", "bool", "true", "Draws a bottom border."),
+        new("Elevated", "bool", "false", "Casts a shadow instead of drawing a border."),
+        new("Translucent", "bool", "false", "Lets content scroll under a blurred bar, with a solid fallback.")
+    ];
+
+    private const string ShellCode = """
+        @inherits LayoutComponentBase
+
+        <VetoThemeProvider />
+
+        <VetoLayout>
+            <VetoAppBar>
+                <VetoIconButton Icon="@VetoIcons.Menu"
+                                Label="Toggle navigation"
+                                OnClick="() => _open = !_open" />
+                Veto
+                <VetoSpacer />
+                <VetoThemeToggle />
+            </VetoAppBar>
+
+            <VetoDrawer @bind-Open="_open">
+                <VetoNavMenu Items="Nav" />
+            </VetoDrawer>
+
+            <VetoMainContent>
+                @Body
+            </VetoMainContent>
+        </VetoLayout>
+        """;
+
+    private const string DrawerCode = """
+        <!-- Full width, then a rail, then an overlay -->
+        <VetoDrawer @bind-Open="_open"
+                    Variant="VetoDrawerVariant.Responsive"
+                    Breakpoint="VetoBreakpoint.Medium"
+                    MiniBreakpoint="VetoBreakpoint.Small" />
+
+        <!-- Always an overlay, wherever it is opened -->
+        <VetoDrawer @bind-Open="_open" Variant="VetoDrawerVariant.Temporary" Anchor="VetoAnchor.Right" />
+        """;
+
+    private const string NavCode = """
+        public static readonly IReadOnlyList<VetoNavEntry> Items =
+        [
+            new VetoNavEntry { Label = "Overview", Href = "/", Icon = VetoIcons.Home, MatchExact = true },
+            new VetoNavEntry
+            {
+                Label = "Components",
+                Icon = VetoIcons.Grid,
+                Children =
+                [
+                    new VetoNavEntry { Label = "Text box", Href = "/docs/components/text-box" },
+                    new VetoNavEntry { Label = "Card", Href = "/docs/components/card" }
+                ]
+            }
+        ];
+        """;
+}

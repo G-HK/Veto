@@ -1,0 +1,12 @@
+@namespace Veto.Components.Layout
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    <div @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId">@ChildContent</div>
+}

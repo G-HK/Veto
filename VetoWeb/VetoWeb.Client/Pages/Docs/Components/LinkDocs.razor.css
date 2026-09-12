@@ -1,0 +1,12 @@
+/* Keeps the example menu to a drawer's width rather than the page's. */
+.link-nav {
+    max-width: 18rem;
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+    padding: var(--veto-space-2);
+}
+
+/* A measure short enough to read, so the in-sentence links sit in real prose. */
+.link-prose {
+    max-width: 46rem;
+}

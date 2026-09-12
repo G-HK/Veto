@@ -1,0 +1,12 @@
+@namespace Veto.Components.Buttons
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    <span @ref="RootElement"
+          @attributes="InnerAttributes"
+          id="@ElementId"
+          class="@CssClass"
+          style="@CssStyle"
+          data-testid="@TestId">@ChildContent</span>
+}

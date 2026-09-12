@@ -1,0 +1,24 @@
+/* VetoGridItem - span follows the same breakpoint fallback chain as VetoGrid's columns. */
+
+.veto-grid-item {
+    grid-column: span var(--veto-grid-span, 1);
+    min-width: 0;
+}
+
+@media (min-width: 640px) {
+    .veto-grid-item {
+        grid-column: span var(--veto-grid-span-sm, var(--veto-grid-span, 1));
+    }
+}
+
+@media (min-width: 960px) {
+    .veto-grid-item {
+        grid-column: span var(--veto-grid-span-md, var(--veto-grid-span-sm, var(--veto-grid-span, 1)));
+    }
+}
+
+@media (min-width: 1280px) {
+    .veto-grid-item {
+        grid-column: span var(--veto-grid-span-lg, var(--veto-grid-span-md, var(--veto-grid-span-sm, var(--veto-grid-span, 1))));
+    }
+}

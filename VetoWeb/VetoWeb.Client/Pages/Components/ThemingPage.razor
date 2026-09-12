@@ -1,0 +1,113 @@
+@page "/components/theming"
+@rendermode InteractiveWebAssembly
+@implements IDisposable
+@inject IVetoThemeService ThemeService
+
+<PageTitle>Theming</PageTitle>
+
+<div class="demo-page" data-testid="page" data-ready="@(_interactive ? "true" : null)">
+    <h1>Theming</h1>
+    <p>
+        Appearance is carried by a <code>data-veto-theme</code> attribute on
+        <code>&lt;html&gt;</code>, and every component styles itself from
+        <code>--veto-*</code> custom properties - so switching theme restyles the whole
+        library without a single component re-rendering its own colours.
+    </p>
+
+    <section class="demo-section">
+        <h2>Switch</h2>
+        <VetoThemeToggle TestId="toggle" />
+        <p class="demo-output">Two states: light and dark.</p>
+    </section>
+
+    <section class="demo-section">
+        <h2>Segmented control</h2>
+        <VetoThemeToggle TestId="segmented" ShowSystemOption="true" />
+        <p class="demo-output">
+            Adds System, which hands control back to the operating system and follows it live.
+        </p>
+    </section>
+
+    <section class="demo-section">
+        <h2>Current state</h2>
+        <dl class="demo-state">
+            <dt>Mode</dt>
+            <dd data-testid="mode">@ThemeService.Mode</dd>
+            <dt>Resolved</dt>
+            <dd data-testid="resolved">@(ThemeService.IsDark ? "Dark" : "Light")</dd>
+        </dl>
+        <p class="demo-output">
+            Inject <code>IVetoThemeService</code> anywhere to read or change this - no
+            component required.
+        </p>
+    </section>
+
+    <section class="demo-section">
+        <h2>Tokens</h2>
+        <p>These swatches read the custom properties directly; they update as the theme changes.</p>
+        <div class="demo-swatches" data-testid="swatches">
+            @foreach (var (name, token) in Swatches)
+            {
+                <div class="demo-swatch">
+                    <span class="demo-swatch__chip" style="background: var(@token)"></span>
+                    <span class="demo-swatch__name">@name</span>
+                    <code class="demo-swatch__token">@token</code>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="demo-section">
+        <h2>Using it in your app</h2>
+        <pre class="demo-code"><code>// Program.cs
+builder.Services.AddVeto();
+
+// App.razor - before the stylesheets, and not deferred
+&lt;script src="_content/Veto/veto-theme-init.js"&gt;&lt;/script&gt;
+&lt;link rel="stylesheet" href="_content/Veto/VetoStyles.css" /&gt;
+
+// MainLayout.razor
+&lt;VetoThemeProvider Theme="MyTheme"&gt;
+    @@Body
+&lt;/VetoThemeProvider&gt;
+
+// Rebrand by overriding only what you care about
+private static readonly VetoTheme MyTheme = new()
+{
+    Light = new() { Primary = "#0ea5e9" },
+    Dark  = new() { Primary = "#38bdf8" },
+    RadiusMedium = "10px"
+};</code></pre>
+    </section>
+</div>
+
+@code {
+    private bool _interactive;
+
+    private static readonly (string Name, string Token)[] Swatches =
+    [
+        ("Primary", "--veto-color-primary"),
+        ("Success", "--veto-color-success"),
+        ("Warning", "--veto-color-warning"),
+        ("Danger", "--veto-color-danger"),
+        ("Surface", "--veto-color-surface"),
+        ("Raised", "--veto-color-surface-raised"),
+        ("Text", "--veto-color-text"),
+        ("Border", "--veto-color-border")
+    ];
+
+    protected override void OnInitialized () => ThemeService.Changed += OnThemeChangedAsync;
+
+    protected override void OnAfterRender ( bool firstRender )
+    {
+        if (firstRender)
+        {
+            _interactive = true;
+            StateHasChanged();
+        }
+    }
+
+    private Task OnThemeChangedAsync () => InvokeAsync(StateHasChanged);
+
+    public void Dispose () => ThemeService.Changed -= OnThemeChangedAsync;
+}

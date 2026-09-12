@@ -1,0 +1,14 @@
+/* VetoCardDescription - the supporting line beside a card's title. */
+
+.veto-card-description {
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text-muted);
+}
+
+/* Description before title is the KPI-tile order: the label sits above the figure, so it
+   reads as a caption rather than as a subtitle trailing after it. */
+.veto-card-description + .veto-card-title {
+    margin-top: var(--veto-space-1);
+}

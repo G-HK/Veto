@@ -1,0 +1,81 @@
+.demo-root {
+    height: 100dvh;
+}
+
+.demo-back {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+}
+
+.demo-back:hover {
+    color: var(--veto-color-primary);
+}
+
+.demo-hint {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.metric {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.metric__delta {
+    font-size: var(--veto-font-size-sm);
+}
+
+.metric__delta--up { color: var(--veto-color-success); }
+.metric__delta--down { color: var(--veto-color-text-muted); }
+
+/* Sparkline drawn from divs: no chart library for six bars. */
+.spark {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 100%;
+    min-height: 3.5rem;
+}
+
+.spark__bar {
+    flex: 1 1 0;
+    background-color: color-mix(in srgb, var(--veto-color-primary) 65%, transparent);
+    border-radius: 2px 2px 0 0;
+}
+
+.row__name {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+}
+
+.row__when {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.row__ok { color: var(--veto-color-success); }
+.row__bad { color: var(--veto-color-danger); }
+
+.demo-prose {
+    max-width: 68ch;
+    margin: 0;
+    line-height: 1.6;
+    color: var(--veto-color-text-muted);
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--veto-space-2) var(--veto-space-3);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text);
+    text-decoration: none;
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-full);
+}
+
+.chip:hover { border-color: var(--veto-color-primary); }

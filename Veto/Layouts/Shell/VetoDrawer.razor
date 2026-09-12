@@ -1,0 +1,29 @@
+@namespace Veto.Layouts.Shell
+@inherits Veto.Core.VetoComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+@if (Visible)
+{
+    @if (ShowScrim)
+    {
+        <div class="veto-drawer-scrim veto-drawer-scrim--@Variant.ToModifier() veto-drawer-scrim--breakpoint-@Breakpoint.ToModifier() @(Open ? "veto-drawer-scrim--visible" : null)"
+             data-testid="@(TestId is null ? null : $"{TestId}-scrim")"
+             aria-hidden="true"
+             @onclick="CloseAsync"></div>
+    }
+
+    <aside @ref="RootElement"
+           @attributes="InnerAttributes"
+           id="@ElementId"
+           class="@CssClass"
+           style="@CssStyle"
+           data-testid="@TestId"
+           data-open="@(Open ? "true" : "false")"
+           tabindex="-1"
+           aria-hidden="@(IsHiddenFromAssistiveTech ? "true" : null)"
+           aria-label="@Label"
+           @onkeydown="OnKeyDownAsync">
+        @ChildContent
+    </aside>
+}

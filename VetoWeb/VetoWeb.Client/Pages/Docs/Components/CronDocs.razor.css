@@ -1,0 +1,30 @@
+.demo-value {
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    min-height: 1.25rem;
+}
+
+.demo-sample {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--veto-space-3);
+}
+
+.demo-cron {
+    flex: none;
+    min-width: 10rem;
+    padding: var(--veto-space-1) var(--veto-space-2);
+    font-family: var(--veto-font-mono);
+    font-size: var(--veto-font-size-sm);
+    letter-spacing: 0.08em;
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-sm);
+}
+
+.demo-sample-text {
+    color: var(--veto-color-text-muted);
+}

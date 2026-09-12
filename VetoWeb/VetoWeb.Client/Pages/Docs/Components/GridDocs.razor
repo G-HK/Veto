@@ -1,0 +1,76 @@
+@page "/docs/components/grid"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Grid — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Grid"
+          Lead="A responsive CSS grid. Set a column count per breakpoint; cells that need more room use VetoGridItem.">
+
+    <DemoBlock TestId="demo-responsive"
+               Title="Columns per breakpoint"
+               Description="Mobile-first: Columns applies everywhere, and each larger breakpoint takes over from its width upwards. Resize the window to watch this go from one column to four."
+               Code="@ResponsiveCode">
+        <VetoGrid Columns="1" ColumnsSmall="2" ColumnsLarge="4" Gap="VetoSpacing.Medium" TestId="grid">
+            @foreach (var i in Cells)
+            {
+                <VetoCard Padding="VetoSpacing.Medium">@i</VetoCard>
+            }
+        </VetoGrid>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-span"
+               Title="Spanning columns"
+               Description="Counts reach CSS as custom properties rather than classes, so any column count works without the library having to ship a class for it."
+               Code="@SpanCode">
+        <VetoGrid Columns="2" ColumnsMedium="4" Gap="VetoSpacing.Medium">
+            <VetoGridItem SpanMedium="2" TestId="wide">
+                <VetoCard Padding="VetoSpacing.Medium">Spans two</VetoCard>
+            </VetoGridItem>
+            <VetoCard Padding="VetoSpacing.Medium">One</VetoCard>
+            <VetoCard Padding="VetoSpacing.Medium">One</VetoCard>
+        </VetoGrid>
+    </DemoBlock>
+
+    <ParameterTable Title="VetoGrid" TestId="parameters" Rows="GridRows" />
+    <ParameterTable Title="VetoGridItem" TestId="item-parameters" Rows="ItemRows" />
+
+</DocsPage>
+
+@code {
+    private static readonly int[] Cells = [1, 2, 3, 4, 5, 6, 7, 8];
+
+    private static readonly ParameterTable.Row[] GridRows =
+    [
+        new("Columns", "int", "1", "Columns at every width, unless a larger breakpoint overrides it."),
+        new("ColumnsSmall", "int?", "null", "Columns from 640px up."),
+        new("ColumnsMedium", "int?", "null", "Columns from 960px up."),
+        new("ColumnsLarge", "int?", "null", "Columns from 1280px up."),
+        new("Gap", "VetoSpacing", "Large", "Space between cells, both directions."),
+        new("Align", "VetoAlign", "Stretch", "Alignment of cell content within its row.")
+    ];
+
+    private static readonly ParameterTable.Row[] ItemRows =
+    [
+        new("Span", "int", "1", "Columns to span at every width."),
+        new("SpanSmall", "int?", "null", "Columns to span from 640px up."),
+        new("SpanMedium", "int?", "null", "Columns to span from 960px up."),
+        new("SpanLarge", "int?", "null", "Columns to span from 1280px up.")
+    ];
+
+    private const string ResponsiveCode = """
+        <VetoGrid Columns="1" ColumnsSmall="2" ColumnsLarge="4" Gap="VetoSpacing.Medium">
+            <VetoCard>1</VetoCard>
+            <VetoCard>2</VetoCard>
+        </VetoGrid>
+        """;
+
+    private const string SpanCode = """
+        <VetoGrid Columns="2" ColumnsMedium="4">
+            <VetoGridItem SpanMedium="2">
+                <VetoCard>Spans two</VetoCard>
+            </VetoGridItem>
+            <VetoCard>One</VetoCard>
+        </VetoGrid>
+        """;
+}

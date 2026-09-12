@@ -1,0 +1,92 @@
+@page "/docs/installation"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Installation — Veto</PageTitle>
+
+<DocsPage Eyebrow="Getting started"
+          Title="Installation"
+          Lead="Four steps: add the package, register the services, link the stylesheet, and import the namespaces.">
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">1. Add the package</h2>
+        <p class="docs-prose">Veto targets .NET 10 and works in any Blazor project - WebAssembly, Server, or a Blazor Web App.</p>
+        <VetoCode Code="@AddPackage" Language="powershell" TestId="install-package" />
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">2. Register the services</h2>
+        <p class="docs-prose">
+            <code>AddVeto()</code> registers everything the components need, which today is the theme
+            service. In a Blazor Web App, call it in <strong>both</strong> projects - the server needs
+            it to prerender, the client needs it once WebAssembly takes over.
+        </p>
+        <VetoCode Code="@Registration" Language="csharp" TestId="install-services" />
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">3. Link the stylesheet</h2>
+        <p class="docs-prose">
+            One stylesheet defines every design token. The boot script above it applies a remembered
+            theme before the first paint - without it, a prerendered page renders light and then
+            snaps to dark once WebAssembly starts.
+        </p>
+        <VetoCode Code="@Stylesheet" Language="html" TestId="install-stylesheet" />
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">4. Import the namespaces</h2>
+        <p class="docs-prose">Add whichever you use to <code>_Imports.razor</code>.</p>
+        <VetoCode Code="@Imports" Language="razor" TestId="install-imports" />
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">That's it</h2>
+        <p class="docs-prose">Drop a component on a page to check everything is wired up.</p>
+        <VetoCode Code="@Smoke" Language="razor" TestId="install-smoke" />
+        <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.Large">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+                <VetoTextBox TValue="string" Label="Project name" Placeholder="e.g. Veto" @bind-Value="_smoke" />
+                <VetoThemeToggle />
+            </VetoStack>
+        </VetoCard>
+    </VetoStack>
+
+</DocsPage>
+
+@code {
+    private string? _smoke;
+
+    private const string AddPackage = """
+        dotnet add package Veto
+        """;
+
+    private const string Registration = """
+        // Program.cs
+        using Veto;
+
+        builder.Services.AddVeto();
+        """;
+
+    private const string Stylesheet = """
+        <!-- App.razor or index.html, inside <head> -->
+        <script src="_content/Veto/veto-theme-init.js"></script>
+        <link rel="stylesheet" href="_content/Veto/VetoStyles.css" />
+        """;
+
+    private const string Imports = """
+        @using Veto.Core
+        @using Veto.Theming
+        @using Veto.Components.Icon
+        @using Veto.Components.Code
+        @using Veto.Components.Buttons
+        @using Veto.Components.Layout
+        @using Veto.Components.TextBox
+        @using Veto.Components.Navigation
+        @using Veto.Layouts.Shell
+        """;
+
+    private const string Smoke = """
+        <VetoTextBox TValue="string" Label="Project name" @bind-Value="_name" />
+        <VetoThemeToggle />
+        """;
+}

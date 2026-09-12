@@ -1,0 +1,33 @@
+@namespace Veto.Components.Feedback
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    @if (Variant == VetoSkeletonVariant.Text && Lines > 1)
+    {
+        <span @ref="RootElement"
+              @attributes="InnerAttributes"
+              id="@ElementId"
+              class="@CssClass"
+              style="@CssStyle"
+              data-testid="@TestId"
+              aria-hidden="true">
+            @for (var line = 0; line < Lines; line++)
+            {
+                @* The last line is short, the way a real paragraph ends. *@
+                <span class="veto-skeleton__line"
+                      style="@(line == Lines - 1 ? "width: 62%" : null)"></span>
+            }
+        </span>
+    }
+    else
+    {
+        <span @ref="RootElement"
+              @attributes="InnerAttributes"
+              id="@ElementId"
+              class="@CssClass"
+              style="@CssStyle"
+              data-testid="@TestId"
+              aria-hidden="true"></span>
+    }
+}

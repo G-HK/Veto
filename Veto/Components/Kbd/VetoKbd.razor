@@ -1,0 +1,39 @@
+@namespace Veto.Components.Kbd
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    @if (Parts.Count > 0)
+    {
+        @* A combination is several <kbd> elements inside one, which is what the HTML spec
+           actually prescribes - and it means each key gets its own cap rather than one long
+           pill reading "Ctrl+Shift+P". *@
+        <kbd @ref="RootElement"
+             @attributes="InnerAttributes"
+             id="@ElementId"
+             class="@CssClass"
+             style="@CssStyle"
+             data-testid="@TestId"
+             data-keys="@string.Join('+', Parts)">
+            @for (var i = 0; i < Parts.Count; i++)
+            {
+                if (i > 0 && ShowSeparator)
+                {
+                    <span class="veto-kbd__separator" aria-hidden="true">@Separator</span>
+                }
+                <kbd class="veto-kbd__key">@Display(Parts[i])</kbd>
+            }
+        </kbd>
+    }
+    else
+    {
+        <kbd @ref="RootElement"
+             @attributes="InnerAttributes"
+             id="@ElementId"
+             class="@CssClass"
+             style="@CssStyle"
+             data-testid="@TestId">
+            <kbd class="veto-kbd__key">@ChildContent</kbd>
+        </kbd>
+    }
+}

@@ -1,0 +1,205 @@
+/* VetoRating - styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-rating {
+    --veto-rating-accent: var(--veto-color-warning);
+    --veto-rating-ring: var(--veto-focus-ring);
+    --veto-rating-icon: 1.5rem;
+    --veto-rating-gap: var(--veto-space-1);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-md);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text);
+}
+
+.veto-rating__label {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text);
+}
+
+.veto-rating__required {
+    margin-inline-start: var(--veto-space-1);
+    color: var(--veto-color-danger);
+}
+
+.veto-rating__row {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-3);
+}
+
+.veto-rating__items {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--veto-rating-gap);
+    border-radius: var(--veto-radius-md);
+}
+
+.veto-rating__items:focus {
+    outline: none;
+}
+
+.veto-rating__items:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-rating-ring);
+}
+
+.veto-rating__item {
+    position: relative;
+    display: block;
+    width: var(--veto-rating-icon);
+    height: var(--veto-rating-icon);
+    font-size: var(--veto-rating-icon);
+}
+
+/* The two layers: an empty icon, and a filled copy of it clipped to however much of this
+   icon is earned. Clipping is what makes half values work for *any* icon - nothing here
+   knows or cares which shape it is drawing. */
+
+.veto-rating__icon {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    display: block;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.veto-rating__icon--empty {
+    width: 100%;
+    color: var(--veto-color-border-strong);
+}
+
+.veto-rating__icon--filled {
+    color: var(--veto-rating-accent);
+    transition: width var(--veto-transition);
+}
+
+/* The icon inside each layer must keep the item's full width, or clipping the layer would
+   squash the glyph instead of cropping it. ::deep reaches the svg VetoIcon renders. */
+.veto-rating__icon ::deep .veto-icon {
+    width: var(--veto-rating-icon);
+    height: var(--veto-rating-icon);
+}
+
+.veto-rating__icon--filled ::deep .veto-icon {
+    fill: currentColor;
+}
+
+/* Hit targets. Not in the tab order - the row itself is the focus stop - and invisible;
+   with halves on, the left half of an icon is its own target. */
+
+.veto-rating__hit {
+    position: absolute;
+    inset-block: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.veto-rating__hit--full {
+    left: 0;
+    width: 100%;
+}
+
+.veto-rating--half .veto-rating__hit--full {
+    left: 50%;
+    width: 50%;
+}
+
+.veto-rating__hit--half {
+    left: 0;
+    width: 50%;
+    /* Above the full-icon target so the left half wins the click. */
+    z-index: 1;
+}
+
+.veto-rating__value {
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Colours */
+
+.veto-rating--primary {
+    --veto-rating-accent: var(--veto-color-primary);
+}
+
+.veto-rating--secondary {
+    --veto-rating-accent: var(--veto-color-secondary);
+}
+
+.veto-rating--neutral {
+    --veto-rating-accent: var(--veto-color-text);
+}
+
+.veto-rating--success {
+    --veto-rating-accent: var(--veto-color-success);
+}
+
+.veto-rating--danger {
+    --veto-rating-accent: var(--veto-color-danger);
+    --veto-rating-ring: var(--veto-focus-ring-danger);
+}
+
+/* Sizes */
+
+.veto-rating--sm {
+    --veto-rating-icon: 1.125rem;
+    font-size: var(--veto-font-size-sm);
+}
+
+.veto-rating--lg {
+    --veto-rating-icon: 2.25rem;
+    --veto-rating-gap: var(--veto-space-2);
+    font-size: var(--veto-font-size-lg);
+}
+
+/* States */
+
+.veto-rating--interactive .veto-rating__item:hover .veto-rating__icon--empty {
+    color: var(--veto-color-text-muted);
+}
+
+.veto-rating--disabled {
+    color: var(--veto-color-text-disabled);
+}
+
+.veto-rating--disabled .veto-rating__label,
+.veto-rating--disabled .veto-rating__value {
+    color: var(--veto-color-text-disabled);
+}
+
+.veto-rating--disabled .veto-rating__icon--filled {
+    color: var(--veto-color-border-strong);
+}
+
+.veto-rating--disabled .veto-rating__icon--empty {
+    color: var(--veto-color-border);
+}
+
+.veto-rating--invalid {
+    --veto-rating-ring: var(--veto-focus-ring-danger);
+}
+
+.veto-rating--invalid .veto-rating__icon--empty {
+    color: var(--veto-color-danger);
+}
+
+/* Messages */
+
+.veto-rating__message {
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.veto-rating__message--error {
+    color: var(--veto-color-danger);
+}

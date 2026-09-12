@@ -1,0 +1,106 @@
+@page "/docs/layouts"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Layouts — Veto</PageTitle>
+
+<DocsPage Eyebrow="Layouts"
+          Title="Layouts"
+          Lead="Three ready-made page frames, each assembled from the same shell pieces. Open one to see it running full-screen.">
+
+    <VetoGrid Columns="1" ColumnsMedium="2" ColumnsLarge="4" Gap="VetoSpacing.Large" TestId="gallery">
+        @foreach (var entry in Layouts)
+        {
+            <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.None" Class="gallery__card" TestId="@($"card-{entry.Slug}")">
+                <VetoStack Gap="VetoSpacing.None">
+                    <div class="gallery__preview" aria-hidden="true">
+                        @entry.Preview
+                    </div>
+
+                    <VetoStack Gap="VetoSpacing.Small" Class="gallery__body">
+                        <h3 class="gallery__name">@entry.Name</h3>
+                        <p class="gallery__summary">@entry.Summary</p>
+                        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+                            <a class="gallery__open" href="@entry.Href" data-testid="@($"open-{entry.Slug}")">Open full screen</a>
+                            <a class="gallery__docs" href="@entry.DocsHref">Reference</a>
+                        </VetoStack>
+                    </VetoStack>
+                </VetoStack>
+            </VetoCard>
+        }
+    </VetoGrid>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">They are all the same pieces</h2>
+        <p class="docs-prose">
+            Each preset is a thin component over <code>VetoLayout</code>, <code>VetoAppBar</code>,
+            <code>VetoDrawer</code> and <code>VetoMainContent</code>. If a preset does not do what
+            you need, compose those directly - the preset is a shortcut, not the only way in.
+        </p>
+        <VetoCode Code="@CompositionCode" Language="razor" TestId="composition" />
+    </VetoStack>
+
+</DocsPage>
+
+@code {
+    private sealed record LayoutEntry ( string Slug, string Name, string Summary, string Href, string DocsHref, RenderFragment Preview );
+
+    private static readonly LayoutEntry[] Layouts =
+    [
+        new("shell", "Shell", "The frame the other three are assembled from: app bar, drawer, content and footer.",
+            "/layouts/shell", "/docs/layouts/shell", ShellPreview!),
+        new("docs", "Docs", "Navigation drawer, a reading column and a contents rail. This site runs on this shape.",
+            "/layouts/docs", "/docs/layouts/shell", DocsPreview!),
+        new("dock", "Dock", "Full-bleed content with a floating dock over it. Four edges, magnified or flat.",
+            "/layouts/dock", "/docs/layouts/dock", DockPreview!),
+        new("dashboard", "Dashboard", "App bar, navigation and a grid of tiles that reflows by breakpoint.",
+            "/layouts/dashboard", "/docs/layouts/dashboard", DashboardPreview!)
+    ];
+
+    // Miniatures rather than screenshots: they follow the theme, stay sharp at any zoom, and
+    // cannot fall out of date with the layouts they depict.
+    private static readonly RenderFragment ShellPreview = @<div class="mini mini--shell">
+        <span class="mini__bar"></span>
+        <span class="mini__rail"></span>
+        <span class="mini__body"></span>
+        <span class="mini__foot"></span>
+    </div>;
+
+    private static readonly RenderFragment DocsPreview = @<div class="mini mini--docs">
+        <span class="mini__bar"></span>
+        <span class="mini__rail"></span>
+        <span class="mini__column"></span>
+        <span class="mini__toc"></span>
+    </div>;
+
+    private static readonly RenderFragment DockPreview = @<div class="mini mini--dock">
+        <span class="mini__surface"></span>
+        <span class="mini__dock">
+            <i></i><i></i><i></i><i></i>
+        </span>
+    </div>;
+
+    private static readonly RenderFragment DashboardPreview = @<div class="mini mini--dashboard">
+        <span class="mini__bar"></span>
+        <span class="mini__rail"></span>
+        <span class="mini__tiles">
+            <i class="mini__tile mini__tile--wide"></i><i class="mini__tile"></i>
+            <i class="mini__tile"></i><i class="mini__tile"></i><i class="mini__tile"></i>
+        </span>
+    </div>;
+
+    private const string CompositionCode = """
+        <!-- The preset -->
+        <VetoDashboardLayout Title="Operations" Items="Nav">
+            <VetoDashboard Columns="1" ColumnsLarge="4">…</VetoDashboard>
+        </VetoDashboardLayout>
+
+        <!-- The same thing, composed by hand -->
+        <VetoLayout>
+            <VetoAppBar>Operations<VetoSpacer /><VetoThemeToggle /></VetoAppBar>
+            <VetoDrawer @bind-Open="_open"><VetoNavMenu Items="Nav" /></VetoDrawer>
+            <VetoMainContent>
+                <VetoDashboard Columns="1" ColumnsLarge="4">…</VetoDashboard>
+            </VetoMainContent>
+        </VetoLayout>
+        """;
+}

@@ -1,0 +1,108 @@
+/*
+ * VetoDock - a floating bar pinned to one edge of the viewport.
+ *
+ * Item scale arrives as --veto-dock-scale, written per item by veto-dock.js. The transform
+ * origin points at the edge the dock is attached to, so items grow away from it rather than
+ * pushing through it.
+ */
+
+.veto-dock {
+    position: fixed;
+    z-index: 40;
+    display: flex;
+    pointer-events: none;
+}
+
+.veto-dock__bar {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--veto-space-2);
+    padding: var(--veto-space-2);
+    pointer-events: auto;
+    background-color: color-mix(in srgb, var(--veto-color-surface-raised) 82%, transparent);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-lg);
+    box-shadow: var(--veto-shadow-md);
+    transition: transform var(--veto-transition);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+    .veto-dock__bar {
+        backdrop-filter: blur(18px) saturate(170%);
+    }
+}
+
+/* Placement */
+
+.veto-dock--bottom {
+    right: 0;
+    bottom: var(--veto-dock-offset, 1rem);
+    left: 0;
+    justify-content: center;
+}
+
+.veto-dock--top {
+    top: var(--veto-dock-offset, 1rem);
+    right: 0;
+    left: 0;
+    justify-content: center;
+}
+
+.veto-dock--left {
+    top: 0;
+    bottom: 0;
+    left: var(--veto-dock-offset, 1rem);
+    align-items: center;
+}
+
+.veto-dock--right {
+    top: 0;
+    right: var(--veto-dock-offset, 1rem);
+    bottom: 0;
+    align-items: center;
+}
+
+.veto-dock--vertical .veto-dock__bar {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.veto-dock--right .veto-dock__bar {
+    align-items: flex-end;
+}
+
+.veto-dock--top .veto-dock__bar {
+    align-items: flex-start;
+}
+
+/* Auto-hide: the bar slides off, leaving a strip that brings it back. */
+
+.veto-dock__reveal {
+    position: fixed;
+    pointer-events: auto;
+}
+
+.veto-dock--bottom .veto-dock__reveal { right: 0; bottom: 0; left: 0; height: 0.75rem; }
+.veto-dock--top .veto-dock__reveal { top: 0; right: 0; left: 0; height: 0.75rem; }
+.veto-dock--left .veto-dock__reveal { top: 0; bottom: 0; left: 0; width: 0.75rem; }
+.veto-dock--right .veto-dock__reveal { top: 0; right: 0; bottom: 0; width: 0.75rem; }
+
+.veto-dock--auto-hide.veto-dock--bottom .veto-dock__bar { transform: translateY(calc(100% + var(--veto-dock-offset, 1rem))); }
+.veto-dock--auto-hide.veto-dock--top .veto-dock__bar { transform: translateY(calc(-100% - var(--veto-dock-offset, 1rem))); }
+.veto-dock--auto-hide.veto-dock--left .veto-dock__bar { transform: translateX(calc(-100% - var(--veto-dock-offset, 1rem))); }
+.veto-dock--auto-hide.veto-dock--right .veto-dock__bar { transform: translateX(calc(100% + var(--veto-dock-offset, 1rem))); }
+
+/*
+ * :focus-within is as important as :hover here - a dock that only came back for the pointer
+ * would be unreachable by keyboard.
+ */
+.veto-dock--auto-hide:hover .veto-dock__bar,
+.veto-dock--auto-hide:focus-within .veto-dock__bar {
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-dock__bar {
+        transition: none;
+    }
+}

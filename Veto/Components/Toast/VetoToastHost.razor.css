@@ -1,0 +1,327 @@
+/* VetoToastHost - styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-toast-stack {
+    --veto-toast-width: 22rem;
+    --veto-toast-accent: var(--veto-color-border-strong);
+    --veto-toast-animation-duration: 250ms;
+
+    position: fixed;
+    z-index: 1400;
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-2);
+    max-width: calc(100vw - var(--veto-space-6));
+    max-height: calc(100vh - var(--veto-space-6));
+    padding: var(--veto-space-4);
+    overflow: hidden;
+    font-family: var(--veto-font-sans);
+    /* The stack covers a corner of the page; only the toasts in it may take the pointer. */
+    pointer-events: none;
+}
+
+/* Positions. Bottom stacks lay out in reverse so the first child still ends up nearest
+   the screen edge, which is what keeps the newest-first ordering consistent. */
+
+.veto-toast-stack--top-left {
+    top: 0;
+    left: 0;
+    align-items: flex-start;
+}
+
+.veto-toast-stack--top-center {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+}
+
+.veto-toast-stack--top-right {
+    top: 0;
+    right: 0;
+    align-items: flex-end;
+}
+
+.veto-toast-stack--bottom-left {
+    bottom: 0;
+    left: 0;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+}
+
+.veto-toast-stack--bottom-center {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column-reverse;
+    align-items: center;
+}
+
+.veto-toast-stack--bottom-right {
+    bottom: 0;
+    right: 0;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+}
+
+/* The toast */
+
+.veto-toast {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--veto-space-3);
+    box-sizing: border-box;
+    width: var(--veto-toast-width);
+    max-width: 100%;
+    padding: var(--veto-space-3) var(--veto-space-4);
+    overflow: hidden;
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-inline-start: 3px solid var(--veto-toast-accent);
+    border-radius: var(--veto-radius-lg);
+    box-shadow: var(--veto-shadow-md);
+    font-size: var(--veto-font-size-md);
+    line-height: var(--veto-line-height);
+    pointer-events: auto;
+    transition:
+        opacity var(--veto-toast-animation-duration) ease,
+        transform var(--veto-toast-animation-duration) ease;
+}
+
+.veto-toast--clickable {
+    cursor: pointer;
+}
+
+.veto-toast__icon {
+    display: flex;
+    flex: none;
+    align-items: center;
+    margin-top: 0.1em;
+    font-size: 1.125em;
+    color: var(--veto-toast-accent);
+}
+
+.veto-toast__body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.veto-toast__title {
+    margin: 0 0 var(--veto-space-1);
+    font-size: var(--veto-font-size-sm);
+    font-weight: 700;
+    color: var(--veto-color-text);
+}
+
+.veto-toast__message {
+    overflow-wrap: anywhere;
+    color: var(--veto-color-text-muted);
+}
+
+/* A toast with no title is one line of text, so the message carries the full weight. */
+.veto-toast__body > .veto-toast__message:only-child {
+    color: var(--veto-color-text);
+}
+
+.veto-toast__count {
+    flex: none;
+    align-self: center;
+    min-width: 1.375rem;
+    padding: 0 var(--veto-space-1);
+    font-size: var(--veto-font-size-sm);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--veto-color-text-muted);
+    background-color: var(--veto-color-surface-raised);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-full);
+}
+
+.veto-toast__close {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.1em;
+    padding: 0;
+    font-size: 0.875em;
+    color: var(--veto-color-text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--veto-radius-sm);
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition);
+}
+
+.veto-toast__close:hover {
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+}
+
+.veto-toast__close:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+/* The countdown. Driven by a CSS animation rather than a re-render per frame, and paused by
+   the same hover that holds the timer in C#, so the bar never lies about the time left. */
+
+.veto-toast__progress {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 3px;
+    background-color: var(--veto-toast-accent);
+    transform-origin: left center;
+    animation-name: veto-toast-countdown;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+.veto-toast--paused:hover .veto-toast__progress {
+    animation-play-state: paused;
+}
+
+@keyframes veto-toast-countdown {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+}
+
+/* Types */
+
+.veto-toast--info {
+    --veto-toast-accent: var(--veto-color-primary);
+}
+
+.veto-toast--success {
+    --veto-toast-accent: var(--veto-color-success);
+}
+
+.veto-toast--warning {
+    --veto-toast-accent: var(--veto-color-warning);
+}
+
+.veto-toast--error {
+    --veto-toast-accent: var(--veto-color-danger);
+}
+
+/* Sizes */
+
+.veto-toast-stack--sm {
+    --veto-toast-width: 18rem;
+}
+
+.veto-toast--sm {
+    padding: var(--veto-space-2) var(--veto-space-3);
+    font-size: var(--veto-font-size-sm);
+}
+
+.veto-toast-stack--lg {
+    --veto-toast-width: 26rem;
+}
+
+.veto-toast--lg {
+    padding: var(--veto-space-4) var(--veto-space-5);
+    font-size: var(--veto-font-size-lg);
+}
+
+/* Animations.
+   One rule pair per animation: the resting state is always "no transform, fully opaque", and
+   both the arrival and the departure are the *same* displaced state. That is what guarantees a
+   toast leaves the way it came in rather than entering one way and exiting another. */
+
+.veto-toast:not([data-state="entered"]) {
+    opacity: 0;
+}
+
+.veto-toast[data-animation="none"] {
+    transition: none;
+}
+
+.veto-toast[data-animation="none"]:not([data-state="entered"]) {
+    opacity: 1;
+}
+
+.veto-toast[data-animation="zoom"]:not([data-state="entered"]) {
+    transform: scale(0.8);
+}
+
+.veto-toast[data-animation="slide-left"]:not([data-state="entered"]) {
+    transform: translateX(-120%);
+}
+
+.veto-toast[data-animation="slide-right"]:not([data-state="entered"]) {
+    transform: translateX(120%);
+}
+
+.veto-toast[data-animation="slide-down"]:not([data-state="entered"]) {
+    transform: translateY(-120%);
+}
+
+.veto-toast[data-animation="slide-up"]:not([data-state="entered"]) {
+    transform: translateY(120%);
+}
+
+/* The flips need a perspective to read as depth rather than as a squash. */
+.veto-toast[data-animation^="flip-"] {
+    transform-origin: center;
+}
+
+.veto-toast[data-animation="flip-x-down"]:not([data-state="entered"]) {
+    transform: perspective(40rem) rotateX(-90deg);
+}
+
+.veto-toast[data-animation="flip-x-up"]:not([data-state="entered"]) {
+    transform: perspective(40rem) rotateX(90deg);
+}
+
+.veto-toast[data-animation="flip-y-left"]:not([data-state="entered"]) {
+    transform: perspective(40rem) rotateY(-90deg);
+}
+
+.veto-toast[data-animation="flip-y-right"]:not([data-state="entered"]) {
+    transform: perspective(40rem) rotateY(90deg);
+}
+
+/* Small screens: one full-width column, wherever the stack was asked to sit. */
+
+@media (max-width: 30rem) {
+    .veto-toast-stack {
+        inset-inline: 0;
+        left: 0;
+        right: 0;
+        align-items: stretch;
+        max-width: 100vw;
+        transform: none;
+        padding: var(--veto-space-3);
+    }
+
+    .veto-toast {
+        width: 100%;
+    }
+}
+
+/* Reduced motion: toasts still arrive and leave, they just do it without moving. The countdown
+   bar keeps running, because it is information rather than decoration. */
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-toast {
+        transition: opacity var(--veto-toast-animation-duration) ease;
+    }
+
+    .veto-toast:not([data-state="entered"]) {
+        transform: none;
+    }
+}
+
+/* Borderless: the outline and the type stripe go, and the shadow does the lifting. The icon
+   keeps the accent, so the kind of message survives losing the stripe. */
+
+.veto-toast-stack--borderless .veto-toast {
+    border-color: transparent;
+    border-inline-start-color: transparent;
+    box-shadow: var(--veto-shadow-md);
+}

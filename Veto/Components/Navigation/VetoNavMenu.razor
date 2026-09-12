@@ -1,0 +1,87 @@
+@namespace Veto.Components.Navigation
+@inherits Veto.Core.VetoComponentBase
+@implements IDisposable
+@using Veto.Components.Icon
+@inject NavigationManager Navigation
+
+@if (Visible)
+{
+    <nav @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId"
+         aria-label="@Label">
+        <ul class="veto-nav-menu__list">
+            @foreach (var entry in Items)
+            {
+                @RenderEntry(entry, 0)
+            }
+        </ul>
+        @ChildContent
+    </nav>
+}
+
+@code {
+    private RenderFragment RenderEntry ( VetoNavEntry entry, int depth ) =>
+        @<li class="veto-nav-menu__item" style="@($"--veto-nav-depth: {depth}")">
+            @if (entry.IsGroup)
+            {
+                <button type="button"
+                        class="veto-nav-menu__link veto-nav-menu__link--group"
+                        aria-expanded="@(IsExpanded(entry) ? "true" : "false")"
+                        data-testid="@EntryTestId(entry)"
+                        @onclick="() => ToggleGroup(entry)">
+                    @if (entry.Icon is not null)
+                    {
+                        <VetoIcon Icon="@entry.Icon" Size="VetoIconSize.Large" Class="veto-nav-menu__icon" />
+                    }
+                    <span class="veto-nav-menu__label">@entry.Label</span>
+                    <VetoIcon Icon="@VetoIcons.ChevronDown"
+                              Class="veto-nav-menu__chevron"
+                              Rotation="@(IsExpanded(entry) ? 180 : 0)" />
+                </button>
+
+                @if (IsExpanded(entry))
+                {
+                    <ul class="veto-nav-menu__list">
+                        @foreach (var child in entry.Children)
+                        {
+                            @RenderEntry(child, depth + 1)
+                        }
+                    </ul>
+                }
+            }
+            else if (entry.Disabled)
+            {
+                <span class="veto-nav-menu__link veto-nav-menu__link--disabled"
+                      data-testid="@EntryTestId(entry)"
+                      aria-disabled="true">
+                    @if (entry.Icon is not null)
+                    {
+                        <VetoIcon Icon="@entry.Icon" Size="VetoIconSize.Large" Class="veto-nav-menu__icon" />
+                    }
+                    <span class="veto-nav-menu__label">@entry.Label</span>
+                </span>
+            }
+            else
+            {
+                <a class="veto-nav-menu__link @(IsActive(entry) ? "veto-nav-menu__link--active" : null) @UnderlineHostClass"
+                   href="@entry.Href"
+                   title="@entry.Label"
+                   data-testid="@EntryTestId(entry)"
+                   aria-current="@(IsActive(entry) ? "page" : null)">
+                    @if (entry.Icon is not null)
+                    {
+                        <VetoIcon Icon="@entry.Icon" Size="VetoIconSize.Large" Class="veto-nav-menu__icon" />
+                    }
+                    <span class="veto-nav-menu__label @UnderlineClass">@entry.Label</span>
+                    @if (entry.Badge is not null)
+                    {
+                        <span class="veto-nav-menu__badge">@entry.Badge</span>
+                    }
+                </a>
+            }
+        </li>;
+}

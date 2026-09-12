@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/.root/">
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/docs/">
+    <File Path="Readme.md" />
+  </Folder>
+  <Project Path="tests/Veto.Tests.E2E/Veto.Tests.E2E.csproj" />
+  <Project Path="Veto/Veto.csproj" />
+  <Project Path="VetoWeb/VetoWeb.Client/VetoWeb.Client.csproj" />
+  <Project Path="VetoWeb/VetoWeb/VetoWeb.csproj" />
+</Solution>

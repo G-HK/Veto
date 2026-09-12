@@ -1,0 +1,54 @@
+/* VetoStack - flex layout driven entirely by spacing tokens. */
+
+.veto-stack {
+    display: flex;
+    min-width: 0;
+}
+
+.veto-stack--column {
+    flex-direction: column;
+}
+
+.veto-stack--row {
+    flex-direction: row;
+}
+
+.veto-stack--column.veto-stack--reverse {
+    flex-direction: column-reverse;
+}
+
+.veto-stack--row.veto-stack--reverse {
+    flex-direction: row-reverse;
+}
+
+.veto-stack--wrap {
+    flex-wrap: wrap;
+}
+
+.veto-stack--full-height {
+    height: 100%;
+}
+
+/* Gap - the numeric suffix is the step on the spacing scale. */
+.veto-stack--gap-0 { gap: 0; }
+.veto-stack--gap-1 { gap: var(--veto-space-1); }
+.veto-stack--gap-2 { gap: var(--veto-space-2); }
+.veto-stack--gap-3 { gap: var(--veto-space-3); }
+.veto-stack--gap-4 { gap: var(--veto-space-4); }
+.veto-stack--gap-5 { gap: var(--veto-space-5); }
+.veto-stack--gap-6 { gap: var(--veto-space-6); }
+
+/* Cross axis */
+.veto-stack--align-stretch { align-items: stretch; }
+.veto-stack--align-start { align-items: flex-start; }
+.veto-stack--align-center { align-items: center; }
+.veto-stack--align-end { align-items: flex-end; }
+.veto-stack--align-baseline { align-items: baseline; }
+
+/* Main axis */
+.veto-stack--justify-start { justify-content: flex-start; }
+.veto-stack--justify-center { justify-content: center; }
+.veto-stack--justify-end { justify-content: flex-end; }
+.veto-stack--justify-space-between { justify-content: space-between; }
+.veto-stack--justify-space-around { justify-content: space-around; }
+.veto-stack--justify-space-evenly { justify-content: space-evenly; }
