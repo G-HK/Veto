@@ -1,4 +1,4 @@
-## .NET build output
+﻿## .NET build output
 [Bb]in/
 [Oo]bj/
 [Dd]ebug/
@@ -30,3 +30,7 @@ packages/
 ## OS noise
 Thumbs.db
 .DS_Store
+
+
+## graphify output - generated, and regenerable with /graphify
+graphify-out/

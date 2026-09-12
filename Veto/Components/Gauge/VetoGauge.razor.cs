@@ -105,6 +105,19 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public bool FollowBands { get; set; }
 
+    /// <summary>
+    /// The reading at or above which the dial flickers like a neon tube - the needle, the hub
+    /// and the printed figure all pulsing on an irregular beat. Null never flickers.
+    /// </summary>
+    /// <remarks>
+    /// For the top of a scale that means something: a tachometer on its limiter, a temperature
+    /// past the line. It is deliberately loud, so it is worth reserving for the reading you
+    /// actually want someone to look up at. Held steady under <c>prefers-reduced-motion</c>,
+    /// where a flashing instrument is at best unpleasant.
+    /// </remarks>
+    [Parameter]
+    public double? FlickerFrom { get; set; }
+
     /// <summary>The colour of the reading when no band applies.</summary>
     [Parameter]
     public VetoColor Color { get; set; } = VetoColor.Primary;
@@ -116,6 +129,22 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     /// <summary>The name under the reading, and the dial's accessible name.</summary>
     [Parameter]
     public string? Label { get; set; }
+
+    /// <summary>
+    /// The dial's face, as any CSS <c>background</c> value - a URL, a data URI, a gradient. It
+    /// is clipped to the dial's circle and sits under everything the gauge draws, so the ticks
+    /// and the needle sweep over it the way they do on a real instrument.
+    /// </summary>
+    [Parameter]
+    public string? Background { get; set; }
+
+    /// <summary>
+    /// Content placed in the middle of the dial, under the needle - a maker's badge, a model
+    /// name, a warning symbol. Purely decorative as far as assistive technology is concerned:
+    /// it sits in an <c>aria-hidden</c> layer, because the reading is what a gauge is for.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? FaceContent { get; set; }
 
     /// <summary>What the number is measured in - <c>%</c>, <c>rpm</c>, <c>km/h</c>. Printed straight after it.</summary>
     [Parameter]
@@ -194,6 +223,20 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     public string? LabelFontSize { get; set; }
 
     /// <summary>
+    /// How long the needle or arc takes to reach a new reading, in milliseconds. Null uses the
+    /// theme's own motion.
+    /// <para>
+    /// The default is right for a gauge that updates now and then - a CPU meter should glide
+    /// rather than snap. It is wrong for one driven continuously: every new value restarts the
+    /// ease from wherever the needle currently is, so a dragged or animated dial trails its
+    /// input by the whole duration and only settles when the input stops. Set it to roughly the
+    /// interval between updates - or to zero - and the needle tracks exactly.
+    /// </para>
+    /// </summary>
+    [Parameter]
+    public int? TransitionDuration { get; set; }
+
+    /// <summary>
     /// A function the gauge calls every <see cref="PollInterval"/> for the current value. The
     /// general way in: call a hub, a counter, or an endpoint needing your own headers.
     /// </summary>
@@ -264,6 +307,15 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     private string ReadingColor
         => FollowBands && CurrentBand is { } band ? band.Color : $"var(--veto-gauge-color)";
 
+    /// <summary>True when the reading has climbed into the range that flickers.</summary>
+    private bool IsFlickering => FlickerFrom is { } from && Reading >= from;
+
+    /// <summary>The face's own inline style, when it was given a background.</summary>
+    private string? FaceStyle => Background is null ? null : $"background:{Background}";
+
+    /// <summary>True when there is anything to draw on the dial's face at all.</summary>
+    private bool HasFace => Background is not null || FaceContent is not null;
+
     private string ValueText => $"{FormatNumber(Reading)}{Unit}{(CurrentBand?.Label is { } l ? $", {l}" : string.Empty)}";
 
     private double NeedleAngle => AngleFor(Reading);
@@ -285,6 +337,7 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     protected override void OnParametersSet ()
     {
         base.OnParametersSet();
+        _ticks = ShowTicks ? [.. BuildTicks()] : [];
         RestartPolling();
     }
 
@@ -292,7 +345,10 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     protected override StyleBuilder StartStyle ()
         => base.StartStyle()
             .AddStyle("--veto-gauge-value-size", ValueFontSize, ValueFontSize is not null)
-            .AddStyle("--veto-gauge-label-size", LabelFontSize, LabelFontSize is not null);
+            .AddStyle("--veto-gauge-label-size", LabelFontSize, LabelFontSize is not null)
+            // Linear rather than eased: a continuously driven dial is interpolating between
+            // frames, and an ease-out on every frame reads as floating rather than as motion.
+            .AddStyle("--veto-gauge-transition", $"{TransitionDuration}ms linear", TransitionDuration is not null);
 
     /// <inheritdoc />
     protected override CssBuilder StartCssClass ()
@@ -300,7 +356,8 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(Modifier(Color.ToModifier()))
             .AddClass(Modifier("needle"), Needle)
-            .AddClass(Modifier("polling"), IsPolling);
+            .AddClass(Modifier("polling"), IsPolling)
+            .AddClass(Modifier("flicker"), IsFlickering);
 
     /// <summary>Stops polling.</summary>
     public ValueTask DisposeAsync ()
@@ -438,9 +495,16 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
 
     private record Tick ( double Value, double X1, double Y1, double X2, double Y2, double LabelX, double LabelY, bool Major );
 
-    private IEnumerable<Tick> Ticks
+    private IReadOnlyList<Tick> _ticks = [];
+
+    /// <summary>
+    /// The tick marks, worked out once per parameter change rather than once per render. They
+    /// only move when the scale does, and a dial being animated re-renders many times a second.
+    /// </summary>
+    private IReadOnlyList<Tick> Ticks => _ticks;
+
+    private IEnumerable<Tick> BuildTicks ()
     {
-        get
         {
             if (TickEvery <= 0)
             {

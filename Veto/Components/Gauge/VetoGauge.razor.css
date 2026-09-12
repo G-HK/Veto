@@ -13,8 +13,26 @@
     color: var(--veto-color-text);
 }
 
+/* The face: the printed dial a real instrument's needle sweeps over. Clipped to the circle
+   so a rectangular image does not show its corners through a round gauge. */
+.veto-gauge__face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    pointer-events: none;
+}
+
 .veto-gauge__dial {
     display: block;
+    /* Above the face, so the ticks and the needle are drawn on top of it. */
+    position: relative;
     width: 100%;
     height: auto;
     overflow: visible;
@@ -31,13 +49,14 @@
 .veto-gauge__value {
     /* The dial sweeps to a new reading rather than jumping, which is what makes a polled
        gauge readable instead of twitchy. */
-    transition: stroke-dashoffset var(--veto-transition), stroke var(--veto-transition);
+    transition: stroke-dashoffset var(--veto-gauge-transition, var(--veto-transition)),
+                stroke var(--veto-transition);
 }
 
 .veto-gauge__needle {
     transform-origin: 100px 100px;
     transform: rotate(var(--veto-gauge-angle, 0deg));
-    transition: transform var(--veto-transition);
+    transition: transform var(--veto-gauge-transition, var(--veto-transition));
 }
 
 .veto-gauge__needle line,
@@ -142,5 +161,36 @@
     .veto-gauge__needle line,
     .veto-gauge__needle circle {
         transition: none;
+    }
+}
+
+/* The limiter flicker: a neon tube struggling to strike. The beat is deliberately uneven -
+   an evenly pulsing glow reads as a progress indicator, not as something going wrong. */
+
+.veto-gauge--flicker .veto-gauge__needle,
+.veto-gauge--flicker .veto-gauge__value,
+.veto-gauge--flicker .veto-gauge__number {
+    animation: veto-gauge-flicker 900ms steps(1, end) infinite;
+}
+
+@keyframes veto-gauge-flicker {
+    0%,  6%   { opacity: 1;    filter: drop-shadow(0 0 5px currentColor); }
+    7%,  9%   { opacity: 0.35; filter: none; }
+    10%, 22%  { opacity: 1;    filter: drop-shadow(0 0 7px currentColor); }
+    23%, 24%  { opacity: 0.25; filter: none; }
+    25%, 46%  { opacity: 1;    filter: drop-shadow(0 0 5px currentColor); }
+    47%, 50%  { opacity: 0.4;  filter: none; }
+    51%, 67%  { opacity: 1;    filter: drop-shadow(0 0 8px currentColor); }
+    68%, 69%  { opacity: 0.3;  filter: none; }
+    70%, 100% { opacity: 1;    filter: drop-shadow(0 0 6px currentColor); }
+}
+
+/* Lit, but still: a flashing instrument is at best unpleasant, and for some readers worse. */
+@media (prefers-reduced-motion: reduce) {
+    .veto-gauge--flicker .veto-gauge__needle,
+    .veto-gauge--flicker .veto-gauge__value,
+    .veto-gauge--flicker .veto-gauge__number {
+        animation: none;
+        filter: drop-shadow(0 0 6px currentColor);
     }
 }

@@ -1,0 +1,146 @@
+/* The car's instrument binnacle - a dark panel, because that is what one looks like. */
+
+.car {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-4);
+    padding: var(--veto-space-5);
+    background-color: #0e1116;
+    border: 1px solid #232935;
+    border-radius: var(--veto-radius-lg);
+}
+
+.car__dials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--veto-space-5);
+}
+
+/* The panel is its own dark surface whatever the page's theme is doing, so the dials on it
+   have to be told what to sit on rather than inheriting the docs site's colours. */
+.car ::deep .veto-gauge {
+    --veto-color-surface-raised: #1b212c;
+    --veto-color-border-strong: #59637a;
+    --veto-color-text-muted: #98a2b8;
+    --veto-color-text: #f2f5fa;
+    --veto-color-surface: #0e1116;
+    color: #f2f5fa;
+}
+
+/* The cluster between the dials: gear, then the two warning lights. */
+
+.car__cluster {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--veto-space-1);
+    min-width: 6rem;
+}
+
+.car__gear {
+    font-family: var(--veto-font-mono);
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #f2f5fa;
+    font-variant-numeric: tabular-nums;
+}
+
+.car__gear-caption {
+    font-size: var(--veto-font-size-sm);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #98a2b8;
+}
+
+.car__lights {
+    display: flex;
+    gap: var(--veto-space-2);
+    margin-top: var(--veto-space-2);
+}
+
+.car__light {
+    padding: 0.2em 0.5em;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    border-radius: var(--veto-radius-sm);
+    /* Unlit rather than hidden: a warning light you cannot see until it matters is a warning
+       light nobody learns the position of. */
+    color: #39414f;
+    background-color: #171c25;
+    border: 1px solid #232935;
+    transition: color var(--veto-transition), background-color var(--veto-transition);
+}
+
+.car__light--shift[data-lit="true"] {
+    color: #0e1116;
+    background-color: var(--veto-color-warning);
+    border-color: var(--veto-color-warning);
+}
+
+.car__light--limit[data-lit="true"] {
+    color: #ffffff;
+    background-color: var(--veto-color-danger);
+    border-color: var(--veto-color-danger);
+}
+
+.car__controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--veto-space-3);
+}
+
+.car__status {
+    font-size: var(--veto-font-size-sm);
+    color: #98a2b8;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .car__light {
+        transition: none;
+    }
+}
+
+/* The maker's plate printed on the dial face. Sits above the hub so the needle crosses it
+   rather than the other way round - which is how one is laid out on a real instrument. */
+
+.car__badge {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    transform: translateY(-2.4rem);
+}
+
+.car__badge-rule {
+    width: 3px;
+    height: 1.7rem;
+    background-color: var(--veto-color-danger);
+    border-radius: 2px;
+}
+
+.car__badge-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    line-height: 1;
+    text-align: left;
+}
+
+.car__badge-name {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.24em;
+    color: #e8edf6;
+}
+
+.car__badge-sub {
+    font-size: 0.52rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #7d8798;
+}
