@@ -238,51 +238,79 @@
         """;
 
     private const string RichCode = """
-        Toasts.Success("Three files changed, none broke.", new VetoToastOptions
-        {
-            Title = "Build finished",
-            OnClose = () => { _dismissed = true; return Task.CompletedTask; },
-        });
+        <VetoButton OnClick="Finished">Finish the build</VetoButton>
+
+        @code {
+            private void Finished() => Toasts.Success(
+                "Three files changed, none broke.",
+                new VetoToastOptions
+                {
+                    Title = "Build finished",
+                    OnClose = () => { _dismissed = true; return Task.CompletedTask; },
+                });
+        }
         """;
 
     private const string PositionCode = """
-        @* The app's default: *@
+        @* The app's default, once in the layout: *@
         <VetoToastHost Position="VetoToastPosition.BottomRight" />
 
         @* One message somewhere else: *@
-        Toasts.Info("Over here", new VetoToastOptions
-        {
-            Position = VetoToastPosition.TopCenter,
-        });
+        <VetoButton OnClick="Elsewhere">Raise it top centre</VetoButton>
+
+        @code {
+            private void Elsewhere() => Toasts.Info("Over here", new VetoToastOptions
+            {
+                Position = VetoToastPosition.TopCenter,
+            });
+        }
         """;
 
     private const string AnimationCode = """
         <VetoToastHost Animation="VetoToastAnimation.SlideRight" />
 
-        Toasts.Info("Flipped", new VetoToastOptions
-        {
-            Animation = VetoToastAnimation.FlipXUp,
-        });
+        <VetoButton OnClick="Flip">Flip one in</VetoButton>
+
+        @code {
+            private void Flip() => Toasts.Info("Flipped", new VetoToastOptions
+            {
+                Animation = VetoToastAnimation.FlipXUp,
+            });
+        }
         """;
 
     private const string TimingCode = """
-        Toasts.Info("Gone in a second", new VetoToastOptions { Duration = 1000 });
+        <VetoButton OnClick="Quick">One second</VetoButton>
+        <VetoButton OnClick="Stay">Sticky</VetoButton>
 
-        @* Sticky: no timer, no progress bar, stays until dismissed. *@
-        Toasts.Error("This one is not going anywhere.", new VetoToastOptions
-        {
-            Title = "Needs your attention",
-            Sticky = true,
-        });
+        @code {
+            private void Quick()
+                => Toasts.Info("Gone in a second", new VetoToastOptions { Duration = 1000 });
+
+            // Sticky: no timer, no progress bar, stays until dismissed.
+            private void Stay() => Toasts.Error(
+                "This one is not going anywhere.",
+                new VetoToastOptions
+                {
+                    Title = "Needs your attention",
+                    Sticky = true,
+                });
+        }
         """;
 
     private const string DuplicateCode = """
+        @* The app's rule, once in the layout: *@
         <VetoToastHost MaxToasts="5" Duplicates="VetoToastDuplicates.Block" />
 
-        @* Or per toast - the repeat is the information here, so count it: *@
-        Toasts.Error("Connection lost", new VetoToastOptions
-        {
-            Duplicates = VetoToastDuplicates.Replace,
-        });
+        <VetoButton OnClick="Lost">Connection lost</VetoButton>
+
+        @code {
+            // Or per toast - here the repeat is the information, so count it rather
+            // than dropping it.
+            private void Lost() => Toasts.Error("Connection lost", new VetoToastOptions
+            {
+                Duplicates = VetoToastDuplicates.Replace,
+            });
+        }
         """;
 }

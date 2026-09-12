@@ -274,7 +274,16 @@
     ];
 
     private const string BasicCode = """
+        @* The gauge reads the value; the slider is what moves it in this demo. *@
         <VetoGauge Value="_cpu" Label="CPU" Unit="%" />
+
+        <VetoSlider TValue="double" Label="Value"
+                    Min="0" Max="100" ShowValue="true"
+                    @bind-Value="_cpu" />
+
+        @code {
+            private double _cpu = 42;
+        }
         """;
 
     private const string CarCode = """
@@ -351,7 +360,13 @@
         <VetoGauge Value="_disk" Label="Disk" Unit="%"
                    Bands="DiskBands" FollowBands="true" />
 
+        <VetoSlider TValue="double" Label="Usage"
+                    Min="0" Max="100" ShowValue="true"
+                    @bind-Value="_disk" />
+
         @code {
+            private double _disk = 55;
+
             private static readonly VetoGaugeBand[] DiskBands =
             [
                 new(0,  70,  "var(--veto-color-success)", "Healthy"),
@@ -367,13 +382,19 @@
                    Min="0" Max="8000"
                    Label="RPM" Format="N0"
                    Size="VetoSize.Large"
+                   ValueFontSize="1.5rem"
                    ShowTicks="true" TickEvery="250" MajorTickEvery="4"
                    ShowTickLabels="true"
-                   ValueFontSize="1.5rem"
                    Bands="RpmBands"
                    FollowBands="true" />
 
+        <VetoSlider TValue="double" Label="RPM"
+                    Min="0" Max="8000" Step="50" ShowValue="true"
+                    @bind-Value="_rpm" />
+
         @code {
+            private double _rpm = 3200;
+
             // Two bands, in order: amber first, then the red it runs into.
             private static readonly VetoGaugeBand[] RpmBands =
             [
@@ -387,11 +408,19 @@
         @* A function the gauge calls on a timer - your HttpClient, your auth, your shape. *@
         <VetoGauge Label="CPU" Unit="%"
                    ValueProvider="NextSampleAsync"
-                   PollInterval="1000" />
+                   PollInterval="1000"
+                   OnValueChanged="_ => _samples++" />
+
+        <VetoButton OnClick="() => _running = !_running">
+            @(_running ? "Pause" : "Resume")
+        </VetoButton>
 
         @code {
+            private bool _running = true;
+            private int _samples;
+
             private async Task<double> NextSampleAsync()
-                => await Http.GetFromJsonAsync<double>("/api/cpu");
+                => _running ? await Http.GetFromJsonAsync<double>("/api/cpu") : _last;
         }
 
         @* Or the shortcut, when the endpoint is plain: *@

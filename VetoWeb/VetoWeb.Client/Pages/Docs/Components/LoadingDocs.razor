@@ -187,6 +187,14 @@
         <VetoProgress Value="_percent" Label="Uploading" ShowValue="true" />
 
         <VetoProgress Indeterminate="true" Label="Contacting the server" />
+
+        <VetoButton OnClick="More">Add 20%</VetoButton>
+
+        @code {
+            private double _percent = 40;
+
+            private void More() => _percent = Math.Min(100, _percent + 20);
+        }
         """;
 
     private const string SkeletonCode = """
@@ -199,5 +207,18 @@
         <VetoLoadingOverlay Loading="_refreshing" Label="Refreshing">
             <VetoCard Title="Team">…</VetoCard>
         </VetoLoadingOverlay>
+
+        <VetoButton OnClick="RefreshAsync">Refresh</VetoButton>
+
+        @code {
+            private bool _refreshing;
+
+            private async Task RefreshAsync()
+            {
+                _refreshing = true;
+                await LoadAsync();
+                _refreshing = false;
+            }
+        }
         """;
 }

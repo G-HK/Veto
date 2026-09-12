@@ -330,16 +330,23 @@
         """;
 
     private const string ChainCode = """
-        new() { Id = "survey", Name = "Survey",
-                Start = new(2026, 3, 2), End = new(2026, 3, 6) },
+        <VetoGantt Items="Tasks" />
 
-        new() { Id = "draft", Name = "Draft",
-                Start = new(2026, 3, 9), End = new(2026, 3, 17),
-                DependsOn = ["survey"] },
+        @code {
+            private static readonly VetoGanttItem[] Tasks =
+            [
+                new() { Id = "survey", Name = "Survey",
+                        Start = new(2026, 3, 2), End = new(2026, 3, 6) },
 
-        new() { Id = "review", Name = "Review",
-                Start = new(2026, 3, 18), End = new(2026, 3, 24),
-                DependsOn = ["draft"] }
+                new() { Id = "draft", Name = "Draft",
+                        Start = new(2026, 3, 9), End = new(2026, 3, 17),
+                        DependsOn = ["survey"] },
+
+                new() { Id = "review", Name = "Review",
+                        Start = new(2026, 3, 18), End = new(2026, 3, 24),
+                        DependsOn = ["draft"] },
+            ];
+        }
         """;
 
     private const string EditCode = """
@@ -357,11 +364,25 @@
         """;
 
     private const string LoadingCode = """
-        <!-- Nothing has arrived yet: a placeholder chart holds the layout -->
-        <VetoGantt Items="@(tasks ?? [])" Loading="tasks is null" />
+        @* Nothing has arrived yet: a placeholder chart holds the layout *@
+        <VetoGantt Items="@(_tasks ?? [])" Loading="_tasks is null" />
 
-        <!-- Rows are already on screen: veil them rather than replacing them -->
-        <VetoGantt Items="tasks" Refreshing="_refreshing" />
+        @* Rows are already on screen: veil them rather than replacing them *@
+        <VetoGantt Items="@(_tasks ?? [])" Refreshing="_refreshing" />
+
+        <VetoButton OnClick="LoadAsync">Load</VetoButton>
+
+        @code {
+            private VetoGanttItem[]? _tasks;
+            private bool _refreshing;
+
+            private async Task LoadAsync()
+            {
+                _refreshing = _tasks is not null;
+                _tasks = await Api.GetScheduleAsync();
+                _refreshing = false;
+            }
+        }
         """;
 
     private const string EmptyCode = """

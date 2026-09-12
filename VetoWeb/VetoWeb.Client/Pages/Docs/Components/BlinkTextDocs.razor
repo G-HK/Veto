@@ -187,6 +187,18 @@
         <VetoBlinkText Text="Initialising the component library."
                        CharactersPerSecond="34"
                        OnCompleted="OnDone" />
+
+        <VetoButton OnClick="Restart">Run it again</VetoButton>
+
+        @code {
+            private int _run;
+            private bool _done;
+
+            // Changing the text is what restarts the reveal.
+            private void Restart() { _run++; _done = false; }
+
+            private void OnDone() => _done = true;
+        }
         """;
 
     private const string ScrambleCode = """
@@ -199,6 +211,8 @@
 
     private const string StreamCode = """
         <VetoBlinkText Stream="_stream" CharactersPerSecond="60" PreserveSpace="false" />
+
+        <VetoButton OnClick="Start">Start streaming</VetoButton>
 
         @code {
             private IAsyncEnumerable<string>? _stream;

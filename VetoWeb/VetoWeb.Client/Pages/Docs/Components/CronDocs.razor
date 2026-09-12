@@ -237,10 +237,17 @@
         @* In your project, not in Veto: *@
         @using CronExpressionDescriptor
 
+        @foreach (var language in new[] { "en", "fr", "de", "es" })
+        {
+            var code = language;
+            <VetoButton OnClick="() => _locale = code">@code</VetoButton>
+        }
+
         <VetoCron @bind-Value="_schedule" Describer="Describe" />
 
         @code {
-            private string _locale = "fr";
+            private string _schedule = "0 9 * * 1-5";
+            private string _locale = "en";
 
             private string? Describe(string expression)
             {
