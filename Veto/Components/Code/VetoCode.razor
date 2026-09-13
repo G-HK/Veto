@@ -12,20 +12,20 @@
          class="@CssClass"
          style="@CssStyle"
          data-testid="@TestId">
-        @if (Language is not null || Copyable)
-        {
-            <div class="veto-code__bar">
-                <span class="veto-code__language">@Language</span>
-                @if (Copyable)
-                {
-                    <VetoIconButton Icon="@(_copied ? VetoIcons.Check : VetoIcons.Copy)"
-                                    Label="@(_copied ? "Copied" : "Copy code")"
-                                    Size="VetoSize.Small"
-                                    TestId="@(TestId is null ? null : $"{TestId}-copy")"
-                                    OnClick="CopyAsync" />
-                }
-            </div>
-        }
+            @if (Language is not null || Copyable)
+            {
+                <div class="veto-code__bar">
+                    <span class="veto-code__language">@Language</span>
+                    @if (Copyable)
+                    {
+                        <VetoIconButton Icon="@(_copied ? VetoIcons.Check : VetoIcons.Copy)"
+                                        Label="@(_copied ? "Copied" : "Copy code")"
+                                        Size="VetoSize.Small"
+                                        TestId="@(TestId is null ? null : $"{TestId}-copy")"
+                                        OnClick="CopyAsync" />
+                    }
+                </div>
+            }
 
         <pre class="veto-code__pre"><code class="veto-code__code">@Code@ChildContent</code></pre>
     </div>

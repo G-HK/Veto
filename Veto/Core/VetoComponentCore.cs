@@ -69,9 +69,9 @@ internal sealed class VetoComponentCore ( string rootClass )
     /// <c>Style</c>, then any <c>style</c> from splatted attributes - so the consumer's values
     /// come last and win.
     /// </summary>
-    public StyleBuilder BuildStyle ( StyleBuilder builder, string? style, IReadOnlyDictionary<string, object>? attributes, VetoEffects effects = default )
-        => effects
-            .Apply(builder)
+    public StyleBuilder BuildStyle ( StyleBuilder builder, string? style, IReadOnlyDictionary<string, object>? attributes, VetoEffects effects = default, VetoBox box = default ) =>
+        box
+            .Apply(effects.Apply(builder))
             .AddRaw(style)
             .AddStyleFromAttributes(attributes);
 
@@ -95,5 +95,36 @@ internal sealed class VetoComponentCore ( string rootClass )
         return attributes
             .Where(a => a.Key is not ("class" or "style"))
             .ToDictionary(a => a.Key, a => a.Value);
+    }
+
+    /// <summary>
+    /// The attributes a component splats onto its root: the consumer's, with <c>class</c> and
+    /// <c>style</c> stripped, plus a <c>title</c> when the shared <c>Tooltip</c> parameter was
+    /// given.
+    /// </summary>
+    /// <remarks>
+    /// The tooltip travels with the splatted attributes rather than as its own binding because
+    /// the base classes supply values - a class list, a style, an id - and never render markup.
+    /// Routing it here means every component picks it up through the <c>@attributes</c> it
+    /// already splats, with no change to sixty razor files. A component that renders its own
+    /// <c>title</c> after the splat still wins, which is what a component with a more specific
+    /// idea of its tooltip should do.
+    /// </remarks>
+    public static IReadOnlyDictionary<string, object>? WithRootAttributes ( IReadOnlyDictionary<string, object>? attributes, string? tooltip )
+    {
+        var stripped = WithoutClassAndStyle(attributes);
+
+        if (string.IsNullOrWhiteSpace(tooltip) || stripped?.ContainsKey("title") == true)
+        {
+            return stripped;
+        }
+
+        var merged = stripped is null
+            ? []
+            : new Dictionary<string, object>(stripped);
+
+        merged["title"] = tooltip;
+
+        return merged;
     }
 }

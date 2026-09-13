@@ -1,0 +1,12 @@
+/* VetoMenuLabel - styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-menu-label {
+    padding: var(--veto-space-2) var(--veto-space-3) var(--veto-space-1);
+    color: var(--veto-color-text-muted);
+    font-family: var(--veto-font-sans);
+    font-size: 0.8em;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}

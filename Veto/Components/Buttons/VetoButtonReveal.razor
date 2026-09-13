@@ -1,0 +1,48 @@
+@namespace Veto.Components.Buttons
+@inherits Veto.Core.VetoComponentBase
+@implements IDisposable
+@using Veto.Components.Icon
+
+@if (Visible)
+{
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+         style="@CssStyle" data-testid="@TestId" data-open="@(Expanded ? "true" : "false")"
+         data-direction="@Direction.ToModifier()"
+         @onkeydown="OnKeyDownAsync"
+         @onpointerenter="OnPointerEnterAsync"
+         @onpointerleave="OnPointerLeaveAsync"
+         @onfocusin="OnFocusInAsync"
+         @onfocusout="OnFocusOutAsync">
+
+        <button @ref="_triggerElement" type="button" class="veto-button-reveal__trigger" id="@TriggerId" data-testid="@(TestId is null ? null : $"{TestId}-trigger")"
+                disabled="@Disabled" title="@TooltipText" aria-label="@(ShowLabel ? null : Label)" aria-expanded="@(Expanded ? "true" : "false")"
+                aria-controls="@ActionsId" @onclick="OnTriggerClickAsync">
+            @if (TriggerContent is not null)
+            {
+                @TriggerContent
+            }
+            else
+            {
+                @if (Icon is not null)
+                {
+                    <VetoIcon Icon="@Icon" Size="VetoIconSize.Inherit" Class="veto-button-reveal__icon" />
+                }
+
+                @if (ShowLabel && Label is not null)
+                {
+                    <span class="veto-button-reveal__label">@Label</span>
+                }
+            }
+        </button>
+
+        @* The actions stay in the DOM whether or not they are showing, so keyboard focus can
+           move into them by Tab once the cluster is open. inert is what keeps them out of the
+           tab order - and out of the accessibility tree - while they are hidden, rather than
+           display:none, which would throw away the transition the reveal is made of. *@
+        <div class="veto-button-reveal__actions" id="@ActionsId" role="group" aria-label="@(ActionsLabel ?? Label)"
+             data-testid="@(TestId is null ? null : $"{TestId}-actions")"
+             inert="@(Expanded ? null : "")" aria-hidden="@(Expanded ? null : "true")">
+            @ChildContent
+        </div>
+    </div>
+}

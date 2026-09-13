@@ -53,8 +53,8 @@ public partial class VetoCard : VetoComponentBase
     private bool IsInteractive => OnClick.HasDelegate;
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Elevation.ToString().ToLowerInvariant()))
             .AddClass(Modifier($"padding-{Padding.ToModifier()}"))
             .AddClass(Modifier("interactive"), IsInteractive)

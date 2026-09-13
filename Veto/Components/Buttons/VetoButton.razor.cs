@@ -94,8 +94,8 @@ public partial class VetoButton : VetoComponentBase
     public EventCallback<MouseEventArgs> OnClick { get; set; }
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(Modifier(Variant.ToModifier()))
             .AddClass(Modifier(Color.ToModifier()))

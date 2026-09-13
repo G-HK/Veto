@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Veto">
+    <title>Veto</title>
+    <!--
+      Browsers honour prefers-color-scheme inside an SVG favicon, so the mark switches to the
+      site's own dark palette on a dark tab strip rather than sitting there as a dark red
+      square. The pairing is VetoDocsTheme's: #C2121F on white in light, #FF3B47 on #15070A
+      in dark - the same two the app bar's mark uses.
+    -->
+    <style>
+        .veto-tile { fill: #C2121F; }
+        .veto-stroke { stroke: #FFFFFF; }
+
+        @media (prefers-color-scheme: dark) {
+            .veto-tile { fill: #FF3B47; }
+            .veto-stroke { stroke: #15070A; }
+        }
+    </style>
+
+    <rect class="veto-tile" width="24" height="24" rx="6" />
+    <path class="veto-stroke"
+          d="M6.5 7.75 12 16.75 17.5 7.75"
+          fill="none"
+          stroke-width="3.4"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+</svg>

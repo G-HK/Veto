@@ -27,10 +27,9 @@
     flex-wrap: wrap;
     padding: var(--veto-space-3);
     border-bottom: 1px solid var(--veto-color-border);
-}
-
-.veto-gantt__spacer {
-    flex: 1 1 auto;
+    /* A faint wash, so the strip of controls reads as a toolbar rather than as the chart's
+       first row. Mixed rather than a flat token, so it stays subtle in both themes. */
+    background-color: color-mix(in srgb, var(--veto-color-surface-raised) 55%, transparent);
 }
 
 .veto-gantt__search {
@@ -38,11 +37,87 @@
 }
 
 .veto-gantt__filters,
-.veto-gantt__scales,
-.veto-gantt__nav {
+.veto-gantt__scales {
     display: flex;
     align-items: center;
     gap: var(--veto-space-1);
+}
+
+/*
+ * The trailing cluster: time navigation, export and reset. Held to the trailing edge and set
+ * off by a hairline, because these act on the chart as a whole while the filters and the scale
+ * to their left change what it shows. The auto margin does the pushing, so no spacer element
+ * is needed - and when the toolbar wraps on a narrow viewport the margin collapses and the
+ * cluster simply starts the next line.
+ */
+.veto-gantt__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-2);
+    margin-inline-start: auto;
+    padding-inline-start: var(--veto-space-3);
+    border-inline-start: 1px solid var(--veto-color-border);
+}
+
+/*
+ * Earlier / Today / Later read as one control rather than three neighbours: the borders they
+ * share collapse into one and only the outer corners round. The buttons are separate
+ * components carrying their own scope attribute, so every rule whose subject is one of them
+ * goes through ::deep.
+ */
+.veto-gantt__nav {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+    background-color: var(--veto-color-surface);
+    transition: border-color var(--veto-transition);
+}
+
+.veto-gantt__nav:hover {
+    border-color: var(--veto-color-border-strong);
+}
+
+.veto-gantt__nav ::deep .veto-button,
+.veto-gantt__nav ::deep .veto-icon-button {
+    border-radius: 0;
+    border-color: transparent;
+}
+
+.veto-gantt__nav > ::deep :first-child,
+.veto-gantt__nav > ::deep :first-child .veto-icon-button {
+    border-start-start-radius: calc(var(--veto-radius-md) - 1px);
+    border-end-start-radius: calc(var(--veto-radius-md) - 1px);
+}
+
+.veto-gantt__nav > ::deep :last-child,
+.veto-gantt__nav > ::deep :last-child .veto-icon-button {
+    border-start-end-radius: calc(var(--veto-radius-md) - 1px);
+    border-end-end-radius: calc(var(--veto-radius-md) - 1px);
+}
+
+/* One shared divider between the three, rather than a border per button. */
+.veto-gantt__nav > ::deep * + * {
+    box-shadow: inset 1px 0 0 var(--veto-color-border);
+}
+
+/* Today is the one that does something to the view rather than nudging it, so it carries the
+   weight - and stays legible once the group's own border is doing the containing. */
+.veto-gantt__nav ::deep .veto-button__label {
+    font-weight: 600;
+}
+
+/* A focused or hovered button has to come forward, or the group's border clips its ring. */
+.veto-gantt__nav ::deep .veto-button:focus-visible,
+.veto-gantt__nav ::deep .veto-icon-button:focus-visible {
+    position: relative;
+    z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-gantt__nav {
+        transition: none;
+    }
 }
 
 .veto-gantt__chip {

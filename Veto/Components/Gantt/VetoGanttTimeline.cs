@@ -50,21 +50,16 @@ internal sealed class VetoGanttTimeline
     /// finish flush against the edge. Falls back to a month around today when there is nothing
     /// to show.
     /// </summary>
-    public static VetoGanttTimeline Create (
-        IReadOnlyList<VetoGanttItem> items,
-        VetoGanttScale scale,
-        DateOnly? start,
-        DateOnly? end,
-        DateOnly today )
+    public static VetoGanttTimeline Create ( IReadOnlyList<VetoGanttItem> items, VetoGanttScale scale, DateOnly? start, DateOnly? end, DateOnly today )
     {
         if (start is not null && end is not null)
         {
-            return new VetoGanttTimeline(start.Value, end.Value, scale);
+            return new(start.Value, end.Value, scale);
         }
 
         if (items.Count == 0)
         {
-            return new VetoGanttTimeline(today.AddDays(-7), today.AddDays(21), scale);
+            return new(today.AddDays(-7), today.AddDays(21), scale);
         }
 
         var earliest = items.Min(i => i.Start);
@@ -88,8 +83,8 @@ internal sealed class VetoGanttTimeline
     public double OffsetOf ( DateOnly day ) => (day.DayNumber - Start.DayNumber) * PixelsPerDay;
 
     /// <summary>How wide a span of days is, in pixels.</summary>
-    public double WidthOf ( DateOnly from, DateOnly to )
-        => Math.Max(PixelsPerDay, (to.DayNumber - from.DayNumber + 1) * PixelsPerDay);
+    public double WidthOf ( DateOnly from, DateOnly to ) =>
+        Math.Max(PixelsPerDay, (to.DayNumber - from.DayNumber + 1) * PixelsPerDay);
 
     /// <summary>Whether a day falls within the axis.</summary>
     public bool Contains ( DateOnly day ) => day >= Start && day <= End;
@@ -115,7 +110,7 @@ internal sealed class VetoGanttTimeline
 
             case VetoGanttScale.Week:
                 // Weeks start on Monday, so a column boundary lines up with the working week.
-                var weekStart = start.AddDays(-((int) start.DayOfWeek + 6) % 7);
+                var weekStart = start.AddDays(-((int)start.DayOfWeek + 6) % 7);
 
                 for (var day = weekStart; day <= end; day = day.AddDays(7))
                 {

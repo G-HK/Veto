@@ -4,13 +4,8 @@
 
 @if (Visible)
 {
-    <div @ref="RootElement"
-         @attributes="InnerAttributes"
-         id="@ElementId"
-         class="@CssClass"
-         style="@CssStyle"
-         data-testid="@TestId"
-         data-value="@Css(Reading)"
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+         class="@CssClass" style="@CssStyle" data-testid="@TestId" data-value="@Css(Reading)"
          data-band="@(CurrentBand?.Label ?? CurrentBand?.Color)"
          data-polling="@(IsPolling ? "true" : null)"
          data-flicker="@(IsFlickering ? "true" : null)">
@@ -25,31 +20,20 @@
             </div>
         }
 
-        <svg class="veto-gauge__dial"
-             viewBox="0 0 200 200"
-             role="meter"
-             aria-valuemin="@Css(Min)"
-             aria-valuemax="@Css(Max)"
-             aria-valuenow="@Css(Reading)"
-             aria-valuetext="@ValueText"
-             aria-label="@(Label ?? "Gauge")"
+        <svg class="veto-gauge__dial" viewBox="0 0 200 200" role="meter"
+             aria-valuemin="@Css(Min)" aria-valuemax="@Css(Max)" aria-valuenow="@Css(Reading)"
+             aria-valuetext="@ValueText" aria-label="@(Label ?? "Gauge")"
              preserveAspectRatio="xMidYMid meet">
 
             @* The track first, then the bands over it, then the reading over them - so a red
                zone is visible on the dial but never paints over the value itself. *@
-            <path class="veto-gauge__track"
-                  d="@TrackPath"
-                  fill="none"
-                  stroke-width="@Css(Thickness)"
-                  stroke-linecap="@Cap" />
+            <path class="veto-gauge__track" d="@TrackPath" fill="none"
+                  stroke-width="@Css(Thickness)" stroke-linecap="@Cap" />
 
             @foreach (var band in BandList)
             {
-                <path class="veto-gauge__band"
-                      d="@BandPath(band)"
-                      fill="none"
-                      stroke="@band.Color"
-                      stroke-width="@Css(Thickness)"
+                <path class="veto-gauge__band" d="@BandPath(band)"
+                      fill="none" stroke="@band.Color" stroke-width="@Css(Thickness)"
                       stroke-linecap="butt" />
             }
 
@@ -57,10 +41,8 @@
             {
                 @foreach (var tick in Ticks)
                 {
-                    <line class="veto-gauge__tick"
-                          x1="@Css(tick.X1)" y1="@Css(tick.Y1)"
-                          x2="@Css(tick.X2)" y2="@Css(tick.Y2)"
-                          stroke-width="@(tick.Major ? "2" : "1")"
+                    <line class="veto-gauge__tick" x1="@Css(tick.X1)" y1="@Css(tick.Y1)"
+                          x2="@Css(tick.X2)" y2="@Css(tick.Y2)" stroke-width="@(tick.Major ? "2" : "1")"
                           data-major="@(tick.Major ? "true" : "false")" />
 
                     @if (ShowTickLabels && tick.Major)
@@ -77,13 +59,8 @@
                 @* The whole track is drawn and then revealed a fraction at a time with a dash
                    offset. Swapping the path's `d` per reading would be simpler to read but
                    cannot be transitioned, so the dial would jump instead of sweeping. *@
-                <path class="veto-gauge__value"
-                      d="@TrackPath"
-                      fill="none"
-                      stroke="@ReadingColor"
-                      stroke-width="@Css(Thickness)"
-                      stroke-linecap="@Cap"
-                      stroke-dasharray="@Css(ArcLength)"
+                <path class="veto-gauge__value" d="@TrackPath" fill="none" stroke="@ReadingColor"
+                      stroke-width="@Css(Thickness)" stroke-linecap="@Cap" stroke-dasharray="@Css(ArcLength)"
                       stroke-dashoffset="@Css(ArcLength * (1 - Fraction))" />
             }
             else
@@ -91,11 +68,8 @@
                 @* Drawn pointing straight up and rotated by CSS, rather than having its tip
                    recomputed per reading - a rotation is what the browser can animate. *@
                 <g class="veto-gauge__needle" style="--veto-gauge-angle:@(Css(NeedleAngle))deg">
-                    <line x1="100" y1="100"
-                          x2="100" y2="@Css(100 - NeedleReach)"
-                          stroke="@(NeedleColor ?? ReadingColor)"
-                          stroke-width="@Css(NeedleWidth)"
-                          stroke-linecap="round" />
+                    <line x1="100" y1="100" x2="100" y2="@Css(100 - NeedleReach)" stroke="@(NeedleColor ?? ReadingColor)"
+                          stroke-width="@Css(NeedleWidth)" stroke-linecap="round" />
                     @if (HubRadius > 0)
                     {
                         <circle cx="100" cy="100" r="@Css(HubRadius)" fill="@(HubColor ?? NeedleColor ?? ReadingColor)" />
@@ -110,9 +84,7 @@
             <div class="veto-gauge__readout">
                 @if (ShowValue)
                 {
-                    <span class="veto-gauge__number"
-                          style="color:@ReadingColor"
-                          data-testid="@(TestId is null ? null : $"{TestId}-value")">@FormatNumber(Reading)@Unit</span>
+                    <span class="veto-gauge__number" style="color:@ReadingColor" data-testid="@(TestId is null ? null : $"{TestId}-value")">@FormatNumber(Reading)@Unit</span>
                 }
                 @if (!string.IsNullOrWhiteSpace(Label))
                 {

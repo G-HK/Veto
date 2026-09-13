@@ -57,15 +57,15 @@ public partial class VetoAppBar : VetoComponentBase
     }
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier("dense"), Dense)
             .AddClass(Modifier("bordered"), Bordered && !Elevated)
             .AddClass(Modifier("elevated"), Elevated)
             .AddClass(Modifier("translucent"), Translucent);
 
     /// <inheritdoc />
-    protected override StyleBuilder StartStyle ()
-        => base.StartStyle()
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
             .AddStyle("height", ResolvedHeight);
 }

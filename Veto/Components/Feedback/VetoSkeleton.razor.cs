@@ -57,15 +57,15 @@ public partial class VetoSkeleton : VetoComponentBase
     public bool Animated { get; set; } = true;
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Variant.ToString().ToLowerInvariant()))
             .AddClass(Modifier("animated"), Animated)
             .AddClass(Modifier("multiline"), Variant == VetoSkeletonVariant.Text && Lines > 1);
 
     /// <inheritdoc />
-    protected override StyleBuilder StartStyle ()
-        => base.StartStyle()
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
             .AddStyle("width", Width)
             .AddStyle("height", Height);
 }

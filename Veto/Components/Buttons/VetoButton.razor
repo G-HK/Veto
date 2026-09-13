@@ -6,28 +6,15 @@
 {
     @if (Href is not null && !Disabled)
     {
-        <a @ref="RootElement"
-           @attributes="InnerAttributes"
-           id="@ElementId"
-           class="@CssClass"
-           style="@CssStyle"
-           data-testid="@TestId"
-           href="@Href"
-           target="@Target"
-           rel="@Rel">
+        <a @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+           style="@CssStyle" data-testid="@TestId" href="@Href" target="@Target" rel="@Rel">
             @RenderContents()
         </a>
     }
     else
     {
-        <button @ref="RootElement"
-                @attributes="InnerAttributes"
-                id="@ElementId"
-                class="@CssClass"
-                style="@CssStyle"
-                data-testid="@TestId"
-                type="@Type"
-                disabled="@(Disabled || Loading)"
+        <button @ref="RootElement" @attributes="InnerAttributes"  id="@ElementId" class="@CssClass"
+                style="@CssStyle" data-testid="@TestId" type="@Type" disabled="@(Disabled || Loading)"
                 aria-busy="@(Loading ? "true" : null)"
                 @onclick="OnClickAsync">
             @RenderContents()

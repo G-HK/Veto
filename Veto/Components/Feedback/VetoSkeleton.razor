@@ -5,13 +5,8 @@
 {
     @if (Variant == VetoSkeletonVariant.Text && Lines > 1)
     {
-        <span @ref="RootElement"
-              @attributes="InnerAttributes"
-              id="@ElementId"
-              class="@CssClass"
-              style="@CssStyle"
-              data-testid="@TestId"
-              aria-hidden="true">
+        <span @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+              style="@CssStyle" data-testid="@TestId" aria-hidden="true">
             @for (var line = 0; line < Lines; line++)
             {
                 @* The last line is short, the way a real paragraph ends. *@
@@ -22,12 +17,8 @@
     }
     else
     {
-        <span @ref="RootElement"
-              @attributes="InnerAttributes"
-              id="@ElementId"
-              class="@CssClass"
-              style="@CssStyle"
-              data-testid="@TestId"
-              aria-hidden="true"></span>
+        <span @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+              style="@CssStyle" data-testid="@TestId" aria-hidden="true">
+        </span>
     }
 }

@@ -17,7 +17,7 @@ Playwright specs.
 
 | Component | Status | Notes |
 |---|---|---|
-| `IVetoComponent` / `VetoComponentBase` / `VetoInputBase<T>` | **done** | The shared contract. `VetoComponentCore` holds the one implementation both bases delegate to. |
+| `IVetoComponent` / `VetoComponentBase` / `VetoInputBase<T>` | **done** | The shared contract. `VetoComponentCore` holds the one implementation both bases delegate to. Beyond `Class`, `Style`, `Id`, `TestId`, `Visible` and the splat, every component carries the box parameters - `RootWidth`, `RootHeight`, `RootMinWidth`/`RootMaxWidth`, `RootMinHeight`/`RootMaxHeight`, `RootMargin`, `RootPadding`, `RootOverflow`, `RootTop`/`RootRight`/`RootBottom`/`RootLeft`, `RootZIndex` and `RootTooltip` - gathered into `VetoBox` for the same reason `VetoEffects` exists. Emitted before the consumer's own `Style`, so that still wins, and there so the one place a component must be a particular size or stack above something needs no wrapper element. `RootZIndex` or an offset also makes the root `position: relative`, since neither does anything on a static element; a component that positions itself overrides `PositionsItself` so its own `fixed` or `sticky` survives. **The `Root` prefix is not decoration:** Blazor matches parameters by name across the whole inheritance chain, case insensitively, so an unprefixed `Width` on the base collides with `VetoDrawer.Width` and `VetoSkeleton.Width` rather than being overridden by them - the component throws "declares more than one parameter matching the name" on its first render. `new` does not help; there is no hiding a `[Parameter]` from the binder. |
 | `CssBuilder` / `StyleBuilder` | **done** | Class and style composition. |
 | `VetoSize` / `VetoColor` / `VetoVariant` | **done** | Modifier-class enums. |
 | Design tokens (`VetoStyles.css`) | **done** | Light + dark palettes, spacing, radius, type, motion. |
@@ -101,7 +101,7 @@ Assembled from the above. Opinionated on purpose - an app adopts one and fills s
 | `VetoAppBarMenu` | idea | Horizontal top-level menu - the classic desktop File/Edit/View bar. |
 | `VetoBreadcrumbs` / `VetoBreadcrumb` | **done** | Steps from an `Items` list or as self-registering children, so a step can carry markup of its own. A step is a link only when it has an `Href` - without one it is text, or a button when `OnItemClick` is wired - which is what lets the same component draw a file path or a wizard rather than only navigation. Separator as a character, an icon or a fragment; long trails collapse their middle to an expander. 11 Playwright specs. |
 | `VetoTabs` | idea | Tab list + panels, arrow-key navigation, lazy panels. |
-| `VetoMenu` | idea | Dropdown / context menu, submenus, roving focus. Shares positioning with `VetoToolTip`. |
+| `VetoMenu` | **done** | Dropdown menu: a trigger button plus composable `VetoMenuItem` / `VetoMenuDivider` / `VetoMenuLabel` children. `OpenOn` = Click or Hover, and hover never becomes the only way in - a click toggles it, Enter and the arrows open it, touch gets the click. `Appearance` switches every item between icon-and-text, icon-only and text-only in one place, icon-only keeping the text as the accessible name and tooltip. Roving focus with wrapping arrows, Home/End, Escape returning focus to the trigger, Tab closing it; items register themselves so they stay ordinary children. Checkable and selected items, destructive styling, shortcut hints, and `Href` items that render real anchors. Positioned in CSS against the trigger - no interop, correct when prerendered, but no collision flip and no escape from an ancestor's `overflow: hidden`, which is what `VetoPopover` is still for. 27 Playwright specs. |
 | `VetoPagination` | idea | Page numbers, prev/next; pairs with `VetoTable`. |
 | `VetoCommandPalette` | idea | Ctrl+K fuzzy command search. |
 
@@ -156,7 +156,7 @@ validation for free.
 | `VetoToolTip` | planned | `Components/ToolTip/` is empty, and `docs/Concept.md` opens with *"hover over an element to trigger something"* - this is that. Hover/focus triggered, collision-aware placement. |
 | `VetoDialog` / `VetoModal` | planned | Focus trap, Escape to close, scroll lock, `async` result. |
 | `VetoDrawer` | idea | Slide-in panel from any edge; shares mechanics with dialog and dock. |
-| `VetoPopover` | idea | The positioning engine `VetoMenu`, `VetoToolTip` and `VetoSelect` would all share. Worth building once, deliberately. |
+| `VetoPopover` | planned | The positioning engine `VetoToolTip`, `VetoSelect` and `VetoDialog` would share, and which `VetoMenu` would then adopt. `VetoMenu` ships without it on purpose - CSS placement covers the common cases - so what is left for the engine is exactly the two things CSS cannot do: flipping away from the edge of the viewport, and escaping a clipping ancestor. Worth building once, deliberately. |
 | `VetoAlert` | planned | Inline severity banner. |
 | `VetoProgress` | **done** | Linear, determinate and indeterminate, with proper `progressbar` semantics. A circular variant is still outstanding. |
 | `VetoSkeleton` | **done** | Text, rectangle and circle placeholders; multi-line blocks end short. Hidden from assistive technology. |
@@ -169,9 +169,10 @@ validation for free.
 
 | Component | Status | Notes |
 |---|---|---|
-| `VetoIcon` + `VetoIcons` | **done** | SVG path constants, ~30 built in, arbitrary SVG accepted. No font, no dependency. |
+| `VetoIcon` + `VetoIcons` | **done** | SVG path constants, 128 built in, arbitrary SVG accepted. No font, no dependency. Grouped into UI glyphs, file formats (CSV, JSON, PDF, spreadsheet, archive, image, code), and simplified brand marks (Google, GitHub, Instagram, Facebook, TikTok, X, LinkedIn, YouTube, Discord, WhatsApp, Telegram, Slack, Reddit, Twitch, Apple, Microsoft) drawn in the same 24x24 stroke style as the rest. The brand marks are other companies' trademarks - Veto draws them; whether a given app may use one is that app's question. |
 | `VetoIconButton` | **done** | Icon-only button; renders an anchor when `Href` is set. |
 | `VetoButtonGroup` | **done** | Related buttons as one segmented control: touching borders collapse and only the outer corners round. `Size` is set once on the group and normalises every button in it, so a group cannot come out uneven. `Separators` draws a line between every child; `VetoButtonGroupSeparator` places one between only some. `VetoButtonGroupText` embeds a muted, non-interactive label. `IsToolbar` reports the outermost container as an ARIA toolbar - the rich-text-editor pattern. 12 Playwright specs. |
+| `VetoButtonReveal` | **done** | One button that unfolds into several on hover - the compact form of a toolbar row. The revealed actions are ordinary `VetoIconButton` children, staggered in with a per-position delay. Reachable three ways, because hover alone would strand a keyboard and a touch screen: the pointer arriving, focus landing anywhere in the cluster, or a tap on the trigger. `Direction` = End / Start / Up / Down, with Start and Up reversing the visual order while leaving the trigger first in the DOM so Tab still reaches it first. Given `OnClick` the trigger becomes a real action and the cluster stays the pointer's shortcut to the variants. Closed, the actions are `inert` rather than `display: none`, so they hold their place and the reveal can be a transition. 23 Playwright specs. |
 | `VetoPortal` | idea | Renders children at the document root - the primitive under dialog, toast and popover. |
 | `VetoClickOutside` / `VetoFocusTrap` | idea | Behaviour helpers, not visual components. |
 | `VetoVirtualize` | idea | Blazor already ships `Virtualize`; only wrap it if we add something. |
@@ -180,7 +181,7 @@ validation for free.
 
 ## Open questions
 
-1. ~~**Icons**~~ - settled: `VetoIcon` takes an SVG path string, with `VetoIcons` shipping ~30 constants and arbitrary SVG accepted. No font, no package dependency.
+1. ~~**Icons**~~ - settled: `VetoIcon` takes an SVG path string, with `VetoIcons` shipping 128 constants and arbitrary SVG accepted. No font, no package dependency.
 2. **Popover engine** - build one positioning primitive first, or let each overlay solve placement itself? Building it once is more work up front and much less later.
 3. **Charts** - wrap a JS library, or leave charts out of scope entirely?
 4. **The inherited stubs** - `TerminalBox` and `MagicTextBox` are interesting but unlike the rest of the set. Promote them to first-class components, or move them to a `Veto.Extras` package? (`3dDiv` became `VetoTilt3D`; `CronUI` became `VetoCron`; `DarkModeSwitch` was deleted for leaking global CSS.)

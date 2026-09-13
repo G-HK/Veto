@@ -25,15 +25,7 @@ public sealed class VetoCronExpression
     private static readonly string[] DayNames =
         ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-    private VetoCronExpression (
-        string text,
-        bool includeSeconds,
-        VetoCronField? seconds,
-        VetoCronField minutes,
-        VetoCronField hours,
-        VetoCronField daysOfMonth,
-        VetoCronField months,
-        VetoCronField daysOfWeek )
+    private VetoCronExpression ( string text, bool includeSeconds, VetoCronField? seconds, VetoCronField minutes, VetoCronField hours, VetoCronField daysOfMonth, VetoCronField months, VetoCronField daysOfWeek )
     {
         Text = text;
         IncludeSeconds = includeSeconds;
@@ -89,11 +81,7 @@ public sealed class VetoCronExpression
     /// Null - the default - accepts five or six fields and decides by counting them. True or
     /// false insists on one shape.
     /// </param>
-    public static bool TryParse (
-        string? text,
-        out VetoCronExpression? expression,
-        out string? error,
-        bool? includeSeconds = null )
+    public static bool TryParse ( string? text, out VetoCronExpression? expression, out string? error, bool? includeSeconds = null )
     {
         expression = null;
         error = null;
@@ -160,8 +148,7 @@ public sealed class VetoCronExpression
             return false;
         }
 
-        expression = new VetoCronExpression(
-            string.Join(' ', fields), withSeconds, seconds, minutes!, hours!, daysOfMonth!, months!, daysOfWeek!);
+        expression = new(string.Join(' ', fields), withSeconds, seconds, minutes!, hours!, daysOfMonth!, months!, daysOfWeek!);
 
         return true;
     }

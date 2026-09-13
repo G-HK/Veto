@@ -9,7 +9,8 @@ public struct CssBuilder
 {
     private string? _value;
 
-    private CssBuilder ( string? initial ) => _value = initial;
+    private CssBuilder ( string? initial ) =>
+        _value = initial;
 
     /// <summary>Starts a builder with no classes.</summary>
     public static CssBuilder Empty () => new(null);
@@ -29,20 +30,27 @@ public struct CssBuilder
     }
 
     /// <summary>Appends a class only when <paramref name="when"/> is true.</summary>
-    public CssBuilder AddClass ( string? value, bool when ) => when ? AddClass(value) : this;
+    public CssBuilder AddClass ( string? value, bool when ) =>
+        when
+            ? AddClass(value)
+            : this;
 
     /// <summary>Appends the class produced by <paramref name="value"/> only when <paramref name="when"/> is true.</summary>
-    public CssBuilder AddClass ( Func<string?> value, bool when ) => when ? AddClass(value()) : this;
+    public CssBuilder AddClass ( Func<string?> value, bool when ) =>
+        when
+            ? AddClass(value())
+            : this;
 
     /// <summary>
     /// Appends the <c>class</c> entry from splatted attributes. Consumers who write
     /// <c>class="..."</c> on a Veto component land here rather than overwriting the
     /// component's own classes.
     /// </summary>
-    public CssBuilder AddClassFromAttributes ( IReadOnlyDictionary<string, object>? attributes )
-        => attributes is not null && attributes.TryGetValue("class", out var c)
-            ? AddClass(c?.ToString())
-            : this;
+    public CssBuilder AddClassFromAttributes ( IReadOnlyDictionary<string, object>? attributes ) =>
+        attributes is not null
+            && attributes.TryGetValue("class", out var c)
+                ? AddClass(c?.ToString())
+                : this;
 
     /// <summary>Returns the joined class string, or <c>null</c> when nothing was added.</summary>
     public readonly string? Build () => _value;

@@ -16,6 +16,76 @@
     </VetoStack>
 
     <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">The box parameters</h2>
+        <p class="docs-prose">
+            Every component also carries a set of box-level parameters: its size, the space
+            around and inside it, how it treats overflow, where it sits and how it stacks. They
+            exist so the one place a component has to be a particular width, or sit above
+            something it overlaps, needs no wrapper element whose only job is to hold a
+            <code>style</code> attribute.
+        </p>
+        <p class="docs-prose">
+            They are emitted as inline declarations <em>before</em> your own <code>Style</code>,
+            so an explicit style still wins. Two of them carry a consequence worth knowing:
+            <code>RootZIndex</code> and the offsets also make the root
+            <code>position: relative</code>, because on a statically positioned element neither
+            does anything at all - and a component that positions itself, like a fixed toast
+            stack or a sticky footer, is left alone.
+        </p>
+        <p class="docs-prose">
+            They carry a <code>Root</code> prefix because they have to. Blazor matches
+            parameters by name across a component's whole inheritance chain, case
+            insensitively, so a component declaring its own <code>Width</code> would collide
+            with an inherited one rather than override it - and throw on its first render.
+            The prefix also says which element is meant, which was the ambiguity anyway:
+            <code>VetoDrawer.Width</code> is the width the drawer opens to, and
+            <code>VetoCard.Padding</code> pads the regions inside the card, not its root.
+        </p>
+        <ParameterTable Title="On every component" TestId="box-table" Rows="Box" />
+
+        <DemoBlock TestId="demo-box"
+                   ClipStage="false"
+                   Title="Sizing and spacing without a wrapper"
+                   Description="A card given a width, a max-width and a margin, and a button given a min-width so a row of them lines up. None of it needs a div around the component."
+                   Code="@BoxCode">
+            <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+                <VetoCard TestId="box-card" Title="Sized" RootWidth="18rem" RootMargin="VetoSpacing.Medium">
+                    Eighteen rem wide, with a margin of its own.
+                </VetoCard>
+                <VetoButton TestId="box-button" RootMinWidth="12rem">Wide enough</VetoButton>
+            </VetoStack>
+        </DemoBlock>
+
+        <DemoBlock TestId="demo-stacking"
+                   ClipStage="false"
+                   Title="Overflow and stacking"
+                   Description="A card clips its contents by default, so a menu inside one is cut off at its edge. Overflow lets the panel out, and ZIndex lifts a component above something it overlaps - both without touching the component's stylesheet."
+                   Code="@StackingCode">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Start" Wrap="true">
+                <VetoCard TestId="clipping-card" Title="Clips" RootWidth="14rem">
+                    <VetoMenu TestId="clipped" Label="Cut off" Icon="@VetoIcons.MoreVertical">
+                        <VetoMenuItem Text="Out of sight" TestId="clipped-item" />
+                    </VetoMenu>
+                </VetoCard>
+
+                <VetoCard TestId="unclipped-card" Title="Lets it out" RootWidth="14rem" RootOverflow="VetoOverflow.Visible">
+                    <VetoMenu TestId="unclipped" Label="Escapes" Icon="@VetoIcons.MoreVertical" RootZIndex="20">
+                        <VetoMenuItem Text="Visible" TestId="unclipped-item" />
+                    </VetoMenu>
+                </VetoCard>
+            </VetoStack>
+        </DemoBlock>
+
+        <DemoBlock TestId="demo-tooltip"
+                   ClipStage="false"
+                   Title="A native tooltip on anything"
+                   Description="Tooltip renders as the root element's title attribute. It appears on hover only - no keyboard, no touch - so it is a convenience for a hint, never the only place something important is said."
+                   Code="@TooltipCode">
+                <VetoButton TestId="tooltip-button" RootTooltip="Saves without leaving the page">Save</VetoButton>
+        </DemoBlock>
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
         <h2 class="docs-heading">Your classes never get overwritten</h2>
         <p class="docs-prose">
             <code>Class</code> is appended after the component's own classes, and unmatched attributes
@@ -72,6 +142,43 @@
         new("Visible", "bool", "true", "When false the component renders nothing at all."),
         new("AdditionalAttributes", "IReadOnlyDictionary<string, object>?", "null", "Any attribute you pass that isn't a parameter, splatted onto the root element.")
     ];
+
+    private static readonly ParameterTable.Row[] Box =
+    [
+        new("RootWidth / RootHeight", "string?", "null", "CSS lengths for the root element."),
+        new("RootMinWidth / RootMaxWidth", "string?", "null", "CSS length bounds on the root's width."),
+        new("RootMinHeight / RootMaxHeight", "string?", "null", "CSS length bounds on the root's height."),
+        new("RootMargin", "VetoSpacing?", "null", "Space outside the root, as a step on the shared spacing scale."),
+        new("RootPadding", "VetoSpacing?", "null", "Space inside the root. Distinct from the Padding VetoCard and VetoContainer own."),
+        new("RootOverflow", "VetoOverflow?", "null", "Visible, Hidden, Auto or Scroll. Visible is how a clipping component is made to let a popover out."),
+        new("RootTop / RootRight / RootBottom / RootLeft", "string?", "null", "CSS offsets. Setting any of them also positions the root."),
+        new("RootZIndex", "int?", "null", "The root's stacking order. Also positions the root, since z-index does nothing on a static element."),
+        new("RootTooltip", "string?", "null", "The root's title attribute. Hover only, so never the only place something is said.")
+    ];
+
+    private const string BoxCode = """
+        <VetoCard Title="Sized" RootWidth="18rem" RootMargin="VetoSpacing.Medium">
+            Eighteen rem wide, with a margin of its own.
+        </VetoCard>
+
+        <VetoButton RootMinWidth="12rem">Wide enough</VetoButton>
+        """;
+
+    private const string StackingCode = """
+        @* A card clips by default, so the menu's panel is cut off at its edge. *@
+        <VetoCard Title="Clips" RootWidth="14rem">
+            <VetoMenu Label="Cut off" Icon="@VetoIcons.MoreVertical">…</VetoMenu>
+        </VetoCard>
+
+        @* Overflow lets the panel out; ZIndex lifts it above what it overlaps. *@
+        <VetoCard Title="Lets it out" RootWidth="14rem" RootOverflow="VetoOverflow.Visible">
+            <VetoMenu Label="Escapes" Icon="@VetoIcons.MoreVertical" RootZIndex="20">…</VetoMenu>
+        </VetoCard>
+        """;
+
+    private const string TooltipCode = """
+        <VetoButton RootTooltip="Saves without leaving the page">Save</VetoButton>
+        """;
 
     private const string Splat = """
         <VetoTextBox TValue="string"

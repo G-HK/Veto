@@ -42,6 +42,11 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
     /// <inheritdoc />
     protected override string RootClass => "veto-dock";
 
+    /// <inheritdoc />
+    /// <remarks>The dock is fixed over the content it floats above. Letting <c>ZIndex</c> make it relative
+    /// would drop it back into the flow.</remarks>
+    protected override bool PositionsItself => true;
+
     /// <summary>The dock's items.</summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

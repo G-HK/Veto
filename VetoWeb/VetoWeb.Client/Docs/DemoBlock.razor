@@ -9,7 +9,8 @@
         }
     </VetoStack>
 
-    <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.ExtraLarge" Class="demo-block__stage">
+    <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.ExtraLarge" Class="demo-block__stage"
+              RootOverflow="@(ClipStage ? null : VetoOverflow.Visible)">
         @ChildContent
     </VetoCard>
 
@@ -39,4 +40,12 @@
     /// <summary>Test hook for the block.</summary>
     [Parameter]
     public string? TestId { get; set; }
+
+    /// <summary>
+    /// Whether the stage clips what is on it. Turn it off for a demo whose component opens a
+    /// panel beyond its own bounds - a menu, or anything else positioned against a trigger -
+    /// which the stage would otherwise cut off at its edge.
+    /// </summary>
+    [Parameter]
+    public bool ClipStage { get; set; } = true;
 }

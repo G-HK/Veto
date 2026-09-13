@@ -33,7 +33,8 @@ public static class DocsNav
                     [
                         new VetoNavEntry { Label = "Button", Href = "/docs/components/button" },
                         new VetoNavEntry { Label = "Icon button", Href = "/docs/components/icon-button" },
-                        new VetoNavEntry { Label = "Button group", Href = "/docs/components/button-group" }
+                        new VetoNavEntry { Label = "Button group", Href = "/docs/components/button-group" },
+                        new VetoNavEntry { Label = "Button reveal", Href = "/docs/components/button-reveal" }
                     ]
                 },
                 new VetoNavEntry
@@ -53,7 +54,8 @@ public static class DocsNav
                     Children =
                     [
                         new VetoNavEntry { Label = "Link", Href = "/docs/components/link" },
-                        new VetoNavEntry { Label = "Breadcrumbs", Href = "/docs/components/breadcrumbs" }
+                        new VetoNavEntry { Label = "Breadcrumbs", Href = "/docs/components/breadcrumbs" },
+                        new VetoNavEntry { Label = "Menu", Href = "/docs/components/menu" }
                     ]
                 },
                 new VetoNavEntry

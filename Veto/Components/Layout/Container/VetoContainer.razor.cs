@@ -30,8 +30,8 @@ public partial class VetoContainer : VetoComponentBase
     public bool Centered { get; set; } = true;
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Size.ToString().ToLowerInvariant()))
             .AddClass(Modifier($"padding-{Padding.ToModifier()}"))
             .AddClass(Modifier("centered"), Centered);

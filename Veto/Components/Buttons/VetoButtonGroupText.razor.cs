@@ -38,6 +38,6 @@ public partial class VetoButtonGroupText : VetoComponentBase
     public bool Bordered { get; set; } = true;
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass().AddClass(Modifier("borderless"), !Bordered);
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass().AddClass(Modifier("borderless"), !Bordered);
 }

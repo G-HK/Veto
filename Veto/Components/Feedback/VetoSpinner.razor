@@ -3,15 +3,9 @@
 
 @if (Visible)
 {
-    <span @ref="RootElement"
-          @attributes="InnerAttributes"
-          id="@ElementId"
-          class="@CssClass"
-          style="@CssStyle"
-          data-testid="@TestId"
-          role="@(Label is null ? null : "status")"
-          aria-label="@Label"
-          aria-hidden="@(Label is null ? "true" : null)">
+    <span @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+          class="@CssClass" style="@CssStyle" data-testid="@TestId" role="@(Label is null ? null : "status")"
+          aria-label="@Label" aria-hidden="@(Label is null ? "true" : null)">
         <span class="veto-spinner__track"></span>
     </span>
 }

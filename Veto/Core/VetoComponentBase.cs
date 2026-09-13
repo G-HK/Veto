@@ -38,8 +38,68 @@ public abstract class VetoComponentBase : ComponentBase, IVetoComponent
     public bool Visible { get; set; } = true;
 
     /// <inheritdoc />
-    [Parameter( CaptureUnmatchedValues = true )]
+    [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootWidth { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootHeight { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootMinWidth { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootMaxWidth { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootMinHeight { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootMaxHeight { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public VetoSpacing? RootMargin { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public VetoSpacing? RootPadding { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public VetoOverflow? RootOverflow { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootTop { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootRight { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootBottom { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootLeft { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootTooltip { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public int? RootZIndex { get; set; }
 
     /// <inheritdoc />
     [Parameter]
@@ -65,6 +125,16 @@ public abstract class VetoComponentBase : ComponentBase, IVetoComponent
     internal VetoEffects Effects => new(Glow, GlowColor, Ping, PingColor);
 
     /// <summary>
+    /// The box-level parameters as one value. Components do not normally touch this - it is
+    /// applied for them - in the same way as <see cref="Effects"/>.
+    /// </summary>
+    internal VetoBox Box => new(
+        RootWidth, RootHeight, RootMinWidth, RootMaxWidth, RootMinHeight, RootMaxHeight,
+        RootMargin, RootPadding, RootOverflow,
+        RootTop, RootRight, RootBottom, RootLeft,
+        RootZIndex, PositionsItself);
+
+    /// <summary>
     /// The component's own base class name, e.g. <c>veto-button</c>. Modifier classes are
     /// built from it, so keep it lowercase and hyphenated.
     /// </summary>
@@ -86,8 +156,8 @@ public abstract class VetoComponentBase : ComponentBase, IVetoComponent
     /// The splatted attributes with <c>class</c> and <c>style</c> removed, for applying to an
     /// inner element when the root has already consumed them.
     /// </summary>
-    protected IReadOnlyDictionary<string, object>? InnerAttributes
-        => VetoComponentCore.WithoutClassAndStyle(AdditionalAttributes);
+    protected IReadOnlyDictionary<string, object>? InnerAttributes =>
+        VetoComponentCore.WithRootAttributes(AdditionalAttributes, RootTooltip);
 
     private VetoComponentCore Core => _core ??= new VetoComponentCore(RootClass);
 
@@ -98,8 +168,8 @@ public abstract class VetoComponentBase : ComponentBase, IVetoComponent
     /// Builds the root class list. Override to add modifier classes - add them to the builder
     /// returned by <see cref="StartCssClass"/>, then let the base append the consumer's classes last.
     /// </summary>
-    protected virtual CssBuilder BuildCssClass ()
-        => VetoComponentCore.BuildCssClass(StartCssClass(), Class, AdditionalAttributes, Effects);
+    protected virtual CssBuilder BuildCssClass () =>
+        VetoComponentCore.BuildCssClass(StartCssClass(), Class, AdditionalAttributes, Effects);
 
     /// <summary>
     /// The component's own classes, before the consumer's are appended. Override this - rather
@@ -107,9 +177,17 @@ public abstract class VetoComponentBase : ComponentBase, IVetoComponent
     /// </summary>
     protected virtual CssBuilder StartCssClass () => CssBuilder.Default(RootClass);
 
+    /// <summary>
+    /// Whether the component's own stylesheet gives its root a non-static <c>position</c>.
+    /// Override to true in a component that positions itself - a fixed overlay, a sticky bar -
+    /// so <see cref="ZIndex"/> does not overwrite that with <c>relative</c> and drop it back
+    /// into the flow.
+    /// </summary>
+    protected virtual bool PositionsItself => false;
+
     /// <summary>Builds the root style list, appending the consumer's style last.</summary>
-    protected virtual StyleBuilder BuildStyle ()
-        => Core.BuildStyle(StartStyle(), Style, AdditionalAttributes, Effects);
+    protected virtual StyleBuilder BuildStyle () =>
+        Core.BuildStyle(StartStyle(), Style, AdditionalAttributes, Effects, Box);
 
     /// <summary>
     /// The component's own inline declarations, before the consumer's are appended. Override

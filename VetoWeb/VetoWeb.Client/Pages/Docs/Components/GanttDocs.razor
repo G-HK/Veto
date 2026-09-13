@@ -8,17 +8,11 @@
           Title="Gantt"
           Lead="Projects and tasks on the left, a scrollable timeline on the right. Filtering, zoom, date navigation and export are built in.">
 
-    <DemoBlock TestId="demo-basic"
-               Title="A schedule"
+    <DemoBlock TestId="demo-basic" Title="A schedule"
                Description="Projects collapse, tasks indent beneath them, and a summary bar spans its children as a slim rail rather than a block. Each category carries its own colour, and the filter chips are tinted to match - so the filter is also the key to the bars. Switch the scale, or use Today to jump back to now."
                Code="@BasicCode">
-        <VetoGantt TestId="chart"
-                   Items="Tasks"
-                   TodayOverride="Today"
-                   @bind-Scale="_scale"
-                   @bind-SelectedId="_selectedId"
-                   Height="26rem"
-                   OnExport="OnExport" />
+        <VetoGantt TestId="chart" Items="Tasks" TodayOverride="Today" @bind-Scale="_scale"
+                   @bind-SelectedId="_selectedId" Height="26rem" OnExport="OnExport" />
     </DemoBlock>
 
     <DemoBlock TestId="demo-selection"
@@ -143,8 +137,16 @@
     <VetoStack Gap="VetoSpacing.Medium">
         <h2 class="docs-heading">Export</h2>
         <p class="docs-prose">
-            The CSV and JSON buttons download what is <em>currently filtered</em> - what the
-            reader can see, which is almost always what they meant. Dates are written as
+            The formats live behind one export menu rather than a button each: the toolbar is
+            already carrying filters, a zoom picker and date navigation, and export is the
+            control a reader wants least often. It opens on hover by default - a click and the
+            keyboard open it too - so it costs a single button of room until it is needed. Set
+            <code>ExportOpenOn</code>, <code>ExportAppearance</code> and
+            <code>ShowExportLabel</code> to trade that room differently.
+        </p>
+        <p class="docs-prose">
+            Either format downloads what is <em>currently filtered</em> - what the reader can
+            see, which is almost always what they meant. Dates are written as
             <code>yyyy-MM-dd</code> rather than in the display format, so a spreadsheet in
             another locale reads them as the same days.
         </p>
@@ -271,7 +273,11 @@
         new("ShowToolbar", "bool", "true", "Whether the toolbar renders at all."),
         new("ShowSearch / ShowCategoryFilter", "bool", "true", "Which filters appear in the toolbar."),
         new("ShowScalePicker / ShowNavigation", "bool", "true", "Whether the zoom picker and Today controls appear."),
-        new("Exportable", "bool", "true", "Whether the CSV and JSON buttons appear."),
+        new("Exportable", "bool", "true", "Whether the export menu appears in the toolbar."),
+        new("ExportOpenOn", "VetoMenuTrigger", "Hover", "What opens the export menu. A click and the keyboard work either way."),
+        new("ExportAppearance", "VetoMenuAppearance", "IconAndText", "Whether the formats show their icon, their name, or both."),
+        new("ShowExportLabel", "bool", "true", "Whether the export trigger shows the word Export beside its icon."),
+        new("ExportPlacement", "VetoMenuPlacement", "BottomEnd", "Which corner of the trigger the export menu hangs from."),
         new("ShowToday / ShowWeekends", "bool", "true", "The today marker and weekend shading."),
         new("ShowProgress / ShowBarLabels / ShowDates", "bool", "true", "Progress fills, names on bars, dates in the sidebar."),
         new("ScrollToTodayOnLoad", "bool", "true", "Whether the timeline scrolls to today on first render."),

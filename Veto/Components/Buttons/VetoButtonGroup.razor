@@ -3,16 +3,9 @@
 
 @if (Visible)
 {
-    <div @ref="RootElement"
-         @attributes="InnerAttributes"
-         id="@ElementId"
-         class="@CssClass"
-         style="@CssStyle"
-         data-testid="@TestId"
-         data-orientation="@(Orientation == VetoOrientation.Vertical ? "vertical" : "horizontal")"
-         role="@Role"
-         aria-label="@Label"
-         aria-orientation="@(Role == "toolbar" ? (Orientation == VetoOrientation.Vertical ? "vertical" : "horizontal") : null)">
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+         style="@CssStyle" data-testid="@TestId" data-orientation="@(Orientation == VetoOrientation.Vertical ? "vertical" : "horizontal")"
+         role="@Role" aria-label="@Label" aria-orientation="@(Role == "toolbar" ? (Orientation == VetoOrientation.Vertical ? "vertical" : "horizontal") : null)">
         @ChildContent
     </div>
 }

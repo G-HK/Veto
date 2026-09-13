@@ -24,6 +24,11 @@ public partial class VetoDrawer : VetoComponentBase, IAsyncDisposable
     /// <inheritdoc />
     protected override string RootClass => "veto-drawer";
 
+    /// <inheritdoc />
+    /// <remarks>A temporary or responsive drawer is fixed to the edge of the viewport. Letting <c>ZIndex</c> make it relative
+    /// would drop it back into the flow.</remarks>
+    protected override bool PositionsItself => true;
+
     /// <summary>The drawer's content.</summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
@@ -142,8 +147,8 @@ public partial class VetoDrawer : VetoComponentBase, IAsyncDisposable
     }
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Variant.ToModifier()))
             .AddClass(Modifier(Anchor.ToModifier()))
             .AddClass(Modifier(Anchor.IsVertical() ? "side" : "horizontal"))
@@ -158,8 +163,7 @@ public partial class VetoDrawer : VetoComponentBase, IAsyncDisposable
             .AddClass(() => Modifier($"mini-breakpoint-{MiniBreakpoint!.Value.ToModifier()}"), MiniBreakpoint.HasValue);
 
     /// <inheritdoc />
-    protected override StyleBuilder StartStyle ()
-        => base.StartStyle()
+    protected override StyleBuilder StartStyle () => base.StartStyle()
             .AddStyle("--veto-drawer-width", Width)
             .AddStyle("--veto-drawer-mini-width", MiniWidth);
 

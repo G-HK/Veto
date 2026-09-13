@@ -35,8 +35,8 @@ public static class VetoCronDescriber
 
     /// <summary>Describes an expression, or returns the parse error when it will not parse.</summary>
     /// <param name="text">The cron expression.</param>
-    public static string Describe ( string? text )
-        => VetoCronExpression.TryParse(text, out var expression, out var error)
+    public static string Describe ( string? text ) =>
+        VetoCronExpression.TryParse(text, out var expression, out var error)
             ? Describe(expression!)
             : error ?? "Not a valid cron expression.";
 
@@ -46,7 +46,7 @@ public static class VetoCronDescriber
     {
         ArgumentNullException.ThrowIfNull(expression);
 
-        var sentence = new StringBuilder();
+        StringBuilder sentence = new();
 
         sentence.Append(DescribeTime(expression));
 
@@ -76,34 +76,43 @@ public static class VetoCronDescriber
         var hours = expression.Hours;
 
         // Every-n cases first: they read as a frequency, not as a time of day.
-        if (seconds is not null && Every(seconds) is { } everySecond && minutes.IsUnrestricted && hours.IsUnrestricted)
+        if (seconds is not null
+            && Every(seconds) is { } everySecond
+            && minutes.IsUnrestricted && hours.IsUnrestricted)
         {
-            return everySecond == 1 ? "every second" : $"every {everySecond} seconds";
+            return everySecond == 1
+                ? "every second"
+                : $"every {everySecond} seconds";
         }
 
-        if (Every(minutes) is { } everyMinute && hours.IsUnrestricted && IsZeroOrAbsent(seconds))
+        if (Every(minutes) is { } everyMinute
+            && hours.IsUnrestricted && IsZeroOrAbsent(seconds))
         {
             return everyMinute == 1 ? "every minute" : $"every {everyMinute} minutes";
         }
 
-        if (minutes.IsUnrestricted && hours.IsUnrestricted)
+        if (minutes.IsUnrestricted
+            && hours.IsUnrestricted)
         {
             return "every minute";
         }
 
-        if (Every(hours) is { } everyHour && minutes.IsSingle)
+        if (Every(hours) is { } everyHour
+            && minutes.IsSingle)
         {
             var at = minutes.Values.Single();
             var past = at == 0 ? string.Empty : $" at {at} minutes past the hour";
             return everyHour == 1 ? $"every hour{past}" : $"every {everyHour} hours{past}";
         }
 
-        if (minutes.IsUnrestricted && !hours.IsUnrestricted)
+        if (minutes.IsUnrestricted
+            && !hours.IsUnrestricted)
         {
             return $"every minute {DescribeHourWindow(hours)}";
         }
 
-        if (hours.IsUnrestricted && !minutes.IsUnrestricted)
+        if (hours.IsUnrestricted
+            && !minutes.IsUnrestricted)
         {
             return $"every hour at {Join(minutes.Values.Order().Select(m => $"{m} minutes past"))}";
         }
@@ -155,7 +164,7 @@ public static class VetoCronDescriber
             return null;
         }
 
-        var parts = new List<string>();
+        List<string> parts = new();
 
         if (!dom.IsUnrestricted)
         {
@@ -192,19 +201,21 @@ public static class VetoCronDescriber
     /// bare <c>*</c>, which is a step of one over everything and has to count as one here or
     /// <c>0 * * * *</c> describes itself as "every hour at 0 minutes past".
     /// </summary>
-    private static int? Every ( VetoCronField field )
-        => field.Parts.Count == 1
+    private static int? Every ( VetoCronField field ) =>
+        field.Parts.Count == 1
            && field.Parts[0] is { Kind: VetoCronPartKind.Step or VetoCronPartKind.All } part
            && part.From == field.Min
            && part.To == field.Max
             ? part.Step
             : null;
 
-    private static bool IsZeroOrAbsent ( VetoCronField? field )
-        => field is null || (field.IsSingle && field.Values.Single() == 0);
+    private static bool IsZeroOrAbsent ( VetoCronField? field ) =>
+        field is null
+            || (field.IsSingle
+                && field.Values.Single() == 0);
 
-    private static string Clock ( int hour, int minute )
-        => $"{hour:00}:{minute:00}";
+    private static string Clock ( int hour, int minute ) =>
+        $"{hour:00}:{minute:00}";
 
     private static string Ordinal ( int value )
     {

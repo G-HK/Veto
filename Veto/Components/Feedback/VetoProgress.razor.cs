@@ -1,5 +1,5 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Components;
+using System.Globalization;
 using Veto.Core;
 
 namespace Veto.Components.Feedback;
@@ -61,13 +61,13 @@ public partial class VetoProgress : VetoComponentBase
 
     private string ValueText => Percent.ToString("0", CultureInfo.InvariantCulture) + "%";
 
-    private string? FillStyle => Indeterminate
-        ? null
-        : string.Create(CultureInfo.InvariantCulture, $"width: {Percent:0.##}%");
+    private string? FillStyle => !Indeterminate
+        ? string.Create(CultureInfo.InvariantCulture, $"width: {Percent:0.##}%")
+        : null;
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(Modifier(Color.ToModifier()))
             .AddClass(Modifier("indeterminate"), Indeterminate)

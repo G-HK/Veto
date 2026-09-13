@@ -16,10 +16,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Components\veto-theme-init.js" />
-  </ItemGroup>
-
-  <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 

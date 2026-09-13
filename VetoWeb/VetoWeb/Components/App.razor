@@ -14,7 +14,12 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="VetoWeb.styles.css" />
     <link rel="stylesheet" href="_content/Veto/VetoStyles.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    @* The .ico first as the fallback, then the SVG: a browser that understands SVG takes the
+       later, sharper one and gets the dark-scheme variant with it, while everything else stops
+       at the raster. *@
+    <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <HeadOutlet @rendermode="InteractiveWebAssembly" />
 </head>
 
@@ -22,5 +27,4 @@
     <Routes @rendermode="InteractiveWebAssembly" />
     <script src="_framework/blazor.web.js"></script>
 </body>
-
 </html>

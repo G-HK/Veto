@@ -1,0 +1,260 @@
+/* VetoButtonReveal - styled entirely from the tokens in wwwroot/VetoStyles.css.
+ *
+ * The revealed buttons are separate components carrying their own scope attribute, so every
+ * rule whose subject is one of them goes through ::deep. What this stylesheet owns is the
+ * trigger and the strip the actions unfold into.
+ *
+ * Closed, the strip is scaled and faded rather than removed: it keeps its place in the layout
+ * so the reveal can be a transition, and `inert` in the markup - not display:none here - is
+ * what keeps the hidden buttons out of the tab order.
+ */
+
+.veto-button-reveal {
+    --veto-button-reveal-gap: var(--veto-space-1);
+    --veto-button-reveal-radius: var(--veto-radius-md);
+    --veto-button-reveal-duration: 180ms;
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    font-family: var(--veto-font-sans);
+}
+
+.veto-button-reveal--block {
+    flex-direction: column;
+}
+
+/* Start and Up put the actions before the trigger in the visual order while leaving the
+   trigger first in the DOM - which is what keeps Tab reaching the trigger before the actions
+   it discloses, whichever way the cluster happens to point. */
+
+.veto-button-reveal--start {
+    flex-direction: row-reverse;
+}
+
+.veto-button-reveal--up {
+    flex-direction: column-reverse;
+}
+
+/* The trigger. */
+
+.veto-button-reveal__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--veto-space-2);
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: var(--veto-button-reveal-radius);
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-family: var(--veto-font-sans);
+    line-height: var(--veto-line-height);
+    cursor: pointer;
+    z-index: 1;
+    transition: background-color var(--veto-transition), border-color var(--veto-transition),
+        color var(--veto-transition);
+}
+
+.veto-button-reveal__trigger:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-button-reveal__trigger:disabled {
+    background: var(--veto-color-surface-disabled);
+    border-color: var(--veto-color-surface-disabled);
+    color: var(--veto-color-text-disabled);
+    cursor: not-allowed;
+}
+
+.veto-button-reveal__label {
+    white-space: nowrap;
+}
+
+/* Sizes. An unlabelled trigger is square; a labelled one grows to its text. */
+
+.veto-button-reveal--sm { font-size: var(--veto-font-size-sm); }
+.veto-button-reveal--md { font-size: var(--veto-font-size-md); }
+.veto-button-reveal--lg { font-size: var(--veto-font-size-lg); }
+
+.veto-button-reveal--sm .veto-button-reveal__trigger { width: 2rem; height: 2rem; }
+.veto-button-reveal--md .veto-button-reveal__trigger { width: 2.5rem; height: 2.5rem; }
+.veto-button-reveal--lg .veto-button-reveal__trigger { width: 3rem; height: 3rem; }
+
+.veto-button-reveal--labelled .veto-button-reveal__trigger {
+    width: auto;
+}
+
+.veto-button-reveal--labelled.veto-button-reveal--sm .veto-button-reveal__trigger {
+    padding-inline: var(--veto-space-3);
+}
+
+.veto-button-reveal--labelled.veto-button-reveal--md .veto-button-reveal__trigger {
+    padding-inline: var(--veto-space-4);
+}
+
+.veto-button-reveal--labelled.veto-button-reveal--lg .veto-button-reveal__trigger {
+    padding-inline: var(--veto-space-5);
+}
+
+.veto-button-reveal--round .veto-button-reveal__trigger {
+    border-radius: var(--veto-radius-full);
+}
+
+/* Variants and colour roles, matching VetoButton so a reveal trigger sits in a toolbar
+   beside ordinary buttons without looking like a different component. */
+
+.veto-button-reveal--filled .veto-button-reveal__trigger {
+    background: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+    color: var(--veto-color-primary-contrast);
+}
+
+.veto-button-reveal--filled .veto-button-reveal__trigger:hover:not(:disabled) {
+    background: var(--veto-color-primary-hover);
+    border-color: var(--veto-color-primary-hover);
+}
+
+.veto-button-reveal--filled.veto-button-reveal--secondary .veto-button-reveal__trigger {
+    background: var(--veto-color-secondary);
+    border-color: var(--veto-color-secondary);
+}
+
+.veto-button-reveal--filled.veto-button-reveal--danger .veto-button-reveal__trigger {
+    background: var(--veto-color-danger);
+    border-color: var(--veto-color-danger);
+}
+
+.veto-button-reveal--filled.veto-button-reveal--neutral .veto-button-reveal__trigger {
+    background: var(--veto-color-surface-raised);
+    border-color: var(--veto-color-border);
+    color: var(--veto-color-text);
+}
+
+.veto-button-reveal--outlined .veto-button-reveal__trigger {
+    border-color: var(--veto-color-border);
+    color: var(--veto-color-text);
+}
+
+.veto-button-reveal--outlined .veto-button-reveal__trigger:hover:not(:disabled) {
+    background: var(--veto-color-surface-raised);
+    border-color: var(--veto-color-border-strong);
+}
+
+.veto-button-reveal--text .veto-button-reveal__trigger {
+    color: var(--veto-color-text);
+}
+
+.veto-button-reveal--text .veto-button-reveal__trigger:hover:not(:disabled) {
+    background: var(--veto-color-surface-raised);
+}
+
+.veto-button-reveal--outlined.veto-button-reveal--primary .veto-button-reveal__trigger,
+.veto-button-reveal--text.veto-button-reveal--primary .veto-button-reveal__trigger {
+    color: var(--veto-color-primary);
+}
+
+.veto-button-reveal--outlined.veto-button-reveal--danger .veto-button-reveal__trigger,
+.veto-button-reveal--text.veto-button-reveal--danger .veto-button-reveal__trigger {
+    color: var(--veto-color-danger);
+}
+
+/* The strip the actions unfold into. */
+
+.veto-button-reveal__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-button-reveal-gap);
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity var(--veto-button-reveal-duration) ease,
+        max-width var(--veto-button-reveal-duration) ease,
+        max-height var(--veto-button-reveal-duration) ease,
+        padding var(--veto-button-reveal-duration) ease;
+}
+
+.veto-button-reveal--inline .veto-button-reveal__actions {
+    flex-direction: row;
+    max-width: 0;
+}
+
+.veto-button-reveal--block .veto-button-reveal__actions {
+    flex-direction: column;
+    max-height: 0;
+}
+
+.veto-button-reveal--start .veto-button-reveal__actions,
+.veto-button-reveal--up .veto-button-reveal__actions {
+    flex-direction: row-reverse;
+}
+
+.veto-button-reveal--up .veto-button-reveal__actions {
+    flex-direction: column-reverse;
+}
+
+/* Open. max-width in character units rather than a pixel figure, so a cluster of six buttons
+   is not clipped by a ceiling written for three. */
+
+.veto-button-reveal--open.veto-button-reveal--inline .veto-button-reveal__actions {
+    max-width: 40rem;
+    opacity: 1;
+    padding-inline-start: var(--veto-button-reveal-gap);
+}
+
+.veto-button-reveal--open.veto-button-reveal--block .veto-button-reveal__actions {
+    max-height: 40rem;
+    opacity: 1;
+    padding-block-start: var(--veto-button-reveal-gap);
+}
+
+/* Each action arrives a moment after the one before it. Written out per position rather than
+   computed, because the children are arbitrary components and nothing in Blazor hands a
+   stylesheet their index. Past the eighth they all arrive together, which is far beyond the
+   number of buttons this component is for. */
+
+.veto-button-reveal--stagger .veto-button-reveal__actions > ::deep * {
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity var(--veto-button-reveal-duration) ease,
+        transform var(--veto-button-reveal-duration) ease;
+}
+
+.veto-button-reveal--stagger.veto-button-reveal--open .veto-button-reveal__actions > ::deep * {
+    opacity: 1;
+    transform: none;
+}
+
+.veto-button-reveal--stagger.veto-button-reveal--open .veto-button-reveal__actions > ::deep :nth-child(1) { transition-delay: 20ms; }
+.veto-button-reveal--stagger.veto-button-reveal--open .veto-button-reveal__actions > ::deep :nth-child(2) { transition-delay: 50ms; }
+.veto-button-reveal--stagger.veto-button-reveal--open .veto-button-reveal__actions > ::deep :nth-child(3) { transition-delay: 80ms; }
+.veto-button-reveal--stagger.veto-button-reveal--open .veto-button-reveal__actions > ::deep :nth-child(4) { transition-delay: 110ms; }
+.veto-button-reveal--stagger.veto-button-reveal--open .veto-button-reveal__actions > ::deep :nth-child(5) { transition-delay: 140ms; }
+.veto-button-reveal--stagger.veto-button-reveal--open .veto-button-reveal__actions > ::deep :nth-child(6) { transition-delay: 170ms; }
+.veto-button-reveal--stagger.veto-button-reveal--open .veto-button-reveal__actions > ::deep :nth-child(7) { transition-delay: 200ms; }
+.veto-button-reveal--stagger.veto-button-reveal--open .veto-button-reveal__actions > ::deep :nth-child(8) { transition-delay: 230ms; }
+
+/* Folding away should not be staggered in reverse - the cluster reads as closing, not as
+   unrolling backwards. */
+.veto-button-reveal--stagger:not(.veto-button-reveal--open) .veto-button-reveal__actions > ::deep * {
+    transition-delay: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-button-reveal__trigger,
+    .veto-button-reveal__actions,
+    .veto-button-reveal__actions > ::deep * {
+        transition: none;
+    }
+
+    /* The reveal itself stays - it is the component's purpose - but it arrives at once, and
+       nothing scales or slides on its way in. */
+    .veto-button-reveal--stagger .veto-button-reveal__actions > ::deep * {
+        transform: none;
+        transition-delay: 0ms;
+    }
+}

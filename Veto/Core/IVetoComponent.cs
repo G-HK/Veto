@@ -47,6 +47,98 @@ public interface IVetoComponent
     /// <summary>The ring's colour. Defaults to the same accent the glow uses.</summary>
     string? PingColor { get; set; }
 
+    /// <summary>The root element's width, as a CSS length. Null leaves it to the stylesheet.</summary>
+    /// <remarks>
+    /// <para>
+    /// This and the other <c>Root*</c> parameters are emitted as inline declarations on the
+    /// root element, before the consumer's own <c>Style</c> so that still wins. They are the
+    /// escape hatch for the one place a component has to be a particular size, sit somewhere,
+    /// or stack above something - so that case needs no wrapper element whose only job is to
+    /// hold a style attribute.
+    /// </para>
+    /// <para>
+    /// They are prefixed because they have to be. Blazor matches parameters by name, case
+    /// insensitively, across a component's whole inheritance chain: a derived
+    /// <c>[Parameter]</c> called <c>Width</c> would not override an inherited one, it would
+    /// collide with it, and the component would throw
+    /// "declares more than one parameter matching the name" on its first render. Several
+    /// components already own these names for something more specific - <c>VetoDrawer.Width</c>
+    /// is the width the drawer opens to, <c>VetoCard.Padding</c> pads the regions inside the
+    /// card - and those keep their names. The prefix also says which element is meant, which
+    /// was the ambiguity anyway.
+    /// </para>
+    /// </remarks>
+    string? RootWidth { get; set; }
+
+    /// <summary>The root element's height, as a CSS length.</summary>
+    string? RootHeight { get; set; }
+
+    /// <summary>The root element's minimum width, as a CSS length.</summary>
+    string? RootMinWidth { get; set; }
+
+    /// <summary>The root element's maximum width, as a CSS length.</summary>
+    string? RootMaxWidth { get; set; }
+
+    /// <summary>The root element's minimum height, as a CSS length.</summary>
+    string? RootMinHeight { get; set; }
+
+    /// <summary>The root element's maximum height, as a CSS length.</summary>
+    string? RootMaxHeight { get; set; }
+
+    /// <summary>Space outside the root element, as a step on the shared spacing scale.</summary>
+    VetoSpacing? RootMargin { get; set; }
+
+    /// <summary>
+    /// Space inside the root element, as a step on the shared spacing scale. Distinct from the
+    /// <c>Padding</c> that <c>VetoCard</c> and <c>VetoContainer</c> own, which pads the regions
+    /// inside those components rather than their root.
+    /// </summary>
+    VetoSpacing? RootPadding { get; set; }
+
+    /// <summary>
+    /// How the root element treats content that does not fit. Setting it to
+    /// <see cref="VetoOverflow.Visible"/> is how a component that clips by default is made to
+    /// let a popover out of it.
+    /// </summary>
+    VetoOverflow? RootOverflow { get; set; }
+
+    /// <summary>
+    /// The root element's offset from the top, as a CSS length. Setting any offset also makes
+    /// the root positioned, since an offset on a static element does nothing.
+    /// </summary>
+    string? RootTop { get; set; }
+
+    /// <summary>The root element's offset from the right, as a CSS length.</summary>
+    string? RootRight { get; set; }
+
+    /// <summary>The root element's offset from the bottom, as a CSS length.</summary>
+    string? RootBottom { get; set; }
+
+    /// <summary>The root element's offset from the left, as a CSS length.</summary>
+    string? RootLeft { get; set; }
+
+    /// <summary>
+    /// The root element's native tooltip, rendered as its <c>title</c> attribute.
+    /// </summary>
+    /// <remarks>
+    /// A native tooltip appears on hover only - no keyboard, no touch - so it is a convenience
+    /// for a hint, never the only place something important is said. A component that renders
+    /// its own <c>title</c> keeps it.
+    /// </remarks>
+    string? RootTooltip { get; set; }
+
+    /// <summary>
+    /// The root element's <c>z-index</c>, for the times a component has to be lifted above - or
+    /// pushed below - something it overlaps. Null leaves the stacking order to the stylesheet.
+    /// </summary>
+    /// <remarks>
+    /// <c>z-index</c> only means anything on a positioned element, so setting this also makes
+    /// the root <c>position: relative</c> unless the component already positions itself. A
+    /// relative element does not move, but it does become the containing block for any
+    /// absolutely positioned descendant - which is normally what was wanted anyway.
+    /// </remarks>
+    int? RootZIndex { get; set; }
+
     /// <summary>Unmatched attributes, splatted onto the root element.</summary>
     IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 }

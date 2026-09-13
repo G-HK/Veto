@@ -1,4 +1,4 @@
-// Clipboard interop for VetoCode.
+﻿// Clipboard interop for VetoCode.
 
 /**
  * Copies text to the clipboard. Returns false rather than throwing when the browser refuses -

@@ -36,6 +36,11 @@ public partial class VetoToastHost : VetoComponentBase, IDisposable
     /// <inheritdoc />
     protected override string RootClass => "veto-toast-stack";
 
+    /// <inheritdoc />
+    /// <remarks>The stack is fixed to a corner of the viewport. Letting <c>ZIndex</c> make it relative
+    /// would drop it back into the flow.</remarks>
+    protected override bool PositionsItself => true;
+
     /// <summary>Where toasts go unless one asks for somewhere else.</summary>
     [Parameter]
     public VetoToastPosition Position { get; set; } = VetoToastPosition.TopRight;
@@ -206,8 +211,8 @@ public partial class VetoToastHost : VetoComponentBase, IDisposable
     }
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(Modifier("borderless"), !Bordered);
 
@@ -235,8 +240,8 @@ public partial class VetoToastHost : VetoComponentBase, IDisposable
     private string StackClass ( VetoToastPosition position )
         => CssBuilder.Default(CssClass).AddClass(Modifier(Slug(position))).Build() ?? RootClass;
 
-    private string? ToastClass ( VetoToastMessage toast )
-        => CssBuilder.Default("veto-toast")
+    private string? ToastClass ( VetoToastMessage toast ) =>
+        CssBuilder.Default("veto-toast")
             .AddClass($"veto-toast--{Slug(toast.Type)}")
             .AddClass($"veto-toast--{Resolve(toast.Options.Size, Size).ToModifier()}")
             .AddClass("veto-toast--clickable", Resolve(toast.Options.CloseOnClick, CloseOnClick) || toast.Options.OnClick is not null)
@@ -244,11 +249,11 @@ public partial class VetoToastHost : VetoComponentBase, IDisposable
             .AddClass(toast.Options.Class)
             .Build();
 
-    private string ToastStyle ( VetoToastMessage toast )
-        => $"--veto-toast-animation-duration:{AnimationDuration}ms;{toast.Options.Style}";
+    private string ToastStyle ( VetoToastMessage toast ) =>
+        $"--veto-toast-animation-duration:{AnimationDuration}ms;{toast.Options.Style}";
 
-    private bool ShowsProgress ( VetoToastMessage toast )
-        => !toast.IsSticky && Resolve(toast.Options.ShowProgress, ShowProgress);
+    private bool ShowsProgress ( VetoToastMessage toast ) =>
+        !toast.IsSticky && Resolve(toast.Options.ShowProgress, ShowProgress);
 
     private int ResolveDuration ( VetoToastMessage toast )
     {
@@ -256,8 +261,8 @@ public partial class VetoToastHost : VetoComponentBase, IDisposable
         return duration > 0 ? duration : Duration;
     }
 
-    private static T Resolve<T> ( T? supplied, T fallback ) where T : struct
-        => supplied ?? fallback;
+    private static T Resolve<T> ( T? supplied, T fallback ) where T : struct =>
+        supplied ?? fallback;
 
     private static string Slug ( Enum value )
     {

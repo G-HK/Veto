@@ -37,13 +37,13 @@ public partial class VetoSpinner : VetoComponentBase
     public string Thickness { get; set; } = "2px";
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(() => Modifier(Color!.Value.ToModifier()), Color.HasValue);
 
     /// <inheritdoc />
-    protected override StyleBuilder StartStyle ()
-        => base.StartStyle()
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
             .AddStyle("--veto-spinner-thickness", Thickness);
 }

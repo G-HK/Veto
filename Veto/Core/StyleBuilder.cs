@@ -18,12 +18,16 @@ public struct StyleBuilder
     public static StyleBuilder Default ( string? initial ) => new(NormalizeChunk(initial));
 
     /// <summary>Appends a <c>property: value</c> declaration.</summary>
-    public StyleBuilder AddStyle ( string property, string? value )
-        => string.IsNullOrWhiteSpace(value) ? this : AddRaw($"{property}: {value}");
+    public StyleBuilder AddStyle ( string property, string? value ) =>
+        string.IsNullOrWhiteSpace(value)
+            ? this
+            : AddRaw($"{property}: {value}");
 
     /// <summary>Appends a <c>property: value</c> declaration only when <paramref name="when"/> is true.</summary>
-    public StyleBuilder AddStyle ( string property, string? value, bool when )
-        => when ? AddStyle(property, value) : this;
+    public StyleBuilder AddStyle ( string property, string? value, bool when ) =>
+        when
+          ? AddStyle(property, value)
+          : this;
 
     /// <summary>Appends a raw declaration list such as <c>"color: red; width: 2rem"</c>.</summary>
     public StyleBuilder AddRaw ( string? value )
@@ -38,16 +42,18 @@ public struct StyleBuilder
     }
 
     /// <summary>Appends the <c>style</c> entry from splatted attributes.</summary>
-    public StyleBuilder AddStyleFromAttributes ( IReadOnlyDictionary<string, object>? attributes )
-        => attributes is not null && attributes.TryGetValue("style", out var s)
-            ? AddRaw(s?.ToString())
-            : this;
+    public StyleBuilder AddStyleFromAttributes ( IReadOnlyDictionary<string, object>? attributes ) =>
+        attributes is not null
+            && attributes.TryGetValue("style", out var s)
+                ? AddRaw(s?.ToString())
+                : this;
 
     /// <summary>Returns the joined style string, or <c>null</c> when nothing was added.</summary>
     public readonly string? Build () => _value;
 
     /// <inheritdoc />
-    public override readonly string ToString () => Build() ?? string.Empty;
+    public override readonly string ToString () =>
+        Build() ?? string.Empty;
 
     private static string? NormalizeChunk ( string? value )
     {

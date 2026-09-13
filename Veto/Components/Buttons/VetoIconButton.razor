@@ -6,32 +6,16 @@
 {
     @if (Href is not null)
     {
-        <a @ref="RootElement"
-           @attributes="InnerAttributes"
-           id="@ElementId"
-           class="@CssClass"
-           style="@CssStyle"
-           data-testid="@TestId"
-           href="@Href"
-           target="@Target"
-           title="@Label"
-           aria-label="@Label">
+        <a @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+           style="@CssStyle" data-testid="@TestId" href="@Href" target="@Target" title="@Label" aria-label="@Label">
             <VetoIcon Icon="@Icon" Size="@IconSize" ChildContent="@ChildContent" />
         </a>
     }
     else
     {
-        <button @ref="RootElement"
-                @attributes="InnerAttributes"
-                id="@ElementId"
-                class="@CssClass"
-                style="@CssStyle"
-                data-testid="@TestId"
-                type="@Type"
-                disabled="@Disabled"
-                title="@Label"
-                aria-label="@Label"
-                aria-pressed="@(Pressed?.ToString().ToLowerInvariant())"
+        <button @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+                style="@CssStyle" data-testid="@TestId" type="@Type" disabled="@Disabled" 
+                title="@Label" aria-label="@Label" aria-pressed="@(Pressed?.ToString().ToLowerInvariant())"
                 @onclick="OnClick">
             <VetoIcon Icon="@Icon" Size="@IconSize" ChildContent="@ChildContent" />
         </button>

@@ -1,0 +1,16 @@
+<!--
+  The mark without its tile, drawn in currentColor - for placing inline beside text, on a
+  surface that already carries the brand colour, or anywhere a single-colour mark is wanted
+  (a stamp, an embroidery file, a favicon mask).
+
+  Same geometry as veto-icon.svg, so the two never drift apart.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Veto">
+    <title>Veto</title>
+    <path d="M6.5 7.75 12 16.75 17.5 7.75"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3.4"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+</svg>

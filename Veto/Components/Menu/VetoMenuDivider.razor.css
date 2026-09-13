@@ -1,0 +1,11 @@
+/* VetoMenuDivider - styled entirely from the tokens in wwwroot/VetoStyles.css. */
+
+.veto-menu-divider {
+    flex: 0 0 auto;
+    height: 1px;
+    /* Negative inline margin so the line runs the full width of the panel rather than stopping
+       inside its padding, which is what makes it read as a break in the menu and not as a rule
+       drawn inside one of the items. */
+    margin: var(--veto-space-2) calc(var(--veto-space-3) * -1);
+    background: var(--veto-color-border);
+}

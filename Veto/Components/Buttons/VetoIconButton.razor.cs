@@ -84,8 +84,8 @@ public partial class VetoIconButton : VetoComponentBase
     };
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(Modifier(Variant.ToModifier()))
             .AddClass(Modifier(Color.ToModifier()))

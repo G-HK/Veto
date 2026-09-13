@@ -44,6 +44,67 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     // with CaptureUnmatchedValues, and satisfies IVetoComponent as-is.
 
     /// <inheritdoc />
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootWidth { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootHeight { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootMinWidth { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootMaxWidth { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootMinHeight { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootMaxHeight { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public VetoSpacing? RootMargin { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public VetoSpacing? RootPadding { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public VetoOverflow? RootOverflow { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootTop { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootRight { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootBottom { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootLeft { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? RootTooltip { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public int? RootZIndex { get; set; }
+
+    /// <inheritdoc />
     [Parameter]
     public bool Glow { get; set; }
 
@@ -65,6 +126,16 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     /// deliberately.
     /// </summary>
     internal VetoEffects Effects => new(Glow, GlowColor, Ping, PingColor);
+
+    /// <summary>
+    /// The box-level parameters as one value. Components do not normally touch this - it is
+    /// applied for them - in the same way as <see cref="Effects"/>.
+    /// </summary>
+    internal VetoBox Box => new(
+        RootWidth, RootHeight, RootMinWidth, RootMaxWidth, RootMinHeight, RootMaxHeight,
+        RootMargin, RootPadding, RootOverflow,
+        RootTop, RootRight, RootBottom, RootLeft,
+        RootZIndex, PositionsItself);
 
     /// <summary>Text shown in the field's label. When null no label element is rendered.</summary>
     [Parameter]
@@ -121,8 +192,10 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     protected string ErrorId => $"{ElementId}-error";
 
     /// <summary>The validation messages currently attached to this field.</summary>
-    protected IEnumerable<string> ValidationMessages
-        => EditContext is null ? [] : EditContext.GetValidationMessages(FieldIdentifier);
+    protected IEnumerable<string> ValidationMessages =>
+        EditContext is not null
+            ? EditContext.GetValidationMessages(FieldIdentifier)
+            : [];
 
     /// <summary>True when the field currently has at least one validation message.</summary>
     protected bool HasErrors => ValidationMessages.Any();
@@ -133,7 +206,9 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     /// </summary>
     protected string? DescribedBy => HasErrors
         ? ErrorId
-        : string.IsNullOrWhiteSpace(HelperText) ? null : HelperId;
+        : string.IsNullOrWhiteSpace(HelperText)
+            ? null
+            : HelperId;
 
     /// <summary>
     /// The final <c>class</c> value for the root element. Named <c>RootCssClass</c> rather than
@@ -154,8 +229,8 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     /// The splatted attributes with <c>class</c> and <c>style</c> removed, so they can be applied
     /// to the inner input element without duplicating what already went onto the root.
     /// </summary>
-    protected IReadOnlyDictionary<string, object>? InnerAttributes
-        => VetoComponentCore.WithoutClassAndStyle(AdditionalAttributes);
+    protected IReadOnlyDictionary<string, object>? InnerAttributes =>
+        VetoComponentCore.WithRootAttributes(AdditionalAttributes, RootTooltip);
 
     private VetoComponentCore Core => _core ??= new VetoComponentCore(RootClass);
 
@@ -163,16 +238,16 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     protected string Modifier ( string suffix ) => Core.Modifier(suffix);
 
     /// <summary>Builds the root class list, appending the consumer's classes last.</summary>
-    protected virtual CssBuilder BuildCssClass ()
-        => VetoComponentCore.BuildCssClass(StartCssClass(), Class, AdditionalAttributes, Effects);
+    protected virtual CssBuilder BuildCssClass () =>
+        VetoComponentCore.BuildCssClass(StartCssClass(), Class, AdditionalAttributes, Effects);
 
     /// <summary>
     /// The component's own classes: root class plus the size, variant and state modifiers every
     /// Veto input shares. Override to add component-specific modifiers, calling
     /// <c>base.StartCssClass()</c> first.
     /// </summary>
-    protected virtual CssBuilder StartCssClass ()
-        => CssBuilder.Default(RootClass)
+    protected virtual CssBuilder StartCssClass () =>
+        CssBuilder.Default(RootClass)
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(Modifier(Variant.ToModifier()))
             .AddClass(Modifier("disabled"), Disabled)
@@ -180,9 +255,17 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
             .AddClass(Modifier("required"), Required)
             .AddClass(Modifier("invalid"), HasErrors);
 
+    /// <summary>
+    /// Whether the component's own stylesheet gives its root a non-static <c>position</c>.
+    /// Override to true in a component that positions itself - a fixed overlay, a sticky bar -
+    /// so <see cref="ZIndex"/> does not overwrite that with <c>relative</c> and drop it back
+    /// into the flow.
+    /// </summary>
+    protected virtual bool PositionsItself => false;
+
     /// <summary>Builds the root style list, appending the consumer's style last.</summary>
-    protected virtual StyleBuilder BuildStyle ()
-        => Core.BuildStyle(StartStyle(), Style, AdditionalAttributes, Effects);
+    protected virtual StyleBuilder BuildStyle () =>
+        Core.BuildStyle(StartStyle(), Style, AdditionalAttributes, Effects, Box);
 
     /// <summary>
     /// The component's own inline declarations, before the consumer's are appended. Override

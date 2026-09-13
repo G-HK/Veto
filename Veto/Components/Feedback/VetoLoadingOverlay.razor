@@ -3,13 +3,8 @@
 
 @if (Visible)
 {
-    <div @ref="RootElement"
-         @attributes="InnerAttributes"
-         id="@ElementId"
-         class="@CssClass"
-         style="@CssStyle"
-         data-testid="@TestId"
-         aria-busy="@(Loading ? "true" : "false")">
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+         style="@CssStyle" data-testid="@TestId" aria-busy="@(Loading ? "true" : "false")"> 
 
         <div class="veto-loading-overlay__content" inert="@Loading">
             @ChildContent

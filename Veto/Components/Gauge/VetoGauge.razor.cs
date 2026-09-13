@@ -1,8 +1,7 @@
+using Microsoft.AspNetCore.Components;
 using System.Globalization;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Microsoft.AspNetCore.Components;
 using Veto.Core;
 
 namespace Veto.Components.Gauge;
@@ -301,11 +300,11 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
 
     private IReadOnlyList<VetoGaugeBand> BandList => Bands ?? [];
 
-    private VetoGaugeBand? CurrentBand
-        => BandList.FirstOrDefault(b => Reading >= Math.Min(b.From, b.To) && Reading <= Math.Max(b.From, b.To));
+    private VetoGaugeBand? CurrentBand =>
+        BandList.FirstOrDefault(b => Reading >= Math.Min(b.From, b.To) && Reading <= Math.Max(b.From, b.To));
 
-    private string ReadingColor
-        => FollowBands && CurrentBand is { } band ? band.Color : $"var(--veto-gauge-color)";
+    private string ReadingColor =>
+        FollowBands && CurrentBand is { } band ? band.Color : $"var(--veto-gauge-color)";
 
     /// <summary>True when the reading has climbed into the range that flickers.</summary>
     private bool IsFlickering => FlickerFrom is { } from && Reading >= from;
@@ -325,7 +324,10 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     /// pointer never crosses the scale it is pointing at.
     /// </summary>
     private double NeedleReach => NeedleLength
-        ?? (ShowTicks && ShowTickLabels ? TickStart - TickLabelOffset - TickLabelSize / 2 : TickStart - 4);
+        ?? (ShowTicks
+        && ShowTickLabels
+            ? TickStart - TickLabelOffset - TickLabelSize / 2
+            : TickStart - 4);
 
     /// <summary>How far along the dial the reading sits, from 0 at Min to 1 at Max.</summary>
     private double Fraction => (Reading - Min) / Span;
@@ -342,8 +344,8 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     }
 
     /// <inheritdoc />
-    protected override StyleBuilder StartStyle ()
-        => base.StartStyle()
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
             .AddStyle("--veto-gauge-value-size", ValueFontSize, ValueFontSize is not null)
             .AddStyle("--veto-gauge-label-size", LabelFontSize, LabelFontSize is not null)
             // Linear rather than eased: a continuously driven dial is interpolating between
@@ -351,8 +353,8 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
             .AddStyle("--veto-gauge-transition", $"{TransitionDuration}ms linear", TransitionDuration is not null);
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(Modifier(Color.ToModifier()))
             .AddClass(Modifier("needle"), Needle)
@@ -468,8 +470,8 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     }
 
     /// <summary>The angle, in degrees clockwise from the top, that a value sits at on the dial.</summary>
-    private double AngleFor ( double value )
-        => StartAngle + (Math.Clamp(value, Min, Max) - Min) / Span * Sweep;
+    private double AngleFor ( double value ) =>
+        StartAngle + (Math.Clamp(value, Min, Max) - Min) / Span * Sweep;
 
     /// <summary>A point on the dial, in the SVG's 200-unit box centred on (100, 100).</summary>
     private static (double X, double Y) Point ( double angleDegrees, double radius )
@@ -490,8 +492,8 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
 
     private string TrackPath => Arc(StartAngle, EndAngle, Radius);
 
-    private string BandPath ( VetoGaugeBand band )
-        => Arc(AngleFor(Math.Min(band.From, band.To)), AngleFor(Math.Max(band.From, band.To)), Radius);
+    private string BandPath ( VetoGaugeBand band ) =>
+        Arc(AngleFor(Math.Min(band.From, band.To)), AngleFor(Math.Max(band.From, band.To)), Radius);
 
     private record Tick ( double Value, double X1, double Y1, double X2, double Y2, double LabelX, double LabelY, bool Major );
 
@@ -537,13 +539,13 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     /// the <c>&lt;text&gt;</c> tag name for its own block syntax and will not emit it verbatim.
     /// The only interpolated value is a number the component formatted itself.
     /// </summary>
-    private MarkupString TickLabel ( Tick tick )
-        => new($"<text class=\"veto-gauge__tick-label\" x=\"{Css(tick.LabelX)}\" y=\"{Css(tick.LabelY)}\" " +
+    private MarkupString TickLabel ( Tick tick ) =>
+        new($"<text class=\"veto-gauge__tick-label\" x=\"{Css(tick.LabelX)}\" y=\"{Css(tick.LabelY)}\" " +
                $"text-anchor=\"middle\" dominant-baseline=\"middle\" font-size=\"{Css(TickLabelSize)}\">" +
                $"{FormatNumber(tick.Value)}</text>");
 
-    private string FormatNumber ( double value )
-        => Format is null ? value.ToString("0.##", Inv) : value.ToString(Format, CultureInfo.CurrentCulture);
+    private string FormatNumber ( double value ) =>
+        Format is null ? value.ToString("0.##", Inv) : value.ToString(Format, CultureInfo.CurrentCulture);
 
     /// <summary>
     /// A number for an SVG attribute or a CSS declaration. Always invariant: a culture that

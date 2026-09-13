@@ -1,0 +1,18 @@
+<!--
+  Veto's mark: the initial, drawn in the same language as the 128 icons the library ships -
+  a 24x24 grid, one stroke, round caps and joins. Not a font glyph, so it is identical at
+  every size and does not wait on Space Grotesk to load.
+
+  The colours are the documentation site's own palette (VetoDocsTheme), not the library's
+  default indigo.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Veto">
+    <title>Veto</title>
+    <rect width="24" height="24" rx="6" fill="#C2121F" />
+    <path d="M6.5 7.75 12 16.75 17.5 7.75"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="3.4"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+</svg>

@@ -1,5 +1,5 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Components;
+using System.Globalization;
 using Veto.Core;
 
 namespace Veto.Components.Cron;
@@ -58,7 +58,6 @@ public partial class VetoCron : VetoComponentBase
     private int _dayOfMonth = 1;
     private int _month = 1;
     private readonly SortedSet<int> _weekdays = [1, 2, 3, 4, 5];
-
     private VetoCronExpression? _parsed;
     private string? _error;
     private string? _lastParsed;
@@ -185,19 +184,19 @@ public partial class VetoCron : VetoComponentBase
 
     private string FieldLegend => IncludeSeconds ? "sec  min  hour  day  month  weekday" : "min  hour  day  month  weekday";
 
-    private string Description
-        => _parsed is null
+    private string Description =>
+        _parsed is null
             ? _error ?? "Not a valid cron expression."
             : Describer?.Invoke(_parsed.Text) ?? VetoCronDescriber.Describe(_parsed);
 
     /// <summary>The thing about the expression worth warning about, or null when there is nothing.</summary>
-    private string? Warning
-        => _parsed is { HasAmbiguousDayRule: true }
+    private string? Warning =>
+        _parsed is { HasAmbiguousDayRule: true }
             ? "Both day fields are set, so this fires when either matches - not only when both do."
             : null;
 
-    private IReadOnlyList<DateTime> NextRuns
-        => _parsed is null ? [] : VetoCronSchedule.Next(_parsed, Now ?? DateTime.Now, NextRunCount);
+    private IReadOnlyList<DateTime> NextRuns =>
+        _parsed is null ? [] : VetoCronSchedule.Next(_parsed, Now ?? DateTime.Now, NextRunCount);
 
     /// <inheritdoc />
     protected override void OnInitialized ()
@@ -218,8 +217,8 @@ public partial class VetoCron : VetoComponentBase
     }
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(Modifier("disabled"), Disabled)
             .AddClass(Modifier("readonly"), ReadOnly)
@@ -301,8 +300,8 @@ public partial class VetoCron : VetoComponentBase
     }
 
     /// <summary>The step a field was written with, when it is a plain <c>*/n</c>.</summary>
-    private static int? StepOf ( VetoCronField field )
-        => field.Parts.Count == 1 && field.Parts[0] is { Kind: VetoCronPartKind.Step } part && part.Step > 1
+    private static int? StepOf ( VetoCronField field ) =>
+        field.Parts.Count == 1 && field.Parts[0] is { Kind: VetoCronPartKind.Step } part && part.Step > 1
             ? part.Step
             : null;
 

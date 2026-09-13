@@ -84,13 +84,7 @@ public sealed class VetoCronField
     /// </param>
     /// <param name="field">The parsed field.</param>
     /// <param name="error">Why parsing failed, when it did.</param>
-    public static bool TryParse (
-        string? text,
-        int min,
-        int max,
-        IReadOnlyList<string>? names,
-        out VetoCronField? field,
-        out string? error )
+    public static bool TryParse ( string? text, int min, int max, IReadOnlyList<string>? names, out VetoCronField? field, out string? error )
     {
         field = null;
         error = null;
@@ -103,8 +97,8 @@ public sealed class VetoCronField
 
         text = text.Trim();
 
-        var parts = new List<VetoCronPart>();
-        var values = new HashSet<int>();
+        List<VetoCronPart> parts = [];
+        HashSet<int> values = [];
 
         foreach (var piece in text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
@@ -127,17 +121,11 @@ public sealed class VetoCronField
             return false;
         }
 
-        field = new VetoCronField(text, min, max, parts, values);
+        field = new(text, min, max, parts, values);
         return true;
     }
 
-    private static bool TryParsePiece (
-        string piece,
-        int min,
-        int max,
-        IReadOnlyList<string>? names,
-        out VetoCronPart? part,
-        out string? error )
+    private static bool TryParsePiece ( string piece, int min, int max, IReadOnlyList<string>? names, out VetoCronPart? part, out string? error )
     {
         part = null;
         error = null;
@@ -161,7 +149,7 @@ public sealed class VetoCronField
 
         if (body is "*")
         {
-            part = new VetoCronPart(step == 1 ? VetoCronPartKind.All : VetoCronPartKind.Step, min, max, step);
+            part = new(step == 1 ? VetoCronPartKind.All : VetoCronPartKind.Step, min, max, step);
             return true;
         }
 
@@ -181,7 +169,7 @@ public sealed class VetoCronField
                 return false;
             }
 
-            part = new VetoCronPart(step == 1 ? VetoCronPartKind.Range : VetoCronPartKind.Step, from, to, step);
+            part = new(step == 1 ? VetoCronPartKind.Range : VetoCronPartKind.Step, from, to, step);
             return true;
         }
 
@@ -193,19 +181,13 @@ public sealed class VetoCronField
         // A bare value with a step means "from here to the end of the field, every n" - which
         // is what `5/15` means to cron, however rarely anyone writes it.
         part = step == 1
-            ? new VetoCronPart(VetoCronPartKind.Single, single, single, 1)
-            : new VetoCronPart(VetoCronPartKind.Step, single, max, step);
+            ? new(VetoCronPartKind.Single, single, single, 1)
+            : new(VetoCronPartKind.Step, single, max, step);
 
         return true;
     }
 
-    private static bool TryValue (
-        string text,
-        int min,
-        int max,
-        IReadOnlyList<string>? names,
-        out int value,
-        out string? error )
+    private static bool TryValue ( string text, int min, int max, IReadOnlyList<string>? names, out int value, out string? error )
     {
         error = null;
         text = text.Trim();

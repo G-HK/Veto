@@ -1,9 +1,10 @@
-using System.Globalization;
-using System.Text;
-using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using System.Globalization;
+using System.Text;
+using System.Text.Json;
+using Veto.Components.Menu;
 using Veto.Core;
 
 namespace Veto.Components.Gantt;
@@ -151,9 +152,40 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public bool ShowNavigation { get; set; } = true;
 
-    /// <summary>Whether the toolbar includes the CSV and JSON buttons.</summary>
+    /// <summary>Whether the toolbar includes the export menu.</summary>
     [Parameter]
     public bool Exportable { get; set; } = true;
+
+    /// <summary>
+    /// What opens the export menu. Hover by default: export is the toolbar's least-used
+    /// control, so it costs one button of room and shows its formats when the reader goes
+    /// looking. A click opens it as well, and so does the keyboard.
+    /// </summary>
+    [Parameter]
+    public VetoMenuTrigger ExportOpenOn { get; set; } = VetoMenuTrigger.Hover;
+
+    /// <summary>
+    /// How much of each export format is drawn: the icon and its name, the icon alone, or the
+    /// name alone. Icon-only suits a crowded toolbar - the names stay as the items' accessible
+    /// names and tooltips either way.
+    /// </summary>
+    [Parameter]
+    public VetoMenuAppearance ExportAppearance { get; set; } = VetoMenuAppearance.IconAndText;
+
+    /// <summary>
+    /// Whether the export trigger shows the word "Export" beside its icon. On by default; off
+    /// leaves a single square button, which is what a narrow toolbar wants.
+    /// </summary>
+    [Parameter]
+    public bool ShowExportLabel { get; set; } = true;
+
+    /// <summary>
+    /// Which corner of the trigger the export menu hangs from. The trailing edge by default,
+    /// because the export control sits at the end of the toolbar and a menu aligned to its
+    /// leading edge would hang off the chart.
+    /// </summary>
+    [Parameter]
+    public VetoMenuPlacement ExportPlacement { get; set; } = VetoMenuPlacement.BottomEnd;
 
     /// <summary>Whether a line marks today on the timeline.</summary>
     [Parameter]
@@ -292,13 +324,13 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     }
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Scale.ToModifier()));
 
     /// <inheritdoc />
-    protected override StyleBuilder StartStyle ()
-        => base.StartStyle()
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
             .AddStyle("--veto-gantt-sidebar", SidebarWidth)
             .AddStyle("--veto-gantt-row-height", $"{RowHeight.ToString("0.##", CultureInfo.InvariantCulture)}px")
             .AddStyle("--veto-gantt-bar-color", BarColor);
@@ -311,8 +343,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// Varies the placeholder name widths so the skeleton reads as a list of tasks rather than
     /// a stack of identical bars.
     /// </summary>
-    private static string SkeletonNameWidth ( int row )
-        => (row % 3) switch { 0 => "62%", 1 => "78%", _ => "48%" };
+    private static string SkeletonNameWidth ( int row ) =>
+        (row % 3) switch { 0 => "62%", 1 => "78%", _ => "48%" };
 
     /// <summary>Varies the placeholder bar offsets and widths, for the same reason.</summary>
     private static string SkeletonBarStyle ( int row )
@@ -357,7 +389,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// </remarks>
     private List<Link> BuildLinks ()
     {
-        var index = new Dictionary<string, int>();
+        Dictionary<string, int> index = new();
 
         for (var i = 0; i < Rows.Count; i++)
         {
@@ -626,7 +658,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             ? item.Start.ToString("d MMM")
             : $"{item.Start:d MMM} – {item.End:d MMM}";
 
-    private string Tooltip ( VetoGanttItem item )
+    private string TooltipFor ( VetoGanttItem item )
     {
         var text = $"{item.Name} · {FormatRange(item)}";
 
@@ -727,8 +759,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     }
 
     /// <summary>Renders the rows as JSON.</summary>
-    internal static string ToJson ( IReadOnlyList<VetoGanttItem> items )
-        => JsonSerializer.Serialize(
+    internal static string ToJson ( IReadOnlyList<VetoGanttItem> items ) =>
+        JsonSerializer.Serialize(
             items.Select(i => new
             {
                 i.Id,
@@ -823,8 +855,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// app supplied. Applied at render time rather than by rewriting the list, which the chart
     /// does not own.
     /// </summary>
-    private VetoGanttItem Resolve ( VetoGanttItem item )
-        => _overrides.TryGetValue(item.Id, out var dates)
+    private VetoGanttItem Resolve ( VetoGanttItem item ) =>
+        _overrides.TryGetValue(item.Id, out var dates)
             ? item with { Start = dates.Start, End = dates.End }
             : item;
 

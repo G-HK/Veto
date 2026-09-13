@@ -8,17 +8,29 @@
     color: var(--veto-color-text);
 }
 
+/* The brand tile. The radius is a quarter of the tile rather than a token step, which is what
+   keeps it the same shape as the favicon - that one is drawn on a 24-unit grid with a radius
+   of 6, and a token would drift away from it the next time the scale moved. */
 .app-bar__mark {
     display: grid;
     place-items: center;
     width: 1.75rem;
     height: 1.75rem;
-    font-size: 1rem;
-    font-weight: 700;
     line-height: 1;
     color: var(--veto-color-primary-contrast);
     background-color: var(--veto-color-primary);
-    border-radius: var(--veto-radius-sm);
+    border-radius: 25%;
+}
+
+/* The mark is drawn to fill its 24-unit grid, so it wants to be the size of the tile rather
+   than the size of the text beside it.
+
+   Through ::deep because the subject is VetoIcon's own root element, which carries that
+   component's scope attribute and not this one's - an unqualified selector here would match
+   nothing, silently. */
+.app-bar__mark ::deep .app-bar__mark-glyph {
+    width: 1.75rem;
+    height: 1.75rem;
 }
 
 .app-bar__name {

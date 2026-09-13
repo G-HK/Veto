@@ -43,8 +43,8 @@ public partial class VetoLoadingOverlay : VetoComponentBase
     public bool Dim { get; set; } = true;
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier("loading"), Loading)
             .AddClass(Modifier("dim"), Dim);
 }

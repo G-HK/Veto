@@ -26,8 +26,8 @@ internal readonly partial record struct VetoEffects ( bool Glow, string? GlowCol
     public bool IsEmpty => !Glow && !Ping;
 
     /// <summary>Adds the effect classes, before the consumer's own so theirs still win.</summary>
-    public CssBuilder Apply ( CssBuilder builder )
-        => builder
+    public CssBuilder Apply ( CssBuilder builder ) =>
+        builder
             .AddClass("veto-glow", Glow)
             .AddClass("veto-ping", Ping);
 
@@ -35,8 +35,8 @@ internal readonly partial record struct VetoEffects ( bool Glow, string? GlowCol
     /// Adds the colour overrides as custom properties. Nothing is added when a colour was not
     /// given, so the stylesheet's fallback to the theme accent stays in force.
     /// </summary>
-    public StyleBuilder Apply ( StyleBuilder builder )
-        => builder
+    public StyleBuilder Apply ( StyleBuilder builder ) =>
+        builder
             .AddStyle("--veto-glow-color", SafeColor(GlowColor), Glow)
             .AddStyle("--veto-ping-color", SafeColor(PingColor), Ping);
 
@@ -47,9 +47,12 @@ internal readonly partial record struct VetoEffects ( bool Glow, string? GlowCol
     /// concatenated into a <c>style</c> attribute, and a colour has no reason to contain a
     /// semicolon or an angle bracket.
     /// </summary>
-    internal static string? SafeColor ( string? value )
-        => !string.IsNullOrWhiteSpace(value) && SafeValue().IsMatch(value) ? value : null;
+    internal static string? SafeColor ( string? value ) =>
+        !string.IsNullOrWhiteSpace(value)
+            && SafeValue().IsMatch(value)
+                ? value
+                : null;
 
-    [GeneratedRegex( @"^[^<>{};@\\""]{1,120}$" )]
+    [GeneratedRegex(@"^[^<>{};@\\""]{1,120}$")]
     private static partial Regex SafeValue ();
 }

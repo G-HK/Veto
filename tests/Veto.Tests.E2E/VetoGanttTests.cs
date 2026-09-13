@@ -5,21 +5,21 @@ using Xunit;
 namespace Veto.Tests.E2E;
 
 /// <summary>End-to-end specs for VetoGantt, driven against /docs/components/gantt.</summary>
-public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
+public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
 {
     private const string Route = "docs/components/gantt";
 
-    private Task<double> LeftAsync ( string testId )
+    private Task<double> LeftAsync(string testId)
         => Component(testId).EvaluateAsync<double>("el => el.getBoundingClientRect().left");
 
-    private Task<double> WidthAsync ( string testId )
+    private Task<double> WidthAsync(string testId)
         => Component(testId).EvaluateAsync<double>("el => el.getBoundingClientRect().width");
 
-    private Task<double> IndentAsync ( string testId )
+    private Task<double> IndentAsync(string testId)
         => Component(testId).EvaluateAsync<double>("el => parseFloat(getComputedStyle(el).paddingInlineStart)");
 
     [Fact]
-    public async Task Rows_are_nested_under_their_project ()
+    public async Task Rows_are_nested_under_their_project()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -32,7 +32,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Collapsing_a_project_hides_its_tasks ()
+    public async Task Collapsing_a_project_hides_its_tasks()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -49,7 +49,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_later_task_starts_further_along_the_timeline ()
+    public async Task A_later_task_starts_further_along_the_timeline()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -62,7 +62,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_longer_task_draws_a_wider_bar ()
+    public async Task A_longer_task_draws_a_wider_bar()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -75,7 +75,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Changing_the_scale_redraws_the_timeline ()
+    public async Task Changing_the_scale_redraws_the_timeline()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -91,7 +91,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_text_filter_narrows_the_rows_but_keeps_their_project ()
+    public async Task The_text_filter_narrows_the_rows_but_keeps_their_project()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -106,7 +106,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_category_can_be_filtered_out ()
+    public async Task A_category_can_be_filtered_out()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -120,7 +120,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Filtering_everything_out_says_so ()
+    public async Task Filtering_everything_out_says_so()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -130,7 +130,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Selecting_a_bar_reports_it ()
+    public async Task Selecting_a_bar_reports_it()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -141,7 +141,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Bars_are_reachable_by_keyboard ()
+    public async Task Bars_are_reachable_by_keyboard()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -154,7 +154,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_today_marker_sits_after_a_task_that_started_earlier ()
+    public async Task The_today_marker_sits_after_a_task_that_started_earlier()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -169,7 +169,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Today_scrolls_the_timeline_back_to_now ()
+    public async Task Today_scrolls_the_timeline_back_to_now()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -186,7 +186,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Earlier_and_later_move_the_timeline ()
+    public async Task Earlier_and_later_move_the_timeline()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -208,23 +208,26 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Export_reports_the_rows_that_are_currently_filtered ()
+    public async Task Export_reports_the_rows_that_are_currently_filtered()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
 
+        // The formats live behind the toolbar's export menu, which opens on hover.
+        await Component("chart-export").HoverAsync();
         await Component("chart-export-csv").ClickAsync();
         await Expect(Page.GetByTestId("export-note")).ToContainTextAsync("as Csv");
 
         // Narrowing the filter narrows the export: what you see is what you get.
         await Component("chart-search").Locator("input").FillAsync("spike");
+        await Component("chart-export").HoverAsync();
         await Component("chart-export-json").ClickAsync();
 
         await Expect(Page.GetByTestId("export-note")).ToContainTextAsync("Exported 2 rows as Json");
     }
 
     [Fact]
-    public async Task A_milestone_renders_as_a_point_rather_than_a_bar ()
+    public async Task A_milestone_renders_as_a_point_rather_than_a_bar()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -236,7 +239,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_chained_task_is_linked_to_the_one_it_waits_for ()
+    public async Task A_chained_task_is_linked_to_the_one_it_waits_for()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -246,7 +249,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task An_arrow_runs_from_the_end_of_one_bar_to_the_start_of_the_next ()
+    public async Task An_arrow_runs_from_the_end_of_one_bar_to_the_start_of_the_next()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -268,7 +271,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_broken_dependency_is_still_drawn ()
+    public async Task A_broken_dependency_is_still_drawn()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -282,7 +285,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Selecting_a_row_picks_out_the_arrows_that_touch_it ()
+    public async Task Selecting_a_row_picks_out_the_arrows_that_touch_it()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -300,7 +303,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task An_arrow_is_dropped_when_its_predecessor_is_collapsed_away ()
+    public async Task An_arrow_is_dropped_when_its_predecessor_is_collapsed_away()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -315,7 +318,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Arrows_never_swallow_a_click_meant_for_a_bar ()
+    public async Task Arrows_never_swallow_a_click_meant_for_a_bar()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -328,7 +331,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_category_chip_is_tinted_with_that_categorys_colour ()
+    public async Task A_category_chip_is_tinted_with_that_categorys_colour()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -349,7 +352,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Turning_a_category_off_hollows_out_its_swatch ()
+    public async Task Turning_a_category_off_hollows_out_its_swatch()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -367,7 +370,7 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_row_can_carry_its_own_colour ()
+    public async Task A_row_can_carry_its_own_colour()
     {
         await Page.SetViewportSizeAsync(1500, 1000);
         await GotoComponentAsync(Route);
@@ -376,5 +379,62 @@ public class VetoGanttTests ( BlazorAppFixture app ) : VetoPageTest(app)
         var second = await Component("colors-bar-c").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
 
         Assert.NotEqual(first, second);
+    }
+
+    [Fact]
+    public async Task The_chart_wide_actions_are_held_to_the_trailing_edge()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // Time navigation, export and reset act on the chart as a whole; the search, the
+        // category chips and the scale picker change what it shows. The chart-wide group is
+        // held to the trailing edge, away from the others.
+        //
+        // Measured against the toolbar's own content edge rather than against the scale
+        // picker: the toolbar wraps when it runs out of room, and once it has wrapped a
+        // left-versus-right comparison between two groups on different rows says nothing.
+        var gap = await Component("chart-actions").EvaluateAsync<double>(
+            """
+            el => {
+                const toolbar = el.closest('.veto-gantt__toolbar');
+                const padding = parseFloat(getComputedStyle(toolbar).paddingRight);
+
+                return toolbar.getBoundingClientRect().right - padding - el.getBoundingClientRect().right;
+            }
+            """);
+
+        Assert.True(Math.Abs(gap) < 2, $"The actions should end at the toolbar's trailing edge, off by {gap}px.");
+    }
+
+    [Fact]
+    public async Task Today_sits_between_the_two_nudge_buttons_as_one_control()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        var earlier = await Component("chart-previous").EvaluateAsync<double>("el => el.getBoundingClientRect().left");
+        var today = await Component("chart-today").EvaluateAsync<double>("el => el.getBoundingClientRect().left");
+        var later = await Component("chart-next").EvaluateAsync<double>("el => el.getBoundingClientRect().left");
+
+        Assert.True(earlier < today && today < later,
+            $"Earlier, Today and Later should read left to right: {earlier}px, {today}px, {later}px.");
+
+        // The three share one border rather than carrying three of their own, which is what
+        // makes them read as a single control.
+        await Expect(Component("chart-actions").Locator(".veto-gantt__nav"))
+            .ToHaveAttributeAsync("role", "group");
+    }
+
+    [Fact]
+    public async Task The_export_menu_is_the_last_thing_in_the_toolbar()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        var today = await Component("chart-today").EvaluateAsync<double>("el => el.getBoundingClientRect().right");
+        var export = await Component("chart-export").EvaluateAsync<double>("el => el.getBoundingClientRect().left");
+
+        Assert.True(export >= today, $"Export should sit after the time navigation: {today}px vs {export}px.");
     }
 }

@@ -1,5 +1,5 @@
-using System.Text;
 using Microsoft.AspNetCore.Components;
+using System.Text;
 using Veto.Core;
 
 namespace Veto.Components.BlinkText;
@@ -145,11 +145,11 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
 
     private string? Sub ( string suffix ) => TestId is null ? null : $"{TestId}-{suffix}";
 
-    private int DelayPerStep => CharactersPerSecond <= 0 ? 0 : (int) Math.Max(1, 1000 / CharactersPerSecond);
+    private int DelayPerStep => CharactersPerSecond <= 0 ? 0 : (int)Math.Max(1, 1000 / CharactersPerSecond);
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier("preserve-space"), PreserveSpace && Text is not null)
             .AddClass(Modifier("complete"), IsComplete);
 

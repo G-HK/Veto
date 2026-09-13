@@ -3,12 +3,8 @@
 
 @if (Visible)
 {
-    <div @ref="RootElement"
-         @attributes="InnerAttributes"
-         id="@ElementId"
-         class="@CssClass"
-         style="@CssStyle"
-         data-testid="@TestId">
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+         style="@CssStyle" data-testid="@TestId"> 
 
         @if (Label is not null || ShowValue)
         {
@@ -21,12 +17,8 @@
             </div>
         }
 
-        <div class="veto-progress__track"
-             role="progressbar"
-             aria-label="@(Label ?? AccessibleLabel)"
-             aria-valuemin="0"
-             aria-valuemax="100"
-             aria-valuenow="@(Indeterminate ? null : Percent.ToString("0"))"
+        <div class="veto-progress__track" role="progressbar" aria-label="@(Label ?? AccessibleLabel)"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="@(Indeterminate ? null : Percent.ToString("0"))"
              aria-valuetext="@(Indeterminate ? "Working" : null)">
             <span class="veto-progress__fill" style="@FillStyle"></span>
         </div>

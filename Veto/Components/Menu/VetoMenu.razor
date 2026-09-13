@@ -1,0 +1,70 @@
+@namespace Veto.Components.Menu
+@inherits Veto.Core.VetoComponentBase
+@implements IDisposable
+@using Veto.Components.Icon
+
+@if (Visible)
+{
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+         style="@CssStyle" data-testid="@TestId" data-open="@(Open ? "true" : "false")"
+         data-placement="@Placement.ToModifier()" @onkeydown="OnKeyDownAsync"
+         @onpointerenter="OnPointerEnterAsync" @onpointerleave="OnPointerLeaveAsync">
+
+        @* A click menu closes when the pointer goes somewhere else, which needs to know about
+           clicks outside the component. The scrim catches them without a document listener, so
+           the menu stays free of JavaScript. A hover menu has pointerleave instead.
+
+           It lives inside the root rather than beside it so that the scrim, the trigger and the
+           panel are all in one stacking context. As a sibling it broke the moment anything gave
+           the root a z-index of its own - RootZIndex does exactly that - because the root then
+           became a stacking context, the panel's z-index was confined to it, and the scrim
+           outside painted over the whole menu and swallowed every click. *@
+        @if (Open && OpenOn == VetoMenuTrigger.Click)
+        {
+            <div class="veto-menu__scrim" aria-hidden="true"
+                 data-testid="@(TestId is null ? null : $"{TestId}-scrim")"
+                 @onclick="CloseAsync"></div>
+        }
+
+        <button @ref="_triggerElement" type="button" class="veto-menu__trigger" id="@TriggerId"
+                data-testid="@(TestId is null ? null : $"{TestId}-trigger")"
+                disabled="@Disabled" title="@TooltipText" aria-label="@(Appearance == VetoMenuAppearance.IconOnly ? Label : null)"
+                aria-haspopup="menu" aria-expanded="@(Open ? "true" : "false")" aria-controls="@PanelId"
+                @onclick="OnTriggerClickAsync">
+            @if (TriggerContent is not null)
+            {
+                @TriggerContent
+            }
+            else
+            {
+                @if (Icon is not null)
+                {
+                    <VetoIcon Icon="@Icon" Size="VetoIconSize.Inherit" Class="veto-menu__trigger-icon" />
+                }
+
+                @if (Appearance != VetoMenuAppearance.IconOnly && Label is not null)
+                {
+                    <span class="veto-menu__trigger-label">@Label</span>
+                }
+
+                @if (ShowChevron)
+                {
+                    <span class="veto-menu__chevron" aria-hidden="true">
+                        <VetoIcon Icon="@VetoIcons.ChevronDown" Size="VetoIconSize.Inherit" />
+                    </span>
+                }
+            }
+        </button>
+
+        @if (Open)
+        {
+            <div class="veto-menu__panel" id="@PanelId" role="menu"
+                 data-testid="@(TestId is null ? null : $"{TestId}-panel")"
+                 aria-labelledby="@TriggerId" style="@PanelStyle">
+                <CascadingValue Value="Context" IsFixed="true">
+                    @ChildContent
+                </CascadingValue>
+            </div>
+        }
+    </div>
+}

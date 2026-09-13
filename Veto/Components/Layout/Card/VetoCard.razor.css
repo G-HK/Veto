@@ -12,7 +12,9 @@
     background-color: var(--veto-color-surface);
     border-radius: var(--veto-radius-lg);
     /* So a media image at the top of the card is clipped to the card's own corners rather
-       than poking square edges out of a rounded box. Nothing has to ask for it. */
+       than poking square edges out of a rounded box. Nothing has to ask for it - and a card
+       that holds a menu or another popover asks for the way out with the shared
+       RootOverflow="VetoOverflow.Visible" parameter. */
     overflow: hidden;
 }
 

@@ -88,8 +88,8 @@ public partial class VetoButtonGroup : VetoComponentBase
     private string Role => IsToolbar ? "toolbar" : "group";
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Size.ToModifier()))
             .AddClass(Modifier(Orientation.ToModifier()))
             .AddClass(Modifier("attached"), Attached)

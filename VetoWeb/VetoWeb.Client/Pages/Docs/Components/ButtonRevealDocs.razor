@@ -1,0 +1,229 @@
+@page "/docs/components/button-reveal"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Button reveal — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Button reveal"
+          Lead="One button that unfolds into several when the pointer reaches it. The compact form of a toolbar that would otherwise take a whole row - and the revealed buttons are ordinary icon buttons, so they behave exactly as they would anywhere else.">
+
+    <DemoBlock TestId="demo-basic"
+               ClipStage="false"
+               Title="Hover to reveal"
+               Description="Closed, the cluster is one button. Bring the pointer to it and the actions unroll beside it, each arriving a moment after the one before. Keyboard focus reveals them too - tab to the trigger and the cluster opens, then Tab walks into the actions - so hover is never the only way in."
+               Code="@BasicCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Center" Wrap="true">
+            <VetoButtonReveal TestId="basic" Icon="@VetoIcons.Share" Label="Share" Round="true">
+                <VetoIconButton Icon="@VetoIcons.GitHub" Label="GitHub" TestId="basic-github"
+                                OnClick='() => Record("GitHub")' />
+                <VetoIconButton Icon="@VetoIcons.X" Label="X" TestId="basic-x"
+                                OnClick='() => Record("X")' />
+                <VetoIconButton Icon="@VetoIcons.LinkedIn" Label="LinkedIn" TestId="basic-linkedin"
+                                OnClick='() => Record("LinkedIn")' />
+                <VetoIconButton Icon="@VetoIcons.Mail" Label="Email" TestId="basic-mail"
+                                OnClick='() => Record("Email")' />
+            </VetoButtonReveal>
+
+            <span class="demo-value">Shared to: <strong data-testid="shared">@(_shared ?? "nothing yet")</strong></span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-action"
+               ClipStage="false"
+               Title="A trigger that does something itself"
+               Description="Without OnClick the trigger is a disclosure and a click toggles the cluster - which is what makes it usable on a touch screen, where there is no hover. Give it OnClick and it becomes a real action instead: the click runs the default - Save - and the cluster stays the pointer's shortcut to the variants."
+               Code="@ActionCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Center" Wrap="true">
+            <VetoButtonReveal TestId="action" Icon="@VetoIcons.Save" Label="Save" ShowLabel="true"
+                              OnClick='() => Record("Save")'>
+                <VetoIconButton Icon="@VetoIcons.Copy" Label="Save a copy" TestId="action-copy"
+                                OnClick='() => Record("Save a copy")' />
+                <VetoIconButton Icon="@VetoIcons.Download" Label="Save and download" TestId="action-download"
+                                OnClick='() => Record("Save and download")' />
+            </VetoButtonReveal>
+
+            <span class="demo-value">Last action: <strong data-testid="acted">@(_shared ?? "none")</strong></span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-directions"
+               ClipStage="false"
+               Title="Directions"
+               Description="The cluster unfolds whichever way suits where the trigger sits - out to either side, up, or down. Start and Up put the actions before the trigger on screen while leaving the trigger first in the DOM, so Tab still reaches the trigger before the actions it discloses."
+               Code="@DirectionCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Huge" Justify="VetoJustify.SpaceBetween" Align="VetoAlign.Center" Wrap="true">
+                <VetoButtonReveal TestId="dir-end" Icon="@VetoIcons.ChevronRight" Label="Out to the end">
+                    <VetoIconButton Icon="@VetoIcons.Edit" Label="Edit" />
+                    <VetoIconButton Icon="@VetoIcons.Copy" Label="Copy" />
+                    <VetoIconButton Icon="@VetoIcons.Trash" Label="Delete" Color="VetoColor.Danger" />
+                </VetoButtonReveal>
+
+                <VetoButtonReveal TestId="dir-start" Icon="@VetoIcons.ChevronLeft" Label="Out to the start"
+                                  Direction="VetoRevealDirection.Start">
+                    <VetoIconButton Icon="@VetoIcons.Edit" Label="Edit" TestId="dir-start-edit" />
+                    <VetoIconButton Icon="@VetoIcons.Copy" Label="Copy" />
+                    <VetoIconButton Icon="@VetoIcons.Trash" Label="Delete" Color="VetoColor.Danger" />
+                </VetoButtonReveal>
+            </VetoStack>
+
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Huge" Align="VetoAlign.End" Wrap="true">
+                <VetoButtonReveal TestId="dir-down" Icon="@VetoIcons.ChevronDown" Label="Downwards"
+                                  Direction="VetoRevealDirection.Down">
+                    <VetoIconButton Icon="@VetoIcons.Csv" Label="CSV" TestId="dir-down-csv" />
+                    <VetoIconButton Icon="@VetoIcons.Json" Label="JSON" />
+                </VetoButtonReveal>
+
+                <VetoButtonReveal TestId="dir-up" Icon="@VetoIcons.ChevronUp" Label="Upwards"
+                                  Direction="VetoRevealDirection.Up">
+                    <VetoIconButton Icon="@VetoIcons.Csv" Label="CSV" TestId="dir-up-csv" />
+                    <VetoIconButton Icon="@VetoIcons.Json" Label="JSON" />
+                </VetoButtonReveal>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-click"
+               ClipStage="false"
+               Title="Opening on a click instead"
+               Description="Hover is right for a cluster beside the thing it acts on. For one that should not open in passing - a row of destructive actions, or a cluster in a dense table - a click is the better trigger, and the cluster then ignores the pointer merely crossing it."
+               Code="@ClickCode">
+        <VetoButtonReveal TestId="click" Icon="@VetoIcons.MoreHorizontal" Label="Row actions"
+                          OpenOn="VetoRevealTrigger.Click" Variant="VetoVariant.Outlined" Color="VetoColor.Neutral">
+            <VetoIconButton Icon="@VetoIcons.Edit" Label="Edit" TestId="click-edit" />
+            <VetoIconButton Icon="@VetoIcons.Archive" Label="Archive" />
+            <VetoIconButton Icon="@VetoIcons.Trash" Label="Delete" Color="VetoColor.Danger" />
+        </VetoButtonReveal>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               ClipStage="false"
+               Title="Sizes, variants and spacing"
+               Description="The trigger takes the same size, variant and colour scale as VetoButton, so a cluster sits in a toolbar beside ordinary buttons without looking imported. Stagger can be turned off for a cluster that should appear whole, and it is ignored anyway for a reader who asked for reduced motion."
+               Code="@SizeCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Center" Wrap="true">
+            <VetoButtonReveal TestId="size-sm" Icon="@VetoIcons.Plus" Label="Small" Size="VetoSize.Small" Round="true">
+                <VetoIconButton Icon="@VetoIcons.Edit" Label="Edit" Size="VetoSize.Small" />
+                <VetoIconButton Icon="@VetoIcons.Copy" Label="Copy" Size="VetoSize.Small" />
+            </VetoButtonReveal>
+
+            <VetoButtonReveal TestId="size-lg" Icon="@VetoIcons.Plus" Label="Large" Size="VetoSize.Large" Round="true">
+                <VetoIconButton Icon="@VetoIcons.Edit" Label="Edit" Size="VetoSize.Large" />
+                <VetoIconButton Icon="@VetoIcons.Copy" Label="Copy" Size="VetoSize.Large" />
+            </VetoButtonReveal>
+
+            <VetoButtonReveal TestId="no-stagger" Icon="@VetoIcons.Bolt" Label="All at once"
+                              Stagger="false" Gap="VetoSpacing.Medium" Variant="VetoVariant.Text" Color="VetoColor.Primary">
+                <VetoIconButton Icon="@VetoIcons.Edit" Label="Edit" />
+                <VetoIconButton Icon="@VetoIcons.Copy" Label="Copy" />
+                <VetoIconButton Icon="@VetoIcons.Share" Label="Share" />
+            </VetoButtonReveal>
+
+            <VetoButtonReveal TestId="disabled" Icon="@VetoIcons.Lock" Label="Disabled" Disabled="true">
+                <VetoIconButton Icon="@VetoIcons.Edit" Label="Edit" />
+            </VetoButtonReveal>
+        </VetoStack>
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Reach without a pointer</h2>
+        <p class="docs-prose">
+            A cluster that only opened on hover would put its actions out of reach of anyone
+            using a keyboard, and out of reach entirely on a touch screen. So there are three
+            ways in, and the component keeps all of them: the pointer arriving,
+            <strong>keyboard focus</strong> landing anywhere in the cluster, and a
+            <strong>tap or click</strong> on the trigger. <code>Esc</code> closes it and returns
+            focus to the trigger.
+        </p>
+        <p class="docs-prose">
+            While the cluster is closed the actions stay in the DOM but are marked
+            <code>inert</code>, so they hold their place in the layout - which is what lets the
+            reveal be a transition rather than a jump - while taking no focus and going
+            unannounced. That is also why focus can move into them the moment the cluster opens,
+            with no second render to wait for.
+        </p>
+    </VetoStack>
+
+    <ParameterTable Title="Parameters" Rows="Api" TestId="parameters" />
+</DocsPage>
+
+@code {
+    private string? _shared;
+
+    private void Record ( string action ) => _shared = action;
+
+    private static readonly ParameterTable.Row[] Api =
+    [
+        new("Icon", "string?", "—", "The trigger's icon."),
+        new("Label", "string?", "—", "The trigger's accessible name, and the cluster's group label. Always supply one."),
+        new("ShowLabel", "bool", "false", "Whether the label is drawn beside the icon."),
+        new("Tooltip", "string?", "Label", "The trigger's tooltip."),
+        new("ActionsLabel", "string?", "Label", "The revealed group's accessible name, when it should differ."),
+        new("TriggerContent", "RenderFragment?", "—", "Replaces the trigger's contents; the button element stays the component's."),
+        new("Expanded", "bool", "false", "Whether the actions are showing. Supports @bind-Expanded."),
+        new("ExpandedChanged", "EventCallback<bool>", "—", "Raised when the cluster opens or closes."),
+        new("OpenOn", "VetoRevealTrigger", "Hover", "Hover or Click. Focus and touch work either way."),
+        new("Direction", "VetoRevealDirection", "End", "Which way the actions unfold: End, Start, Up or Down."),
+        new("Size", "VetoSize", "Medium", "The trigger's size. The revealed buttons keep their own."),
+        new("Variant", "VetoVariant", "Filled", "The trigger's visual treatment."),
+        new("Color", "VetoColor", "Primary", "The trigger's colour role."),
+        new("Round", "bool", "false", "Draws the trigger as a circle - the speed-dial look."),
+        new("Gap", "VetoSpacing", "ExtraSmall", "The gap between the revealed buttons."),
+        new("Stagger", "bool", "true", "Whether each action arrives after the one before it."),
+        new("OpenDelay", "int", "0", "Milliseconds the pointer must rest before the cluster opens."),
+        new("CloseDelay", "int", "240", "Milliseconds the cluster stays open after the pointer leaves."),
+        new("Disabled", "bool", "false", "Disables the trigger and closes the cluster."),
+        new("OnClick", "EventCallback<MouseEventArgs>", "—", "Makes the trigger a real action rather than a disclosure.")
+    ];
+
+    private const string BasicCode = """
+        <VetoButtonReveal Icon="@VetoIcons.Share" Label="Share" Round="true">
+            <VetoIconButton Icon="@VetoIcons.GitHub"   Label="GitHub"   OnClick="ShareToGitHub" />
+            <VetoIconButton Icon="@VetoIcons.X"        Label="X"        OnClick="ShareToX" />
+            <VetoIconButton Icon="@VetoIcons.LinkedIn" Label="LinkedIn" OnClick="ShareToLinkedIn" />
+            <VetoIconButton Icon="@VetoIcons.Mail"     Label="Email"    OnClick="ShareByEmail" />
+        </VetoButtonReveal>
+        """;
+
+    private const string ActionCode = """
+        @* With OnClick the trigger is an action, not a disclosure: the click saves, and the
+           cluster is the shortcut to the variants. *@
+        <VetoButtonReveal Icon="@VetoIcons.Save" Label="Save" ShowLabel="true" OnClick="SaveAsync">
+            <VetoIconButton Icon="@VetoIcons.Copy"     Label="Save a copy"        OnClick="SaveCopyAsync" />
+            <VetoIconButton Icon="@VetoIcons.Download" Label="Save and download"  OnClick="SaveAndDownloadAsync" />
+        </VetoButtonReveal>
+        """;
+
+    private const string DirectionCode = """
+        <VetoButtonReveal Icon="@VetoIcons.ChevronRight" Label="Out to the end">…</VetoButtonReveal>
+
+        <VetoButtonReveal Icon="@VetoIcons.ChevronLeft" Label="Out to the start"
+                          Direction="VetoRevealDirection.Start">…</VetoButtonReveal>
+
+        <VetoButtonReveal Icon="@VetoIcons.ChevronDown" Label="Downwards"
+                          Direction="VetoRevealDirection.Down">…</VetoButtonReveal>
+
+        <VetoButtonReveal Icon="@VetoIcons.ChevronUp" Label="Upwards"
+                          Direction="VetoRevealDirection.Up">…</VetoButtonReveal>
+        """;
+
+    private const string ClickCode = """
+        <VetoButtonReveal Icon="@VetoIcons.MoreHorizontal" Label="Row actions"
+                          OpenOn="VetoRevealTrigger.Click"
+                          Variant="VetoVariant.Outlined" Color="VetoColor.Neutral">
+            <VetoIconButton Icon="@VetoIcons.Edit"    Label="Edit" />
+            <VetoIconButton Icon="@VetoIcons.Archive" Label="Archive" />
+            <VetoIconButton Icon="@VetoIcons.Trash"   Label="Delete" Color="VetoColor.Danger" />
+        </VetoButtonReveal>
+        """;
+
+    private const string SizeCode = """
+        <VetoButtonReveal Icon="@VetoIcons.Plus" Label="Small" Size="VetoSize.Small" Round="true">…</VetoButtonReveal>
+        <VetoButtonReveal Icon="@VetoIcons.Plus" Label="Large" Size="VetoSize.Large" Round="true">…</VetoButtonReveal>
+
+        @* Appears whole rather than unrolling, with a wider gap. *@
+        <VetoButtonReveal Icon="@VetoIcons.Bolt" Label="All at once"
+                          Stagger="false" Gap="VetoSpacing.Medium"
+                          Variant="VetoVariant.Text" Color="VetoColor.Primary">…</VetoButtonReveal>
+        """;
+}

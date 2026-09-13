@@ -82,12 +82,13 @@ public static class VetoEnumExtensions
     public static string ToModifier ( this VetoVariant variant ) => variant.ToString().ToLowerInvariant();
 
     /// <summary>The global effect classes that draw this underline, or null for none.</summary>
-    public static string? ToUnderlineClass ( this VetoUnderline underline ) => underline switch
-    {
-        VetoUnderline.Reveal => "veto-underline-reveal",
-        VetoUnderline.Always => "veto-underline-reveal veto-underline-static",
-        _ => null
-    };
+    public static string? ToUnderlineClass ( this VetoUnderline underline ) =>
+        underline switch
+        {
+            VetoUnderline.Reveal => "veto-underline-reveal",
+            VetoUnderline.Always => "veto-underline-reveal veto-underline-static",
+            _ => null
+        };
 }
 
 /// <summary>The axis a component lays its children out on.</summary>
@@ -174,21 +175,26 @@ public enum VetoJustify
 public static class VetoLayoutExtensions
 {
     /// <summary>Returns the modifier suffix for an orientation: <c>row</c> or <c>column</c>.</summary>
-    public static string ToModifier ( this VetoOrientation orientation )
-        => orientation == VetoOrientation.Horizontal ? "row" : "column";
+    public static string ToModifier ( this VetoOrientation orientation ) =>
+        orientation == VetoOrientation.Horizontal
+            ? "row"
+            : "column";
 
     /// <summary>Returns the spacing step as a number, which the CSS feeds to <c>--veto-space-*</c>.</summary>
-    public static string ToModifier ( this VetoSpacing spacing ) => ((int)spacing).ToString();
+    public static string ToModifier ( this VetoSpacing spacing ) =>
+        ((int)spacing).ToString();
 
     /// <summary>Returns the modifier suffix for cross-axis alignment, e.g. <c>center</c>.</summary>
-    public static string ToModifier ( this VetoAlign align ) => align.ToString().ToLowerInvariant();
+    public static string ToModifier ( this VetoAlign align ) =>
+        align.ToString().ToLowerInvariant();
 
     /// <summary>Returns the modifier suffix for main-axis distribution, e.g. <c>space-between</c>.</summary>
-    public static string ToModifier ( this VetoJustify justify ) => justify switch
-    {
-        VetoJustify.SpaceBetween => "space-between",
-        VetoJustify.SpaceAround => "space-around",
-        VetoJustify.SpaceEvenly => "space-evenly",
-        _ => justify.ToString().ToLowerInvariant()
-    };
+    public static string ToModifier ( this VetoJustify justify ) =>
+        justify switch
+        {
+            VetoJustify.SpaceBetween => "space-between",
+            VetoJustify.SpaceAround => "space-around",
+            VetoJustify.SpaceEvenly => "space-evenly",
+            _ => justify.ToString().ToLowerInvariant()
+        };
 }

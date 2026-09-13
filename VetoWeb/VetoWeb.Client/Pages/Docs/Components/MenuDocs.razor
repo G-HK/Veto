@@ -1,0 +1,356 @@
+@page "/docs/components/menu"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Menu — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Menu"
+          Lead="A button that drops a list of actions below it - the overflow menu on a toolbar, the export choices on a chart, the account menu in an app bar. Opens on a click or on a hover, and draws its items as icons, text, or both.">
+
+    <DemoBlock TestId="demo-basic"
+               ClipStage="false"
+               Title="A menu of actions"
+               Description="The items are ordinary children rather than a list passed in, so one menu can hold actions, links, headings and a divider without the component modelling each of them. Choosing an item closes the menu and hands focus back to the trigger."
+               Code="@BasicCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Align="VetoAlign.Center" Wrap="true">
+            <VetoMenu TestId="basic" Label="Actions" Icon="@VetoIcons.Bolt">
+                <VetoMenuItem Icon="@VetoIcons.Edit" Text="Rename" Shortcut="F2" TestId="basic-rename"
+                              OnClick='() => Record("Rename")' />
+                <VetoMenuItem Icon="@VetoIcons.Copy" Text="Duplicate" Shortcut="Ctrl+D" TestId="basic-duplicate"
+                              OnClick='() => Record("Duplicate")' />
+                <VetoMenuItem Icon="@VetoIcons.Share" Text="Share" TestId="basic-share"
+                              OnClick='() => Record("Share")' />
+                <VetoMenuDivider TestId="basic-divider" />
+                <VetoMenuItem Icon="@VetoIcons.Trash" Text="Delete" Destructive="true" TestId="basic-delete"
+                              OnClick='() => Record("Delete")' />
+            </VetoMenu>
+
+            <span class="demo-value">Chosen: <strong data-testid="chosen">@(_chosen ?? "nothing yet")</strong></span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-hover"
+               ClipStage="false"
+               Title="Opening on hover"
+               Description="Hover suits the control a reader only occasionally wants - it costs one button of room and shows its contents when they go looking. It never becomes the only way in: a click still toggles the menu, the arrow keys still open it, and touch, which has no hover, gets the click. The gap between trigger and panel is bridged, so crossing it does not shut the menu."
+               Code="@HoverCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Align="VetoAlign.Center" Wrap="true">
+            <VetoMenu TestId="hover" Label="Export" Icon="@VetoIcons.Download" OpenOn="VetoMenuTrigger.Hover">
+                <VetoMenuLabel Text="Export as" TestId="hover-heading" />
+                <VetoMenuItem Icon="@VetoIcons.Csv" Text="CSV" TestId="hover-csv" OnClick='() => Record("CSV")' />
+                <VetoMenuItem Icon="@VetoIcons.Json" Text="JSON" TestId="hover-json" OnClick='() => Record("JSON")' />
+                <VetoMenuItem Icon="@VetoIcons.Pdf" Text="PDF" TestId="hover-pdf" OnClick='() => Record("PDF")' />
+                <VetoMenuItem Icon="@VetoIcons.Spreadsheet" Text="Spreadsheet" Disabled="true" TestId="hover-xlsx" />
+            </VetoMenu>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-appearance"
+               ClipStage="false"
+               Title="Icons, text, or both"
+               Description="Appearance is set once on the menu rather than per item, so switching a crowded toolbar to icons is one change in one place. Icon-only keeps each item's text as its accessible name and its tooltip - it is a saving of space, not of meaning - and text-only drops the icon column entirely instead of leaving the items indented around a gap."
+               Code="@AppearanceCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Center" Wrap="true">
+            <VetoMenu TestId="appearance-both" Label="Both" Icon="@VetoIcons.Grid">
+                <VetoMenuItem Icon="@VetoIcons.Csv" Text="CSV" />
+                <VetoMenuItem Icon="@VetoIcons.Json" Text="JSON" />
+            </VetoMenu>
+
+            <VetoMenu TestId="appearance-icons" Label="Icons only" Icon="@VetoIcons.MoreVertical"
+                      Appearance="VetoMenuAppearance.IconOnly" Round="true" MinWidth="auto">
+                <VetoMenuItem Icon="@VetoIcons.Csv" Text="CSV" TestId="appearance-icons-csv" />
+                <VetoMenuItem Icon="@VetoIcons.Json" Text="JSON" />
+                <VetoMenuItem Icon="@VetoIcons.Pdf" Text="PDF" />
+            </VetoMenu>
+
+            <VetoMenu TestId="appearance-text" Label="Text only" Appearance="VetoMenuAppearance.TextOnly">
+                <VetoMenuItem Icon="@VetoIcons.Csv" Text="CSV" TestId="appearance-text-csv" />
+                <VetoMenuItem Icon="@VetoIcons.Json" Text="JSON" />
+            </VetoMenu>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-placement"
+               ClipStage="false"
+               Title="Placement"
+               Description="The panel hangs from the corner you name. Placement is resolved in CSS against the trigger rather than measured against the window, which keeps the menu free of JavaScript and working in prerendered HTML - the trade is that it does not flip itself away from the edge of the screen, so a trigger at the end of a row wants an end placement. Collision handling waits for one shared popover engine rather than half of one here."
+               Code="@PlacementCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Justify="VetoJustify.SpaceBetween" Align="VetoAlign.Center" Wrap="true">
+            <VetoMenu TestId="place-bottom-start" Label="Bottom start" Placement="VetoMenuPlacement.BottomStart">
+                <VetoMenuItem Text="First" />
+                <VetoMenuItem Text="Second" />
+            </VetoMenu>
+
+            <VetoMenu TestId="place-bottom-end" Label="Bottom end" Placement="VetoMenuPlacement.BottomEnd">
+                <VetoMenuItem Text="First" />
+                <VetoMenuItem Text="Second" />
+            </VetoMenu>
+
+            <VetoMenu TestId="place-top-start" Label="Top start" Placement="VetoMenuPlacement.TopStart">
+                <VetoMenuItem Text="First" />
+                <VetoMenuItem Text="Second" />
+            </VetoMenu>
+
+            <VetoMenu TestId="place-top-end" Label="Top end" Placement="VetoMenuPlacement.TopEnd">
+                <VetoMenuItem Text="First" />
+                <VetoMenuItem Text="Second" />
+            </VetoMenu>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-checkable"
+               ClipStage="false"
+               Title="Choices that stay open"
+               Description="A checkable item reports itself through aria-checked and keeps its tick column whether or not it is ticked, so the items under it do not shuffle sideways as the reader toggles one. KeepOpen leaves the menu up afterwards, which is what you want for a set of toggles the reader is about to change again - and Selected marks a single current choice rather than a box with two states."
+               Code="@CheckableCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Align="VetoAlign.Center" Wrap="true">
+            <VetoMenu TestId="columns" Label="Columns" Icon="@VetoIcons.Sidebar" CloseOnSelect="false">
+                <VetoMenuLabel Text="Show" />
+                <VetoMenuItem Text="Owner" Checked="_owner" KeepOpen="true" TestId="columns-owner"
+                              OnClick="() => _owner = !_owner" />
+                <VetoMenuItem Text="Due date" Checked="_due" KeepOpen="true" TestId="columns-due"
+                              OnClick="() => _due = !_due" />
+                <VetoMenuItem Text="Progress" Checked="_progress" KeepOpen="true" TestId="columns-progress"
+                              OnClick="() => _progress = !_progress" />
+            </VetoMenu>
+
+            <VetoMenu TestId="sort" Label="Sort" Icon="@VetoIcons.SortAscending">
+                <VetoMenuItem Text="Name" Selected="@(_sort == "Name")" TestId="sort-name" OnClick='() => _sort = "Name"' />
+                <VetoMenuItem Text="Newest" Selected="@(_sort == "Newest")" TestId="sort-newest" OnClick='() => _sort = "Newest"' />
+                <VetoMenuItem Text="Size" Selected="@(_sort == "Size")" TestId="sort-size" OnClick='() => _sort = "Size"' />
+            </VetoMenu>
+
+            <span class="demo-value">
+                Sorted by <strong data-testid="sort-value">@_sort</strong>,
+                columns <strong data-testid="columns-value">@ColumnSummary</strong>
+            </span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-links"
+               ClipStage="false"
+               Title="A menu of links"
+               Description="An item given an Href renders as an anchor rather than a button, so middle-click and open-in-new-tab work as the reader expects them to. It is still a menuitem to assistive technology."
+               Code="@LinkCode">
+        <VetoMenu TestId="links" Label="Follow" Icon="@VetoIcons.Share" Variant="VetoVariant.Text">
+            <VetoMenuItem Icon="@VetoIcons.GitHub" Text="GitHub" Href="https://github.com" Target="_blank" Rel="noopener" TestId="links-github" />
+            <VetoMenuItem Icon="@VetoIcons.X" Text="X" Href="https://x.com" Target="_blank" Rel="noopener" TestId="links-x" />
+            <VetoMenuItem Icon="@VetoIcons.LinkedIn" Text="LinkedIn" Href="https://linkedin.com" Target="_blank" Rel="noopener" />
+        </VetoMenu>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-sizes"
+               ClipStage="false"
+               Title="Sizes and variants"
+               Description="The trigger carries the same size, variant and colour scale as VetoButton, so a menu drops into a toolbar beside ordinary buttons without looking like it came from somewhere else. The trigger's size also sizes the panel's text."
+               Code="@SizeCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Align="VetoAlign.Center" Wrap="true">
+            <VetoMenu TestId="size-sm" Label="Small" Size="VetoSize.Small" Dense="true">
+                <VetoMenuItem Text="One" />
+                <VetoMenuItem Text="Two" />
+            </VetoMenu>
+
+            <VetoMenu TestId="size-md" Label="Medium">
+                <VetoMenuItem Text="One" />
+                <VetoMenuItem Text="Two" />
+            </VetoMenu>
+
+            <VetoMenu TestId="size-lg" Label="Large" Size="VetoSize.Large">
+                <VetoMenuItem Text="One" />
+                <VetoMenuItem Text="Two" />
+            </VetoMenu>
+
+            <VetoMenu TestId="variant-filled" Label="Filled" Variant="VetoVariant.Filled" Color="VetoColor.Primary">
+                <VetoMenuItem Text="One" />
+            </VetoMenu>
+
+            <VetoMenu TestId="variant-danger" Label="Danger" Variant="VetoVariant.Text" Color="VetoColor.Danger">
+                <VetoMenuItem Text="One" />
+            </VetoMenu>
+
+            <VetoMenu TestId="disabled" Label="Disabled" Disabled="true">
+                <VetoMenuItem Text="Unreachable" />
+            </VetoMenu>
+        </VetoStack>
+    </DemoBlock>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">A menu inside something that clips</h2>
+        <p class="docs-prose">
+            The panel is an absolutely positioned child of the menu, not a layer moved to the
+            end of the document, so it is subject to whatever its ancestors do. A container with
+            <code>overflow: hidden</code> will cut it off at its edge - and
+            <code>VetoCard</code> clips by default, so that a media image is trimmed to the
+            card's own corners. Every Veto component takes a <code>RootOverflow</code> parameter
+            for exactly this - <code>RootOverflow="VetoOverflow.Visible"</code> on the card that
+            holds the menu, which is what the demos on this page do.
+        </p>
+        <p class="docs-prose">
+            This is the price of positioning in CSS rather than measuring in JavaScript: no
+            interop, no layout thrash, correct in prerendered HTML - but no escape from an
+            ancestor's clip and no flip away from the edge of the window. Both are the job of
+            the one shared popover engine, which <code>VetoDialog</code> and
+            <code>VetoTooltip</code> will want too.
+        </p>
+    </VetoStack>
+
+    <VetoStack Gap="VetoSpacing.Medium">
+        <h2 class="docs-heading">Keyboard</h2>
+        <p class="docs-prose">
+            The trigger is the menu's only tab stop; the items are reached with the arrow keys,
+            which is the menu-button pattern assistive technology expects. The arrows wrap, and
+            they skip disabled items rather than landing on something that does nothing.
+        </p>
+        <VetoShortcutList Divided="true" TestId="keyboard">
+            <VetoShortcut Description="Open the menu and focus its first item" Keys="Enter" />
+            <VetoShortcut Description="Open the menu, or move to the next item" Keys="ArrowDown" />
+            <VetoShortcut Description="Open the menu at its last item, or move back" Keys="ArrowUp" />
+            <VetoShortcut Description="Jump to the first item" Keys="Home" />
+            <VetoShortcut Description="Jump to the last item" Keys="End" />
+            <VetoShortcut Description="Close the menu and return focus to the trigger" Keys="Esc" />
+            <VetoShortcut Description="Close the menu and carry on through the page" Keys="Tab" />
+        </VetoShortcutList>
+    </VetoStack>
+
+    <ParameterTable Title="VetoMenu" Rows="MenuApi" TestId="parameters" />
+    <ParameterTable Title="VetoMenuItem" Rows="ItemApi" TestId="item-parameters" />
+</DocsPage>
+
+@code {
+    private string? _chosen;
+    private string _sort = "Name";
+    private bool _owner = true;
+    private bool _due;
+    private bool _progress = true;
+
+    private string ColumnSummary
+    {
+        get
+        {
+            var on = new List<string>();
+
+            if (_owner) on.Add("Owner");
+            if (_due) on.Add("Due date");
+            if (_progress) on.Add("Progress");
+
+            return on.Count == 0 ? "none" : string.Join(", ", on);
+        }
+    }
+
+    private void Record ( string action ) => _chosen = action;
+
+    private static readonly ParameterTable.Row[] MenuApi =
+    [
+        new("Label", "string?", "—", "The trigger's text, and its accessible name when the appearance hides it."),
+        new("Icon", "string?", "—", "The trigger's icon."),
+        new("TriggerContent", "RenderFragment?", "—", "Replaces the trigger's contents; the button element stays the component's."),
+        new("Open", "bool", "false", "Whether the menu is open. Supports @bind-Open."),
+        new("OpenOn", "VetoMenuTrigger", "Click", "Click or Hover. Hover keeps the click and the keyboard alongside it."),
+        new("Placement", "VetoMenuPlacement", "BottomStart", "Which corner of the trigger the panel hangs from."),
+        new("Appearance", "VetoMenuAppearance", "IconAndText", "How much of each item is drawn."),
+        new("Size", "VetoSize", "Medium", "The trigger's size; also sizes the panel's text."),
+        new("Variant", "VetoVariant", "Outlined", "The trigger's visual treatment."),
+        new("Color", "VetoColor", "Neutral", "The trigger's colour role."),
+        new("Round", "bool", "false", "Draws the trigger as a circle."),
+        new("Chevron", "bool?", "auto", "Whether the trigger shows a chevron. On for a trigger with text."),
+        new("Dense", "bool", "false", "Packs the items tightly."),
+        new("CloseOnSelect", "bool", "true", "Closes the menu when an item is chosen."),
+        new("MinWidth", "string", "\"11rem\"", "The panel's minimum width."),
+        new("Offset", "string", "\"0.375rem\"", "The gap between the trigger and the panel."),
+        new("HoverOpenDelay", "int", "120", "Milliseconds the pointer must rest before a hover menu opens."),
+        new("HoverCloseDelay", "int", "280", "Milliseconds a hover menu stays open after the pointer leaves."),
+        new("Disabled", "bool", "false", "Disables the trigger and closes the menu."),
+        new("OpenChanged", "EventCallback<bool>", "—", "Raised when the menu opens or closes."),
+        new("OnClosed", "EventCallback", "—", "Raised when the menu closes, whatever closed it.")
+    ];
+
+    private static readonly ParameterTable.Row[] ItemApi =
+    [
+        new("Text", "string?", "—", "The item's text, and its accessible name whatever the appearance hides."),
+        new("Icon", "string?", "—", "The item's icon."),
+        new("IconContent", "RenderFragment?", "—", "Markup to render instead of Icon - an avatar, a swatch."),
+        new("Label", "string?", "—", "The accessible name, for an item built from ChildContent."),
+        new("Shortcut", "string?", "—", "A keyboard hint drawn at the end. Decoration - the app binds the key."),
+        new("Checked", "bool?", "null", "Makes the item a checkbox, reported through aria-checked."),
+        new("Selected", "bool", "false", "Marks the item as the current choice - a highlight, not a checkbox."),
+        new("Destructive", "bool", "false", "Draws the item in the danger colour."),
+        new("Disabled", "bool", "false", "Disables the item; the arrow keys skip it."),
+        new("Href", "string?", "—", "Renders an anchor rather than a button, so navigation stays real."),
+        new("KeepOpen", "bool", "false", "Leaves the menu open after this item is chosen."),
+        new("OnClick", "EventCallback<MouseEventArgs>", "—", "Raised when the item is chosen.")
+    ];
+
+    private const string BasicCode = """
+        <VetoMenu Label="Actions" Icon="@VetoIcons.Bolt">
+            <VetoMenuItem Icon="@VetoIcons.Edit" Text="Rename" Shortcut="F2" OnClick="Rename" />
+            <VetoMenuItem Icon="@VetoIcons.Copy" Text="Duplicate" Shortcut="Ctrl+D" OnClick="Duplicate" />
+            <VetoMenuItem Icon="@VetoIcons.Share" Text="Share" OnClick="Share" />
+            <VetoMenuDivider />
+            <VetoMenuItem Icon="@VetoIcons.Trash" Text="Delete" Destructive="true" OnClick="Delete" />
+        </VetoMenu>
+        """;
+
+    private const string HoverCode = """
+        @* A click still toggles it, and the arrow keys still open it. *@
+        <VetoMenu Label="Export" Icon="@VetoIcons.Download" OpenOn="VetoMenuTrigger.Hover">
+            <VetoMenuLabel Text="Export as" />
+            <VetoMenuItem Icon="@VetoIcons.Csv" Text="CSV" OnClick="ExportCsvAsync" />
+            <VetoMenuItem Icon="@VetoIcons.Json" Text="JSON" OnClick="ExportJsonAsync" />
+            <VetoMenuItem Icon="@VetoIcons.Pdf" Text="PDF" OnClick="ExportPdfAsync" />
+            <VetoMenuItem Icon="@VetoIcons.Spreadsheet" Text="Spreadsheet" Disabled="true" />
+        </VetoMenu>
+        """;
+
+    private const string AppearanceCode = """
+        @* Both, the default. *@
+        <VetoMenu Label="Both" Icon="@VetoIcons.Grid">…</VetoMenu>
+
+        @* Icons alone. Each item's Text is still its accessible name and tooltip. *@
+        <VetoMenu Label="Icons only" Icon="@VetoIcons.MoreVertical" Round="true"
+                  Appearance="VetoMenuAppearance.IconOnly" MinWidth="auto">…</VetoMenu>
+
+        @* Text alone - the icon column is left out rather than left empty. *@
+        <VetoMenu Label="Text only" Appearance="VetoMenuAppearance.TextOnly">…</VetoMenu>
+        """;
+
+    private const string PlacementCode = """
+        <VetoMenu Label="Bottom start" Placement="VetoMenuPlacement.BottomStart">…</VetoMenu>
+        <VetoMenu Label="Bottom end"   Placement="VetoMenuPlacement.BottomEnd">…</VetoMenu>
+        <VetoMenu Label="Top start"    Placement="VetoMenuPlacement.TopStart">…</VetoMenu>
+        <VetoMenu Label="Top end"      Placement="VetoMenuPlacement.TopEnd">…</VetoMenu>
+        """;
+
+    private const string CheckableCode = """
+        @* Toggles: the menu stays up, and each item keeps its tick column. *@
+        <VetoMenu Label="Columns" Icon="@VetoIcons.Sidebar" CloseOnSelect="false">
+            <VetoMenuLabel Text="Show" />
+            <VetoMenuItem Text="Owner"    Checked="_owner" KeepOpen="true" OnClick="() => _owner = !_owner" />
+            <VetoMenuItem Text="Due date" Checked="_due"   KeepOpen="true" OnClick="() => _due = !_due" />
+        </VetoMenu>
+
+        @* One current choice: Selected highlights, it does not tick. *@
+        <VetoMenu Label="Sort" Icon="@VetoIcons.SortAscending">
+            <VetoMenuItem Text="Name"   Selected="@(_sort == "Name")"   OnClick="() => SortBy("Name")" />
+            <VetoMenuItem Text="Newest" Selected="@(_sort == "Newest")" OnClick="() => SortBy("Newest")" />
+        </VetoMenu>
+        """;
+
+    private const string LinkCode = """
+        <VetoMenu Label="Follow" Icon="@VetoIcons.Share" Variant="VetoVariant.Text">
+            <VetoMenuItem Icon="@VetoIcons.GitHub" Text="GitHub"
+                          Href="https://github.com" Target="_blank" Rel="noopener" />
+            <VetoMenuItem Icon="@VetoIcons.X" Text="X"
+                          Href="https://x.com" Target="_blank" Rel="noopener" />
+        </VetoMenu>
+        """;
+
+    private const string SizeCode = """
+        <VetoMenu Label="Small" Size="VetoSize.Small" Dense="true">…</VetoMenu>
+        <VetoMenu Label="Medium">…</VetoMenu>
+        <VetoMenu Label="Large" Size="VetoSize.Large">…</VetoMenu>
+
+        <VetoMenu Label="Filled" Variant="VetoVariant.Filled" Color="VetoColor.Primary">…</VetoMenu>
+        <VetoMenu Label="Danger" Variant="VetoVariant.Text" Color="VetoColor.Danger">…</VetoMenu>
+        <VetoMenu Label="Disabled" Disabled="true">…</VetoMenu>
+        """;
+}

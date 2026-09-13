@@ -1,0 +1,311 @@
+/* VetoMenu - styled entirely from the tokens in wwwroot/VetoStyles.css.
+ *
+ * The panel is positioned against the trigger in CSS rather than measured in JavaScript, so
+ * the menu needs no interop and works in prerendered HTML. The cost is that it does not flip
+ * itself away from the edge of the window - Placement chooses the corner, and the component's
+ * documentation says so rather than pretending otherwise.
+ *
+ * The items are separate components carrying their own scope attribute, so the rules whose
+ * subject is an item live in VetoMenuItem.razor.css. Only the panel that contains them is
+ * addressed here.
+ */
+
+.veto-menu {
+    --veto-menu-offset: 0.375rem;
+    --veto-menu-radius: var(--veto-radius-md);
+
+    position: relative;
+    display: inline-flex;
+    vertical-align: middle;
+    font-family: var(--veto-font-sans);
+}
+
+/* The trigger. Built here rather than from VetoButton so the button element itself can carry
+   aria-haspopup, aria-expanded and aria-controls - a wrapper around a button cannot. */
+
+.veto-menu__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--veto-space-2);
+    box-sizing: border-box;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: var(--veto-menu-radius);
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-family: var(--veto-font-sans);
+    line-height: var(--veto-line-height);
+    cursor: pointer;
+    transition: background-color var(--veto-transition), border-color var(--veto-transition),
+        color var(--veto-transition);
+}
+
+.veto-menu__trigger:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-menu__trigger:disabled {
+    background: var(--veto-color-surface-disabled);
+    color: var(--veto-color-text-disabled);
+    cursor: not-allowed;
+}
+
+.veto-menu__trigger-label {
+    white-space: nowrap;
+}
+
+/* The chevron turns over when the menu is open, which is the one piece of state the trigger
+   shows on its own. */
+
+.veto-menu__chevron {
+    display: inline-flex;
+    margin-inline-start: calc(var(--veto-space-1) * -1);
+    rotate: 0deg;
+    transition: rotate var(--veto-transition);
+}
+
+.veto-menu--open .veto-menu__chevron {
+    rotate: 180deg;
+}
+
+/*
+ * An open menu lifts the whole component above the page rather than lifting its panel alone.
+ * That is what makes the three z-indices inside it - scrim, trigger, panel - local to the menu
+ * and immune to whatever the page is doing: they only have to be ordered against each other.
+ * It also gives RootZIndex something to override, since an inline z-index beats this rule, so
+ * a consumer who needs the menu under or over something specific still can.
+ */
+.veto-menu--open {
+    z-index: 1300;
+}
+
+/* Sizes. The trigger's font size also sizes the panel's text, because the panel inherits from
+   the component root rather than setting its own scale. */
+
+.veto-menu--sm { font-size: var(--veto-font-size-sm); }
+.veto-menu--md { font-size: var(--veto-font-size-md); }
+.veto-menu--lg { font-size: var(--veto-font-size-lg); }
+
+.veto-menu--sm .veto-menu__trigger {
+    padding: var(--veto-space-2) var(--veto-space-3);
+    min-height: 2rem;
+}
+
+.veto-menu--md .veto-menu__trigger {
+    padding: var(--veto-space-2) var(--veto-space-4);
+    min-height: 2.5rem;
+}
+
+.veto-menu--lg .veto-menu__trigger {
+    padding: var(--veto-space-3) var(--veto-space-5);
+    min-height: 3rem;
+}
+
+/* An icon-only trigger is square, and round when asked. */
+
+.veto-menu--icon-only.veto-menu--sm .veto-menu__trigger {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    justify-content: center;
+}
+
+.veto-menu--icon-only.veto-menu--md .veto-menu__trigger {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    justify-content: center;
+}
+
+.veto-menu--icon-only.veto-menu--lg .veto-menu__trigger {
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    justify-content: center;
+}
+
+.veto-menu--round .veto-menu__trigger {
+    border-radius: var(--veto-radius-full);
+}
+
+/* Variants. */
+
+.veto-menu--filled .veto-menu__trigger {
+    background: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+    color: var(--veto-color-primary-contrast);
+}
+
+.veto-menu--filled .veto-menu__trigger:hover:not(:disabled),
+.veto-menu--filled.veto-menu--open .veto-menu__trigger:not(:disabled) {
+    background: var(--veto-color-primary-hover);
+    border-color: var(--veto-color-primary-hover);
+}
+
+.veto-menu--outlined .veto-menu__trigger {
+    border-color: var(--veto-color-border);
+    color: var(--veto-color-text);
+}
+
+.veto-menu--outlined .veto-menu__trigger:hover:not(:disabled),
+.veto-menu--outlined.veto-menu--open .veto-menu__trigger:not(:disabled) {
+    background: var(--veto-color-surface-raised);
+    border-color: var(--veto-color-border-strong);
+}
+
+.veto-menu--text .veto-menu__trigger {
+    color: var(--veto-color-text);
+}
+
+.veto-menu--text .veto-menu__trigger:hover:not(:disabled),
+.veto-menu--text.veto-menu--open .veto-menu__trigger:not(:disabled) {
+    background: var(--veto-color-surface-raised);
+}
+
+/* Colour roles apply to the variant that shows them. */
+
+.veto-menu--primary.veto-menu--outlined .veto-menu__trigger,
+.veto-menu--primary.veto-menu--text .veto-menu__trigger { color: var(--veto-color-primary); }
+
+.veto-menu--secondary.veto-menu--outlined .veto-menu__trigger,
+.veto-menu--secondary.veto-menu--text .veto-menu__trigger { color: var(--veto-color-secondary); }
+
+.veto-menu--success.veto-menu--outlined .veto-menu__trigger,
+.veto-menu--success.veto-menu--text .veto-menu__trigger { color: var(--veto-color-success); }
+
+.veto-menu--warning.veto-menu--outlined .veto-menu__trigger,
+.veto-menu--warning.veto-menu--text .veto-menu__trigger { color: var(--veto-color-warning); }
+
+.veto-menu--danger.veto-menu--outlined .veto-menu__trigger,
+.veto-menu--danger.veto-menu--text .veto-menu__trigger { color: var(--veto-color-danger); }
+
+.veto-menu--secondary.veto-menu--filled .veto-menu__trigger {
+    background: var(--veto-color-secondary);
+    border-color: var(--veto-color-secondary);
+}
+
+.veto-menu--danger.veto-menu--filled .veto-menu__trigger {
+    background: var(--veto-color-danger);
+    border-color: var(--veto-color-danger);
+}
+
+/* The panel. */
+
+.veto-menu__panel {
+    position: absolute;
+    z-index: 3;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: var(--veto-space-2);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-menu-radius);
+    background: var(--veto-color-surface-raised);
+    box-shadow: var(--veto-shadow-md);
+    animation: veto-menu-in 120ms ease-out;
+}
+
+.veto-menu--dense .veto-menu__panel {
+    padding: var(--veto-space-1);
+}
+
+/* Placement. The offset is applied as a margin rather than folded into the inset, so the
+   bridge below can cover exactly the gap it creates. */
+
+.veto-menu--bottom-start .veto-menu__panel {
+    top: 100%;
+    inset-inline-start: 0;
+    margin-block-start: var(--veto-menu-offset);
+}
+
+.veto-menu--bottom-end .veto-menu__panel {
+    top: 100%;
+    inset-inline-end: 0;
+    margin-block-start: var(--veto-menu-offset);
+}
+
+.veto-menu--top-start .veto-menu__panel {
+    bottom: 100%;
+    inset-inline-start: 0;
+    margin-block-end: var(--veto-menu-offset);
+}
+
+.veto-menu--top-end .veto-menu__panel {
+    bottom: 100%;
+    inset-inline-end: 0;
+    margin-block-end: var(--veto-menu-offset);
+}
+
+.veto-menu--top-start .veto-menu__panel,
+.veto-menu--top-end .veto-menu__panel {
+    animation-name: veto-menu-in-up;
+}
+
+/* A hover menu needs the gap between trigger and panel to still count as "inside", or the
+   pointer crossing it fires pointerleave and the menu shuts in the reader's face. The bridge
+   is an invisible strip over exactly that gap. */
+
+.veto-menu--hover .veto-menu__panel::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    height: var(--veto-menu-offset);
+}
+
+.veto-menu--hover.veto-menu--bottom-start .veto-menu__panel::before,
+.veto-menu--hover.veto-menu--bottom-end .veto-menu__panel::before {
+    top: calc(var(--veto-menu-offset) * -1);
+}
+
+.veto-menu--hover.veto-menu--top-start .veto-menu__panel::before,
+.veto-menu--hover.veto-menu--top-end .veto-menu__panel::before {
+    bottom: calc(var(--veto-menu-offset) * -1);
+}
+
+/* The scrim catches the click that closes a click menu. Transparent and unpainted - it is a
+   hit area, not a dimming layer, because a menu is not a modal.
+   
+   It is a child of the root, so these three z-indices are ordered against each other inside
+   whatever stacking context the menu sits in - and stay ordered when RootZIndex gives the menu
+   a context of its own. */
+
+.veto-menu__scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: none;
+}
+
+/* The scrim covers the trigger too, so an open menu's trigger has to come above it - otherwise
+   clicking the trigger to close the menu is caught by the scrim instead of toggling. */
+.veto-menu--open .veto-menu__trigger {
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes veto-menu-in {
+    from {
+        opacity: 0;
+        transform: translateY(-0.25rem);
+    }
+}
+
+@keyframes veto-menu-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(0.25rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-menu__trigger,
+    .veto-menu__chevron {
+        transition: none;
+    }
+
+    .veto-menu__panel {
+        animation: none;
+    }
+}
