@@ -31,8 +31,10 @@ public sealed partial record VetoTheme
     public string? FontMono { get; init; }
 
     /// <summary>True when at least one token is overridden and a style block is worth rendering.</summary>
-    public bool HasOverrides => Light.HasOverrides || Dark.HasOverrides
-           || RadiusMedium is not null || FontSans is not null || FontMono is not null;
+    public bool HasOverrides =>
+        Light.HasOverrides || Dark.HasOverrides
+        || RadiusMedium is not null
+        || FontSans is not null || FontMono is not null;
 
     /// <summary>
     /// Renders the overrides as CSS. Light values and the shape/type tokens go on

@@ -63,8 +63,8 @@ public partial class VetoDockLayout : VetoComponentBase
     public bool Scrollable { get; set; } = true;
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier($"dock-{Position.ToModifier()}"))
             .AddClass(Modifier("scrollable"), Scrollable);
 }

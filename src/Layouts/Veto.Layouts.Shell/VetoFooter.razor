@@ -3,12 +3,8 @@
 
 @if (Visible)
 {
-    <footer @ref="RootElement"
-            @attributes="InnerAttributes"
-            id="@ElementId"
-            class="@CssClass"
-            style="@CssStyle"
-            data-testid="@TestId">
+    <footer @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+            class="@CssClass" style="@CssStyle" data-testid="@TestId">
         @ChildContent
     </footer>
 }

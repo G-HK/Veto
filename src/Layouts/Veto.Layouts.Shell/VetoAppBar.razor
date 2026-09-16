@@ -3,12 +3,8 @@
 
 @if (Visible)
 {
-    <header @ref="RootElement"
-            @attributes="InnerAttributes"
-            id="@ElementId"
-            class="@CssClass"
-            style="@CssStyle"
-            data-testid="@TestId">
+    <header @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+            style="@CssStyle" data-testid="@TestId">
         @ChildContent
     </header>
 }

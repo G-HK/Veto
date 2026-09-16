@@ -4,13 +4,9 @@
 
 @if (Visible)
 {
-    <div @ref="RootElement"
-         @attributes="InnerAttributes"
-         id="@ElementId"
-         class="@CssClass"
-         style="@CssStyle"
-         data-testid="@TestId">
-
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" 
+         class="@CssClass" style="@CssStyle" data-testid="@TestId">
+        
         @if (Wallpaper is not null)
         {
             <div class="veto-dock-layout__wallpaper" aria-hidden="true">@Wallpaper</div>
@@ -20,12 +16,8 @@
             @ChildContent
         </main>
 
-        <VetoDock Position="Position"
-                  Appearance="Appearance"
-                  AutoHide="AutoHide"
-                  Magnification="Magnification"
-                  ItemSize="@ItemSize"
-                  Label="@DockLabel"
+        <VetoDock Position="Position" Appearance="Appearance" AutoHide="AutoHide"
+                  Magnification="Magnification" ItemSize="@ItemSize" Label="@DockLabel"
                   TestId="@(TestId is null ? null : $"{TestId}-dock")">
             @Items
         </VetoDock>

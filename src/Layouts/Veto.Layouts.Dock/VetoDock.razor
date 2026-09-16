@@ -12,12 +12,8 @@
                 <div class="veto-dock__reveal" aria-hidden="true"></div>
             }
 
-            <div @ref="RootElement"
-                 @attributes="InnerAttributes"
-                 id="@ElementId"
-                 class="veto-dock__bar"
-                 role="toolbar"
-                 aria-label="@Label"
+            <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+                 class="veto-dock__bar" role="toolbar" aria-label="@Label"
                  aria-orientation="@(Position.IsVertical() ? "vertical" : "horizontal")"
                  @onkeydown="OnKeyDownAsync">
                 @ChildContent

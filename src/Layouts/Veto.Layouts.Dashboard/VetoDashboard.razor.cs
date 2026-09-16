@@ -42,8 +42,8 @@ public partial class VetoDashboard : VetoComponentBase
             .AddClass(Modifier($"gap-{Gap.ToModifier()}"));
 
     /// <inheritdoc />
-    protected override StyleBuilder StartStyle ()
-        => base.StartStyle()
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
             .AddStyle("--veto-dashboard-columns", Columns.ToString())
             .AddStyle("--veto-dashboard-columns-md", ColumnsMedium?.ToString())
             .AddStyle("--veto-dashboard-columns-lg", ColumnsLarge?.ToString())

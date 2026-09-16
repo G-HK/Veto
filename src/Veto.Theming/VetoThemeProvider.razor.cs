@@ -44,7 +44,9 @@ public partial class VetoThemeProvider : IDisposable
             await ThemeService.SetThemeAsync(Theme);
         }
 
-        _css = ThemeService.Theme.HasOverrides ? ThemeService.Theme.ToCss() : null;
+        _css = ThemeService.Theme.HasOverrides
+            ? ThemeService.Theme.ToCss()
+            : null;
     }
 
     /// <inheritdoc />

@@ -7,24 +7,14 @@
 {
     @if (ShowSystemOption)
     {
-        <div @ref="RootElement"
-             @attributes="InnerAttributes"
-             id="@ElementId"
-             class="@CssClass"
-             style="@CssStyle"
-             data-testid="@TestId"
-             role="radiogroup"
-             aria-label="@Label">
+        <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+             style="@CssStyle" data-testid="@TestId" role="radiogroup" aria-label="@Label">
             @foreach (var mode in Modes)
             {
-                <button type="button"
-                        class="veto-theme-toggle__option"
-                        role="radio"
-                        title="@ModeLabel(mode)"
-                        aria-label="@ModeLabel(mode)"
-                        aria-checked="@(ThemeService.Mode == mode ? "true" : "false")"
-                        data-mode="@mode"
-                        @onclick="() => SetModeAsync(mode)">
+                <button type="button" class="veto-theme-toggle__option" role="radio"
+                        title="@ModeLabel(mode)" aria-label="@ModeLabel(mode)"
+                        aria-checked="@(ThemeService.Mode == mode ? "true" : "false")" 
+                        data-mode="@mode" @onclick="() => SetModeAsync(mode)">
                     @ModeIcon(mode)
                 </button>
             }
@@ -32,18 +22,10 @@
     }
     else
     {
-        <button @ref="RootElement"
-                @attributes="InnerAttributes"
-                id="@ElementId"
-                class="@CssClass"
-                style="@CssStyle"
-                data-testid="@TestId"
-                type="button"
-                role="switch"
-                aria-checked="@(ThemeService.IsDark ? "true" : "false")"
-                aria-label="@Label"
-                title="@Label"
-                @onclick="ToggleAsync">
+        <button @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+                class="@CssClass" style="@CssStyle" data-testid="@TestId"
+                type="button" role="switch" aria-checked="@(ThemeService.IsDark ? "true" : "false")"
+                aria-label="@Label" title="@Label" @onclick="ToggleAsync">
             <span class="veto-theme-toggle__track" aria-hidden="true">
                 <span class="veto-theme-toggle__thumb">
                     @ModeIcon(ThemeService.IsDark ? VetoThemeMode.Dark : VetoThemeMode.Light)

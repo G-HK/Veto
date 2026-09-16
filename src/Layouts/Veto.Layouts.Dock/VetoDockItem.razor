@@ -7,32 +7,18 @@
 {
     @if (Href is not null)
     {
-        <a @ref="RootElement"
-           @attributes="InnerAttributes"
-           id="@ElementId"
-           class="@CssClass"
-           style="@CssStyle"
-           data-testid="@TestId"
-           href="@Href"
-           target="@Target"
-           tabindex="@TabIndex"
-           aria-label="@Label"
-           aria-current="@(IsActive ? "page" : null)">
+        <a @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+           class="@CssClass" style="@CssStyle" data-testid="@TestId" href="@Href"
+           target="@Target" tabindex="@TabIndex" aria-label="@Label" aria-current="@(IsActive ? "page" : null)">
             @RenderContents()
         </a>
     }
     else
     {
-        <button @ref="RootElement"
-                @attributes="InnerAttributes"
-                id="@ElementId"
-                class="@CssClass"
-                style="@CssStyle"
-                data-testid="@TestId"
-                type="button"
-                tabindex="@TabIndex"
-                disabled="@Disabled"
-                aria-label="@Label"
+        <button @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+                class="@CssClass" style="@CssStyle" data-testid="@TestId"
+                type="button" tabindex="@TabIndex"
+                disabled="@Disabled" aria-label="@Label"
                 aria-pressed="@(IsActive ? "true" : null)"
                 @onclick="OnClick">
             @RenderContents()

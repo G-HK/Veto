@@ -96,16 +96,16 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
     internal bool IsVertical => Position.IsVertical();
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier(Position.ToModifier()))
             .AddClass(Modifier(IsVertical ? "vertical" : "horizontal"))
             .AddClass(Modifier(Appearance.ToString().ToLowerInvariant()))
             .AddClass(Modifier("auto-hide"), AutoHide);
 
     /// <inheritdoc />
-    protected override StyleBuilder StartStyle ()
-        => base.StartStyle()
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
             .AddStyle("--veto-dock-offset", Offset)
             .AddStyle("--veto-dock-item-size", ItemSize);
 

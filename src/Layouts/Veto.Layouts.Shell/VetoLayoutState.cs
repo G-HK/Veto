@@ -58,12 +58,7 @@ public sealed class VetoLayoutState
     /// Called by <see cref="VetoDrawer"/> as it renders, so the rest of the layout knows what
     /// it is dealing with.
     /// </summary>
-    public void RegisterDrawer (
-        string width,
-        string miniWidth,
-        VetoAnchor anchor,
-        VetoDrawerVariant variant,
-        VetoBreakpoint breakpoint )
+    public void RegisterDrawer ( string width, string miniWidth, VetoAnchor anchor, VetoDrawerVariant variant, VetoBreakpoint breakpoint )
     {
         var changed = !HasDrawer
             || DrawerWidth != width

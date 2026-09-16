@@ -7,18 +7,14 @@
 {
     <VetoLayout State="_layout" TestId="@TestId" Class="@CssClass" Style="@CssStyle">
         <VetoAppBar TestId="@Sub("appbar")" Translucent="true">
-            <VetoIconButton Icon="@VetoIcons.Menu"
-                            Label="Toggle navigation"
-                            TestId="@Sub("toggle")"
-                            OnClick="ToggleDrawer" />
+            <VetoIconButton Icon="@VetoIcons.Menu" Label="Toggle navigation"
+                            TestId="@Sub("toggle")" OnClick="ToggleDrawer" />
             @Brand
             <VetoSpacer />
             @Toolbar
         </VetoAppBar>
 
-        <VetoDrawer @bind-Open="_drawerOpen"
-                    TestId="@Sub("drawer")"
-                    Variant="VetoDrawerVariant.Responsive"
+        <VetoDrawer @bind-Open="_drawerOpen" TestId="@Sub("drawer")" Variant="VetoDrawerVariant.Responsive"
                     Width="@DrawerWidth">
             <VetoNavMenu Items="Items" TestId="@Sub("nav")" Label="Documentation" />
         </VetoDrawer>

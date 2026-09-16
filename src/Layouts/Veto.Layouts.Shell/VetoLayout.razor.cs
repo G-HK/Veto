@@ -45,8 +45,8 @@ public partial class VetoLayout : VetoComponentBase, IDisposable
     protected override void OnInitialized () => State.Changed += OnStateChanged;
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier("fill"), FillViewport);
 
     /// <inheritdoc />

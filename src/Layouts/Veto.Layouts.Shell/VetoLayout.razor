@@ -5,12 +5,8 @@
 @if (Visible)
 {
     <CascadingValue Value="State" IsFixed="true">
-        <div @ref="RootElement"
-             @attributes="InnerAttributes"
-             id="@ElementId"
-             class="@CssClass"
-             style="@CssStyle"
-             data-testid="@TestId">
+        <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+             class="@CssClass" style="@CssStyle" data-testid="@TestId">
             @ChildContent
         </div>
     </CascadingValue>

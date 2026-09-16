@@ -5,7 +5,7 @@ namespace Veto.Layouts.Shell;
 
 /// <summary>
 /// The content region of a <see cref="VetoLayout"/>. Offsets itself from the app bar and the
-/// drawer, and owns its own scrolling so the frame around it stays put.
+/// drawer, and owns its own scrolling so the fsrame around it stays put.
 /// </summary>
 public partial class VetoMainContent : VetoComponentBase, IDisposable
 {
@@ -28,13 +28,8 @@ public partial class VetoMainContent : VetoComponentBase, IDisposable
     public bool Scrollable { get; set; } = true;
 
     /// <inheritdoc />
-    protected override void OnInitialized ()
-    {
-        if (Layout is not null)
-        {
-            Layout.Changed += OnLayoutChanged;
-        }
-    }
+    protected override void OnInitialized () =>
+        Layout?.Changed += OnLayoutChanged;
 
     /// <inheritdoc />
     protected override CssBuilder StartCssClass ()
@@ -58,11 +53,6 @@ public partial class VetoMainContent : VetoComponentBase, IDisposable
     private void OnLayoutChanged () => InvokeAsync(StateHasChanged);
 
     /// <inheritdoc />
-    public void Dispose ()
-    {
-        if (Layout is not null)
-        {
-            Layout.Changed -= OnLayoutChanged;
-        }
-    }
+    public void Dispose () =>
+        Layout?.Changed -= OnLayoutChanged;
 }

@@ -74,8 +74,8 @@ public partial class VetoDockItem : VetoComponentBase, IDisposable
     protected override void OnInitialized () => Dock?.Register(this);
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass("veto-dock__item--active", IsActive)
             .AddClass("veto-dock__item--disabled", Disabled);
 

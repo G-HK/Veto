@@ -44,7 +44,6 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     // with CaptureUnmatchedValues, and satisfies IVetoComponent as-is.
 
     /// <inheritdoc />
-    /// <inheritdoc />
     [Parameter]
     public string? RootWidth { get; set; }
 
@@ -206,9 +205,9 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     /// </summary>
     protected string? DescribedBy => HasErrors
         ? ErrorId
-        : string.IsNullOrWhiteSpace(HelperText)
-            ? null
-            : HelperId;
+        : !string.IsNullOrWhiteSpace(HelperText)
+            ? HelperId
+            : null;
 
     /// <summary>
     /// The final <c>class</c> value for the root element. Named <c>RootCssClass</c> rather than

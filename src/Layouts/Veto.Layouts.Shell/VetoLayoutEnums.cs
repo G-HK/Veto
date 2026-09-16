@@ -81,14 +81,15 @@ public static class VetoShellExtensions
     public static string ToModifier ( this VetoDrawerVariant variant ) => variant.ToString().ToLowerInvariant();
 
     /// <summary>Returns the modifier suffix for a breakpoint, e.g. <c>md</c>.</summary>
-    public static string ToModifier ( this VetoBreakpoint breakpoint ) => breakpoint switch
-    {
-        VetoBreakpoint.Small => "sm",
-        VetoBreakpoint.Large => "lg",
-        _ => "md"
-    };
+    public static string ToModifier ( this VetoBreakpoint breakpoint ) =>
+        breakpoint switch
+        {
+            VetoBreakpoint.Small => "sm",
+            VetoBreakpoint.Large => "lg",
+            _ => "md"
+        };
 
     /// <summary>True when the anchor runs down a side rather than across the top or bottom.</summary>
-    public static bool IsVertical ( this VetoAnchor anchor )
-        => anchor is VetoAnchor.Left or VetoAnchor.Right;
+    public static bool IsVertical ( this VetoAnchor anchor ) =>
+        anchor is VetoAnchor.Left or VetoAnchor.Right;
 }
