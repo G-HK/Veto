@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Layouts.DockLayout</PackageId>
+    <Description>Ready-made dock page layout for Veto.</Description>
+    <RootNamespace>Veto.Layouts.DockLayout</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\Veto.Layouts.Dock\Veto.Layouts.Dock.csproj" />
+  </ItemGroup>
+
+</Project>

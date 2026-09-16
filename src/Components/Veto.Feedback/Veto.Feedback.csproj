@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Feedback</PackageId>
+    <Description>Spinner, Progress, Skeleton and LoadingOverlay components for Veto.</Description>
+    <RootNamespace>Veto.Components.Feedback</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+  </ItemGroup>
+
+</Project>

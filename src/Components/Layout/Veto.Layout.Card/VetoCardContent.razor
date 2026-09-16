@@ -3,10 +3,6 @@
 
 @if (Visible)
 {
-    <div @ref="RootElement"
-         @attributes="InnerAttributes"
-         id="@ElementId"
-         class="@CssClass"
-         style="@CssStyle"
-         data-testid="@TestId">@ChildContent</div>
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+         class="@CssClass" style="@CssStyle" data-testid="@TestId">@ChildContent</div>
 }

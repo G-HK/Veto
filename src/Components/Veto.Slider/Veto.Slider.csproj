@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Slider</PackageId>
+    <Description>Range slider component with marks for Veto.</Description>
+    <RootNamespace>Veto.Components.Slider</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+  </ItemGroup>
+
+</Project>

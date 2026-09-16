@@ -31,8 +31,7 @@ public sealed partial record VetoTheme
     public string? FontMono { get; init; }
 
     /// <summary>True when at least one token is overridden and a style block is worth rendering.</summary>
-    public bool HasOverrides
-        => Light.HasOverrides || Dark.HasOverrides
+    public bool HasOverrides => Light.HasOverrides || Dark.HasOverrides
            || RadiusMedium is not null || FontSans is not null || FontMono is not null;
 
     /// <summary>
@@ -42,9 +41,9 @@ public sealed partial record VetoTheme
     /// </summary>
     public string ToCss ()
     {
-        var css = new StringBuilder();
+        StringBuilder css = new();
+        StringBuilder root = new();
 
-        var root = new StringBuilder();
         AppendPalette(root, Light);
         Append(root, "--veto-radius-md", RadiusMedium);
         Append(root, "--veto-font-sans", FontSans);
@@ -55,7 +54,7 @@ public sealed partial record VetoTheme
             css.Append(":root{").Append(root).Append('}');
         }
 
-        var dark = new StringBuilder();
+        StringBuilder dark = new();
         AppendPalette(dark, Dark);
 
         if (dark.Length > 0)
@@ -101,7 +100,7 @@ public sealed partial record VetoTheme
     private static bool IsSafeValue ( string? value )
         => !string.IsNullOrWhiteSpace(value) && SafeValue().IsMatch(value);
 
-    [GeneratedRegex( @"^[^<>{};@\\]{1,120}$" )]
+    [GeneratedRegex(@"^[^<>{};@\\]{1,120}$")]
     private static partial Regex SafeValue ();
 }
 
@@ -148,8 +147,8 @@ public sealed record VetoPalette
     public string? Border { get; init; }
 
     /// <summary>True when at least one colour in this palette is set.</summary>
-    public bool HasOverrides
-        => Primary is not null || PrimaryHover is not null || PrimaryContrast is not null
+    public bool HasOverrides =>
+        Primary is not null || PrimaryHover is not null || PrimaryContrast is not null
            || Secondary is not null || Success is not null || Warning is not null
            || Danger is not null || Surface is not null || SurfaceRaised is not null
            || Text is not null || TextMuted is not null || Border is not null;

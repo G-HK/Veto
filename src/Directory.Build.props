@@ -1,0 +1,63 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!--
+    Deliberately NOT IsTrimmable. Marking these assemblies trimmable opts them into member-level
+    trimming in a consumer's Blazor WebAssembly publish, and the [JSInvokable] callbacks on
+    VetoGantt and VetoThemeService are only ever reached by name from JavaScript - the trimmer
+    cannot see those calls, removes the methods, and the component then fails at runtime in the
+    consumer's browser with no build warning. VetoGantt swallows the resulting JSException by
+    design, so it degrades to a silently read-only chart.
+
+    Turning this on is worth doing, but it is a piece of work rather than a flag: every
+    [JSInvokable] member needs a DynamicDependency or a trimmer root, and the IL2026 warnings
+    already reported on the JSON paths in VetoGantt and VetoGauge need addressing first.
+  -->
+
+
+  <!--
+    Shared package metadata. Every project under src/ ships as its own NuGet package, so the
+    only thing a component .csproj states for itself is its id, description and dependencies.
+    Version is not set here: the release workflow passes /p:Version off the git tag, so a local
+    pack produces 1.0.0 and only CI stamps a real version.
+  -->
+  <PropertyGroup>
+    <Authors>Veto</Authors>
+    <Company>Veto</Company>
+    <PackageTags>blazor;wasm;components;ui</PackageTags>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/G-HK/Veto</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/G-HK/Veto</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsPackable)' != 'false'">
+    <None Include="$(MSBuildThisFileDirectory)..\LICENSE.txt" Pack="true" PackagePath="\" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)..\Readme.md" Pack="true" PackagePath="\README.md" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+  </ItemGroup>
+
+</Project>

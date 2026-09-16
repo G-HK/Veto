@@ -32,7 +32,7 @@
     browser would be slower and would find less.
   -->
   <ItemGroup>
-    <ProjectReference Include="..\..\Veto\Veto.csproj" />
+    <ProjectReference Include="..\..\src\Veto\Veto.csproj" />
   </ItemGroup>
 
 </Project>

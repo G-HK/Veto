@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Core</PackageId>
+    <Description>Base classes, builders and shared enums every Veto component is built on.</Description>
+    <RootNamespace>Veto.Core</RootNamespace>
+  </PropertyGroup>
+
+</Project>

@@ -176,7 +176,8 @@
         new("OnClick", "EventCallback<MouseEventArgs>", "—", "Makes the trigger a real action rather than a disclosure.")
     ];
 
-    private const string BasicCode = """
+    private const string BasicCode = 
+        """
         <VetoButtonReveal Icon="@VetoIcons.Share" Label="Share" Round="true">
             <VetoIconButton Icon="@VetoIcons.GitHub"   Label="GitHub"   OnClick="ShareToGitHub" />
             <VetoIconButton Icon="@VetoIcons.X"        Label="X"        OnClick="ShareToX" />
@@ -185,7 +186,8 @@
         </VetoButtonReveal>
         """;
 
-    private const string ActionCode = """
+    private const string ActionCode = 
+        """
         @* With OnClick the trigger is an action, not a disclosure: the click saves, and the
            cluster is the shortcut to the variants. *@
         <VetoButtonReveal Icon="@VetoIcons.Save" Label="Save" ShowLabel="true" OnClick="SaveAsync">
@@ -194,7 +196,8 @@
         </VetoButtonReveal>
         """;
 
-    private const string DirectionCode = """
+    private const string DirectionCode = 
+        """
         <VetoButtonReveal Icon="@VetoIcons.ChevronRight" Label="Out to the end">…</VetoButtonReveal>
 
         <VetoButtonReveal Icon="@VetoIcons.ChevronLeft" Label="Out to the start"
@@ -217,7 +220,8 @@
         </VetoButtonReveal>
         """;
 
-    private const string SizeCode = """
+    private const string SizeCode = 
+        """
         <VetoButtonReveal Icon="@VetoIcons.Plus" Label="Small" Size="VetoSize.Small" Round="true">…</VetoButtonReveal>
         <VetoButtonReveal Icon="@VetoIcons.Plus" Label="Large" Size="VetoSize.Large" Round="true">…</VetoButtonReveal>
 

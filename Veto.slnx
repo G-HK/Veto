@@ -1,12 +1,64 @@
 <Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".github/workflows/release.yml" />
+  </Folder>
   <Folder Name="/.root/">
     <File Path="Directory.Packages.props" />
+    <File Path="src/Directory.Build.props" />
   </Folder>
   <Folder Name="/docs/">
     <File Path="Readme.md" />
   </Folder>
-  <Project Path="tests/Veto.Tests.E2E/Veto.Tests.E2E.csproj" />
-  <Project Path="Veto/Veto.csproj" />
-  <Project Path="VetoWeb/VetoWeb.Client/VetoWeb.Client.csproj" />
-  <Project Path="VetoWeb/VetoWeb/VetoWeb.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/Veto.Core/Veto.Core.csproj" />
+    <Project Path="src/Veto.Incubator/Veto.Incubator.csproj" />
+    <Project Path="src/Veto.Theming/Veto.Theming.csproj" />
+    <Project Path="src/Veto/Veto.csproj" />
+  </Folder>
+  <Folder Name="/src/Components/">
+    <Project Path="src/Components/Veto.BlinkText/Veto.BlinkText.csproj" />
+    <Project Path="src/Components/Veto.Buttons/Veto.Buttons.csproj" />
+    <Project Path="src/Components/Veto.Code/Veto.Code.csproj" />
+    <Project Path="src/Components/Veto.Cron/Veto.Cron.csproj" />
+    <Project Path="src/Components/Veto.Feedback/Veto.Feedback.csproj" />
+    <Project Path="src/Components/Veto.Gantt/Veto.Gantt.csproj" />
+    <Project Path="src/Components/Veto.Gauge/Veto.Gauge.csproj" />
+    <Project Path="src/Components/Veto.Handbook/Veto.Handbook.csproj" />
+    <Project Path="src/Components/Veto.Icon/Veto.Icon.csproj" />
+    <Project Path="src/Components/Veto.Kbd/Veto.Kbd.csproj" />
+    <Project Path="src/Components/Veto.Menu/Veto.Menu.csproj" />
+    <Project Path="src/Components/Veto.Navigation/Veto.Navigation.csproj" />
+    <Project Path="src/Components/Veto.Rating/Veto.Rating.csproj" />
+    <Project Path="src/Components/Veto.Slider/Veto.Slider.csproj" />
+    <Project Path="src/Components/Veto.Switch/Veto.Switch.csproj" />
+    <Project Path="src/Components/Veto.Table/Veto.Table.csproj" />
+    <Project Path="src/Components/Veto.TextBox/Veto.TextBox.csproj" />
+    <Project Path="src/Components/Veto.Tilt/Veto.Tilt.csproj" />
+    <Project Path="src/Components/Veto.Toast/Veto.Toast.csproj" />
+  </Folder>
+  <Folder Name="/src/Components/Layout/">
+    <Project Path="src/Components/Layout/Veto.Layout.Card/Veto.Layout.Card.csproj" />
+    <Project Path="src/Components/Layout/Veto.Layout.Container/Veto.Layout.Container.csproj" />
+    <Project Path="src/Components/Layout/Veto.Layout.Divider/Veto.Layout.Divider.csproj" />
+    <Project Path="src/Components/Layout/Veto.Layout.Grid/Veto.Layout.Grid.csproj" />
+    <Project Path="src/Components/Layout/Veto.Layout.Spacer/Veto.Layout.Spacer.csproj" />
+    <Project Path="src/Components/Layout/Veto.Layout.Stack/Veto.Layout.Stack.csproj" />
+  </Folder>
+  <Folder Name="/src/Layouts/">
+    <Project Path="src/Layouts/Veto.Layouts.Dashboard/Veto.Layouts.Dashboard.csproj" />
+    <Project Path="src/Layouts/Veto.Layouts.DashboardLayout/Veto.Layouts.DashboardLayout.csproj" />
+    <Project Path="src/Layouts/Veto.Layouts.Dock/Veto.Layouts.Dock.csproj" />
+    <Project Path="src/Layouts/Veto.Layouts.DockLayout/Veto.Layouts.DockLayout.csproj" />
+    <Project Path="src/Layouts/Veto.Layouts.DocsLayout/Veto.Layouts.DocsLayout.csproj" />
+    <Project Path="src/Layouts/Veto.Layouts.Shell/Veto.Layouts.Shell.csproj" />
+  </Folder>
+  <Folder Name="/web/">
+    <Project Path="VetoWeb/VetoWeb.Client/VetoWeb.Client.csproj" />
+    <Project Path="VetoWeb/VetoWeb/VetoWeb.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Veto.Tests.E2E/Veto.Tests.E2E.csproj" />
+  </Folder>
 </Solution>

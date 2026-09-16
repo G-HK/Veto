@@ -208,7 +208,7 @@ public partial class VetoDrawer : VetoComponentBase, IAsyncDisposable
 
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto/veto-layout.js");
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Layouts.Shell/veto-layout.js");
 
             if (!await _module.InvokeAsync<bool>("matchesMinWidth", BreakpointPixels))
             {
@@ -233,7 +233,7 @@ public partial class VetoDrawer : VetoComponentBase, IAsyncDisposable
     {
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto/veto-layout.js");
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Layouts.Shell/veto-layout.js");
             await _module.InvokeVoidAsync("setScrollLock", locked);
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException or JSDisconnectedException)

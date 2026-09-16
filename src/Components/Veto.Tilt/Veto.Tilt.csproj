@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Tilt</PackageId>
+    <Description>3D tilt-on-hover wrapper component for Veto.</Description>
+    <RootNamespace>Veto.Components.Tilt</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\Layout\Veto.Layout.Card\Veto.Layout.Card.csproj" />
+  </ItemGroup>
+
+</Project>

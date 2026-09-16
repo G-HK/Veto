@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Switch</PackageId>
+    <Description>Toggle switch component for Veto.</Description>
+    <RootNamespace>Veto.Components.Switch</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\Veto.Icon\Veto.Icon.csproj" />
+    <ProjectReference Include="..\Veto.TextBox\Veto.TextBox.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.TextBox</PackageId>
+    <Description>Text input component for Veto.</Description>
+    <RootNamespace>Veto.Components.TextBox</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+  </ItemGroup>
+
+</Project>

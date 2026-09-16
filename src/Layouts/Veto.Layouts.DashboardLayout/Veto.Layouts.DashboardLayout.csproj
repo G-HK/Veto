@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Layouts.DashboardLayout</PackageId>
+    <Description>Ready-made dashboard page layout for Veto.</Description>
+    <RootNamespace>Veto.Layouts.DashboardLayout</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\..\Components\Veto.Buttons\Veto.Buttons.csproj" />
+    <ProjectReference Include="..\..\Components\Veto.Icon\Veto.Icon.csproj" />
+    <ProjectReference Include="..\..\Components\Layout\Veto.Layout.Spacer\Veto.Layout.Spacer.csproj" />
+    <ProjectReference Include="..\..\Components\Veto.Navigation\Veto.Navigation.csproj" />
+    <ProjectReference Include="..\Veto.Layouts.Dashboard\Veto.Layouts.Dashboard.csproj" />
+    <ProjectReference Include="..\Veto.Layouts.Shell\Veto.Layouts.Shell.csproj" />
+  </ItemGroup>
+
+</Project>

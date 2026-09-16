@@ -38,26 +38,12 @@ public enum VetoOverflow
 /// something, without a wrapper element whose only job is to hold a style attribute.
 /// </para>
 /// </remarks>
-internal readonly record struct VetoBox (
-    string? Width,
-    string? Height,
-    string? MinWidth,
-    string? MaxWidth,
-    string? MinHeight,
-    string? MaxHeight,
-    VetoSpacing? Margin,
-    VetoSpacing? Padding,
-    VetoOverflow? Overflow,
-    string? Top,
-    string? Right,
-    string? Bottom,
-    string? Left,
-    int? ZIndex,
-    bool PositionsItself )
+internal readonly record struct VetoBox ( string? Width, string? Height, string? MinWidth, string? MaxWidth, string? MinHeight, string? MaxHeight, VetoSpacing? Margin, VetoSpacing? Padding, VetoOverflow? Overflow, string? Top, string? Right, string? Bottom, string? Left, int? ZIndex, bool PositionsItself )
 {
     /// <summary>True when nothing was set and there is no work to do.</summary>
     public bool IsEmpty =>
-        Width is null && Height is null && MinWidth is null && MaxWidth is null
+        Width is null && Height is null
+        && MinWidth is null && MaxWidth is null
         && MinHeight is null && MaxHeight is null
         && Margin is null && Padding is null && Overflow is null
         && !HasOffset && !ZIndex.HasValue;

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Layouts.Shell</PackageId>
+    <Description>App shell layout: Layout, AppBar, Drawer, MainContent and Footer for Veto.</Description>
+    <RootNamespace>Veto.Layouts.Shell</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\..\Components\Veto.Navigation\Veto.Navigation.csproj" />
+    <ProjectReference Include="..\..\Components\Layout\Veto.Layout.Spacer\Veto.Layout.Spacer.csproj" />
+  </ItemGroup>
+
+</Project>

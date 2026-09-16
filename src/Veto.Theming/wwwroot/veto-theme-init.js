@@ -2,7 +2,7 @@
 //
 // Add this to <head>, as a plain synchronous script, BEFORE any stylesheet link:
 //
-//   <script src="_content/Veto/veto-theme-init.js"></script>
+//   <script src="_content/Veto.Theming/veto-theme-init.js"></script>
 //
 // It applies the remembered theme before the first paint. Without it a prerendered page
 // renders light, then snaps to dark once WebAssembly boots - visible on every navigation.

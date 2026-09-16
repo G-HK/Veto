@@ -135,7 +135,7 @@ public sealed class VetoThemeService : IVetoThemeService, IAsyncDisposable
     {
         try
         {
-            return await _js.InvokeAsync<IJSObjectReference>("import", "./_content/Veto/veto-theme.js");
+            return await _js.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Theming/veto-theme.js");
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException or JSDisconnectedException)
         {

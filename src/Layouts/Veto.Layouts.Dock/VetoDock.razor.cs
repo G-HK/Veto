@@ -194,7 +194,7 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
     {
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto/veto-dock.js");
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Layouts.Dock/veto-dock.js");
             await _module.InvokeVoidAsync("attach", RootElement, new
             {
                 magnification = Magnification,

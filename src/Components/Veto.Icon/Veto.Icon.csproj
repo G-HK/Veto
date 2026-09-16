@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Icon</PackageId>
+    <Description>Icon component and the built-in Veto icon set.</Description>
+    <RootNamespace>Veto.Components.Icon</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+  </ItemGroup>
+
+</Project>

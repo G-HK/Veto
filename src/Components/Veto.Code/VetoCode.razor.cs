@@ -55,7 +55,7 @@ public partial class VetoCode : VetoComponentBase, IAsyncDisposable
 
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto/veto-code.js");
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Code/veto-code.js");
             _copied = await _module.InvokeAsync<bool>("copyText", Code);
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException or JSDisconnectedException)

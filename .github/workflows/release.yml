@@ -1,0 +1,80 @@
+name: release
+
+# Tag the commit to release it: `git tag v1.2.0 && git push --tags`.
+# Every package ships at that one version, and the meta package pins its 33 component
+# dependencies to it, so a consumer can never end up with a mismatched set.
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Required for Trusted Publishing. Without it the OIDC token request fails silently and the
+  # NuGet login step comes back with no key.
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    # Optional: create a `nuget` environment in repo settings with a required reviewer to gate
+    # the push behind a manual approval. Remove this line if you would rather it just run.
+    environment: nuget
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Restore
+        run: dotnet restore Veto.slnx
+
+      - name: Build
+        run: dotnet build Veto.slnx -c Release --no-restore -p:Version=${{ steps.version.outputs.VERSION }}
+
+      - name: Install Playwright browsers
+        run: pwsh tests/Veto.Tests.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+      - name: Test
+        run: dotnet test tests/Veto.Tests.E2E -c Release --no-build
+
+      - name: Pack
+        run: dotnet pack Veto.slnx -c Release --no-build -o ${{ runner.temp }}/nupkgs -p:Version=${{ steps.version.outputs.VERSION }}
+
+      - name: Verify package contents
+        shell: pwsh
+        run: ./tools/CheckPackageContainsStaticAssets.ps1 -PackageDirectory ${{ runner.temp }}/nupkgs
+
+      # Trusted Publishing: exchanges a GitHub OIDC token for a NuGet key that lives one hour.
+      # Set this up first at nuget.org > your account > Trusted Publishing, registering this
+      # repository and this workflow file. There is no API key to store, which matters now that
+      # nuget.org caps new API keys at 30 days.
+      - name: Log in to NuGet
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: YOUR_NUGET_ORG_USERNAME # <- replace with the nuget.org account that owns Veto
+
+      # One glob pushes all 34 packages. --skip-duplicate keeps the job re-runnable if it fails
+      # partway through: the packages already up are skipped rather than failing the whole run.
+      - name: Publish to NuGet
+        run: >
+          dotnet nuget push "${{ runner.temp }}/nupkgs/*.nupkg"
+          --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkgs-${{ steps.version.outputs.VERSION }}
+          path: ${{ runner.temp }}/nupkgs/*

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Rating</PackageId>
+    <Description>Star rating component for Veto.</Description>
+    <RootNamespace>Veto.Components.Rating</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\Veto.Icon\Veto.Icon.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -19,8 +19,14 @@ namespace Veto.Core;
 /// <c>&lt;input&gt;</c> or <c>&lt;img&gt;</c> cannot host a pseudo-element - which is why
 /// <c>VetoTextBox</c> carries the effect on its wrapper rather than on the field itself.
 /// </para>
+/// <para>
+/// Public rather than internal because the components that use it ship as their own packages
+/// and so compile into their own assemblies - <c>VetoLink</c> and <c>VetoNavMenu</c> reach for
+/// <see cref="SafeColor"/> from Veto.Navigation. It is a building block for component authors,
+/// not something an app is expected to construct.
+/// </para>
 /// </remarks>
-internal readonly partial record struct VetoEffects ( bool Glow, string? GlowColor, bool Ping, string? PingColor )
+public readonly partial record struct VetoEffects ( bool Glow, string? GlowColor, bool Ping, string? PingColor )
 {
     /// <summary>True when neither effect is on and there is nothing to add.</summary>
     public bool IsEmpty => !Glow && !Ping;
@@ -47,7 +53,7 @@ internal readonly partial record struct VetoEffects ( bool Glow, string? GlowCol
     /// concatenated into a <c>style</c> attribute, and a colour has no reason to contain a
     /// semicolon or an angle bracket.
     /// </summary>
-    internal static string? SafeColor ( string? value ) =>
+    public static string? SafeColor ( string? value ) =>
         !string.IsNullOrWhiteSpace(value)
             && SafeValue().IsMatch(value)
                 ? value

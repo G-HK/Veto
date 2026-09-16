@@ -5,7 +5,7 @@
  * declared here - no component may hard-code a color, radius, or spacing value.
  * Consumers add this one stylesheet:
  *
- *   <link rel="stylesheet" href="_content/Veto/VetoStyles.css" />
+ *   <link rel="stylesheet" href="_content/Veto.Core/VetoStyles.css" />
  *
  * Theming: the full light palette lives on bare :root. Dark values are declared
  * twice - once behind an explicit [data-veto-theme="dark"] on the root element,

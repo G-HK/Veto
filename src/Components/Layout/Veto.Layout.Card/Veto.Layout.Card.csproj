@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Layout.Card</PackageId>
+    <Description>Card component and its header, title, description, content and footer sections for Veto.</Description>
+    <RootNamespace>Veto.Components.Layout</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\..\Veto.Buttons\Veto.Buttons.csproj" />
+  </ItemGroup>
+
+</Project>

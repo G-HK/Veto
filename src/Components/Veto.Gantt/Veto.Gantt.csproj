@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Gantt</PackageId>
+    <Description>Interactive Gantt chart component with drag, zoom and export for Veto.</Description>
+    <RootNamespace>Veto.Components.Gantt</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\Veto.Buttons\Veto.Buttons.csproj" />
+    <ProjectReference Include="..\Veto.Feedback\Veto.Feedback.csproj" />
+    <ProjectReference Include="..\Veto.Icon\Veto.Icon.csproj" />
+    <ProjectReference Include="..\Veto.Menu\Veto.Menu.csproj" />
+    <ProjectReference Include="..\Veto.TextBox\Veto.TextBox.csproj" />
+  </ItemGroup>
+
+</Project>

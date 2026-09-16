@@ -58,8 +58,8 @@ internal sealed class VetoComponentCore ( string rootClass )
     /// Component-specific modifiers are added by the caller before these, so consumer classes
     /// always win.
     /// </summary>
-    public static CssBuilder BuildCssClass ( CssBuilder builder, string? @class, IReadOnlyDictionary<string, object>? attributes, VetoEffects effects = default )
-        => effects
+    public static CssBuilder BuildCssClass ( CssBuilder builder, string? @class, IReadOnlyDictionary<string, object>? attributes, VetoEffects effects = default ) =>
+        effects
             .Apply(builder)
             .AddClass(@class)
             .AddClassFromAttributes(attributes);
@@ -71,9 +71,9 @@ internal sealed class VetoComponentCore ( string rootClass )
     /// </summary>
     public StyleBuilder BuildStyle ( StyleBuilder builder, string? style, IReadOnlyDictionary<string, object>? attributes, VetoEffects effects = default, VetoBox box = default ) =>
         box
-            .Apply(effects.Apply(builder))
-            .AddRaw(style)
-            .AddStyleFromAttributes(attributes);
+          .Apply(effects.Apply(builder))
+          .AddRaw(style)
+          .AddStyleFromAttributes(attributes);
 
     /// <summary>
     /// The splatted attributes with <c>class</c> and <c>style</c> removed, so a component can
@@ -119,9 +119,9 @@ internal sealed class VetoComponentCore ( string rootClass )
             return stripped;
         }
 
-        var merged = stripped is null
-            ? []
-            : new Dictionary<string, object>(stripped);
+        var merged = stripped is not null
+            ? new Dictionary<string, object>(stripped)
+            : [];
 
         merged["title"] = tooltip;
 

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.BlinkText</PackageId>
+    <Description>Blinking text component for Veto.</Description>
+    <RootNamespace>Veto.Components.BlinkText</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+  </ItemGroup>
+
+</Project>

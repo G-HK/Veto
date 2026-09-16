@@ -107,7 +107,7 @@ public partial class VetoTilt3D : VetoComponentBase, IAsyncDisposable
     {
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto/veto-tilt.js");
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Tilt/veto-tilt.js");
             await _module.InvokeVoidAsync("attach", RootElement, new
             {
                 maxTilt = MaxTilt,

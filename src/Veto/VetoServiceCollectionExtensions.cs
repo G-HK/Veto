@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Veto.Components.Toast;
 using Veto.Theming;
 
@@ -13,21 +12,21 @@ public static class VetoServiceCollectionExtensions
     /// <code>builder.Services.AddVeto();</code>
     /// In a Blazor Web App this belongs in <b>both</b> the server and the client project, so
     /// the components resolve during prerendering as well as after WebAssembly takes over.
+    /// <para>
+    /// This is the meta package's convenience over the individual ones: it calls every
+    /// component package's own registration for you. Installing components one by one
+    /// instead? Call theirs directly - <see cref="VetoThemingServiceCollectionExtensions.AddVetoTheming"/>
+    /// and <see cref="VetoToastServiceCollectionExtensions.AddVetoToast"/> are the only two
+    /// packages that register anything.
+    /// </para>
     /// </summary>
     /// <param name="services">The app's service collection.</param>
     /// <returns>The same collection, for chaining.</returns>
     public static IServiceCollection AddVeto ( this IServiceCollection services )
     {
         ArgumentNullException.ThrowIfNull(services);
-
-        // Scoped, not singleton: in a server-rendered circuit the theme belongs to one user's
-        // session, and a singleton would leak one visitor's choice to everyone.
-        services.TryAddScoped<IVetoThemeService, VetoThemeService>();
-
-        // Same reasoning for toasts: the queue belongs to one user's session. A singleton
-        // would show one visitor's notifications to everyone else on the server.
-        services.TryAddScoped<VetoToastService>();
-        services.TryAddScoped<IVetoToastService>(sp => sp.GetRequiredService<VetoToastService>());
+        services.AddVetoTheming();
+        services.AddVetoToast();
 
         return services;
     }

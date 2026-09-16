@@ -5,26 +5,16 @@
 {
     @if (IsInteractive)
     {
-        <button @ref="RootElement"
-                @attributes="InnerAttributes"
-                id="@ElementId"
-                class="@CssClass"
-                style="@CssStyle"
-                data-testid="@TestId"
-                type="button"
-                disabled="@Disabled"
+        <button @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+                style="@CssStyle" data-testid="@TestId" type="button" disabled="@Disabled"
                 @onclick="OnClick">
             @RenderBody()
         </button>
     }
     else
     {
-        <div @ref="RootElement"
-             @attributes="InnerAttributes"
-             id="@ElementId"
-             class="@CssClass"
-             style="@CssStyle"
-             data-testid="@TestId">
+        <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+             style="@CssStyle" data-testid="@TestId"> 
             @RenderBody()
         </div>
     }

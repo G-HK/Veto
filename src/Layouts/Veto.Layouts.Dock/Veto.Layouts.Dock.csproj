@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Layouts.Dock</PackageId>
+    <Description>Dock and DockItem components for Veto.</Description>
+    <RootNamespace>Veto.Layouts.Dock</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\..\Components\Veto.Icon\Veto.Icon.csproj" />
+    <ProjectReference Include="..\Veto.Layouts.Shell\Veto.Layouts.Shell.csproj" />
+  </ItemGroup>
+
+</Project>

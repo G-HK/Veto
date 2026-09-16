@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Navigation</PackageId>
+    <Description>Link, NavMenu and Breadcrumbs components for Veto.</Description>
+    <RootNamespace>Veto.Components.Navigation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\Veto.Icon\Veto.Icon.csproj" />
+  </ItemGroup>
+
+</Project>

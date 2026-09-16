@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.Layout.Grid</PackageId>
+    <Description>Grid and GridItem layout primitives for Veto.</Description>
+    <RootNamespace>Veto.Components.Layout</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\Veto.Layout.Card\Veto.Layout.Card.csproj" />
+  </ItemGroup>
+
+</Project>

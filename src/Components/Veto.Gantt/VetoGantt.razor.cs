@@ -800,7 +800,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     {
         try
         {
-            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto/veto-gantt.js");
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Gantt/veto-gantt.js");
             await _module.InvokeVoidAsync(function, args);
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException or JSDisconnectedException)
@@ -977,7 +977,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         try
         {
-            _storeModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto/veto-gantt-store.js");
+            _storeModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Gantt/veto-gantt-store.js");
             _storeBackend = await _storeModule.InvokeAsync<string>("open", PersistenceModuleUrl);
 
             var saved = await _storeModule.InvokeAsync<StoredOverride[]>("load", PersistKey);
@@ -1064,7 +1064,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         try
         {
-            _dragModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto/veto-gantt-drag.js");
+            _dragModule ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Gantt/veto-gantt-drag.js");
             _selfRef ??= DotNetObjectReference.Create(this);
 
             await _dragModule.InvokeVoidAsync("attach", _grid, _selfRef, new

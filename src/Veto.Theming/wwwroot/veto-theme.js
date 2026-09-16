@@ -18,7 +18,9 @@ function apply(mode) {
 
     if (mode === 'Light' || mode === 'Dark') {
         root.setAttribute('data-veto-theme', mode.toLowerCase());
-    } else {
+    }
+    else
+    {
         root.removeAttribute('data-veto-theme');
     }
 }
@@ -27,7 +29,9 @@ function store(mode) {
     try {
         if (mode === 'System') {
             localStorage.removeItem(STORAGE_KEY);
-        } else {
+        }
+        else
+        {
             localStorage.setItem(STORAGE_KEY, mode);
         }
     } catch {
@@ -40,7 +44,9 @@ function storedMode() {
     try {
         const value = localStorage.getItem(STORAGE_KEY);
         return value === 'Light' || value === 'Dark' ? value : 'System';
-    } catch {
+    }
+    catch
+    {
         return 'System';
     }
 }

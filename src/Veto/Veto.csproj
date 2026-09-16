@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto</PackageId>
+    <Description>Every Veto component in one package: a dependency-free component library for Blazor WebAssembly apps. Prefer an individual Veto.* package if you only need one component.</Description>
+    <RootNamespace>Veto</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\Veto.Theming\Veto.Theming.csproj" />
+    <ProjectReference Include="..\Components\Veto.Icon\Veto.Icon.csproj" />
+    <ProjectReference Include="..\Components\Veto.BlinkText\Veto.BlinkText.csproj" />
+    <ProjectReference Include="..\Components\Veto.Buttons\Veto.Buttons.csproj" />
+    <ProjectReference Include="..\Components\Veto.Code\Veto.Code.csproj" />
+    <ProjectReference Include="..\Components\Veto.Cron\Veto.Cron.csproj" />
+    <ProjectReference Include="..\Components\Veto.Feedback\Veto.Feedback.csproj" />
+    <ProjectReference Include="..\Components\Veto.Gauge\Veto.Gauge.csproj" />
+    <ProjectReference Include="..\Components\Veto.Kbd\Veto.Kbd.csproj" />
+    <ProjectReference Include="..\Components\Veto.Menu\Veto.Menu.csproj" />
+    <ProjectReference Include="..\Components\Veto.Rating\Veto.Rating.csproj" />
+    <ProjectReference Include="..\Components\Veto.Slider\Veto.Slider.csproj" />
+    <ProjectReference Include="..\Components\Veto.TextBox\Veto.TextBox.csproj" />
+    <ProjectReference Include="..\Components\Veto.Switch\Veto.Switch.csproj" />
+    <ProjectReference Include="..\Components\Veto.Table\Veto.Table.csproj" />
+    <ProjectReference Include="..\Components\Veto.Toast\Veto.Toast.csproj" />
+    <ProjectReference Include="..\Components\Layout\Veto.Layout.Card\Veto.Layout.Card.csproj" />
+    <ProjectReference Include="..\Components\Layout\Veto.Layout.Container\Veto.Layout.Container.csproj" />
+    <ProjectReference Include="..\Components\Layout\Veto.Layout.Divider\Veto.Layout.Divider.csproj" />
+    <ProjectReference Include="..\Components\Layout\Veto.Layout.Grid\Veto.Layout.Grid.csproj" />
+    <ProjectReference Include="..\Components\Layout\Veto.Layout.Spacer\Veto.Layout.Spacer.csproj" />
+    <ProjectReference Include="..\Components\Layout\Veto.Layout.Stack\Veto.Layout.Stack.csproj" />
+    <ProjectReference Include="..\Components\Veto.Tilt\Veto.Tilt.csproj" />
+    <ProjectReference Include="..\Components\Veto.Navigation\Veto.Navigation.csproj" />
+    <ProjectReference Include="..\Components\Veto.Gantt\Veto.Gantt.csproj" />
+    <ProjectReference Include="..\Layouts\Veto.Layouts.Shell\Veto.Layouts.Shell.csproj" />
+    <ProjectReference Include="..\Layouts\Veto.Layouts.Dashboard\Veto.Layouts.Dashboard.csproj" />
+    <ProjectReference Include="..\Layouts\Veto.Layouts.DashboardLayout\Veto.Layouts.DashboardLayout.csproj" />
+    <ProjectReference Include="..\Layouts\Veto.Layouts.Dock\Veto.Layouts.Dock.csproj" />
+    <ProjectReference Include="..\Layouts\Veto.Layouts.DockLayout\Veto.Layouts.DockLayout.csproj" />
+    <ProjectReference Include="..\Layouts\Veto.Layouts.DocsLayout\Veto.Layouts.DocsLayout.csproj" />
+    <ProjectReference Include="..\Components\Veto.Handbook\Veto.Handbook.csproj" />
+  </ItemGroup>
+
+</Project>
