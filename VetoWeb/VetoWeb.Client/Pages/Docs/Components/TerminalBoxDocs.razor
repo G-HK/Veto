@@ -1,0 +1,120 @@
+@page "/docs/components/terminal-box"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.TerminalBox
+
+<PageTitle>Terminal box — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components" Title="Terminal box"
+          Lead="A terminal window for the 'here is the command to run' block on a landing page or an installation guide. 
+                It is presentation, not an emulator - nothing is executed, and the typing animation plays over text that is already on the page.">
+
+    <DemoBlock TestId="demo-basic" Title="One command"
+               Description="The common shape is one line long, so Command is a shorthand for a single child line. 
+                            The copy button takes the command without the prompt - a prompt is decoration, and pasting one into a shell is an error."
+               Code="@BasicCode">
+        <VetoTerminalBox TestId="basic" Command="dotnet add package Veto" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-typed" Title="Typing"
+               Description="Typed reveals the command a character at a time. It is a width animation stepped once per character, 
+                            over text that is already in the DOM - nothing is inserted as it plays, so the text stays selectable and a screen reader is given the whole command at once rather than watching it arrive. 
+                            Looping suits a landing page, a page the reader is working through wants it to settle, which is what Loop=false does."
+               Code="@TypedCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoTerminalBox TestId="typed-loop" Title="Looping" Command="npx create-veto-app@latest" Typed="true" />
+            <VetoTerminalBox TestId="typed-once" Title="Types once, then stays" Command="dotnet new blazorwasm -o MyApp" 
+                             Typed="true" Loop="false" TypingDuration="3s" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-session" Title="A session" 
+               Description="Child lines for anything longer than one command. Output is drawn muted and is deliberately left out of what the copy button collects,
+                            nobody wants a program's own chatter pasted back into their shell. A line that is only output belongs to the program, so give it no prompt."
+               Code="@SessionCode">
+        <VetoTerminalBox TestId="session" Title="bash">
+            <VetoTerminalLine Command="dotnet add package Veto" TestId="session-install" />
+            <VetoTerminalLine Prompt="@null" Output="info : Adding PackageReference for 'Veto' into project." TestId="session-output" />
+            <VetoTerminalLine Command="dotnet run" TestId="session-run" />
+            <VetoTerminalLine Prompt="@null" Output="Now listening on: http://localhost:5000" TestId="session-listening" />
+        </VetoTerminalBox>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-chrome" Title="The window itself"
+               Description="Title and Icon name the window - a shell, a container, a remote host. 
+                            ShowHeader=false takes the bar away entirely, for a page that has already said what it is, 
+                            and the body then carries the rounding."
+               Code="@ChromeCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoTerminalBox TestId="chrome-named" Title="deploy@veto-prod" Icon="@VetoIcons.Server" Command="systemctl restart veto" />
+            <VetoTerminalBox TestId="chrome-headless" ShowHeader="false" Command="git clone https://github.com/G-HK/Veto.git" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-copy"
+               Title="What copy takes"
+               Description="By default the commands in the window, one per line, gathered from what is actually rendered. 
+                            CopyText overrides that outright - for a window showing an abbreviated command where the real one is longer, 
+                            or where the thing worth copying was never on screen."
+               Code="@CopyCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoTerminalBox TestId="copy-explicit" Title="Copies more than it shows"
+                             Command="docker compose up" CopyText="docker compose --profile full --env-file .env.production up --build --detach"
+                             OnCopied="OnCopied" />
+
+            <VetoTerminalBox TestId="copy-none" Title="No copy button"
+                             Copyable="false" Command="rm -rf ./bin ./obj" />
+
+            <span data-testid="copy-result">@(_copyResult is null ? "Not copied yet" : $"Copy accepted: {_copyResult}")</span>
+        </VetoStack>
+    </DemoBlock>
+
+</DocsPage>
+
+@code {
+    private bool? _copyResult;
+
+    private void OnCopied ( bool accepted ) => _copyResult = accepted;
+
+    private const string BasicCode = 
+        """
+        <VetoTerminalBox Command="dotnet add package Veto" />
+        """;
+
+    private const string TypedCode = 
+        """
+        @* Types in, holds, clears, repeats. *@
+        <VetoTerminalBox Command="npx create-veto-app@latest" Typed="true" />
+
+        @* Types once and stays put. *@
+        <VetoTerminalBox Command="dotnet new blazorwasm -o MyApp"
+                         Typed="true" Loop="false" TypingDuration="3s" />
+        """;
+
+    private const string SessionCode = 
+        """
+        <VetoTerminalBox Title="bash">
+            <VetoTerminalLine Command="dotnet add package Veto" />
+            <VetoTerminalLine Prompt="@null" Output="info : Adding PackageReference for 'Veto' into project." />
+            <VetoTerminalLine Command="dotnet run" />
+            <VetoTerminalLine Prompt="@null" Output="Now listening on: http://localhost:5000" />
+        </VetoTerminalBox>
+        """;
+
+    private const string ChromeCode = 
+        """
+        <VetoTerminalBox Title="deploy@veto-prod" Icon="@VetoIcons.Server"
+                         Command="systemctl restart veto" />
+
+        <VetoTerminalBox ShowHeader="false"
+                         Command="git clone https://github.com/G-HK/Veto.git" />
+        """;
+
+    private const string CopyCode = 
+        """
+        @* Copies the full command, not the short one on screen. *@
+        <VetoTerminalBox Command="docker compose up"
+                         CopyText="docker compose --profile full --env-file .env.production up --build --detach" />
+
+        <VetoTerminalBox Command="rm -rf ./bin ./obj" Copyable="false" />
+        """;
+}

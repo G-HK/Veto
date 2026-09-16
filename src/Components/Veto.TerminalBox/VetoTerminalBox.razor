@@ -1,0 +1,46 @@
+@namespace Veto.Components.TerminalBox
+@inherits Veto.Core.VetoComponentBase
+@inject IJSRuntime JS
+
+@if (Visible)
+{
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+         class="@CssClass" style="@CssStyle" data-testid="@TestId">
+
+        <div class="veto-terminal-box__frame">
+            @if (ShowHeader)
+            {
+                <hgroup class="veto-terminal-box__head">
+                    <p class="veto-terminal-box__title">
+                        @if (Icon is not null)
+                        {
+                            <VetoIcon Icon="@Icon" Size="VetoIconSize.Small" />
+                        }
+                        @Title
+                    </p>
+
+                    @if (Copyable)
+                    {
+                        <VetoIconButton Icon="@(_copied ? VetoIcons.Check : VetoIcons.Copy)"
+                                        Label="@(_copied ? CopiedLabel : CopyLabel)"
+                                        Size="VetoSize.Small" Class="veto-terminal-box__copy"
+                                        TestId="@(TestId is null ? null : $"{TestId}-copy")"
+                                        OnClick="CopyAsync" />
+                    }
+                </hgroup>
+            }
+
+            <div class="veto-terminal-box__body" data-terminal-body>
+                @if (Command is not null)
+                {
+                    <VetoTerminalLine Prompt="@Prompt" Command="@Command"
+                                      Typed="@Typed" Loop="@Loop"
+                                      TypingDuration="@TypingDuration"
+                                      TestId="@(TestId is null ? null : $"{TestId}-line")" />
+                }
+
+                @ChildContent
+            </div>
+        </div>
+    </div>
+}

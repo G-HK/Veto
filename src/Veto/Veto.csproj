@@ -17,10 +17,12 @@
     <ProjectReference Include="..\Components\Veto.Feedback\Veto.Feedback.csproj" />
     <ProjectReference Include="..\Components\Veto.Gauge\Veto.Gauge.csproj" />
     <ProjectReference Include="..\Components\Veto.Kbd\Veto.Kbd.csproj" />
+    <ProjectReference Include="..\Components\Veto.MagicTextBox\Veto.MagicTextBox.csproj" />
     <ProjectReference Include="..\Components\Veto.Menu\Veto.Menu.csproj" />
     <ProjectReference Include="..\Components\Veto.Rating\Veto.Rating.csproj" />
     <ProjectReference Include="..\Components\Veto.Slider\Veto.Slider.csproj" />
     <ProjectReference Include="..\Components\Veto.TextBox\Veto.TextBox.csproj" />
+    <ProjectReference Include="..\Components\Veto.TerminalBox\Veto.TerminalBox.csproj" />
     <ProjectReference Include="..\Components\Veto.Switch\Veto.Switch.csproj" />
     <ProjectReference Include="..\Components\Veto.Table\Veto.Table.csproj" />
     <ProjectReference Include="..\Components\Veto.Toast\Veto.Toast.csproj" />

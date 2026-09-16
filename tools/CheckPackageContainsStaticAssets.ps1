@@ -47,12 +47,14 @@ $expectedPackages = @(
     'Veto.Handbook'
     'Veto.Icon'
     'Veto.Kbd'
+    'Veto.MagicTextBox'
     'Veto.Menu'
     'Veto.Navigation'
     'Veto.Rating'
     'Veto.Slider'
     'Veto.Switch'
     'Veto.Table'
+    'Veto.TerminalBox'
     'Veto.TextBox'
     'Veto.Tilt'
     'Veto.Toast'
@@ -76,6 +78,8 @@ $expectedAssets = @{
     'Veto.Core'          = @('VetoStyles.css')
     'Veto.Theming'       = @('veto-theme.js', 'veto-theme-init.js')
     'Veto.Code'          = @('veto-code.js')
+    'Veto.MagicTextBox'  = @('veto-magic-textbox.js')
+    'Veto.TerminalBox'   = @('veto-terminal-box.js')
     'Veto.Gantt'         = @('veto-gantt.js', 'veto-gantt-store.js', 'veto-gantt-drag.js')
     'Veto.Tilt'          = @('veto-tilt.js')
     'Veto.Layouts.Dock'  = @('veto-dock.js')

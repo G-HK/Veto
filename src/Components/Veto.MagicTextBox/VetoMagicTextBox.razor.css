@@ -1,0 +1,221 @@
+/* VetoMagicTextBox - a text box that holds its height until you ask it to open. */
+
+.veto-magic-textbox {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+    min-width: 0;
+    font-family: var(--veto-font-sans);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text);
+}
+
+.veto-magic-textbox__label {
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text);
+}
+
+.veto-magic-textbox__required {
+    margin-inline-start: var(--veto-space-1);
+    color: var(--veto-color-danger);
+}
+
+/* The field is the positioning context for the corner clusters. */
+.veto-magic-textbox__field {
+    position: relative;
+    display: flex;
+    min-width: 0;
+}
+
+.veto-magic-textbox__input {
+    /* One line box, in the field's own units - the height calculations below are all
+       multiples of it, and the script measures against the same number of lines. */
+    --veto-magic-textbox-line-box: calc(var(--veto-line-height) * 1em);
+
+    width: 100%;
+    box-sizing: border-box;
+    height: calc(
+        var(--veto-magic-textbox-collapsed-lines, 3) * var(--veto-magic-textbox-line-box)
+        + var(--veto-space-2) * 2);
+    font-family: inherit;
+    font-size: var(--veto-font-size-md);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border);
+    border-radius: var(--veto-radius-md);
+    padding: var(--veto-space-2) var(--veto-space-3);
+    overflow-y: auto;
+
+    /* The open/closed toggle is the way this field changes size; a drag handle in the corner
+       would fight it, and would sit underneath the copy button besides. */
+    resize: none;
+    transition:
+        height var(--veto-transition),
+        border-color var(--veto-transition),
+        box-shadow var(--veto-transition),
+        background-color var(--veto-transition);
+}
+
+/* Open to a fixed number of lines. With no line count the script sets an inline height
+   instead, because no CSS length describes the height of a textarea's content. */
+.veto-magic-textbox--expanded .veto-magic-textbox__input {
+    height: calc(
+        var(--veto-magic-textbox-expanded-lines, var(--veto-magic-textbox-collapsed-lines, 3))
+        * var(--veto-magic-textbox-line-box)
+        + var(--veto-space-2) * 2
+    );
+}
+
+.veto-magic-textbox__input::placeholder {
+    color: var(--veto-color-text-muted);
+}
+
+.veto-magic-textbox__input:hover:not(:disabled):not([readonly]) {
+    border-color: var(--veto-color-border-strong);
+}
+
+.veto-magic-textbox__input:focus-visible {
+    outline: none;
+    border-color: var(--veto-color-primary);
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-magic-textbox__input:disabled {
+    background-color: var(--veto-color-surface-disabled);
+    color: var(--veto-color-text-disabled);
+    cursor: not-allowed;
+}
+
+.veto-magic-textbox__input[readonly] {
+    background-color: var(--veto-color-surface-raised);
+    cursor: default;
+}
+
+/* Corner clusters, laid over the field's top edge. */
+.veto-magic-textbox__corner {
+    position: absolute;
+    top: var(--veto-space-1);
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-1);
+}
+
+.veto-magic-textbox__corner--start {
+    inset-inline-start: var(--veto-space-1);
+}
+
+.veto-magic-textbox__corner--end {
+    inset-inline-end: var(--veto-space-1);
+}
+
+/* A gutter so no line of text ever runs underneath a corner cluster: the cluster's own inset
+   plus roughly a small icon button. Composed from the spacing scale rather than adding a token
+   nothing else would use. The field only reserves the side it actually has content on, so a
+   field with no leading buttons is not indented. */
+.veto-magic-textbox__field:has(.veto-magic-textbox__corner--start) .veto-magic-textbox__input {
+    padding-inline-start: calc(var(--veto-space-6) + var(--veto-space-2));
+}
+
+.veto-magic-textbox__field:has(.veto-magic-textbox__corner--end) .veto-magic-textbox__input {
+    padding-inline-end: calc(var(--veto-space-6) + var(--veto-space-2));
+}
+
+/* The copy button rests hidden and arrives on hover. Focus-within counts too: revealing on
+   hover alone would put the button out of reach of anyone navigating by keyboard. It is only
+   ever transparent, never display:none, so it keeps its place in the tab order. */
+.veto-magic-textbox:not(.veto-magic-textbox--copy-always) .veto-magic-textbox__corner--end {
+    opacity: 0;
+    transition: opacity var(--veto-transition);
+}
+
+.veto-magic-textbox:not(.veto-magic-textbox--copy-always):hover .veto-magic-textbox__corner--end,
+.veto-magic-textbox:not(.veto-magic-textbox--copy-always):focus-within .veto-magic-textbox__corner--end {
+    opacity: 1;
+}
+
+/* Someone who has asked for less motion still needs the button to appear - it is the fade
+   that goes, not the reveal. */
+@media (prefers-reduced-motion: reduce) {
+    .veto-magic-textbox__input,
+    .veto-magic-textbox__corner--end {
+        transition: none;
+    }
+}
+
+.veto-magic-textbox__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--veto-space-1);
+    align-self: flex-start;
+    font-family: inherit;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--veto-radius-sm);
+    padding: var(--veto-space-1) var(--veto-space-2);
+    cursor: pointer;
+    transition: color var(--veto-transition), background-color var(--veto-transition);
+}
+
+.veto-magic-textbox__toggle:hover {
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+}
+
+.veto-magic-textbox__toggle:focus-visible {
+    outline: none;
+    border-color: var(--veto-color-primary);
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-magic-textbox__message {
+    margin: 0;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+}
+
+.veto-magic-textbox__message--error {
+    color: var(--veto-color-danger);
+}
+
+/* Size modifiers */
+.veto-magic-textbox--sm .veto-magic-textbox__input {
+    font-size: var(--veto-font-size-sm);
+    padding: var(--veto-space-1) var(--veto-space-2);
+}
+
+.veto-magic-textbox--lg .veto-magic-textbox__input {
+    font-size: var(--veto-font-size-lg);
+    padding: var(--veto-space-3) var(--veto-space-4);
+}
+
+/* Variant modifiers */
+.veto-magic-textbox--filled .veto-magic-textbox__input {
+    background-color: var(--veto-color-surface-raised);
+    border-color: transparent;
+}
+
+.veto-magic-textbox--text .veto-magic-textbox__input {
+    background-color: transparent;
+    border-width: 0 0 1px 0;
+    border-radius: 0;
+    padding-inline-start: 0;
+}
+
+/* State modifiers */
+.veto-magic-textbox--invalid .veto-magic-textbox__input {
+    border-color: var(--veto-color-danger);
+}
+
+.veto-magic-textbox--invalid .veto-magic-textbox__input:focus-visible {
+    border-color: var(--veto-color-danger);
+    box-shadow: var(--veto-focus-ring-danger);
+}
+
+.veto-magic-textbox--disabled .veto-magic-textbox__label {
+    color: var(--veto-color-text-disabled);
+}

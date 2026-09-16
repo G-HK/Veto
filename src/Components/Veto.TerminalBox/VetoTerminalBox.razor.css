@@ -1,0 +1,78 @@
+/* VetoTerminalBox - the window chrome. The lines inside style themselves; a rule whose
+   subject belongs to a child component would need ::deep and is better written where the
+   child lives. */
+
+.veto-terminal-box {
+    display: block;
+    min-width: 0;
+}
+
+.veto-terminal-box__frame {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--veto-color-terminal-border);
+    border-radius: var(--veto-radius-lg);
+    font-family: var(--veto-font-mono);
+}
+
+.veto-terminal-box__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--veto-space-2);
+    min-height: 40px;
+    margin: 0;
+    padding-inline: var(--veto-space-3);
+    background-color: var(--veto-color-terminal-chrome);
+}
+
+.veto-terminal-box__title {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-2);
+    margin: 0;
+    overflow: hidden;
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    user-select: none;
+    color: var(--veto-color-terminal-muted);
+}
+
+.veto-terminal-box__title > svg {
+    flex: none;
+    color: var(--veto-color-primary);
+}
+
+/* The copy button lives on the terminal's own dark chrome, not on the page's surface, so it
+   cannot inherit the button colours the rest of the library uses. ::deep because the subject
+   of the rule is the child component's own root element. */
+::deep .veto-terminal-box__copy {
+    flex: none;
+    color: var(--veto-color-terminal-muted);
+}
+
+::deep .veto-terminal-box__copy:hover:not(:disabled) {
+    color: var(--veto-color-terminal-text);
+    background-color: rgb(255 255 255 / 0.08);
+}
+
+.veto-terminal-box__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--veto-space-1);
+    padding: var(--veto-space-4);
+    overflow-x: auto;
+    font-size: var(--veto-font-size-md);
+    line-height: var(--veto-line-height);
+    color: var(--veto-color-terminal-text);
+    background-color: var(--veto-color-terminal-surface);
+    white-space: nowrap;
+}
+
+/* With no title bar the body is the whole window, so it carries the rounding itself. */
+.veto-terminal-box--headless .veto-terminal-box__body {
+    border-radius: var(--veto-radius-lg);
+}

@@ -1,0 +1,200 @@
+@page "/docs/components/magic-text-box"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.MagicTextBox
+
+<PageTitle>Magic text box — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components" Title="Magic text box"
+          Lead="A multi-line field that refuses to push the rest of the page around. 
+                It holds itself to a few lines, and grows a toggle only when there is genuinely more text than fits,
+                so a short value looks like an ordinary text box and a long one stays out of the way until asked.">
+
+    <DemoBlock TestId="demo-basic" Title="It opens only when there is something to open"
+               Description="Both fields are configured identically. 
+                            The first has more text than three lines hold, so it offers a toggle,
+                            the second does not, and so does not. The measurement is the browser's, 
+                            taken after the first paint - which is why the toggle arrives a frame late rather than being decided from the string's length, 
+                            a number that tells you nothing about how it wraps."
+               Code="@BasicCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoMagicTextBox TValue="string" TestId="basic-long" Label="Release notes"
+                              @bind-Value="_long" />
+
+            <VetoMagicTextBox TValue="string"
+                              TestId="basic-short"
+                              Label="Summary"
+                              @bind-Value="_short" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-copy"
+               Title="The copy button"
+               Description="It rests hidden and arrives on hover, because on most fields it is an occasional convenience rather than part of the furniture. Always is for the field whose whole point is to be copied - a generated key, a connection string - where hiding the button until hover hides the feature. Either way it also appears on keyboard focus: revealing on hover alone would put it out of reach of anyone not using a pointer."
+               Code="@CopyCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoMagicTextBox TValue="string"
+                              TestId="copy-hover"
+                              Label="Hover to reveal (the default)"
+                              @bind-Value="_short" />
+
+            <VetoMagicTextBox TValue="string"
+                              TestId="copy-always"
+                              Label="Always visible"
+                              CopyReveal="VetoCopyReveal.Always"
+                              @bind-Value="_token" />
+
+            <VetoMagicTextBox TValue="string"
+                              TestId="copy-none"
+                              Label="No copy button"
+                              Copyable="false"
+                              @bind-Value="_short" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-corners"
+               Title="Corner slots"
+               Description="Your own buttons go in either corner, laid over the field's top edge. The field reserves a gutter on whichever side has content, so no line of text ever runs underneath - and only the side in use is indented, so a field with nothing in its leading corner is not needlessly narrow. Corner content is always visible; only the copy button follows CopyReveal."
+               Code="@CornerCode">
+            <VetoMagicTextBox TValue="string"
+                              TestId="corners"
+                              Label="Message"
+                              CopyReveal="VetoCopyReveal.Always"
+                              @bind-Value="_long">
+                <LeadingContent>
+                    <VetoIconButton Icon="@VetoIcons.Bold" Label="Bold" Size="VetoSize.Small" TestId="corner-bold" />
+                </LeadingContent>
+                <TrailingContent>
+                    <VetoIconButton Icon="@VetoIcons.Trash" Label="Clear" Size="VetoSize.Small" TestId="corner-clear"
+                                    OnClick='() => _long = string.Empty' />
+                </TrailingContent>
+            </VetoMagicTextBox>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-lines"
+               Title="How far it opens"
+               Description="CollapsedLines sets the resting height and is what the overflow measurement is taken against. ExpandedLines caps how far it opens, for a field that could otherwise unroll to the length of the page; leave it null and the field grows to fit whatever is in it."
+               Code="@LinesCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoMagicTextBox TValue="string"
+                              TestId="lines-grow"
+                              Label="Opens to fit (null)"
+                              CollapsedLines="2"
+                              @bind-Value="_long" />
+
+            <VetoMagicTextBox TValue="string"
+                              TestId="lines-capped"
+                              Label="Opens to six lines"
+                              CollapsedLines="2"
+                              ExpandedLines="6"
+                              @bind-Value="_long" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-bound"
+               Title="Bound open state"
+               Description="Expanded is two-way bindable, so the page can open the field itself - to reveal the one that failed validation, say - and stays told when the reader closes it again."
+               Code="@BoundCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoMagicTextBox TValue="string" TestId="bound" Label="Stack trace" @bind-Value="_long"
+                              @bind-Expanded="_expanded" />
+
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+                <VetoButton TestId="bound-page-toggle" Size="VetoSize.Small"
+                            OnClick="() => _expanded = !_expanded">
+                    Toggle from the page
+                </VetoButton>
+                <span data-testid="bound-state">Expanded: @_expanded</span>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-states" Title="Fixed height, and the usual field states"
+               Description="Expandable=false keeps the field at its resting height and renders no toggle - the text still scrolls, 
+                            it simply never rearranges the page. Disabled and read-only behave as they do on any Veto input."
+               Code="@StateCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoMagicTextBox TValue="string" TestId="state-fixed" Label="Never opens"
+                              Expandable="false" @bind-Value="_long" />
+
+            <VetoMagicTextBox TValue="string" TestId="state-readonly" Label="Read-only"
+                              ReadOnly="true" CopyReveal="VetoCopyReveal.Always"
+                              @bind-Value="_long" />
+
+            <VetoMagicTextBox TValue="string" TestId="state-disabled"
+                              Label="Disabled" Disabled="true"
+                              HelperText="Nothing to copy from a field you cannot read."
+                              @bind-Value="_long" />
+        </VetoStack>
+    </DemoBlock>
+
+</DocsPage>
+
+@code {
+    private bool _expanded;
+
+    private string _short = "Fixes the drawer closing on its own scrim.";
+
+    private string _token = "veto_sk_9f2a4c7e1b8d6350a1c4e9f7b2d8a6c3";
+
+    private string _long =
+        """
+        Reworked how the drawer decides it has been dismissed. It used to close on any click
+        that reached the scrim, which sounds right until the scrim is a sibling of the panel
+        rather than a child of it - at which point a click that starts on the panel and ends
+        on the scrim, as every drag of a slider inside the drawer does, reads as a dismissal.
+        The scrim now sits inside the drawer's own stacking context and the check is against
+        where the gesture started, not where it finished.
+        """;
+
+    private const string BasicCode = """
+        <VetoMagicTextBox TValue="string" Label="Release notes" @bind-Value="_notes" />
+        """;
+
+    private const string CopyCode = """
+        @* Hover and keyboard focus reveal it - the default. *@
+        <VetoMagicTextBox TValue="string" @bind-Value="_text" />
+
+        @* Always visible, for a value that exists to be copied. *@
+        <VetoMagicTextBox TValue="string" @bind-Value="_key"
+                          CopyReveal="VetoCopyReveal.Always" />
+
+        @* No copy button at all. *@
+        <VetoMagicTextBox TValue="string" @bind-Value="_text" Copyable="false" />
+        """;
+
+    private const string CornerCode = """
+        <VetoMagicTextBox TValue="string" Label="Message" @bind-Value="_message">
+            <LeadingContent>
+                <VetoIconButton Icon="@VetoIcons.Bold" Label="Bold" Size="VetoSize.Small" />
+            </LeadingContent>
+            <TrailingContent>
+                <VetoIconButton Icon="@VetoIcons.Trash" Label="Clear" Size="VetoSize.Small"
+                                OnClick='() => _message = string.Empty' />
+            </TrailingContent>
+        </VetoMagicTextBox>
+        """;
+
+    private const string LinesCode = """
+        @* Two lines at rest, opening to fit the whole value. *@
+        <VetoMagicTextBox TValue="string" @bind-Value="_text" CollapsedLines="2" />
+
+        @* Two lines at rest, opening no further than six. *@
+        <VetoMagicTextBox TValue="string" @bind-Value="_text"
+                          CollapsedLines="2" ExpandedLines="6" />
+        """;
+
+    private const string BoundCode = """
+        <VetoMagicTextBox TValue="string" Label="Stack trace"
+                          @bind-Value="_trace" @bind-Expanded="_expanded" />
+
+        <VetoButton OnClick="() => _expanded = !_expanded">Toggle from the page</VetoButton>
+        """;
+
+    private const string StateCode = """
+        @* Holds its height and never offers a toggle; the text scrolls instead. *@
+        <VetoMagicTextBox TValue="string" @bind-Value="_text" Expandable="false" />
+
+        <VetoMagicTextBox TValue="string" @bind-Value="_text" ReadOnly="true" />
+        <VetoMagicTextBox TValue="string" @bind-Value="_text" Disabled="true" />
+        """;
+}

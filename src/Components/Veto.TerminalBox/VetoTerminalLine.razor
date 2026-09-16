@@ -1,0 +1,29 @@
+@namespace Veto.Components.TerminalBox
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
+         class="@CssClass" style="@CssStyle" data-testid="@TestId">
+
+        @if (Prompt is not null)
+        {
+            <span class="veto-terminal-line__prompt" aria-hidden="true">@Prompt</span>
+        }
+
+        @if (Command is not null)
+        {
+            @* data-terminal-command is what the window's copy button collects. *@
+            <span class="veto-terminal-line__command" data-terminal-command>
+                <span class="veto-terminal-line__text" data-command="@Command">@Command</span>
+            </span>
+        }
+
+        @if (Output is not null)
+        {
+            <span class="veto-terminal-line__output">@Output</span>
+        }
+
+        @ChildContent
+    </div>
+}

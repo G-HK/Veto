@@ -13,7 +13,6 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Veto.Core/Veto.Core.csproj" />
-    <Project Path="src/Veto.Incubator/Veto.Incubator.csproj" />
     <Project Path="src/Veto.Theming/Veto.Theming.csproj" />
     <Project Path="src/Veto/Veto.csproj" />
   </Folder>
@@ -28,6 +27,7 @@
     <Project Path="src/Components/Veto.Handbook/Veto.Handbook.csproj" />
     <Project Path="src/Components/Veto.Icon/Veto.Icon.csproj" />
     <Project Path="src/Components/Veto.Kbd/Veto.Kbd.csproj" />
+    <Project Path="src/Components/Veto.MagicTextBox/Veto.MagicTextBox.csproj" />
     <Project Path="src/Components/Veto.Menu/Veto.Menu.csproj" />
     <Project Path="src/Components/Veto.Navigation/Veto.Navigation.csproj" />
     <Project Path="src/Components/Veto.Rating/Veto.Rating.csproj" />
@@ -35,6 +35,7 @@
     <Project Path="src/Components/Veto.Switch/Veto.Switch.csproj" />
     <Project Path="src/Components/Veto.Table/Veto.Table.csproj" />
     <Project Path="src/Components/Veto.TextBox/Veto.TextBox.csproj" />
+    <Project Path="src/Components/Veto.TerminalBox/Veto.TerminalBox.csproj" />
     <Project Path="src/Components/Veto.Tilt/Veto.Tilt.csproj" />
     <Project Path="src/Components/Veto.Toast/Veto.Toast.csproj" />
   </Folder>

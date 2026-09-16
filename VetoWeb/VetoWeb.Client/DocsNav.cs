@@ -43,6 +43,7 @@ public static class DocsNav
                     Children =
                     [
                         new VetoNavEntry { Label = "Text box", Href = "/docs/components/text-box" },
+                        new VetoNavEntry { Label = "Magic text box", Href = "/docs/components/magic-text-box" },
                         new VetoNavEntry { Label = "Switch", Href = "/docs/components/switch" },
                         new VetoNavEntry { Label = "Slider", Href = "/docs/components/slider" },
                         new VetoNavEntry { Label = "Rating", Href = "/docs/components/rating" }
@@ -64,6 +65,7 @@ public static class DocsNav
                     Children =
                     [
                         new VetoNavEntry { Label = "Toast", Href = "/docs/components/toast" },
+                        new VetoNavEntry { Label = "Terminal box", Href = "/docs/components/terminal-box" },
                         new VetoNavEntry { Label = "Gauge", Href = "/docs/components/gauge" }
                     ]
                 },

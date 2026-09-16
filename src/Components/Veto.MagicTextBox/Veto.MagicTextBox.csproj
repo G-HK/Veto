@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <PackageId>Veto.MagicTextBox</PackageId>
+    <Description>A multi-line text box that collapses when the text outruns its space, with corner slots and a copy-to-clipboard button, for Veto.</Description>
+    <RootNamespace>Veto.Components.MagicTextBox</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Veto.Core\Veto.Core.csproj" />
+    <ProjectReference Include="..\Veto.Buttons\Veto.Buttons.csproj" />
+    <ProjectReference Include="..\Veto.Icon\Veto.Icon.csproj" />
+  </ItemGroup>
+
+</Project>

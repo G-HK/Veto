@@ -56,12 +56,14 @@ builder.Services.AddVetoToast();
 | `Veto.Handbook` | `VetoHandbookPage`, `VetoHandbookToc` |
 | `Veto.Icon` | `VetoIcon` and the built-in icon set |
 | `Veto.Kbd` | `VetoKbd`, `VetoShortcut`, `VetoShortcutList` |
+| `Veto.MagicTextBox` | `VetoMagicTextBox` - collapses when the text outruns its space |
 | `Veto.Menu` | `VetoMenu`, `VetoMenuItem`, `VetoMenuLabel`, `VetoMenuDivider` |
 | `Veto.Navigation` | `VetoLink`, `VetoNavMenu`, `VetoBreadcrumbs` |
 | `Veto.Rating` | `VetoRating` |
 | `Veto.Slider` | `VetoSlider` |
 | `Veto.Switch` | `VetoSwitch` |
 | `Veto.Table` | `VetoTable` |
+| `Veto.TerminalBox` | `VetoTerminalBox`, `VetoTerminalLine` |
 | `Veto.TextBox` | `VetoTextBox` |
 | `Veto.Tilt` | `VetoTilt3D` |
 | `Veto.Toast` | `VetoToastHost`, `IVetoToastService` |
@@ -88,7 +90,6 @@ src/
   Veto/                     meta package
   Veto.Core/
   Veto.Theming/
-  Veto.Incubator/           unfinished components, never packed
   Components/
     Veto.Buttons/  Veto.Icon/  Veto.Gantt/  ...
     Layout/
@@ -112,6 +113,6 @@ git tag v1.2.0
 git push --tags
 ```
 
-That runs `.github/workflows/release.yml`, which builds, tests, packs all 34 packages at the
+That runs `.github/workflows/release.yml`, which builds, tests, packs all 36 packages at the
 tag's version, verifies each contains its static web assets, and pushes them to nuget.org via
 Trusted Publishing.

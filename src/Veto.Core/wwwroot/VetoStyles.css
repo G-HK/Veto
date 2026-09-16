@@ -63,6 +63,20 @@
     --veto-focus-ring: 0 0 0 3px rgb(79 70 229 / 0.35);
     --veto-focus-ring-danger: 0 0 0 3px rgb(220 38 38 / 0.3);
     --veto-transition: 150ms ease;
+
+    /* Terminal.
+       Deliberately the same in both themes, and deliberately not built from the surface and
+       text tokens: a terminal window reads as a terminal *because* it is dark, and one that
+       turned white under the light theme would read as a block quote. They are tokens rather
+       than literals in the component so an app can still repaint it - a brand's own terminal
+       green, or a light one if that is genuinely what it wants. */
+    --veto-color-terminal-surface: #000000;
+    --veto-color-terminal-chrome: #202425;
+    --veto-color-terminal-border: #525252;
+    --veto-color-terminal-text: #e5e7eb;
+    --veto-color-terminal-muted: #8e8e8e;
+    --veto-color-terminal-prompt: #575757;
+    --veto-color-terminal-accent: #e34ba9;
 }
 
 /* Explicit dark theme: <html data-veto-theme="dark"> */

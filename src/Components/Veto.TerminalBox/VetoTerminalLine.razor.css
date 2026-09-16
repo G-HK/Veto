@@ -1,0 +1,88 @@
+/* VetoTerminalLine - one line of the session. */
+
+.veto-terminal-line {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: var(--veto-space-2);
+    min-width: 0;
+    white-space: pre;
+}
+
+.veto-terminal-line__prompt {
+    flex: none;
+    user-select: none;
+    color: var(--veto-color-terminal-prompt);
+}
+
+.veto-terminal-line__command {
+    color: var(--veto-color-terminal-text);
+}
+
+.veto-terminal-line__output {
+    color: var(--veto-color-terminal-muted);
+}
+
+/* A typed line reveals text that is already there, one character at a time. The width is in
+   ch and the animation steps once per character, so the caret always lands on a character
+   boundary of the monospaced text rather than part-way through a glyph. */
+.veto-terminal-line--typed .veto-terminal-line__text {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    white-space: pre;
+    width: calc(var(--veto-terminal-chars, 0) * 1ch);
+    animation:
+        veto-terminal-type
+        var(--veto-terminal-typing-duration, 8s)
+        steps(var(--veto-terminal-chars, 1))
+        infinite;
+}
+
+.veto-terminal-line--typed.veto-terminal-line--once .veto-terminal-line__text {
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+/* The caret. Separate from the text so it does not scroll away with it. */
+.veto-terminal-line--typed .veto-terminal-line__command::after {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 1em;
+    vertical-align: bottom;
+    border-right: 0.15em solid var(--veto-color-terminal-accent);
+    animation: veto-terminal-caret 0.8s step-end infinite;
+}
+
+@keyframes veto-terminal-type {
+    0%, 100% {
+        width: 0;
+    }
+
+    /* Types in over the first quarter, sits complete for half the cycle, then clears - long
+       enough to actually be read before it starts over. */
+    25%, 75% {
+        width: calc(var(--veto-terminal-chars, 0) * 1ch);
+    }
+}
+
+@keyframes veto-terminal-caret {
+    50% {
+        border-right-color: transparent;
+    }
+}
+
+/* Reduced motion takes away the animation, not the content: the command is shown in full and
+   the caret stops blinking. A reader who has asked for less motion still needs to see what to
+   type - hiding it would be a worse outcome than the animation they turned off. */
+@media (prefers-reduced-motion: reduce) {
+    .veto-terminal-line--typed .veto-terminal-line__text {
+        width: auto;
+        animation: none;
+    }
+
+    .veto-terminal-line--typed .veto-terminal-line__command::after {
+        animation: none;
+    }
+}

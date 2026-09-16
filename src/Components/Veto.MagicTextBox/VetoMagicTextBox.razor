@@ -1,0 +1,84 @@
+@namespace Veto.Components.MagicTextBox
+@typeparam TValue
+@inherits VetoInputBase<TValue>
+@inject IJSRuntime JS
+
+@if (Visible)
+{
+    <div class="@RootCssClass" style="@RootCssStyle" data-testid="@TestId"
+         data-expanded="@(Expanded ? "true" : "false")"
+         data-overflowing="@(_measured ? (_overflowing ? "true" : "false") : null)">
+
+        @if (!string.IsNullOrWhiteSpace(Label))
+        {
+            <label class="veto-magic-textbox__label" for="@ElementId">
+                @Label
+                @if (Required)
+                {
+                    <span class="veto-magic-textbox__required" aria-hidden="true">*</span>
+                }
+            </label>
+        }
+
+        <div class="veto-magic-textbox__field">
+            <textarea @ref="InputElement" @attributes="InnerAttributes"
+                      id="@ElementId" name="@NameAttributeValue"
+                      class="veto-magic-textbox__input @FieldValidationClass"
+                      placeholder="@Placeholder" disabled="@Disabled" readonly="@ReadOnly" 
+                      aria-required="@(Required ? "true" : null)"
+                      aria-invalid="@(HasErrors ? "true" : null)"
+                      aria-describedby="@DescribedBy"
+                      @oninput="OnInputAsync" @onchange="OnChangeAsync">
+                      
+                      @CurrentValueAsString
+            </textarea>
+
+            @if (LeadingContent is not null)
+            {
+                <div class="veto-magic-textbox__corner veto-magic-textbox__corner--start">
+                    @LeadingContent
+                </div>
+            }
+
+            @if (TrailingContent is not null || Copyable)
+            {
+                <div class="veto-magic-textbox__corner veto-magic-textbox__corner--end">
+                    @TrailingContent
+
+                    @if (Copyable)
+                    {
+                        <VetoIconButton Icon="@(_copied ? VetoIcons.Check : VetoIcons.Copy)"
+                                        Label="@(_copied ? CopiedLabel : CopyLabel)"
+                                        Size="VetoSize.Small"
+                                        TestId="@(TestId is null ? null : $"{TestId}-copy")"
+                                        OnClick="CopyAsync" />
+                    }
+                </div>
+            }
+        </div>
+
+        @if (Expandable && _overflowing)
+        {
+            <button type="button"
+                    class="veto-magic-textbox__toggle"
+                    aria-expanded="@(Expanded ? "true" : "false")"
+                    aria-controls="@ElementId"
+                    data-testid="@(TestId is null ? null : $"{TestId}-toggle")"
+                    @onclick="ToggleAsync">
+                <VetoIcon Icon="@(Expanded ? VetoIcons.ChevronUp : VetoIcons.ChevronDown)" Size="VetoIconSize.Small" />
+                <span>@(Expanded ? CollapseLabel : ExpandLabel)</span>
+            </button>
+        }
+
+        @if (HasErrors)
+        {
+            <p class="veto-magic-textbox__message veto-magic-textbox__message--error" id="@ErrorId" role="alert">
+                @ValidationMessages.First()
+            </p>
+        }
+        else if (!string.IsNullOrWhiteSpace(HelperText))
+        {
+            <p class="veto-magic-textbox__message" id="@HelperId">@HelperText</p>
+        }
+    </div>
+}
