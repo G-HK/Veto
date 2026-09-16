@@ -161,4 +161,104 @@ public class VetoEffectsTests ( BlazorAppFixture app ) : VetoPageTest(app)
         Assert.True(double.Parse(glow, CultureInfo.InvariantCulture) > 0, $"The glow faded to {glow}.");
         Assert.True(double.Parse(ping, CultureInfo.InvariantCulture) > 0, $"The ring faded to {ping}.");
     }
+    [Fact]
+    public async Task Extrude_lifts_the_component_toward_the_viewer()
+    {
+        await GotoComponentAsync(Route);
+
+        var transform = await Component("extrude-button")
+            .EvaluateAsync<string>("el => getComputedStyle(el).transform");
+
+        // A perspective transform resolves to a matrix3d; a flat one stays a 2D matrix, so the
+        // dimensionality is the thing worth asserting rather than any particular number.
+        Assert.StartsWith("matrix3d", transform);
+
+        var shadow = await Component("extrude-button")
+            .EvaluateAsync<string>("el => getComputedStyle(el).boxShadow");
+
+        Assert.NotEqual("none", shadow);
+    }
+
+    [Fact]
+    public async Task ExtrudeDepth_sets_how_far_it_stands_out()
+    {
+        await GotoComponentAsync(Route);
+
+        var normal = await Component("extrude-button")
+            .EvaluateAsync<string>("el => getComputedStyle(el).getPropertyValue('--veto-extrude-depth').trim()");
+        var deep = await Component("extrude-deep")
+            .EvaluateAsync<string>("el => getComputedStyle(el).getPropertyValue('--veto-extrude-depth').trim()");
+
+        // Unset on the first, so the stylesheet's own default is in force.
+        Assert.Equal(string.Empty, normal);
+        Assert.Equal("1.5rem", deep);
+    }
+
+    [Fact]
+    public async Task Reduced_motion_keeps_the_depth_and_drops_the_travel()
+    {
+        await Page.EmulateMediaAsync(new() { ReducedMotion = ReducedMotion.Reduce });
+        await GotoComponentAsync(Route);
+
+        var button = Component("extrude-button");
+
+        // Still raised - the height is the design, the travel toward the pointer is the
+        // animation, and only the second one was opted out of.
+        Assert.StartsWith("matrix3d", await button.EvaluateAsync<string>("el => getComputedStyle(el).transform"));
+        Assert.Equal("none", await button.EvaluateAsync<string>("el => getComputedStyle(el).transitionProperty"));
+    }
+
+    [Fact]
+    public async Task RootBordered_false_makes_the_border_transparent_on_an_input()
+    {
+        await GotoComponentAsync(Route);
+
+        var on = Component("bordered-default").Locator("input");
+        var off = Component("bordered-off").Locator("input");
+
+        // Transparent rather than removed, so nothing shifts and the focus state still has a
+        // colour to set. The width is therefore unchanged.
+        Assert.Equal(
+            await on.EvaluateAsync<string>("el => getComputedStyle(el).borderTopWidth"),
+            await off.EvaluateAsync<string>("el => getComputedStyle(el).borderTopWidth"));
+
+        Assert.NotEqual(
+            "rgba(0, 0, 0, 0)",
+            await on.EvaluateAsync<string>("el => getComputedStyle(el).borderTopColor"));
+
+        Assert.Equal(
+            "rgba(0, 0, 0, 0)",
+            await off.EvaluateAsync<string>("el => getComputedStyle(el).borderTopColor"));
+    }
+
+    [Fact]
+    public async Task RootBordered_reaches_components_that_are_not_inputs()
+    {
+        await GotoComponentAsync(Route);
+
+        // The point of inheriting the colour from the root rather than writing it into each
+        // component's rule: one parameter reaches every component that draws a border.
+        // Each pair names the element that actually draws the border. It is not always the
+        // root: a kbd draws its border on the key inside, and an element with no border
+        // declaration at all reports currentColor rather than transparent, which would make
+        // this spec pass or fail for the wrong reason.
+        foreach (var (with, without, target) in new[]
+                 {
+                     ("bordered-button-default", "bordered-button-off", ""),
+                     ("bordered-kbd-default", "bordered-kbd-off", ".veto-kbd__key")
+                 })
+        {
+            var on = target.Length == 0 ? Component(with) : Component(with).Locator(target).First;
+            var off = target.Length == 0 ? Component(without) : Component(without).Locator(target).First;
+
+            Assert.NotEqual(
+                "rgba(0, 0, 0, 0)",
+                await on.EvaluateAsync<string>("el => getComputedStyle(el).borderTopColor"));
+
+            Assert.Equal(
+                "rgba(0, 0, 0, 0)",
+                await off.EvaluateAsync<string>("el => getComputedStyle(el).borderTopColor"));
+        }
+    }
+
 }

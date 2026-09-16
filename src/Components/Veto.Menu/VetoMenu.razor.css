@@ -145,7 +145,7 @@
 }
 
 .veto-menu--outlined .veto-menu__trigger {
-    border-color: var(--veto-color-border);
+    border-color: var(--veto-border-color, var(--veto-color-border));
     color: var(--veto-color-text);
 }
 
@@ -200,7 +200,7 @@
     display: flex;
     flex-direction: column;
     padding: var(--veto-space-2);
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-radius: var(--veto-menu-radius);
     background: var(--veto-color-surface-raised);
     box-shadow: var(--veto-shadow-md);

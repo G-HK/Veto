@@ -144,11 +144,11 @@
    element of its own. */
 
 .veto-button-group--separated.veto-button-group--row > ::deep * + *:not(.veto-button-group__separator) {
-    border-inline-start: 1px solid var(--veto-color-border);
+    border-inline-start: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-button-group--separated.veto-button-group--column > ::deep * + *:not(.veto-button-group__separator) {
-    border-block-start: 1px solid var(--veto-color-border);
+    border-block-start: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 /* Toolbar: several groups on one line, wrapping when the window is narrow. */

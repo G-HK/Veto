@@ -15,6 +15,30 @@
     color: var(--veto-color-terminal-prompt);
 }
 
+/* The editable prompt is a real input, so it arrives with a browser's own field styling -
+   background, border, font - none of which belongs on a terminal line. Stripped back to look
+   exactly like the sign it replaces, with the focus ring the only thing that gives it away. */
+.veto-terminal-line__prompt--editable {
+    flex: none;
+    min-width: 1ch;
+    padding: 0;
+    font: inherit;
+    color: var(--veto-color-terminal-prompt);
+    background: none;
+    border: none;
+    border-radius: var(--veto-radius-sm);
+    outline: none;
+}
+
+.veto-terminal-line__prompt--editable:hover {
+    color: var(--veto-color-terminal-text);
+}
+
+.veto-terminal-line__prompt--editable:focus-visible {
+    color: var(--veto-color-terminal-text);
+    box-shadow: var(--veto-focus-ring);
+}
+
 .veto-terminal-line__command {
     color: var(--veto-color-terminal-text);
 }

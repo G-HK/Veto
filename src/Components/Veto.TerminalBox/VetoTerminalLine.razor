@@ -6,7 +6,25 @@
     <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId"
          class="@CssClass" style="@CssStyle" data-testid="@TestId">
 
-        @if (Prompt is not null)
+        @if (PromptContent is not null)
+        {
+            @* Content rather than a sign: an icon, a host name, whatever the prompt is being
+               used to say. Not hidden from assistive technology - unlike a bare $, content
+               put here deliberately is presumed to be worth reading. *@
+            <span class="veto-terminal-line__prompt">@PromptContent</span>
+        }
+        else if (PromptEditable)
+        {
+            @* Focusable, so it must not be aria-hidden: hiding a focusable element from the
+               accessibility tree leaves a keyboard user on a control their screen reader will
+               not announce. It gets a real label instead. *@
+            <input class="veto-terminal-line__prompt veto-terminal-line__prompt--editable"
+                   type="text" value="@Prompt" size="@PromptSize"
+                   aria-label="@PromptLabel"
+                   data-testid="@(TestId is null ? null : $"{TestId}-prompt")"
+                   @onchange="OnPromptChangedAsync" />
+        }
+        else if (Prompt is not null)
         {
             <span class="veto-terminal-line__prompt" aria-hidden="true">@Prompt</span>
         }

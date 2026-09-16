@@ -3,14 +3,15 @@
 <VetoThemeProvider Theme="VetoDocsTheme.Theme" />
 
 @* One host for the whole site: anything that injects IVetoToastService renders here. *@
-<VetoToastHost TestId="toasts" Position="VetoToastPosition.TopRight" Animation="VetoToastAnimation.SlideRight" />
+<VetoToastHost TestId="toasts"
+               Position="VetoToastPosition.BottomRight"
+               Animation="VetoToastAnimation.SlideRight"
+               MaxToasts="5" />
 
 <VetoLayout State="_layout">
     <VetoAppBar Translucent="true" TestId="appbar">
-        <VetoIconButton Icon="@VetoIcons.Menu"
-                        Label="Toggle navigation"
-                        TestId="drawer-toggle"
-                        OnClick="ToggleDrawer" />
+        <VetoIconButton Icon="@VetoIcons.Menu" Label="Toggle navigation"
+                        TestId="drawer-toggle" OnClick="ToggleDrawer" />
 
         <a class="app-bar__brand" href="/">
             <span class="app-bar__mark" aria-hidden="true">

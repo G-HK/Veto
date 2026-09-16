@@ -25,9 +25,63 @@ public partial class VetoTerminalLine : VetoComponentBase
     /// <inheritdoc />
     protected override string RootClass => "veto-terminal-line";
 
-    /// <summary>The prompt drawn before the command, e.g. <c>$</c>. Null renders none.</summary>
+    /// <summary>
+    /// The prompt drawn before the command. Any sign you like - <c>$</c>, <c>&gt;</c>,
+    /// <c>PS&gt;</c>, <c>~/veto $</c>. Null renders none.
+    /// </summary>
+    /// <remarks>
+    /// Two-way bindable with <c>@bind-Prompt</c>, which is only worth doing alongside
+    /// <see cref="PromptEditable"/> - nothing else in the line changes it.
+    /// </remarks>
     [Parameter]
     public string? Prompt { get; set; } = "$";
+
+    /// <summary>Raised when the prompt is edited, so <c>@bind-Prompt</c> works.</summary>
+    [Parameter]
+    public EventCallback<string?> PromptChanged { get; set; }
+
+    /// <summary>
+    /// Content drawn in place of <see cref="Prompt"/> - an icon, a coloured host name, a
+    /// branch. For a prompt being used to say something rather than to mark a line.
+    /// </summary>
+    /// <remarks>
+    /// Unlike a bare sign, this is not hidden from assistive technology: a <c>$</c> before
+    /// every line is noise, but content put here deliberately is presumed worth reading.
+    /// </remarks>
+    [Parameter]
+    public RenderFragment? PromptContent { get; set; }
+
+    /// <summary>
+    /// Whether the reader can type over the prompt. Off by default. Turning it on is what
+    /// makes <c>@bind-Prompt</c> mean anything, and what lets the prompt be used as a small
+    /// input of its own - a host, a profile, a working directory.
+    /// </summary>
+    [Parameter]
+    public bool PromptEditable { get; set; }
+
+    /// <summary>
+    /// The editable prompt's accessible name. It has no visible label, so without this a
+    /// screen reader announces an unnamed text box.
+    /// </summary>
+    [Parameter]
+    public string PromptLabel { get; set; } = "Prompt";
+
+    /// <summary>
+    /// The editable prompt's width in characters, so the field is the size of what is in it
+    /// rather than the browser's default twenty.
+    /// </summary>
+    private int PromptSize => Math.Max(1, Prompt?.Length ?? 1);
+
+    private Task OnPromptChangedAsync ( ChangeEventArgs args )
+    {
+        var value = args.Value?.ToString();
+
+        Prompt = value;
+
+        return PromptChanged.HasDelegate
+            ? PromptChanged.InvokeAsync(value)
+            : Task.CompletedTask;
+    }
 
     /// <summary>The command. This is the part the window's copy button collects.</summary>
     [Parameter]
@@ -62,6 +116,7 @@ public partial class VetoTerminalLine : VetoComponentBase
     /// <inheritdoc />
     protected override CssBuilder StartCssClass () =>
         base.StartCssClass()
+            .AddClass(Modifier("prompt-editable"), PromptEditable && PromptContent is null)
             .AddClass(Modifier("typed"), Typed && Command is { Length: > 0 })
             .AddClass(Modifier("once"), Typed && !Loop);
 

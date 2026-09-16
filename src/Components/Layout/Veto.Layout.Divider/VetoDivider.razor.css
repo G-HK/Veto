@@ -2,7 +2,7 @@
 
 .veto-divider {
     border: none;
-    background-color: var(--veto-color-border);
+    background-color: var(--veto-border-color, var(--veto-color-border));
 }
 
 /* Plain rule */
@@ -42,7 +42,7 @@ div.veto-divider--vertical {
 
 .veto-divider__line {
     flex: 1 1 auto;
-    background-color: var(--veto-color-border);
+    background-color: var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-divider--horizontal .veto-divider__line {

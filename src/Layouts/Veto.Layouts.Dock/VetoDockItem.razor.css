@@ -13,7 +13,7 @@
     color: var(--veto-color-text);
     text-decoration: none;
     background-color: var(--veto-color-surface);
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-radius: var(--veto-radius-lg);
     cursor: pointer;
     /* Items grow away from the edge the dock is pinned to, not through it. */

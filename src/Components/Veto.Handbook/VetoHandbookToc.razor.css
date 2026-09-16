@@ -28,7 +28,7 @@
     line-height: 1.5;
     color: var(--veto-color-text-muted);
     text-decoration: none;
-    border-left: 2px solid var(--veto-color-border);
+    border-left: 2px solid var(--veto-border-color, var(--veto-color-border));
     transition: color var(--veto-transition), border-color var(--veto-transition);
 }
 

@@ -21,10 +21,10 @@
     transition: transform var(--veto-transition), width var(--veto-transition);
 }
 
-.veto-drawer--bordered.veto-drawer--left { border-right: 1px solid var(--veto-color-border); }
-.veto-drawer--bordered.veto-drawer--right { border-left: 1px solid var(--veto-color-border); }
-.veto-drawer--bordered.veto-drawer--top { border-bottom: 1px solid var(--veto-color-border); }
-.veto-drawer--bordered.veto-drawer--bottom { border-top: 1px solid var(--veto-color-border); }
+.veto-drawer--bordered.veto-drawer--left { border-right: 1px solid var(--veto-border-color, var(--veto-color-border)); }
+.veto-drawer--bordered.veto-drawer--right { border-left: 1px solid var(--veto-border-color, var(--veto-color-border)); }
+.veto-drawer--bordered.veto-drawer--top { border-bottom: 1px solid var(--veto-border-color, var(--veto-color-border)); }
+.veto-drawer--bordered.veto-drawer--bottom { border-top: 1px solid var(--veto-border-color, var(--veto-color-border)); }
 
 /* Side drawers sit in the frame's middle row, alongside the content. */
 .veto-drawer--side {

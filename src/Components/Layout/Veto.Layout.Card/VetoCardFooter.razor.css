@@ -17,7 +17,7 @@
 
 .veto-card-footer--bordered {
     padding-top: var(--veto-space-4);
-    border-top: 1px solid var(--veto-color-border);
+    border-top: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-card-footer--start { justify-content: flex-start; }

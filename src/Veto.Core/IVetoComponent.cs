@@ -139,6 +139,38 @@ public interface IVetoComponent
     /// </remarks>
     int? RootZIndex { get; set; }
 
+    /// <summary>
+    /// Whether the component draws its border. Null - the default - leaves the component's own
+    /// stylesheet in charge, which is what nearly every component wants.
+    /// </summary>
+    /// <remarks>
+    /// False does not remove the border, it makes it transparent: the space it occupied stays,
+    /// so turning a border off never moves the content by a pixel, and the focus and invalid
+    /// states still have something to recolour. It is inherited, so a border on an element
+    /// inside the component goes too.
+    /// <para>
+    /// Named <c>RootBordered</c> rather than <c>Bordered</c> because several components already
+    /// have a <c>Bordered</c> of their own, and Blazor matches parameters by name across the
+    /// whole inheritance chain - two of them is a first-render exception, not a compile error.
+    /// </para>
+    /// </remarks>
+    bool? RootBordered { get; set; }
+
+    /// <summary>
+    /// Lifts the component off the page, as though it stood out of the screen. Off by default.
+    /// </summary>
+    /// <remarks>
+    /// A perspective transform plus a shadow cast down and away, so the component reads as
+    /// raised rather than merely shadowed. It is the component's own root that is lifted, so
+    /// this composes with anything inside it.
+    /// </remarks>
+    bool Extrude { get; set; }
+
+    /// <summary>
+    /// How far the component stands out, as a CSS length. Null uses the effect's own default.
+    /// </summary>
+    string? ExtrudeDepth { get; set; }
+
     /// <summary>Unmatched attributes, splatted onto the root element.</summary>
     IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 }

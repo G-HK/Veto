@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Veto.Components.Toast;
 using Veto.Core;
 
 namespace Veto.Components.Code;
@@ -17,6 +18,14 @@ public partial class VetoCode : VetoComponentBase, IAsyncDisposable
     private IJSObjectReference? _module;
     private bool _copied;
     private CancellationTokenSource? _resetCopied;
+
+    /// <summary>
+    /// Resolved through the provider rather than injected directly so the component still
+    /// works in an app that never registered toasts. [Inject] on IVetoToastService would throw
+    /// at first render there, which is a hard failure for an entirely optional convenience.
+    /// </summary>
+    [Inject]
+    private IServiceProvider Services { get; set; } = default!;
 
     /// <inheritdoc />
     protected override string RootClass => "veto-code";
@@ -36,6 +45,24 @@ public partial class VetoCode : VetoComponentBase, IAsyncDisposable
     /// <summary>Whether to show a copy button. True by default.</summary>
     [Parameter]
     public bool Copyable { get; set; } = true;
+
+    /// <summary>
+    /// Whether a copy raises a toast. Needs a <c>VetoToastHost</c> in the layout and
+    /// <c>AddVetoToast()</c> registered; without either, copying still works and says nothing.
+    /// </summary>
+    [Parameter]
+    public bool NotifyOnCopy { get; set; } = true;
+
+    /// <summary>What the toast says after a successful copy.</summary>
+    [Parameter]
+    public string CopyToastMessage { get; set; } = "Code copied to clipboard";
+
+    /// <summary>
+    /// What the toast says when the browser refused the write - outside a secure context, or
+    /// with the clipboard permission denied.
+    /// </summary>
+    [Parameter]
+    public string CopyFailedToastMessage { get; set; } = "Could not copy to the clipboard";
 
     /// <summary>Caps the height and scrolls, for long listings. Null means no cap.</summary>
     [Parameter]
@@ -63,9 +90,49 @@ public partial class VetoCode : VetoComponentBase, IAsyncDisposable
             _copied = false;
         }
 
+        NotifyCopied();
+
         if (_copied)
         {
+            // Rendered here rather than left to the render that follows the event. This method
+            // awaits the reset below, so the event's task does not complete for two seconds -
+            // by which time the flag is false again and the confirmation would never have been
+            // drawn at all.
+            StateHasChanged();
+
             await ResetCopiedLabelAsync();
+        }
+    }
+
+    /// <summary>
+    /// Raises the toast that reports the copy. The icon swap on the button is easy to miss -
+    /// it is small, and the reader's eye is usually on what they just copied - so the toast is
+    /// what actually confirms it happened.
+    /// </summary>
+    /// <remarks>
+    /// A missing toast service is not an error: the component is usable without one, and an
+    /// app that never registered toasts has said as much. Copying still works and reports
+    /// through the button.
+    /// </remarks>
+    private void NotifyCopied ()
+    {
+        if (!NotifyOnCopy)
+        {
+            return;
+        }
+
+        if (Services.GetService(typeof(IVetoToastService)) is not IVetoToastService toasts)
+        {
+            return;
+        }
+
+        if (_copied)
+        {
+            toasts.Success(CopyToastMessage);
+        }
+        else
+        {
+            toasts.Error(CopyFailedToastMessage);
         }
     }
 

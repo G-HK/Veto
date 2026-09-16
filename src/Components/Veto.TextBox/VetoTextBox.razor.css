@@ -27,7 +27,7 @@
     font-size: var(--veto-font-size-md);
     color: var(--veto-color-text);
     background-color: var(--veto-color-surface);
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-radius: var(--veto-radius-md);
     padding: var(--veto-space-2) var(--veto-space-3);
     transition: border-color var(--veto-transition), box-shadow var(--veto-transition), background-color var(--veto-transition);

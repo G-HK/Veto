@@ -26,16 +26,17 @@ namespace Veto.Core;
 /// not something an app is expected to construct.
 /// </para>
 /// </remarks>
-public readonly partial record struct VetoEffects ( bool Glow, string? GlowColor, bool Ping, string? PingColor )
+public readonly partial record struct VetoEffects ( bool Glow, string? GlowColor, bool Ping, string? PingColor, bool Extrude, string? ExtrudeDepth )
 {
     /// <summary>True when neither effect is on and there is nothing to add.</summary>
-    public bool IsEmpty => !Glow && !Ping;
+    public bool IsEmpty => !Glow && !Ping && !Extrude;
 
     /// <summary>Adds the effect classes, before the consumer's own so theirs still win.</summary>
     public CssBuilder Apply ( CssBuilder builder ) =>
         builder
             .AddClass("veto-glow", Glow)
-            .AddClass("veto-ping", Ping);
+            .AddClass("veto-ping", Ping)
+            .AddClass("veto-extrude", Extrude);
 
     /// <summary>
     /// Adds the colour overrides as custom properties. Nothing is added when a colour was not
@@ -44,7 +45,8 @@ public readonly partial record struct VetoEffects ( bool Glow, string? GlowColor
     public StyleBuilder Apply ( StyleBuilder builder ) =>
         builder
             .AddStyle("--veto-glow-color", SafeColor(GlowColor), Glow)
-            .AddStyle("--veto-ping-color", SafeColor(PingColor), Ping);
+            .AddStyle("--veto-ping-color", SafeColor(PingColor), Ping)
+            .AddStyle("--veto-extrude-depth", SafeColor(ExtrudeDepth), Extrude);
 
     /// <summary>
     /// Returns the colour if it is safe to write into a <c>style</c> attribute, otherwise null.

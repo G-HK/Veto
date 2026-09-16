@@ -13,7 +13,7 @@
     font-family: var(--veto-font-sans);
     color: var(--veto-color-text);
     background-color: var(--veto-color-surface);
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-radius: var(--veto-radius-lg);
     overflow: hidden;
 }
@@ -26,7 +26,7 @@
     gap: var(--veto-space-3);
     flex-wrap: wrap;
     padding: var(--veto-space-3);
-    border-bottom: 1px solid var(--veto-color-border);
+    border-bottom: 1px solid var(--veto-border-color, var(--veto-color-border));
     /* A faint wash, so the strip of controls reads as a toolbar rather than as the chart's
        first row. Mixed rather than a flat token, so it stays subtle in both themes. */
     background-color: color-mix(in srgb, var(--veto-color-surface-raised) 55%, transparent);
@@ -56,7 +56,7 @@
     gap: var(--veto-space-2);
     margin-inline-start: auto;
     padding-inline-start: var(--veto-space-3);
-    border-inline-start: 1px solid var(--veto-color-border);
+    border-inline-start: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 /*
@@ -68,7 +68,7 @@
 .veto-gantt__nav {
     display: flex;
     align-items: stretch;
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-radius: var(--veto-radius-md);
     background-color: var(--veto-color-surface);
     transition: border-color var(--veto-transition);
@@ -98,7 +98,7 @@
 
 /* One shared divider between the three, rather than a border per button. */
 .veto-gantt__nav > ::deep * + * {
-    box-shadow: inset 1px 0 0 var(--veto-color-border);
+    box-shadow: inset 1px 0 0 var(--veto-border-color, var(--veto-color-border));
 }
 
 /* Today is the one that does something to the view rather than nudging it, so it carries the
@@ -126,7 +126,7 @@
     font-size: var(--veto-font-size-sm);
     color: var(--veto-color-text-muted);
     background-color: transparent;
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-radius: var(--veto-radius-full);
     cursor: pointer;
     transition: color var(--veto-transition), background-color var(--veto-transition), border-color var(--veto-transition);
@@ -194,7 +194,7 @@
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
-    border-right: 1px solid var(--veto-color-border);
+    border-right: 1px solid var(--veto-border-color, var(--veto-color-border));
     background-color: var(--veto-color-surface);
 }
 
@@ -211,7 +211,7 @@
     font-size: var(--veto-font-size-sm);
     font-weight: 600;
     color: var(--veto-color-text-muted);
-    border-bottom: 1px solid var(--veto-color-border);
+    border-bottom: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-gantt__row {
@@ -220,7 +220,7 @@
     align-items: center;
     height: var(--veto-gantt-row-height, 2.25rem);
     box-sizing: border-box;
-    border-bottom: 1px solid color-mix(in srgb, var(--veto-color-border) 55%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--veto-border-color, var(--veto-color-border)) 55%, transparent);
 }
 
 .veto-gantt__row--label {
@@ -291,7 +291,7 @@
     height: 3.25rem;
     padding: var(--veto-space-2) var(--veto-space-3);
     box-sizing: border-box;
-    border-bottom: 1px solid var(--veto-color-border);
+    border-bottom: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 /* Sized like a real bar, so nothing shifts when the data arrives. */
@@ -317,7 +317,7 @@
     height: 3.25rem;
     box-sizing: border-box;
     background-color: var(--veto-color-surface);
-    border-bottom: 1px solid var(--veto-color-border);
+    border-bottom: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-gantt__head-row {
@@ -326,7 +326,7 @@
 }
 
 .veto-gantt__head-row--groups {
-    border-bottom: 1px solid color-mix(in srgb, var(--veto-color-border) 55%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--veto-border-color, var(--veto-color-border)) 55%, transparent);
 }
 
 .veto-gantt__head-cell {
@@ -339,7 +339,7 @@
     box-sizing: border-box;
     font-size: 0.6875rem;
     color: var(--veto-color-text-muted);
-    border-left: 1px solid color-mix(in srgb, var(--veto-color-border) 45%, transparent);
+    border-left: 1px solid color-mix(in srgb, var(--veto-border-color, var(--veto-color-border)) 45%, transparent);
     overflow: hidden;
     white-space: nowrap;
 }

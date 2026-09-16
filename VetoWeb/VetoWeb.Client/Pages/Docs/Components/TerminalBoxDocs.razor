@@ -50,6 +50,34 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-prompt"
+               Title="The prompt sign"
+               Description="Prompt is any string, so the sign is whatever the shell you are showing actually uses. PromptContent replaces it with content - an icon, a coloured host name - and unlike a bare $, content put there deliberately is read out rather than hidden, because it is presumably saying something. PromptEditable lets the reader type over it, which is what makes @@bind-Prompt worth having: the prompt becomes a small input of its own."
+               Code="@PromptCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoTerminalBox TestId="prompt-arrow" Title="zsh" Prompt="&#8250;" Command="veto build" />
+
+            <VetoTerminalBox TestId="prompt-powershell" Title="pwsh" Prompt="PS&gt;" Command="dotnet test" />
+
+            <VetoTerminalBox TestId="prompt-content" Title="With an icon">
+                <VetoTerminalLine Command="git push origin main" TestId="prompt-content-line">
+                    <PromptContent>
+                        <VetoIcon Icon="@VetoIcons.GitHub" Size="VetoIconSize.Small" />
+                    </PromptContent>
+                </VetoTerminalLine>
+            </VetoTerminalBox>
+
+            <VetoStack Gap="VetoSpacing.Small" Align="VetoAlign.Start">
+                <VetoTerminalBox TestId="prompt-editable"
+                                 Title="Type over the prompt"
+                                 PromptEditable="true"
+                                 @bind-Prompt="_prompt"
+                                 Command="whoami" />
+                <span data-testid="prompt-readout">Bound prompt: @_prompt</span>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-copy"
                Title="What copy takes"
                Description="By default the commands in the window, one per line, gathered from what is actually rendered. 
@@ -72,6 +100,8 @@
 
 @code {
     private bool? _copyResult;
+
+    private string? _prompt = "$";
 
     private void OnCopied ( bool accepted ) => _copyResult = accepted;
 
@@ -107,6 +137,23 @@
 
         <VetoTerminalBox ShowHeader="false"
                          Command="git clone https://github.com/G-HK/Veto.git" />
+        """;
+
+    private const string PromptCode =
+        """
+        @* Any sign the shell you are showing actually uses. *@
+        <VetoTerminalBox Prompt="&#8250;" Command="veto build" />
+        <VetoTerminalBox Prompt="PS>" Command="dotnet test" />
+
+        @* Content instead of a sign. *@
+        <VetoTerminalLine Command="git push origin main">
+            <PromptContent>
+                <VetoIcon Icon="@VetoIcons.GitHub" Size="VetoIconSize.Small" />
+            </PromptContent>
+        </VetoTerminalLine>
+
+        @* Editable, and bound back to the page. *@
+        <VetoTerminalBox PromptEditable="true" @bind-Prompt="_prompt" Command="whoami" />
         """;
 
     private const string CopyCode = 

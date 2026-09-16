@@ -43,7 +43,10 @@
     line-height: var(--veto-line-height);
     color: var(--veto-color-text);
     background-color: var(--veto-color-surface);
-    border: 1px solid var(--veto-color-border);
+
+    /* Transparent rather than absent so turning the border on never shifts the text by a
+       pixel, and so the focus and invalid states still have something to recolour. */
+    border: 1px solid transparent;
     border-radius: var(--veto-radius-md);
     padding: var(--veto-space-2) var(--veto-space-3);
     overflow-y: auto;
@@ -51,11 +54,24 @@
     /* The open/closed toggle is the way this field changes size; a drag handle in the corner
        would fight it, and would sit underneath the copy button besides. */
     resize: none;
+
+    /* The height is eased over its own duration, not the library's 150ms: opening is the one
+       motion in this component the reader is meant to follow, and it is what tells them the
+       text was folded rather than cut off. The curve starts quickly and settles, so the field
+       arrives rather than stops. Everything else keeps the shared timing. */
     transition:
-        height var(--veto-transition),
+        height var(--veto-magic-textbox-expand-duration, 320ms) cubic-bezier(0.22, 0.61, 0.36, 1),
         border-color var(--veto-transition),
         box-shadow var(--veto-transition),
         background-color var(--veto-transition);
+}
+
+.veto-magic-textbox--bordered .veto-magic-textbox__input {
+    border-color: var(--veto-border-color, var(--veto-color-border));
+}
+
+.veto-magic-textbox--bordered .veto-magic-textbox__input:hover:not(:disabled):not([readonly]) {
+    border-color: var(--veto-color-border-strong);
 }
 
 /* Open to a fixed number of lines. With no line count the script sets an inline height
@@ -70,10 +86,6 @@
 
 .veto-magic-textbox__input::placeholder {
     color: var(--veto-color-text-muted);
-}
-
-.veto-magic-textbox__input:hover:not(:disabled):not([readonly]) {
-    border-color: var(--veto-color-border-strong);
 }
 
 .veto-magic-textbox__input:focus-visible {

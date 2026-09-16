@@ -78,7 +78,7 @@
     height: var(--veto-switch-track-height);
     padding: var(--veto-switch-pad);
     background-color: var(--veto-color-surface-raised);
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-radius: var(--veto-radius-full);
     transition: background-color var(--veto-transition), border-color var(--veto-transition);
 }
@@ -207,7 +207,7 @@
 
 .veto-switch--disabled .veto-switch__track {
     background-color: var(--veto-color-surface-disabled);
-    border-color: var(--veto-color-border);
+    border-color: var(--veto-border-color, var(--veto-color-border));
     opacity: 0.65;
 }
 

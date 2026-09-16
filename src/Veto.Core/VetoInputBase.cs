@@ -119,12 +119,24 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     [Parameter]
     public string? PingColor { get; set; }
 
+    /// <inheritdoc />
+    [Parameter]
+    public bool? RootBordered { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public bool Extrude { get; set; }
+
+    /// <inheritdoc />
+    [Parameter]
+    public string? ExtrudeDepth { get; set; }
+
     /// <summary>
     /// The effects the consumer asked for, as one value. Components do not normally touch this -
     /// it is applied for them - but one that renders its root somewhere unusual can place it
     /// deliberately.
     /// </summary>
-    internal VetoEffects Effects => new(Glow, GlowColor, Ping, PingColor);
+    internal VetoEffects Effects => new(Glow, GlowColor, Ping, PingColor, Extrude, ExtrudeDepth);
 
     /// <summary>
     /// The box-level parameters as one value. Components do not normally touch this - it is
@@ -134,7 +146,7 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
         RootWidth, RootHeight, RootMinWidth, RootMaxWidth, RootMinHeight, RootMaxHeight,
         RootMargin, RootPadding, RootOverflow,
         RootTop, RootRight, RootBottom, RootLeft,
-        RootZIndex, PositionsItself);
+        RootZIndex, RootBordered, PositionsItself);
 
     /// <summary>Text shown in the field's label. When null no label element is rendered.</summary>
     [Parameter]

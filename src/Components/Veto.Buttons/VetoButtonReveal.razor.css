@@ -132,12 +132,12 @@
 
 .veto-button-reveal--filled.veto-button-reveal--neutral .veto-button-reveal__trigger {
     background: var(--veto-color-surface-raised);
-    border-color: var(--veto-color-border);
+    border-color: var(--veto-border-color, var(--veto-color-border));
     color: var(--veto-color-text);
 }
 
 .veto-button-reveal--outlined .veto-button-reveal__trigger {
-    border-color: var(--veto-color-border);
+    border-color: var(--veto-border-color, var(--veto-color-border));
     color: var(--veto-color-text);
 }
 

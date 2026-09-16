@@ -70,9 +70,23 @@ public class VetoLoadingTests ( BlazorAppFixture app ) : VetoPageTest(app)
         await Component("progress-more").ClickAsync();
         await Expect(Page.GetByTestId("progress-value")).ToHaveTextAsync("60%");
 
-        var after = await fill.EvaluateAsync<double>("el => el.getBoundingClientRect().width");
+        // Waited for rather than sampled. The value changes the moment the button is clicked,
+        // but the width is a CSS transition and has barely started by then - reading it once
+        // measures the animation's first frame, which under load is indistinguishable from no
+        // change at all.
+        var grew = await fill.EvaluateAsync<bool>(
+            @"(el, before) => new Promise(resolve => {
+                  const deadline = performance.now() + 2000;
+                  const check = () => {
+                      if (el.getBoundingClientRect().width > before) { resolve(true); return; }
+                      if (performance.now() > deadline) { resolve(false); return; }
+                      requestAnimationFrame(check);
+                  };
+                  check();
+              })",
+            before);
 
-        Assert.True(after > before, $"The bar should grow: {before}px -> {after}px.");
+        Assert.True(grew, $"The bar should grow from {before}px within 2s.");
     }
 
     [Fact]

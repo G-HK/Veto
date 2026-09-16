@@ -33,9 +33,10 @@
             <div class="veto-terminal-box__body" data-terminal-body>
                 @if (Command is not null)
                 {
-                    <VetoTerminalLine Prompt="@Prompt" Command="@Command"
-                                      Typed="@Typed" Loop="@Loop"
-                                      TypingDuration="@TypingDuration"
+                    <VetoTerminalLine Prompt="@Prompt" PromptChanged="@PromptChanged"
+                                      PromptContent="@PromptContent" PromptEditable="@PromptEditable"
+                                      PromptLabel="@PromptLabel" Command="@Command"
+                                      Typed="@Typed" Loop="@Loop" TypingDuration="@TypingDuration"
                                       TestId="@(TestId is null ? null : $"{TestId}-line")" />
                 }
 

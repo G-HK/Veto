@@ -15,7 +15,7 @@
 }
 
 .veto-footer--bordered {
-    border-top: 1px solid var(--veto-color-border);
+    border-top: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-footer--sticky {

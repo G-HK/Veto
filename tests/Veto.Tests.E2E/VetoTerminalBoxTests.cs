@@ -244,4 +244,140 @@ public class VetoTerminalBoxTests(BlazorAppFixture app) : VetoPageTest(app)
 
         Assert.Equal(normalised, actual);
     }
+    [Fact]
+    public async Task The_prompt_sign_is_whatever_you_give_it()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("prompt-arrow-line").Locator(".veto-terminal-line__prompt"))
+            .ToHaveTextAsync("›");
+        await Expect(Component("prompt-powershell-line").Locator(".veto-terminal-line__prompt"))
+            .ToHaveTextAsync("PS>");
+    }
+
+    [Fact]
+    public async Task PromptContent_replaces_the_sign_and_is_not_hidden()
+    {
+        await GotoComponentAsync(Route);
+
+        var prompt = Component("prompt-content-line").Locator(".veto-terminal-line__prompt");
+
+        await Expect(prompt.Locator("svg")).ToHaveCountAsync(1);
+
+        // A bare $ before every line is noise and is hidden; content put there deliberately is
+        // presumed to be saying something, so it stays in the accessibility tree.
+        await Expect(prompt).Not.ToHaveAttributeAsync("aria-hidden", "true");
+    }
+
+    [Fact]
+    public async Task An_editable_prompt_is_labelled_rather_than_hidden()
+    {
+        await GotoComponentAsync(Route);
+
+        var prompt = Component("prompt-editable-line-prompt");
+
+        // Focusable, so aria-hidden would strand a keyboard user on a control their screen
+        // reader will not announce. It carries a real name instead.
+        await Expect(prompt).Not.ToHaveAttributeAsync("aria-hidden", "true");
+        await Expect(prompt).ToHaveAttributeAsync("aria-label", "Prompt");
+
+        await prompt.FocusAsync();
+        await Expect(prompt).ToBeFocusedAsync();
+    }
+
+    [Fact]
+    public async Task Editing_the_prompt_reports_back_to_the_page()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("prompt-readout")).ToHaveTextAsync("Bound prompt: $");
+
+        var prompt = Component("prompt-editable-line-prompt");
+
+        await prompt.FillAsync("veto@host:~#");
+        await prompt.BlurAsync();
+
+        // Two-way: the page is told, which is the whole point of making it editable.
+        await Expect(Component("prompt-readout")).ToHaveTextAsync("Bound prompt: veto@host:~#");
+        Assert.Equal("veto@host:~#", await prompt.InputValueAsync());
+    }
+
+    [Fact]
+    public async Task The_prompt_is_never_part_of_what_is_copied()
+    {
+        await GrantClipboardAsync();
+        await GotoComponentAsync(Route);
+
+        await Component("prompt-powershell-copy").ClickAsync();
+
+        var clipboard = await Page.EvaluateAsync<string>("() => navigator.clipboard.readText()");
+
+        Assert.Equal("dotnet test", clipboard);
+        Assert.DoesNotContain("PS>", clipboard);
+    }
+
+    [Fact]
+    public async Task Copying_raises_a_toast()
+    {
+        await GrantClipboardAsync();
+        await GotoComponentAsync(Route);
+
+        await Component("basic-copy").ClickAsync();
+
+        // The icon swapping to a tick is small and easy to miss; the toast is what actually
+        // confirms the copy to someone whose eye is on the command.
+        await Expect(Page.Locator(".veto-toast").First)
+            .ToContainTextAsync("Command copied to clipboard");
+    }
+
+    [Fact]
+    public async Task A_code_block_copy_raises_a_toast_too()
+    {
+        await GrantClipboardAsync();
+        await GotoComponentAsync(Route);
+
+        // Every copy button on the site reports the same way - the code samples under each
+        // demo are VetoCode, and they toast just as the terminal does.
+        await Component("demo-basic-code-copy").ClickAsync();
+
+        await Expect(Page.Locator(".veto-toast").First)
+            .ToContainTextAsync("Code copied to clipboard");
+    }
+
+    [Fact]
+    public async Task The_site_shows_at_most_five_toasts_at_the_bottom_right()
+    {
+        await GrantClipboardAsync();
+        await GotoComponentAsync(Route);
+
+        foreach (var id in new[]
+                 {
+                     "basic-copy", "session-copy", "chrome-named-copy",
+                     "prompt-arrow-copy", "prompt-powershell-copy", "copy-explicit-copy"
+                 })
+        {
+            await Component(id).ClickAsync();
+        }
+
+        // Six raised, five kept: the oldest steps aside rather than the stack growing down the
+        // whole page. MaxToasts is what decides that, not the page.
+        await Expect(Page.Locator(".veto-toast")).ToHaveCountAsync(5);
+
+        var stack = Page.GetByTestId("toasts-bottom-right");
+        await Expect(stack).ToHaveCountAsync(1);
+
+        // Anchored to the bottom right corner, so a toast never covers what was just clicked
+        // at the top of the page.
+        var box = await stack.BoundingBoxAsync();
+        var viewport = Page.ViewportSize!;
+
+        Assert.NotNull(box);
+        Assert.True(
+            box!.Y + box.Height > viewport.Height / 2,
+            $"expected the stack in the lower half, its bottom edge was at {box.Y + box.Height}px of {viewport.Height}px");
+        Assert.True(
+            box.X + box.Width > viewport.Width / 2,
+            $"expected the stack on the right, its right edge was at {box.X + box.Width}px of {viewport.Width}px");
+    }
+
 }

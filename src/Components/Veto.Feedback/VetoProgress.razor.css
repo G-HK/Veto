@@ -30,7 +30,7 @@
     width: 100%;
     overflow: hidden;
     background-color: var(--veto-color-surface-raised);
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-progress--rounded .veto-progress__track,

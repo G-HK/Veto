@@ -28,6 +28,16 @@ public class VetoMagicTextBoxTests(BlazorAppFixture app) : VetoPageTest(app)
 
     private ILocator TextArea(string testId) => Component(testId).Locator("textarea");
 
+    private async Task GrantClipboardAsync()
+    {
+        // Scoped to the app's origin. Granted without one it applies to whatever the context
+        // is showing - about:blank, before the first navigation - and the real page is still
+        // refused with NotAllowedError.
+        await Context.GrantPermissionsAsync(
+            ["clipboard-read", "clipboard-write"],
+            new() { Origin = App.BaseUrl });
+    }
+
     private Task<double> HeightAsync(string testId) =>
         TextArea(testId).EvaluateAsync<double>("el => el.getBoundingClientRect().height");
 
@@ -155,6 +165,75 @@ public class VetoMagicTextBoxTests(BlazorAppFixture app) : VetoPageTest(app)
     }
 
     [Fact]
+    public async Task The_field_has_no_border_unless_asked_for()
+    {
+        await GotoComponentAsync(Route);
+        await MeasuredAsync("border-off");
+        await MeasuredAsync("border-on");
+
+        // Transparent rather than absent, so turning the border on does not shift the text.
+        await Expect(TextArea("border-off")).ToHaveCSSAsync("border-top-width", "1px");
+        Assert.Equal(
+            "rgba(0, 0, 0, 0)",
+            await TextArea("border-off").EvaluateAsync<string>("el => getComputedStyle(el).borderTopColor"));
+
+        Assert.NotEqual(
+            "rgba(0, 0, 0, 0)",
+            await TextArea("border-on").EvaluateAsync<string>("el => getComputedStyle(el).borderTopColor"));
+    }
+
+    [Fact]
+    public async Task The_open_and_close_motion_is_gradual_and_adjustable()
+    {
+        await GotoComponentAsync(Route);
+        await MeasuredAsync("border-off");
+        await MeasuredAsync("motion-slow");
+
+        var defaultDuration = await TextArea("border-off")
+            .EvaluateAsync<string>("el => getComputedStyle(el).transitionDuration.split(',')[0].trim()");
+        var slowDuration = await TextArea("motion-slow")
+            .EvaluateAsync<string>("el => getComputedStyle(el).transitionDuration.split(',')[0].trim()");
+
+        // Gradual: the height is eased over its own duration rather than snapping.
+        Assert.Equal("0.32s", defaultDuration);
+        Assert.Equal("1.2s", slowDuration);
+    }
+
+    [Fact]
+    public async Task Copying_raises_a_toast()
+    {
+        await GrantClipboardAsync();
+        await GotoComponentAsync(Route);
+        await MeasuredAsync("copy-always");
+
+        await Component("copy-always-copy").ClickAsync();
+
+        // The icon swapping to a tick is small and easy to miss; the toast is what actually
+        // confirms the copy to someone whose eye is on the text. The host renders one stack
+        // per position, so the toasts are found by class rather than under a single testid.
+        await Expect(Page.Locator(".veto-toast").First).ToContainTextAsync("Copied to clipboard");
+    }
+
+    [Fact]
+    public async Task NotifyOnCopy_false_copies_silently()
+    {
+        await GrantClipboardAsync();
+        await GotoComponentAsync(Route);
+        await MeasuredAsync("copy-quiet");
+
+        var expected = await TextArea("copy-quiet").InputValueAsync();
+
+        await Component("copy-quiet-copy").ClickAsync();
+        await Expect(Component("copy-quiet-copy")).ToHaveAttributeAsync("aria-label", "Copied");
+
+        var clipboard = await Page.EvaluateAsync<string>("() => navigator.clipboard.readText()");
+        Assert.Equal(expected, clipboard);
+
+        // The copy happened; it just said nothing about it.
+        await Expect(Page.Locator(".veto-toast")).ToHaveCountAsync(0);
+    }
+
+    [Fact]
     public async Task Copyable_false_renders_no_copy_button()
     {
         await GotoComponentAsync(Route);
@@ -166,12 +245,7 @@ public class VetoMagicTextBoxTests(BlazorAppFixture app) : VetoPageTest(app)
     [Fact]
     public async Task Copying_puts_the_value_on_the_clipboard_and_confirms_it()
     {
-        // Scoped to the app's origin. Granted without one it applies to whatever the context
-        // is showing - about:blank, before the first navigation - and the real page is still
-        // refused with NotAllowedError.
-        await Context.GrantPermissionsAsync(
-            ["clipboard-read", "clipboard-write"],
-            new() { Origin = App.BaseUrl });
+        await GrantClipboardAsync();
         await GotoComponentAsync(Route);
         await MeasuredAsync("copy-always");
 

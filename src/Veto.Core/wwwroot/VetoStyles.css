@@ -288,6 +288,52 @@
 }
 
 /*
+ * Extrude - the component standing out of the screen.
+ *
+ * A perspective transform on the element itself rather than on a pseudo-element, because the
+ * whole component has to come forward, not a layer behind it. The shadow is cast down and away
+ * from the light rather than spread evenly, which is what separates "raised" from "blurred":
+ * an evenly spread shadow reads as a halo, and the eye does not take it for depth.
+ *
+ * transform-style and the translateZ need a perspective to mean anything, and perspective on
+ * the element itself applies to its children, not to it - so the element is given its own
+ * perspective through the transform function instead of the property.
+ */
+.veto-extrude {
+    transform:
+        perspective(var(--veto-extrude-perspective, 40rem))
+        translateZ(var(--veto-extrude-depth, 0.75rem));
+    box-shadow:
+        0 calc(var(--veto-extrude-depth, 0.75rem) * 0.6)
+          calc(var(--veto-extrude-depth, 0.75rem) * 1.6)
+          rgb(15 23 42 / var(--veto-extrude-shadow-opacity, 0.28)),
+        0 calc(var(--veto-extrude-depth, 0.75rem) * 0.15)
+          calc(var(--veto-extrude-depth, 0.75rem) * 0.4)
+          rgb(15 23 42 / var(--veto-extrude-shadow-opacity, 0.28));
+    transition: transform var(--veto-transition), box-shadow var(--veto-transition);
+}
+
+/* Coming further forward under the pointer sells the depth: a raised thing that does not
+   answer the pointer reads as a picture of a raised thing. */
+.veto-extrude:hover {
+    transform:
+        perspective(var(--veto-extrude-perspective, 40rem))
+        translateZ(calc(var(--veto-extrude-depth, 0.75rem) * 1.6));
+}
+
+/* The dark theme's shadows are black rather than slate, for the same reason the elevation
+   tokens are: a slate shadow on a dark surface looks like a smudge. */
+[data-veto-theme="dark"] .veto-extrude {
+    --veto-extrude-shadow-opacity: 0.55;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-veto-theme="light"]) .veto-extrude {
+        --veto-extrude-shadow-opacity: 0.55;
+    }
+}
+
+/*
  * Reduced motion. The glow and the ring stay - they are saying something, and removing them
  * would remove the message along with the movement - but they stop moving and hold at a steady
  * value instead.
@@ -301,5 +347,17 @@
     .veto-ping::before {
         animation: none;
         opacity: 0.5;
+    }
+
+    /* The component stays raised - that is the design, not the motion - but it stops moving
+       toward the pointer. */
+    .veto-extrude {
+        transition: none;
+    }
+
+    .veto-extrude:hover {
+        transform:
+            perspective(var(--veto-extrude-perspective, 40rem))
+            translateZ(var(--veto-extrude-depth, 0.75rem));
     }
 }

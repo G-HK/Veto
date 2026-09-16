@@ -82,13 +82,13 @@
 .veto-button--filled.veto-button--neutral {
     color: var(--veto-color-text);
     background-color: var(--veto-color-surface-raised);
-    border-color: var(--veto-color-border);
+    border-color: var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-button--outlined {
     color: var(--veto-button-color);
     background-color: transparent;
-    border-color: var(--veto-color-border);
+    border-color: var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-button--text {
@@ -103,7 +103,9 @@
 }
 
 .veto-button--outlined:hover:not(:disabled) {
-    border-color: var(--veto-button-color);
+    /* Through the same property as the resting border, or a button asked to go borderless
+       would grow one back the moment the pointer arrived. */
+    border-color: var(--veto-border-color, var(--veto-button-color));
     background-color: color-mix(in srgb, var(--veto-button-color) 8%, transparent);
 }
 

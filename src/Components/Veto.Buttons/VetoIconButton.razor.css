@@ -35,7 +35,7 @@
 
 /* Variants */
 .veto-icon-button--outlined {
-    border-color: var(--veto-color-border);
+    border-color: var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-icon-button--filled {

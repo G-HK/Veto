@@ -18,10 +18,23 @@ public struct StyleBuilder
     public static StyleBuilder Default ( string? initial ) => new(NormalizeChunk(initial));
 
     /// <summary>Appends a <c>property: value</c> declaration.</summary>
+    /// <remarks>
+    /// A semicolon in <paramref name="value"/> is replaced with a comma. One declaration's
+    /// value has no legitimate use for a semicolon - it is the character that ends the
+    /// declaration - so anything carrying one is either a mistake or an attempt to close this
+    /// declaration and start another. Components pass their own string parameters through
+    /// here (a duration, a length, a colour), and those parameters come from app code that
+    /// may have built them from something less trustworthy.
+    /// <para>
+    /// Only single declarations are cleaned. <see cref="AddRaw"/> takes a whole declaration
+    /// list on purpose - it is how a consumer's own <c>Style</c> is appended - and separating
+    /// those two cases is the point of having both methods.
+    /// </para>
+    /// </remarks>
     public StyleBuilder AddStyle ( string property, string? value ) =>
         string.IsNullOrWhiteSpace(value)
             ? this
-            : AddRaw($"{property}: {value}");
+            : AddRaw($"{property}: {value.Replace(';', ',')}");
 
     /// <summary>Appends a <c>property: value</c> declaration only when <paramref name="when"/> is true.</summary>
     public StyleBuilder AddStyle ( string property, string? value, bool when ) =>

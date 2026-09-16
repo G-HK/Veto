@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Veto.Components.Icon;
+using Veto.Components.Toast;
 using Veto.Core;
 
 namespace Veto.Components.TerminalBox;
@@ -27,6 +28,14 @@ public partial class VetoTerminalBox : VetoComponentBase, IAsyncDisposable
     private IJSObjectReference? _module;
     private CancellationTokenSource? _resetCopied;
     private bool _copied;
+
+    /// <summary>
+    /// Resolved through the provider rather than injected directly so the component still
+    /// works in an app that never registered toasts. [Inject] on IVetoToastService would throw
+    /// at first render there, which is a hard failure for an entirely optional convenience.
+    /// </summary>
+    [Inject]
+    private IServiceProvider Services { get; set; } = default!;
 
     /// <inheritdoc />
     protected override string RootClass => "veto-terminal-box";
@@ -55,9 +64,33 @@ public partial class VetoTerminalBox : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public string? Command { get; set; }
 
-    /// <summary>The prompt drawn before <see cref="Command"/>.</summary>
+    /// <summary>
+    /// The prompt drawn before <see cref="Command"/>. Any sign you like - <c>$</c>,
+    /// <c>&gt;</c>, <c>PS&gt;</c>. Null renders none. Applies to the shorthand line only;
+    /// child lines carry their own.
+    /// </summary>
+    /// <remarks>Two-way bindable with <c>@bind-Prompt</c> alongside <see cref="PromptEditable"/>.</remarks>
     [Parameter]
     public string? Prompt { get; set; } = "$";
+
+    /// <summary>Raised when the shorthand line's prompt is edited, so <c>@bind-Prompt</c> works.</summary>
+    [Parameter]
+    public EventCallback<string?> PromptChanged { get; set; }
+
+    /// <summary>
+    /// Content drawn in place of <see cref="Prompt"/> on the shorthand line - an icon, a
+    /// coloured host name, a branch.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? PromptContent { get; set; }
+
+    /// <summary>Whether the reader can type over the shorthand line's prompt. Off by default.</summary>
+    [Parameter]
+    public bool PromptEditable { get; set; }
+
+    /// <summary>The editable prompt's accessible name.</summary>
+    [Parameter]
+    public string PromptLabel { get; set; } = "Prompt";
 
     /// <summary>Whether <see cref="Command"/> types itself in rather than appearing at once.</summary>
     [Parameter]
@@ -86,6 +119,24 @@ public partial class VetoTerminalBox : VetoComponentBase, IAsyncDisposable
     /// </summary>
     [Parameter]
     public string? CopyText { get; set; }
+
+    /// <summary>
+    /// Whether a copy raises a toast. Needs a <c>VetoToastHost</c> in the layout and
+    /// <c>AddVetoToast()</c> registered; without either, copying still works and says nothing.
+    /// </summary>
+    [Parameter]
+    public bool NotifyOnCopy { get; set; } = true;
+
+    /// <summary>What the toast says after a successful copy.</summary>
+    [Parameter]
+    public string CopyToastMessage { get; set; } = "Command copied to clipboard";
+
+    /// <summary>
+    /// What the toast says when the browser refused the write - outside a secure context, or
+    /// with the clipboard permission denied.
+    /// </summary>
+    [Parameter]
+    public string CopyFailedToastMessage { get; set; } = "Could not copy to the clipboard";
 
     /// <summary>The copy button's accessible name and tooltip, before it has been used.</summary>
     [Parameter]
@@ -132,6 +183,8 @@ public partial class VetoTerminalBox : VetoComponentBase, IAsyncDisposable
             _copied = false;
         }
 
+        NotifyCopied();
+
         if (OnCopied.HasDelegate)
         {
             await OnCopied.InvokeAsync(_copied);
@@ -146,6 +199,38 @@ public partial class VetoTerminalBox : VetoComponentBase, IAsyncDisposable
             StateHasChanged();
 
             await ResetCopiedLabelAsync();
+        }
+    }
+
+    /// <summary>
+    /// Raises the toast that reports the copy. The icon swap on the button is easy to miss -
+    /// it is small, and the reader's eye is usually on what they just copied - so the toast is
+    /// what actually confirms it happened.
+    /// </summary>
+    /// <remarks>
+    /// A missing toast service is not an error: the component is usable without one, and an
+    /// app that never registered toasts has said as much. Copying still works and reports
+    /// through the button.
+    /// </remarks>
+    private void NotifyCopied ()
+    {
+        if (!NotifyOnCopy)
+        {
+            return;
+        }
+
+        if (Services.GetService(typeof(IVetoToastService)) is not IVetoToastService toasts)
+        {
+            return;
+        }
+
+        if (_copied)
+        {
+            toasts.Success(CopyToastMessage);
+        }
+        else
+        {
+            toasts.Error(CopyFailedToastMessage);
         }
     }
 

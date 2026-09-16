@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
+using Veto.Components.Toast;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Veto.Core;
@@ -38,6 +39,14 @@ public partial class VetoMagicTextBox<TValue> : VetoInputBase<TValue>, IAsyncDis
     private bool _overflowing;
     private bool _measured;
     private bool _copied;
+
+    /// <summary>
+    /// Resolved through the provider rather than injected directly so the field still works in
+    /// an app that never registered toasts. [Inject] on IVetoToastService would throw at first
+    /// render there, which is a hard failure for an entirely optional convenience.
+    /// </summary>
+    [Inject]
+    private IServiceProvider Services { get; set; } = default!;
 
     /// <inheritdoc />
     protected override string RootClass => "veto-magic-textbox";
@@ -78,6 +87,41 @@ public partial class VetoMagicTextBox<TValue> : VetoInputBase<TValue>, IAsyncDis
     /// <summary>When the copy button is shown. On hover and focus by default.</summary>
     [Parameter]
     public VetoCopyReveal CopyReveal { get; set; } = VetoCopyReveal.Hover;
+
+    /// <summary>
+    /// Whether the field draws a border. False by default: the field is usually one of several
+    /// in a form that already groups them, and a border around a box that changes height draws
+    /// the eye to the change rather than to the text. Turn it on for a field standing alone.
+    /// </summary>
+    [Parameter]
+    public bool Bordered { get; set; }
+
+    /// <summary>
+    /// How long the field takes to open or close, as a CSS duration. Long enough to be followed
+    /// by eye - the movement is what tells the reader the text was not cut off but folded, and
+    /// an instant jump reads as the page breaking.
+    /// </summary>
+    [Parameter]
+    public string ExpandDuration { get; set; } = "320ms";
+
+    /// <summary>
+    /// Whether a copy raises a toast. Needs a <c>VetoToastHost</c> in the layout and
+    /// <c>AddVetoToast()</c> registered; without either, copying still works and simply says
+    /// nothing.
+    /// </summary>
+    [Parameter]
+    public bool NotifyOnCopy { get; set; } = true;
+
+    /// <summary>What the toast says after a successful copy.</summary>
+    [Parameter]
+    public string CopyToastMessage { get; set; } = "Copied to clipboard";
+
+    /// <summary>
+    /// What the toast says when the browser refused the write - outside a secure context, or
+    /// with the clipboard permission denied.
+    /// </summary>
+    [Parameter]
+    public string CopyFailedToastMessage { get; set; } = "Could not copy to the clipboard";
 
     /// <summary>The copy button's accessible name and tooltip, before it has been used.</summary>
     [Parameter]
@@ -145,7 +189,8 @@ public partial class VetoMagicTextBox<TValue> : VetoInputBase<TValue>, IAsyncDis
             .AddClass(Modifier("expanded"), Expanded)
             .AddClass(Modifier("expandable"), Expandable)
             .AddClass(Modifier("overflowing"), _overflowing)
-            .AddClass(Modifier("copy-always"), Copyable && CopyReveal is VetoCopyReveal.Always);
+            .AddClass(Modifier("copy-always"), Copyable && CopyReveal is VetoCopyReveal.Always)
+            .AddClass(Modifier("bordered"), Bordered);
 
     /// <inheritdoc />
     protected override StyleBuilder StartStyle () =>
@@ -154,7 +199,8 @@ public partial class VetoMagicTextBox<TValue> : VetoInputBase<TValue>, IAsyncDis
             .AddStyle(
                 "--veto-magic-textbox-expanded-lines",
                 ExpandedLines?.ToString(CultureInfo.InvariantCulture),
-                ExpandedLines.HasValue);
+                ExpandedLines.HasValue)
+            .AddStyle("--veto-magic-textbox-expand-duration", ExpandDuration);
 
     private Task ToggleAsync ()
     {
@@ -277,6 +323,8 @@ public partial class VetoMagicTextBox<TValue> : VetoInputBase<TValue>, IAsyncDis
             _copied = false;
         }
 
+        NotifyCopied();
+
         if (OnCopied.HasDelegate)
         {
             await OnCopied.InvokeAsync(_copied);
@@ -291,6 +339,38 @@ public partial class VetoMagicTextBox<TValue> : VetoInputBase<TValue>, IAsyncDis
             StateHasChanged();
 
             await ResetCopiedLabelAsync();
+        }
+    }
+
+    /// <summary>
+    /// Raises the toast that reports the copy. The icon swap on the button is easy to miss -
+    /// it is small, and the reader's eye is usually on the text they just copied - so the
+    /// toast is what actually confirms it happened.
+    /// </summary>
+    /// <remarks>
+    /// A missing toast service is not an error: the field is usable without one, and an app
+    /// that never registered toasts has said as much. Copying still works and reports through
+    /// the button and <see cref="OnCopied"/>.
+    /// </remarks>
+    private void NotifyCopied ()
+    {
+        if (!NotifyOnCopy)
+        {
+            return;
+        }
+
+        if (Services.GetService(typeof(IVetoToastService)) is not IVetoToastService toasts)
+        {
+            return;
+        }
+
+        if (_copied)
+        {
+            toasts.Success(CopyToastMessage);
+        }
+        else
+        {
+            toasts.Error(CopyFailedToastMessage);
         }
     }
 

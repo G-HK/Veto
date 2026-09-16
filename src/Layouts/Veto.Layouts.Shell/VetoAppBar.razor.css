@@ -20,7 +20,7 @@
 }
 
 .veto-appbar--bordered {
-    border-bottom: 1px solid var(--veto-color-border);
+    border-bottom: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-appbar--elevated {

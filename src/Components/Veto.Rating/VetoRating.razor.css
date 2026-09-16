@@ -181,7 +181,7 @@
 }
 
 .veto-rating--disabled .veto-rating__icon--empty {
-    color: var(--veto-color-border);
+    color: var(--veto-border-color, var(--veto-color-border));
 }
 
 .veto-rating--invalid {

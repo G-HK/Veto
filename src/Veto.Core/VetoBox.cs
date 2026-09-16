@@ -38,7 +38,7 @@ public enum VetoOverflow
 /// something, without a wrapper element whose only job is to hold a style attribute.
 /// </para>
 /// </remarks>
-internal readonly record struct VetoBox ( string? Width, string? Height, string? MinWidth, string? MaxWidth, string? MinHeight, string? MaxHeight, VetoSpacing? Margin, VetoSpacing? Padding, VetoOverflow? Overflow, string? Top, string? Right, string? Bottom, string? Left, int? ZIndex, bool PositionsItself )
+internal readonly record struct VetoBox ( string? Width, string? Height, string? MinWidth, string? MaxWidth, string? MinHeight, string? MaxHeight, VetoSpacing? Margin, VetoSpacing? Padding, VetoOverflow? Overflow, string? Top, string? Right, string? Bottom, string? Left, int? ZIndex, bool? Bordered, bool PositionsItself )
 {
     /// <summary>True when nothing was set and there is no work to do.</summary>
     public bool IsEmpty =>
@@ -46,7 +46,7 @@ internal readonly record struct VetoBox ( string? Width, string? Height, string?
         && MinWidth is null && MaxWidth is null
         && MinHeight is null && MaxHeight is null
         && Margin is null && Padding is null && Overflow is null
-        && !HasOffset && !ZIndex.HasValue;
+        && !HasOffset && !ZIndex.HasValue && Bordered is null;
 
     private bool HasOffset => Top is not null || Right is not null || Bottom is not null || Left is not null;
 
@@ -85,7 +85,14 @@ internal readonly record struct VetoBox ( string? Width, string? Height, string?
             .AddStyle("top", Length(Top))
             .AddStyle("right", Length(Right))
             .AddStyle("bottom", Length(Bottom))
-            .AddStyle("left", Length(Left));
+            .AddStyle("left", Length(Left))
+
+            // Transparent rather than none: the border keeps its width, so turning it off never
+            // shifts the content, and the focus and invalid states still have a colour to set.
+            // A custom property rather than a border declaration because the border is usually
+            // drawn on an element inside the component - custom properties inherit, so one
+            // declaration on the root reaches it.
+            .AddStyle("--veto-border-color", "transparent", Bordered is false);
     }
 
     /// <summary>

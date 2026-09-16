@@ -9,7 +9,7 @@
 }
 
 .veto-card-header--bordered {
-    border-bottom: 1px solid var(--veto-color-border);
+    border-bottom: 1px solid var(--veto-border-color, var(--veto-color-border));
 }
 
 /* An image directly above the header runs to the card's edges, so the header must not add a

@@ -29,7 +29,7 @@
 
     <DemoBlock TestId="demo-copy"
                Title="The copy button"
-               Description="It rests hidden and arrives on hover, because on most fields it is an occasional convenience rather than part of the furniture. Always is for the field whose whole point is to be copied - a generated key, a connection string - where hiding the button until hover hides the feature. Either way it also appears on keyboard focus: revealing on hover alone would put it out of reach of anyone not using a pointer."
+               Description="It rests hidden and arrives on hover, because on most fields it is an occasional convenience rather than part of the furniture. Always is for the field whose whole point is to be copied - a generated key, a connection string - where hiding the button until hover hides the feature. Either way it also appears on keyboard focus: revealing on hover alone would put it out of reach of anyone not using a pointer. Copying raises a toast, because the icon swapping to a tick is small and easy to miss when the reader's eye is on the text they just copied; NotifyOnCopy turns that off, and a field in an app with no toast host simply stays quiet."
                Code="@CopyCode">
         <VetoStack Gap="VetoSpacing.Large">
             <VetoMagicTextBox TValue="string"
@@ -48,6 +48,13 @@
                               Label="No copy button"
                               Copyable="false"
                               @bind-Value="_short" />
+
+            <VetoMagicTextBox TValue="string"
+                              TestId="copy-quiet"
+                              Label="Copies without a toast"
+                              CopyReveal="VetoCopyReveal.Always"
+                              NotifyOnCopy="false"
+                              @bind-Value="_token" />
         </VetoStack>
     </DemoBlock>
 
@@ -105,6 +112,31 @@
                 </VetoButton>
                 <span data-testid="bound-state">Expanded: @_expanded</span>
             </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-border-motion"
+               Title="Border, and how fast it moves"
+               Description="No border by default: the field is usually one of several in a form that already groups them, and a box that changes height draws more attention to the change when it is outlined. Bordered puts it back for a field standing alone. ExpandDuration sets how long opening takes - long enough to follow by eye is the point, because the movement is what tells the reader the text was folded rather than cut off. Anyone who has asked for reduced motion gets the new height immediately instead."
+               Code="@BorderCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoMagicTextBox TValue="string"
+                              TestId="border-off"
+                              Label="No border (the default)"
+                              @bind-Value="_long" />
+
+            <VetoMagicTextBox TValue="string"
+                              TestId="border-on"
+                              Label="Bordered"
+                              Bordered="true"
+                              @bind-Value="_long" />
+
+            <VetoMagicTextBox TValue="string"
+                              TestId="motion-slow"
+                              Label="Opens slowly (1.2s)"
+                              Bordered="true"
+                              ExpandDuration="1200ms"
+                              @bind-Value="_long" />
         </VetoStack>
     </DemoBlock>
 
@@ -188,6 +220,15 @@
                           @bind-Value="_trace" @bind-Expanded="_expanded" />
 
         <VetoButton OnClick="() => _expanded = !_expanded">Toggle from the page</VetoButton>
+        """;
+
+    private const string BorderCode = """
+        @* No border by default. *@
+        <VetoMagicTextBox TValue="string" @bind-Value="_text" />
+
+        @* Outlined, and slower to open. *@
+        <VetoMagicTextBox TValue="string" @bind-Value="_text"
+                          Bordered="true" ExpandDuration="1200ms" />
         """;
 
     private const string StateCode = """

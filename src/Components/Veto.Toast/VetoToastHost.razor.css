@@ -77,7 +77,7 @@
     overflow: hidden;
     color: var(--veto-color-text);
     background-color: var(--veto-color-surface);
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-inline-start: 3px solid var(--veto-toast-accent);
     border-radius: var(--veto-radius-lg);
     box-shadow: var(--veto-shadow-md);
@@ -134,7 +134,7 @@
     text-align: center;
     color: var(--veto-color-text-muted);
     background-color: var(--veto-color-surface-raised);
-    border: 1px solid var(--veto-color-border);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-radius: var(--veto-radius-full);
 }
 

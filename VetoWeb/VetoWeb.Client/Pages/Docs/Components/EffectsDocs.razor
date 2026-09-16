@@ -93,6 +93,39 @@
         </p>
     </VetoStack>
 
+    <DemoBlock TestId="demo-extrude"
+               Title="Extrude - standing out of the screen"
+               Description="A perspective transform plus a shadow cast down and away, so the component reads as raised rather than merely shadowed. It comes further forward under the pointer, because a raised thing that does not answer the pointer reads as a picture of a raised thing. ExtrudeDepth sets how far out it stands. Reduced motion keeps the depth and drops the movement - the height is the design, the travel is the animation."
+               Code="@ExtrudeCode"
+               ClipStage="false">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoButton Extrude="true" TestId="extrude-button">Raised</VetoButton>
+            <VetoButton Extrude="true" ExtrudeDepth="1.5rem" Color="VetoColor.Secondary" TestId="extrude-deep">Further out</VetoButton>
+            <VetoCard Elevation="VetoElevation.Flat" Padding="VetoSpacing.Large" Extrude="true" TestId="extrude-card">
+                A card can come off the page too.
+            </VetoCard>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-bordered"
+               Title="RootBordered - taking the border off anything"
+               Description="Every component answers to it, because the border colour is inherited from the root rather than written into each component's own rule. False makes the border transparent rather than removing it, so nothing shifts by a pixel and the focus and invalid states still have a colour to set. Null - the default - leaves the component's own stylesheet in charge. It is RootBordered rather than Bordered because several components already have a Bordered of their own, and Blazor matches parameters by name across the whole inheritance chain."
+               Code="@BorderedCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" Align="VetoAlign.Center">
+                <VetoTextBox TValue="string" @bind-Value="_name" Label="Default" TestId="bordered-default" />
+                <VetoTextBox TValue="string" @bind-Value="_name" Label="No border" RootBordered="false" TestId="bordered-off" />
+            </VetoStack>
+
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" Align="VetoAlign.Center">
+                <VetoButton Variant="VetoVariant.Outlined" TestId="bordered-button-default">Outlined</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined" RootBordered="false" TestId="bordered-button-off">Borderless</VetoButton>
+                <VetoKbd Keys="Ctrl+K" TestId="bordered-kbd-default" />
+                <VetoKbd Keys="Ctrl+K" RootBordered="false" TestId="bordered-kbd-off" />
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
     <ParameterTable TestId="parameters" Rows="Parameters" />
 
 </DocsPage>
@@ -105,8 +138,27 @@
         new("Glow", "bool", "false", "Surrounds the component with a neon glow that breathes in and out."),
         new("GlowColor", "string?", "null", "Any CSS colour. Defaults to the component's colour role, then to the theme accent."),
         new("Ping", "bool", "false", "Sends a ring expanding out of the border and fading, over and over."),
-        new("PingColor", "string?", "null", "The ring's colour. Defaults the same way the glow does.")
+        new("PingColor", "string?", "null", "The ring's colour. Defaults the same way the glow does."),
+        new("Extrude", "bool", "false", "Lifts the component off the page, as though it stood out of the screen."),
+        new("ExtrudeDepth", "string?", "null", "How far it stands out, as a CSS length. Defaults to 0.75rem."),
+        new("RootBordered", "bool?", "null", "False makes the component's border transparent. Null leaves its own stylesheet in charge.")
     ];
+
+    private const string ExtrudeCode = """
+        <VetoButton Extrude="true">Raised</VetoButton>
+        <VetoButton Extrude="true" ExtrudeDepth="1.5rem">Further out</VetoButton>
+
+        <VetoCard Elevation="VetoElevation.Flat" Extrude="true">
+            A card can come off the page too.
+        </VetoCard>
+        """;
+
+    private const string BorderedCode = """
+        @* Works on anything - the border colour is inherited from the root. *@
+        <VetoTextBox TValue="string" @bind-Value="_name" RootBordered="false" />
+        <VetoButton Variant="VetoVariant.Outlined" RootBordered="false">Borderless</VetoButton>
+        <VetoKbd Keys="Ctrl+K" RootBordered="false" />
+        """;
 
     private const string GlowCode = """
         <VetoButton Glow="true">Primary</VetoButton>
