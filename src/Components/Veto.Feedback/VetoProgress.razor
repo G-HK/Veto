@@ -4,23 +4,107 @@
 @if (Visible)
 {
     <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
-         style="@CssStyle" data-testid="@TestId"> 
+         style="@CssStyle" data-testid="@TestId"
+         data-shape="@(Shape is VetoProgressShape.Circle ? "circle" : "linear")">
 
-        @if (Label is not null || ShowValue)
+        @if (Shape is VetoProgressShape.Linear && (Label is not null || ShowValue))
         {
             <div class="veto-progress__header">
                 <span class="veto-progress__label">@Label</span>
                 @if (ShowValue && !Indeterminate)
                 {
-                    <span class="veto-progress__value" data-testid="@(TestId is null ? null : $"{TestId}-value")">@ValueText</span>
+                    <span class="veto-progress__value" data-testid="@(TestId is null ? null : $"{TestId}-value")">
+                        @if (ValueContent is not null)
+                        {
+                            @ValueContent(this)
+                        }
+                        else
+                        {
+                            @ValueText
+                        }
+                    </span>
                 }
             </div>
         }
 
-        <div class="veto-progress__track" role="progressbar" aria-label="@(Label ?? AccessibleLabel)"
-             aria-valuemin="0" aria-valuemax="100" aria-valuenow="@(Indeterminate ? null : Percent.ToString("0"))"
-             aria-valuetext="@(Indeterminate ? "Working" : null)">
-            <span class="veto-progress__fill" style="@FillStyle"></span>
-        </div>
+        @if (Shape is VetoProgressShape.Circle)
+        {
+            <div class="veto-progress__ring" role="progressbar" aria-label="@(Label ?? AccessibleLabel)"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="@(Indeterminate ? null : Percent.ToString("0"))"
+                 aria-valuetext="@(Indeterminate ? "Working" : null)">
+
+                @* The arc is revealed with a dash offset rather than by redrawing the path: a
+                   path's d cannot be transitioned, so growing it any other way would jump. *@
+                <svg class="veto-progress__svg" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                    <circle class="veto-progress__ring-track"
+                            cx="50" cy="50" r="@RingRadiusText"
+                            fill="none" stroke-width="@ThicknessText" />
+
+                    @if (Trail is not null && !Indeterminate)
+                    {
+                        <circle class="veto-progress__ring-trail"
+                                cx="50" cy="50" r="@RingRadiusText"
+                                fill="none" stroke-width="@ThicknessText"
+                                stroke-dasharray="@RingCircumferenceText"
+                                stroke-dashoffset="@RingOffsetText(TrailPercent)" />
+                    }
+
+                    <circle class="veto-progress__ring-fill"
+                            cx="50" cy="50" r="@RingRadiusText"
+                            fill="none" stroke-width="@ThicknessText"
+                            stroke-linecap="@(Rounded ? "round" : "butt")"
+                            stroke-dasharray="@RingCircumferenceText"
+                            stroke-dashoffset="@RingOffsetText(Percent)" />
+                </svg>
+
+                @if (ShowValue && !Indeterminate)
+                {
+                    <span class="veto-progress__ring-value" data-testid="@(TestId is null ? null : $"{TestId}-value")">
+                        @if (ValueContent is not null)
+                        {
+                            @ValueContent(this)
+                        }
+                        else
+                        {
+                            @ValueText
+                        }
+                    </span>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="veto-progress__track" role="progressbar" aria-label="@(Label ?? AccessibleLabel)"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="@(Indeterminate ? null : Percent.ToString("0"))"
+                 aria-valuetext="@(Indeterminate ? "Working" : null)">
+
+                @if (Trail is not null && !Indeterminate)
+                {
+                    @* Drawn under the fill and left behind when the value drops - the damage
+                       bar of a health meter, which is what makes a hit readable at all. *@
+                    <span class="veto-progress__trail" style="@TrailStyle"></span>
+                }
+
+                <span class="veto-progress__fill" style="@FillStyle"></span>
+
+                @if (Segments > 1)
+                {
+                    @* Notches over the top rather than a segment per element: the fill stays
+                       one box, so it still animates as one. *@
+                    <span class="veto-progress__notches" aria-hidden="true" style="@NotchStyle"></span>
+                }
+            </div>
+        }
+
+        @if (Runner is not null && Shape is VetoProgressShape.Linear)
+        {
+            @* Rides the leading edge of the fill. Outside the track, which clips, so a runner
+               taller than the bar is not cut off at the knees. *@
+            <div class="veto-progress__runner-rail" aria-hidden="true">
+                <div class="veto-progress__runner" style="@RunnerStyle">
+                    @Runner(this)
+                </div>
+            </div>
+        }
     </div>
 }

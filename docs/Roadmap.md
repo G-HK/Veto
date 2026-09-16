@@ -158,7 +158,7 @@ validation for free.
 | `VetoDrawer` | idea | Slide-in panel from any edge; shares mechanics with dialog and dock. |
 | `VetoPopover` | planned | The positioning engine `VetoToolTip`, `VetoSelect` and `VetoDialog` would share, and which `VetoMenu` would then adopt. `VetoMenu` ships without it on purpose - CSS placement covers the common cases - so what is left for the engine is exactly the two things CSS cannot do: flipping away from the edge of the viewport, and escaping a clipping ancestor. Worth building once, deliberately. |
 | `VetoAlert` | planned | Inline severity banner. |
-| `VetoProgress` | **done** | Linear, determinate and indeterminate, with proper `progressbar` semantics. A circular variant is still outstanding. |
+| `VetoProgress` | **done** | Linear or circular (`Shape`), determinate and indeterminate, with proper `progressbar` semantics. The ring grows by offsetting a dash rather than redrawing the path - `d` cannot be transitioned - and its radius pulls in by half the stroke width or the stroke clips at the edge of the viewBox. `Segments` notches the bar into game-style pips, drawn *over* one fill so a part-filled pip still reads as part-filled. `Trail` is the damage bar: hold the old value and the gap between the two is the hit. `Runner` carries content along the leading edge (a car, a jet) on its own rail outside the track, which clips. `ValueContent` prints the number in its own units - bytes, files, time left - and is handed the component so it can read `Value`, `Max` and `Percent`. |
 | `VetoSkeleton` | **done** | Text, rectangle and circle placeholders; multi-line blocks end short. Hidden from assistive technology. |
 | `VetoBlinkText` | **done** | Teletype reveal with a blinking cursor, punctuation pauses, word mode, optional glyph scramble, and an `IAsyncEnumerable` stream input for API or model output. |
 | `VetoSpinner` | **done** | Indeterminate wait; decorative unless given a label. |
@@ -235,5 +235,5 @@ Two things worth remembering from building it:
 2. Overlays: the popover engine, then `ToolTip`, `Menu`, `Dialog`
 3. Remaining form inputs - `TextArea`, `CheckBox`, `RadioGroup`, `Select`, date and time pickers
 4. `VetoTable` promoted to a real component - it is still the original sketch
-5. Circular variant of `VetoProgress`
+5. ~~Circular variant of `VetoProgress`~~ - done
 6. Retire the legacy fixture pages under `VetoWeb.Client/Pages/Components`, migrating their specs to the `/docs` routes

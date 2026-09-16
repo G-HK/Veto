@@ -67,6 +67,84 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-progress-circle"
+               Title="A ring instead of a bar"
+               Description="For a figure that has to sit inside something small and square - a tile, an avatar, a button - where a bar would be too short to read or would force the layout wider. The arc grows by offsetting a dash rather than by redrawing the path, because an SVG path's d cannot be transitioned and redrawing it would jump. An indeterminate ring turns rather than fills: there is no figure to show, so showing one would be a lie."
+               Code="@CircleCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoProgress TestId="ring" Shape="VetoProgressShape.Circle" Value="_progress" ShowValue="true" AccessibleLabel="Uploading" />
+            <VetoProgress TestId="ring-thin" Shape="VetoProgressShape.Circle" Value="_progress" Thickness="4" ShowValue="true" Color="VetoColor.Success" AccessibleLabel="Sync" />
+            <VetoProgress TestId="ring-small" Shape="VetoProgressShape.Circle" Value="_progress" Size="VetoSize.Small" AccessibleLabel="Saving" />
+            <VetoProgress TestId="ring-indeterminate" Shape="VetoProgressShape.Circle" Indeterminate="true" AccessibleLabel="Working" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-progress-game"
+               Title="Game meters - health, mana, experience"
+               Description="Segments notch the bar into pips, and a part-filled pip still reads as part-filled because the notches are drawn over one fill rather than the bar being split into separate elements. Trail is the damage bar: hold the old value there and it is left behind when the health drops, which is what makes a hit readable - a bar that simply shortens says the number changed, where one that leaves a bright remainder says how much was lost."
+               Code="@GameCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoProgress TestId="hp" Label="Health" Value="_health" Trail="_healthTrail"
+                          Max="100" Segments="10" Color="VetoColor.Danger" Rounded="false"
+                          ShowValue="true" ValueSuffix=" HP" />
+
+            <VetoProgress TestId="mp" Label="Mana" Value="62" Max="100" Segments="10"
+                          Color="VetoColor.Primary" Rounded="false" ShowValue="true" ValueSuffix=" MP" />
+
+            <VetoProgress TestId="xp" Label="Experience" Value="_progress" Max="100"
+                          Color="VetoColor.Warning" Size="VetoSize.Small"
+                          ShowValue="true" ValueFormat="0.0" />
+
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Danger"
+                            TestId="hp-hit" OnClick="TakeDamage">
+                    Take a hit
+                </VetoButton>
+                <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Success"
+                            TestId="hp-heal" OnClick="Heal">
+                    Heal
+                </VetoButton>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-progress-download"
+               Title="A download, counted in its own units"
+               Description="ValueContent prints whatever the number actually means rather than a percentage of it - bytes transferred, files done, time left. It is handed the component, so it can read Value, Max and Percent and say something true about all three. ValueFormat and ValueSuffix cover the simpler case where a percentage is right but its shape is not."
+               Code="@DownloadCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoProgress TestId="download" Label="veto-1.0.0.zip" Value="_progress" Max="100" ShowValue="true">
+                <ValueContent Context="bar">
+                    @($"{bar.Value * 0.84:0.0} MB of 84 MB")
+                </ValueContent>
+            </VetoProgress>
+
+            <VetoProgress TestId="download-plain" Label="Files" Value="_progress" Max="100"
+                          ShowValue="true" ValueFormat="0.0" ValueSuffix="% done" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-progress-runner"
+               Title="Something riding the bar"
+               Description="Runner is content carried along the leading edge of the fill - a car on a road, a jet climbing away. It rides its own rail outside the track, which clips, so a runner taller than the bar is not cut off at the knees. It is handed the component too, so it can change as it goes: the jet raises its nose the further it gets."
+               Code="@RunnerCode"
+               ClipStage="false">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoProgress TestId="runner-car" Label="Delivery" Value="_progress" ShowValue="true" Color="VetoColor.Neutral">
+                <Runner Context="bar">
+                    <span class="demo-runner" data-testid="runner-car-glyph">&#128663;</span>
+                </Runner>
+            </VetoProgress>
+
+            <VetoProgress TestId="runner-jet" Label="Take-off" Value="_progress" ShowValue="true" Color="VetoColor.Primary">
+                <Runner Context="bar">
+                    <span class="demo-runner" data-testid="runner-jet-glyph"
+                          style="@($"transform: rotate({-bar.Percent * 0.35:0.#}deg)")">&#9992;</span>
+                </Runner>
+            </VetoProgress>
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-skeleton"
                Title="Skeleton"
                Description="Placeholders in the shape of the content that replaces them. The last line of a multi-line block is short, the way a real paragraph ends. Hidden from assistive technology - announce the wait once on the region, not once per grey box."
@@ -123,6 +201,32 @@
 
 @code {
     private double _progress = 40;
+    private double _health = 100;
+    private double _healthTrail = 100;
+
+    /// <summary>
+    /// Drops the health immediately and lets the trail catch up, which is the whole point of
+    /// having two values: the gap between them is the hit.
+    /// </summary>
+    private void TakeDamage ()
+    {
+        _healthTrail = Math.Max(_health, _healthTrail);
+        _health = Math.Max(0, _health - 18);
+        _ = SettleTrailAsync();
+    }
+
+    private void Heal ()
+    {
+        _health = Math.Min(100, _health + 25);
+        _healthTrail = _health;
+    }
+
+    private async Task SettleTrailAsync ()
+    {
+        await Task.Delay(900);
+        _healthTrail = _health;
+        StateHasChanged();
+    }
     private bool _refreshing;
 
     private async Task ToggleOverlay ()
@@ -195,6 +299,41 @@
 
             private void More() => _percent = Math.Min(100, _percent + 20);
         }
+        """;
+
+    private const string CircleCode = """
+        <VetoProgress Shape="VetoProgressShape.Circle" Value="@_progress" ShowValue="true" />
+        <VetoProgress Shape="VetoProgressShape.Circle" Value="@_progress" Thickness="4" />
+        <VetoProgress Shape="VetoProgressShape.Circle" Indeterminate="true" />
+        """;
+
+    private const string GameCode = """
+        @* Notched pips, and a damage bar left behind when the health drops. *@
+        <VetoProgress Label="Health" Value="@_health" Trail="@_healthTrail"
+                      Segments="10" Color="VetoColor.Danger" Rounded="false"
+                      ShowValue="true" ValueSuffix=" HP" />
+
+        <VetoProgress Label="Experience" Value="@_xp" Color="VetoColor.Warning"
+                      Size="VetoSize.Small" ShowValue="true" ValueFormat="0.0" />
+        """;
+
+    private const string DownloadCode = """
+        <VetoProgress Label="veto-1.0.0.zip" Value="@_progress" ShowValue="true">
+            <ValueContent Context="bar">
+                @($"{bar.Value * 0.84:0.0} MB of 84 MB")
+            </ValueContent>
+        </VetoProgress>
+
+        <VetoProgress Value="@_progress" ShowValue="true" ValueFormat="0.0" ValueSuffix="% done" />
+        """;
+
+    private const string RunnerCode = """
+        @* Carried along the leading edge, and handed the bar so it can change as it goes. *@
+        <VetoProgress Label="Take-off" Value="@_progress" ShowValue="true">
+            <Runner Context="bar">
+                <span style="@($"transform: rotate({-bar.Percent * 0.35:0.#}deg)")">&#9992;</span>
+            </Runner>
+        </VetoProgress>
         """;
 
     private const string SkeletonCode = """

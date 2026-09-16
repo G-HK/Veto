@@ -56,6 +56,118 @@
 .veto-progress--danger { --veto-progress-color: var(--veto-color-danger); }
 .veto-progress--neutral { --veto-progress-color: var(--veto-color-text-muted); }
 
+/* The trail sits under the fill and is left behind when the value drops - the damage bar of a
+   health meter. Eased slower than the fill on purpose: the gap between the two is the whole
+   message, and it only exists because one catches up after the other. */
+.veto-progress__trail {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    display: block;
+    background-color: var(--veto-progress-trail-color, color-mix(in srgb, var(--veto-progress-color, var(--veto-color-primary)) 35%, transparent));
+    transition: width var(--veto-progress-trail-duration, 700ms) ease-out var(--veto-progress-trail-delay, 250ms);
+}
+
+.veto-progress--rounded .veto-progress__trail {
+    border-radius: var(--veto-radius-full);
+}
+
+/* Notches drawn over a single fill rather than a segment per element, so the fill stays one
+   box that animates as one and a part-filled segment reads as part-filled. */
+.veto-progress__notches {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent 0,
+        transparent calc(100% / var(--veto-progress-segments, 1) - var(--veto-progress-notch-width, 2px)),
+        var(--veto-color-surface) calc(100% / var(--veto-progress-segments, 1) - var(--veto-progress-notch-width, 2px)),
+        var(--veto-color-surface) calc(100% / var(--veto-progress-segments, 1))
+    );
+}
+
+/* The runner rides the fill's leading edge. On its own rail outside the track, which clips -
+   a runner taller than the bar would otherwise be cut off at the knees. */
+.veto-progress__runner-rail {
+    position: relative;
+    height: 0;
+}
+
+.veto-progress__runner {
+    position: absolute;
+    bottom: calc(var(--veto-progress-runner-lift, 0.35rem));
+    display: flex;
+    align-items: flex-end;
+
+    /* Centred on the edge it is riding, and never allowed to hang off either end. */
+    transform: translateX(-50%);
+    transition: left var(--veto-transition);
+}
+
+/* The ring. */
+.veto-progress--circle {
+    display: inline-flex;
+}
+
+.veto-progress__ring {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--veto-progress-ring-size, 6rem);
+    height: var(--veto-progress-ring-size, 6rem);
+}
+
+.veto-progress--sm .veto-progress__ring { --veto-progress-ring-size: 3rem; }
+.veto-progress--md .veto-progress__ring { --veto-progress-ring-size: 6rem; }
+.veto-progress--lg .veto-progress__ring { --veto-progress-ring-size: 9rem; }
+
+.veto-progress__svg {
+    width: 100%;
+    height: 100%;
+
+    /* Zero is at three o'clock in SVG; a ring that fills is read from the top. */
+    transform: rotate(-90deg);
+}
+
+.veto-progress__ring-track {
+    stroke: var(--veto-color-surface-raised);
+}
+
+.veto-progress__ring-trail {
+    stroke: var(--veto-progress-trail-color, color-mix(in srgb, var(--veto-progress-color, var(--veto-color-primary)) 35%, transparent));
+    transition: stroke-dashoffset var(--veto-progress-trail-duration, 700ms) ease-out var(--veto-progress-trail-delay, 250ms);
+}
+
+.veto-progress__ring-fill {
+    stroke: var(--veto-progress-color, var(--veto-color-primary));
+    transition: stroke-dashoffset var(--veto-transition);
+}
+
+.veto-progress__ring-value {
+    position: absolute;
+    font-size: var(--veto-font-size-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--veto-color-text);
+}
+
+/* An indeterminate ring turns rather than fills: there is no figure to show, so showing one
+   would be a lie. */
+.veto-progress--circle.veto-progress--indeterminate .veto-progress__svg {
+    animation: veto-progress-spin 1.4s linear infinite;
+}
+
+.veto-progress--circle.veto-progress--indeterminate .veto-progress__ring-fill {
+    stroke-dashoffset: calc(var(--veto-progress-ring-gap, 0.75) * 100%);
+}
+
+@keyframes veto-progress-spin {
+    from { transform: rotate(-90deg); }
+    to { transform: rotate(270deg); }
+}
+
 /* Indeterminate: a band that sweeps the track rather than a width that grows. */
 .veto-progress--indeterminate .veto-progress__fill {
     width: 40%;
@@ -68,8 +180,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .veto-progress__fill {
+    .veto-progress__fill,
+    .veto-progress__trail,
+    .veto-progress__runner,
+    .veto-progress__ring-fill,
+    .veto-progress__ring-trail {
         transition: none;
+    }
+
+    /* A turning ring is travel for its own sake; it pulses in place instead. */
+    .veto-progress--circle.veto-progress--indeterminate .veto-progress__svg {
+        animation: veto-progress-pulse 1.6s ease-in-out infinite;
     }
 
     /*
