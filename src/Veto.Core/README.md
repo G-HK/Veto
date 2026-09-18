@@ -36,6 +36,13 @@ Style your own markup with the same tokens, so it follows the theme:
 }
 ```
 
+Every Veto tooltip layers at one token, so a single line moves them all above your own
+overlays:
+
+```css
+:root { --veto-z-tooltip: 2000; }
+```
+
 ## Documentation
 
 The design tokens are documented on the Veto docs site at `/docs/theming/tokens`. Source and

@@ -58,10 +58,17 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
 <VetoGantt Items="Jobs" StartTime="new TimeOnly(14, 0)" EndTime="new TimeOnly(20, 0)" />
 
 @* An operations schedule: runs from exact timestamps, one line per server, overlapping
-   runs stacked into lanes. TodayScale="VetoGanttScale.QuarterHour" for 15-minute columns. *@
+   runs stacked into lanes. TodayScale="VetoGanttScale.QuarterHour" for 15-minute columns.
+   Today's date sits on its own line (DateLineFormat, ShowDateLine), the now marker carries
+   the time (NowLabelFormat, ShowNowLabel) and follows the clock, and the timeline scrolls
+   itself to it. Rows can differ in height (RowHeight on an item, GroupRowHeight), and the
+   hover card layers at TooltipZIndex - it is placed against the window, so the chart's
+   scrolling never cuts it off. *@
 <VetoGantt Items="Runs"
            GroupBy="run => run.Category"
-           SubItemLayout="VetoGanttSubItemLayout.Inline" />
+           SubItemLayout="VetoGanttSubItemLayout.Inline"
+           GroupRowHeight="44"
+           DateLineFormat="ddd d MMM" />
 
 @* Filters of your own, bound both ways, with one event for any change. Scales and
    ExportFormats choose which zoom levels and export formats are offered. *@

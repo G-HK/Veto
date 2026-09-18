@@ -29,7 +29,8 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
 ## Usage
 
 ```razor
-<VetoDock Label="Apps">
+@* TooltipZIndex lifts a hovered item and its label above its magnified neighbours. *@
+<VetoDock Label="Apps" TooltipZIndex="1000">
     <VetoDockItem Icon="@VetoIcons.Home" Label="Home" Href="/" />
     <VetoDockItem Icon="@VetoIcons.Search" Label="Search" Href="/search" />
     <VetoDockItem Icon="@VetoIcons.Settings" Label="Settings" Badge="2" Href="/settings" />

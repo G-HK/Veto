@@ -94,6 +94,13 @@ public sealed record VetoGanttItem
     /// <summary>Whether the row is timed to the hour rather than whole days.</summary>
     public bool HasTimes => StartTime is not null || EndTime is not null;
 
+    /// <summary>
+    /// This row's height in pixels, overriding the chart's <c>RowHeight</c> - a taller row for a
+    /// project that deserves the attention, a slimmer one for a minor task. Its bar, and any
+    /// lanes of stacked jobs, scale with it. Null takes the chart's height.
+    /// </summary>
+    public double? RowHeight { get; init; }
+
     /// <summary>The <see cref="Id"/> of the row this one sits under. Null for a top-level row.</summary>
     public string? ParentId { get; init; }
 

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Core</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>Base classes, builders and shared enums every Veto component is built on.</Description>
     <RootNamespace>Veto.Core</RootNamespace>
   </PropertyGroup>

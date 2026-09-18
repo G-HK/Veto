@@ -64,6 +64,11 @@
     --veto-focus-ring-danger: 0 0 0 3px rgb(220 38 38 / 0.3);
     --veto-transition: 150ms ease;
 
+    /* Layering. Tooltips sit above page content, sticky bars and each other's components;
+       override this one token to move every Veto tooltip at once, or use a component's own
+       TooltipZIndex parameter for one of them. */
+    --veto-z-tooltip: 1000;
+
     /* Terminal.
        Deliberately the same in both themes, and deliberately not built from the surface and
        text tokens: a terminal window reads as a terminal *because* it is dark, and one that

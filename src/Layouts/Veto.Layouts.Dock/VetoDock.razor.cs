@@ -92,6 +92,15 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public string Label { get; set; } = "Dock";
 
+    /// <summary>
+    /// How high a hovered item and its label layer within the dock. Null uses the library's
+    /// <c>--veto-z-tooltip</c> token. The hovered item is lifted to it, so a magnified neighbour
+    /// can never paint over its label. Where the dock as a whole sits among the page's other
+    /// layers is <c>RootZIndex</c>.
+    /// </summary>
+    [Parameter]
+    public int? TooltipZIndex { get; set; }
+
     /// <summary>True when the dock runs down a side rather than across the top or bottom.</summary>
     internal bool IsVertical => Position.IsVertical();
 
@@ -107,7 +116,8 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
     protected override StyleBuilder StartStyle () =>
         base.StartStyle()
             .AddStyle("--veto-dock-offset", Offset)
-            .AddStyle("--veto-dock-item-size", ItemSize);
+            .AddStyle("--veto-dock-item-size", ItemSize)
+            .AddStyle("--veto-dock-tooltip-z", TooltipZIndex?.ToString(System.Globalization.CultureInfo.InvariantCulture), TooltipZIndex is not null);
 
     /// <summary>Called by <see cref="VetoDockItem"/> as it initialises, to join the keyboard order.</summary>
     internal void Register ( VetoDockItem item )

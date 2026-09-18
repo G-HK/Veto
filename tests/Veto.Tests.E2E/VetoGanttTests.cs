@@ -526,30 +526,47 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_tooltip_card_opens_away_from_the_edge_it_would_run_out_of()
+    public async Task The_tooltip_card_is_never_cut_off_by_the_chart()
     {
-        await Page.SetViewportSizeAsync(1500, 1000);
+        await Page.SetViewportSizeAsync(1500, 900);
         await GotoComponentAsync(Route);
 
         var card = Component("tooltip-card-tooltip");
 
-        // A row near the top opens its card below the bar...
-        var top = Component("tooltip-card-bar-design");
-        await top.HoverAsync();
-        await Expect(card).ToContainTextAsync("Design system");
-        var topBar = await top.BoundingBoxAsync();
-        var belowCard = await card.BoundingBoxAsync();
-        Assert.True(belowCard!.Y >= topBar!.Y + topBar.Height - 1,
-            $"A top row's card ({belowCard.Y}px) should open below its bar ({topBar.Y + topBar.Height}px).");
+        // The last rows sit at the bottom of a chart that scrolls; a card kept inside the chart
+        // would be clipped there. Placed against the window, it is whole wherever the bar is.
+        foreach (var bar in new[] { "tooltip-card-bar-design", "tooltip-card-bar-launch", "tooltip-card-bar-ship" })
+        {
+            await Component(bar).HoverAsync();
+            await Expect(card).ToBeVisibleAsync();
 
-        // ...and a row in the lower half opens it above, where below would run out of the chart.
-        var last = Component("tooltip-card-bar-launch");
-        await last.HoverAsync();
-        await Expect(card).ToContainTextAsync("Launch");
-        var lastBar = await last.BoundingBoxAsync();
-        var aboveCard = await card.BoundingBoxAsync();
-        Assert.True(aboveCard!.Y + aboveCard.Height <= lastBar!.Y + 1,
-            $"A lower row's card (ending {aboveCard.Y + aboveCard.Height}px) should open above its bar ({lastBar.Y}px).");
+            var box = (await card.BoundingBoxAsync())!;
+            var anchor = (await Component(bar).BoundingBoxAsync())!;
+            var viewport = Page.ViewportSize!;
+
+            Assert.True(box.X >= 0 && box.Y >= 0 && box.X + box.Width <= viewport.Width && box.Y + box.Height <= viewport.Height,
+                $"The card for {bar} ({box.X},{box.Y} {box.Width}x{box.Height}) should be wholly inside the window.");
+
+            // Beside the bar, not on top of it: above or below.
+            Assert.True(box.Y >= anchor.Y + anchor.Height - 1 || box.Y + box.Height <= anchor.Y + 1,
+                $"The card for {bar} should open above or below it, not over it.");
+        }
+
+        Assert.Equal("fixed", await card.EvaluateAsync<string>("el => getComputedStyle(el).position"));
+    }
+
+    [Fact]
+    public async Task The_tooltip_card_layers_at_the_shared_token_or_its_own_z_index()
+    {
+        await GotoComponentAsync(Route);
+
+        // Default: the library's --veto-z-tooltip.
+        await Component("tooltip-card-bar-design").HoverAsync();
+        Assert.Equal("1000", await Component("tooltip-card-tooltip").EvaluateAsync<string>("el => getComputedStyle(el).zIndex"));
+
+        // TooltipZIndex overrides it for one chart.
+        await Page.GetByTestId("ref-tooltip").ClickAsync();
+        Assert.Equal("2500", await Component("driven-tooltip").EvaluateAsync<string>("el => getComputedStyle(el).zIndex"));
     }
 
     [Fact]
@@ -800,7 +817,23 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
         var header = Component("hours-scroller").Locator(".veto-gantt__head-cell");
 
         await Expect(header.Filter(new() { HasText = "14:00" })).ToHaveCountAsync(1);
-        await Expect(header.Filter(new() { HasText = "Wed 18 March" })).ToHaveCountAsync(1);
+
+        // The day is named once, on the date line - not repeated above the hours.
+        await Expect(Component("hours-dateline")).ToHaveTextAsync("Wednesday 18 March 2026");
+        await Expect(header.Filter(new() { HasText = "Wed 18 March" })).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task A_single_day_header_keeps_the_names_level_with_their_bars()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // One header row instead of two: the sidebar heading has to shrink with it.
+        var label = (await Component("hours-label-support").BoundingBoxAsync())!;
+        var line = (await Component("hours-row-support").BoundingBoxAsync())!;
+
+        Assert.True(Math.Abs(label.Y - line.Y) <= 1, $"The name ({label.Y}px) should be level with its row ({line.Y}px).");
     }
 
     [Fact]
@@ -1106,5 +1139,196 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
         // 08:00 to 10:00: two hours overhead, eight quarters beneath them.
         await Expect(cells.Filter(new() { HasText = ":45" })).ToHaveCountAsync(2);
         await Expect(cells.Filter(new() { HasText = "09:00" })).ToHaveCountAsync(1);
+    }
+
+    [Fact]
+    public async Task The_timeline_scrolls_itself_to_the_now_marker()
+    {
+        // Narrow enough that a day of readable hours does not fit, so the timeline scrolls.
+        await Page.SetViewportSizeAsync(1100, 900);
+        await GotoComponentAsync(Route);
+
+        var scroller = Component("hours-scroller");
+        var marker = Component("hours-today-marker");
+
+        // Now is 11:30, most of the way across a day that is wider than the chart.
+        for (var attempt = 0; attempt < 50 && await scroller.EvaluateAsync<double>("el => el.scrollLeft") == 0; attempt++)
+        {
+            await Page.WaitForTimeoutAsync(100);
+        }
+
+        var view = (await scroller.BoundingBoxAsync())!;
+        var needle = (await marker.BoundingBoxAsync())!;
+
+        Assert.True(needle.X >= view.X && needle.X <= view.X + view.Width,
+            $"The now marker ({needle.X}px) should be in view ({view.X}-{view.X + view.Width}px) without anyone scrolling.");
+    }
+
+    [Fact]
+    public async Task A_row_can_be_taller_than_the_rest()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // RowHeight 28 for the chart, 48 for each project.
+        var project = (await Component("heights-label-platform").BoundingBoxAsync())!;
+        var task = (await Component("heights-label-design").BoundingBoxAsync())!;
+
+        Assert.InRange(project.Height, 47, 49);
+        Assert.InRange(task.Height, 27, 29);
+
+        // The timeline row matches, and rows further down stay level with their names.
+        var line = (await Component("heights-row-platform").BoundingBoxAsync())!;
+        Assert.InRange(line.Height, 47, 49);
+
+        var launchLabel = (await Component("heights-label-launch").BoundingBoxAsync())!;
+        var launchLine = (await Component("heights-row-launch").BoundingBoxAsync())!;
+        Assert.True(Math.Abs(launchLabel.Y - launchLine.Y) <= 1,
+            $"Launch's name ({launchLabel.Y}px) should be level with its row ({launchLine.Y}px).");
+    }
+
+    [Fact]
+    public async Task The_built_in_filters_can_be_switched_off()
+    {
+        await GotoComponentAsync(Route);
+
+        // The limited demo turns off search and the category chips; the full chart has both.
+        await Expect(Component("limited-toolbar")).ToBeVisibleAsync();
+        await Expect(Component("limited-search")).ToHaveCountAsync(0);
+        await Expect(Component("limited-category-design")).ToHaveCountAsync(0);
+
+        await Expect(Component("chart-search")).ToBeVisibleAsync();
+        await Expect(Component("chart-category-design")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task Todays_date_has_a_line_of_its_own()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("hours-dateline")).ToHaveTextAsync("Wednesday 18 March 2026");
+
+        // Above the timeline, not inside it.
+        var line = (await Component("hours-dateline").BoundingBoxAsync())!;
+        var timeline = (await Component("hours-scroller").BoundingBoxAsync())!;
+        Assert.True(line.Y + line.Height <= timeline.Y + 1, "The date line should sit above the timeline.");
+    }
+
+    [Fact]
+    public async Task Todays_date_stays_in_view_however_the_timeline_is_scrolled()
+    {
+        await Page.SetViewportSizeAsync(1100, 900);
+        await GotoComponentAsync(Route);
+
+        var scroller = Component("hours-scroller");
+        await scroller.ScrollIntoViewIfNeededAsync();
+        var dateline = (await Component("hours-dateline").BoundingBoxAsync())!;
+
+        foreach (var left in new[] { 0, 400, 100000 })
+        {
+            await scroller.EvaluateAsync($"el => el.scrollLeft = {left}");
+
+            // The date line is outside the part that scrolls: it does not move at all.
+            var now = (await Component("hours-dateline").BoundingBoxAsync())!;
+            Assert.Equal(dateline.X, now.X, 1);
+            await Expect(Component("hours-dateline")).ToBeInViewportAsync();
+        }
+    }
+
+    [Fact]
+    public async Task A_month_label_sticks_to_the_edge_as_the_timeline_scrolls()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // The schedule at day scale: March spans far wider than the timeline shows.
+        var scroller = Component("chart-scroller");
+        var march = scroller.Locator(".veto-gantt__head-label", new() { HasText = "March 2026" });
+
+        foreach (var left in new[] { 0, 300, 600 })
+        {
+            await scroller.EvaluateAsync($"el => el.scrollLeft = {left}");
+
+            var label = (await march.BoundingBoxAsync())!;
+            var view = (await scroller.BoundingBoxAsync())!;
+            Assert.True(label.X >= view.X - 1 && label.X < view.X + view.Width,
+                $"Scrolled to {left}px, the March label ({label.X}px) should still be in view ({view.X}-{view.X + view.Width}px).");
+        }
+    }
+
+    [Fact]
+    public async Task The_date_line_header_and_toolbar_texts_are_the_apps_to_word()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("wording-dateline")).ToHaveTextAsync("Wed 18 Mar");
+        await Expect(Component("wording-view-today")).ToHaveTextAsync("Now");
+        await Expect(Component("wording-view-schedule")).ToHaveTextAsync("Plan");
+        await Expect(Component("wording-today")).ToContainTextAsync("Back to now");
+        await Expect(Component("wording-export")).ToContainTextAsync("Download");
+        await Expect(Component("wording-search").Locator("input")).ToHaveAttributeAsync("placeholder", "Search jobs");
+
+        var header = Component("wording-scroller").Locator(".veto-gantt__head-cell");
+        await Expect(header.Filter(new() { HasText = "Wednesday" })).ToHaveCountAsync(1);
+        Assert.True(await header.Filter(new() { HasTextRegex = new System.Text.RegularExpressions.Regex("^9:00$") }).CountAsync() > 0,
+            "The hours should read in the app's own format, 9:00 rather than 09:00.");
+    }
+
+    [Fact]
+    public async Task The_date_line_can_be_switched_off()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("limited-toolbar")).ToBeVisibleAsync();
+        await Expect(Component("limited-dateline")).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task The_now_marker_carries_the_current_time()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // Now is pinned to 11:30 in this demo.
+        var label = Component("hours-now-label");
+        await Expect(label).ToHaveTextAsync("11:30");
+
+        // Centred on the marker below it.
+        var tab = (await label.BoundingBoxAsync())!;
+        var needle = (await Component("hours-today-marker").BoundingBoxAsync())!;
+        Assert.True(Math.Abs(tab.X + tab.Width / 2 - (needle.X + needle.Width / 2)) <= 2,
+            $"The time ({tab.X + tab.Width / 2}px) should sit on the marker ({needle.X + needle.Width / 2}px).");
+
+        // At day scale the marker stands for today, so the tab gives the date.
+        await Expect(Component("chart-now-label")).ToHaveTextAsync("18 Mar");
+    }
+
+    [Fact]
+    public async Task The_time_on_the_marker_never_covers_a_header_label()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        foreach (var chart in new[] { "hours", "chart", "runs-quarter" })
+        {
+            var tab = (await Component($"{chart}-now-label").BoundingBoxAsync())!;
+            var cells = Component($"{chart}-scroller").Locator(".veto-gantt__head-cell");
+
+            for (var i = 0; i < await cells.CountAsync(); i++)
+            {
+                var cell = await cells.Nth(i).BoundingBoxAsync();
+                if (cell is null) continue;
+
+                Assert.True(tab.Y >= cell.Y + cell.Height - 1,
+                    $"In {chart}, the time tab ({tab.Y}px) should sit below the header labels, not over one ending at {cell.Y + cell.Height}px.");
+            }
+
+            // And the band it sits in does not push the rows out of line with their names.
+            var firstLabel = Component($"{chart}-sidebar").Locator(".veto-gantt__row").First;
+            var firstRow = Component($"{chart}-scroller").Locator(".veto-gantt__grid > .veto-gantt__row").First;
+            var y1 = (await firstLabel.BoundingBoxAsync())!.Y;
+            var y2 = (await firstRow.BoundingBoxAsync())!.Y;
+            Assert.True(Math.Abs(y1 - y2) <= 1, $"In {chart}, the first name ({y1}px) should be level with its row ({y2}px).");
+        }
     }
 }

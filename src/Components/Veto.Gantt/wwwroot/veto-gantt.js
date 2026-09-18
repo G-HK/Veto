@@ -21,13 +21,17 @@ export function download(fileName, mimeType, content) {
     URL.revokeObjectURL(url);
 }
 
-/** Scrolls the timeline so a given pixel offset sits a little in from the left edge. */
-export function scrollTo(element, offset) {
+/**
+ * Scrolls the timeline so a given pixel offset sits a third of the way in from the left, with
+ * what is coming up in view. Smooth when the reader asked for it; instant when the chart is
+ * placing itself, where an animation would only be a delay.
+ */
+export function scrollTo(element, offset, smooth = true) {
     if (!element) {
         return;
     }
 
-    element.scrollTo({ left: Math.max(0, offset - element.clientWidth / 3), behavior: 'smooth' });
+    element.scrollTo({ left: Math.max(0, offset - element.clientWidth / 3), behavior: smooth ? 'smooth' : 'instant' });
 }
 
 /** Scrolls the timeline by a fraction of its visible width. */
@@ -78,4 +82,73 @@ export function unobserveWidth(element) {
         observer.disconnect();
         widthObservers.delete(element);
     }
+}
+
+// The listeners keeping each open card against its bar, so a new placement replaces them.
+const tooltipTrackers = new WeakMap();
+
+/**
+ * Places a hover card against the bar it describes, in window coordinates: below the bar, or
+ * above it when there is no room below, and kept inside the window. It follows the bar while
+ * anything scrolls, and hides while the bar is scrolled out of the timeline's view.
+ */
+export function placeTooltip(card, root, itemId) {
+    if (!card || !root) {
+        return;
+    }
+
+    tooltipTrackers.get(card)?.();
+
+    const anchor = root.querySelector(`[data-item-id="${CSS.escape(itemId)}"]:not([role="tooltip"])`);
+    const scroller = root.querySelector('.veto-gantt__scroller');
+
+    const stop = () => {
+        window.removeEventListener('scroll', place, true);
+        window.removeEventListener('resize', place);
+        tooltipTrackers.delete(card);
+    };
+
+    function place() {
+        if (!card.isConnected || !anchor || !anchor.isConnected) {
+            stop();
+            return;
+        }
+
+        const bar = anchor.getBoundingClientRect();
+        const view = scroller ? scroller.getBoundingClientRect() : bar;
+
+        // A bar scrolled out of the timeline has nothing on screen to point at.
+        if (bar.right < view.left || bar.left > view.right || bar.bottom < view.top || bar.top > view.bottom) {
+            card.style.visibility = 'hidden';
+            return;
+        }
+
+        const gap = 6;
+        const margin = 8;
+        const box = card.getBoundingClientRect();
+
+        const fitsBelow = bar.bottom + gap + box.height <= window.innerHeight - margin;
+        const fitsAbove = bar.top - gap - box.height >= margin;
+        const top = fitsBelow || !fitsAbove ? bar.bottom + gap : bar.top - gap - box.height;
+
+        const pointer = Math.max(bar.left, view.left);
+        const left = Math.max(margin, Math.min(pointer, window.innerWidth - box.width - margin));
+
+        card.style.left = `${left}px`;
+        card.style.top = `${top}px`;
+
+        // A transformed ancestor - a tilted card, an extruded panel - becomes a fixed element's
+        // frame of reference, so measure where it landed and correct by the difference.
+        const landed = card.getBoundingClientRect();
+        card.style.left = `${left + (left - landed.left)}px`;
+        card.style.top = `${top + (top - landed.top)}px`;
+
+        card.style.visibility = 'visible';
+    }
+
+    window.addEventListener('scroll', place, true);
+    window.addEventListener('resize', place);
+    tooltipTrackers.set(card, stop);
+
+    place();
 }

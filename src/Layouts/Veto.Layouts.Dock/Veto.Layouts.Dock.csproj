@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layouts.Dock</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>Dock and DockItem components for Veto.</Description>
     <RootNamespace>Veto.Layouts.Dock</RootNamespace>
   </PropertyGroup>

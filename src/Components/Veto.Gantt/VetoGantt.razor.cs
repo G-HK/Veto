@@ -119,6 +119,58 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public string SidebarTitle { get; set; } = "Tasks";
 
+    /// <summary>
+    /// Shows today's date on a line of its own above the timeline. It sits outside the part
+    /// that scrolls, so the date stays in view however far the timeline is scrolled.
+    /// </summary>
+    [Parameter]
+    public bool ShowDateLine { get; set; } = true;
+
+    /// <summary>The format of the date line - any .NET date format, such as <c>"ddd d MMM"</c>.</summary>
+    [Parameter]
+    public string DateLineFormat { get; set; } = "dddd d MMMM yyyy";
+
+    /// <summary>
+    /// The date line drawn your own way, given today's date. Replaces the formatted text;
+    /// <see cref="ShowDateLine"/> still decides whether the line is there at all.
+    /// </summary>
+    [Parameter]
+    public RenderFragment<DateOnly>? DateLineTemplate { get; set; }
+
+    /// <summary>
+    /// The format of the header's lower row - the hours, days, weeks or months. Null keeps each
+    /// scale's own: <c>HH:00</c>, the day of the month, <c>MMM</c>.
+    /// </summary>
+    [Parameter]
+    public string? HeaderFormat { get; set; }
+
+    /// <summary>
+    /// The format of the header's upper row - the day above the hours, the month above the
+    /// days, the year above the months. Null keeps each scale's own.
+    /// </summary>
+    [Parameter]
+    public string? HeaderGroupFormat { get; set; }
+
+    /// <summary>The text shown in the empty search box.</summary>
+    [Parameter]
+    public string SearchPlaceholder { get; set; } = "Filter tasks";
+
+    /// <summary>The label of the view switch's today option.</summary>
+    [Parameter]
+    public string TodayViewLabel { get; set; } = "Today";
+
+    /// <summary>The label of the view switch's schedule option.</summary>
+    [Parameter]
+    public string ScheduleViewLabel { get; set; } = "Schedule";
+
+    /// <summary>The text of the button that scrolls back to now.</summary>
+    [Parameter]
+    public string TodayButtonText { get; set; } = "Today";
+
+    /// <summary>The text of the export menu's trigger, and its tooltip.</summary>
+    [Parameter]
+    public string ExportText { get; set; } = "Export";
+
     /// <summary>Shown in place of the rows when the filters match nothing.</summary>
     [Parameter]
     public string EmptyText { get; set; } = "No tasks match these filters.";
@@ -313,6 +365,15 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     public RenderFragment<VetoGanttItem>? TooltipTemplate { get; set; }
 
     /// <summary>
+    /// How high the <see cref="TooltipTemplate"/> card layers. Null uses the library's
+    /// <c>--veto-z-tooltip</c> token, 1000 - above page content and sticky bars. The card is
+    /// placed against the window rather than inside the timeline, so the chart's own scrolling
+    /// never cuts it off; this decides what it may still be covered by.
+    /// </summary>
+    [Parameter]
+    public int? TooltipZIndex { get; set; }
+
+    /// <summary>
     /// What span the chart shows. <see cref="VetoGanttView.Today"/> by default: today alone,
     /// fitted to the width, listing only the rows with work today. Supports <c>@bind-View</c>.
     /// An explicit <see cref="Start"/> and <see cref="End"/> set the axis in either view.
@@ -377,6 +438,34 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     public TimeOnly? TimeOverride { get; set; }
 
     /// <summary>
+    /// Shows the time on top of the now marker, in the header - so it stays in view when the
+    /// rows are scrolled.
+    /// </summary>
+    [Parameter]
+    public bool ShowNowLabel { get; set; } = true;
+
+    /// <summary>
+    /// The format of the time on the now marker. Null reads <c>HH:mm</c> on the hour scales and
+    /// the date on the coarser ones, where the marker stands for the whole of today.
+    /// </summary>
+    [Parameter]
+    public string? NowLabelFormat { get; set; }
+
+    /// <summary>
+    /// The height of the band at the foot of the header that the time on the now marker sits
+    /// in, as a CSS length. The band keeps the time clear of the hour and day labels.
+    /// </summary>
+    [Parameter]
+    public string NowBandHeight { get; set; } = "1rem";
+
+    /// <summary>
+    /// Moves the now marker, and its time, as the clock moves - checked twice a minute. Has no
+    /// effect with <see cref="TimeOverride"/> set, which holds now still.
+    /// </summary>
+    [Parameter]
+    public bool LiveNowMarker { get; set; } = true;
+
+    /// <summary>
     /// The narrowest an hour is drawn, in pixels. Fitting a whole day into a narrow chart stops
     /// here: past it, the hours keep a width their "14:00" labels fit in, and the timeline
     /// scrolls instead.
@@ -405,6 +494,13 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     public Func<VetoGanttItem, string?>? GroupBy { get; set; }
 
     /// <summary>
+    /// The height of the rows <see cref="GroupBy"/> makes, in pixels - they are the chart's
+    /// own rows, so this is where their height is set. Null takes <see cref="RowHeight"/>.
+    /// </summary>
+    [Parameter]
+    public double? GroupRowHeight { get; set; }
+
+    /// <summary>
     /// Shows a placeholder chart instead of the rows, for the wait before any data has arrived.
     /// </summary>
     /// <remarks>
@@ -431,7 +527,11 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public int LoadingRows { get; set; } = 6;
 
-    /// <summary>Whether to scroll to today on the first render.</summary>
+    /// <summary>
+    /// Whether the timeline scrolls to the now marker by itself: on load, and again whenever the
+    /// view or the scale changes. On the hour scales that is the current time; on the coarser
+    /// ones, today. Off, the timeline opens at the start of its axis.
+    /// </summary>
     [Parameter]
     public bool ScrollToTodayOnLoad { get; set; } = true;
 
@@ -488,6 +588,40 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>The moment treated as now: today, at the overridden time or the clock's.</summary>
     private DateTime Now => Today.ToDateTime(TimeOverride ?? TimeOnly.FromDateTime(DateTime.Now));
 
+    /// <summary>The time on top of the now marker.</summary>
+    private string NowLabel => EffectiveScale.ShowsClockTime()
+        ? Now.ToString(NowLabelFormat ?? "HH:mm")
+        : Today.ToString(NowLabelFormat ?? "d MMM");
+
+    private Timer? _clock;
+
+    /// <summary>
+    /// Keeps the now marker on the clock. Only redraws when the minute has changed, so a chart
+    /// nobody is looking at costs a comparison every thirty seconds.
+    /// </summary>
+    private void StartClock ()
+    {
+        if (!LiveNowMarker || _clock is not null)
+        {
+            return;
+        }
+
+        var shown = DateTime.Now.ToString("yyyyMMddHHmm");
+
+        _clock = new Timer(_ =>
+        {
+            var current = DateTime.Now.ToString("yyyyMMddHHmm");
+
+            if (current == shown || TimeOverride is not null || !ShowToday)
+            {
+                return;
+            }
+
+            shown = current;
+            _ = InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+    }
+
     /// <summary>The scale actually drawn: the today view has its own, so the picker's choice survives it.</summary>
     private VetoGanttScale EffectiveScale => View == VetoGanttView.Today ? TodayScale : Scale;
 
@@ -521,6 +655,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private IReadOnlyList<Category> Categories { get; set; } = [];
 
     private static readonly VetoGanttView[] ViewOptions = [VetoGanttView.Today, VetoGanttView.Schedule];
+
+    private string ViewLabel ( VetoGanttView view ) => view == VetoGanttView.Today ? TodayViewLabel : ScheduleViewLabel;
 
 
     /// <inheritdoc />
@@ -556,14 +692,38 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <inheritdoc />
     protected override CssBuilder StartCssClass () =>
         base.StartCssClass()
-            .AddClass(Modifier(EffectiveScale.ToModifier()));
+            .AddClass(Modifier(EffectiveScale.ToModifier()))
+            .AddClass(Modifier("single-header"), SingleHeaderRow)
+            .AddClass(Modifier("now-label"), ShowToday && ShowNowLabel);
+
+    /// <summary>
+    /// Which way the time tab hangs from the marker: centred, or held inside the timeline when
+    /// the marker is so close to an edge that a centred tab would be cut in half.
+    /// </summary>
+    private string NowLabelClass ( double offset )
+    {
+        const double reach = 24;
+
+        return offset < reach ? "veto-gantt__now-label veto-gantt__now-label--start"
+            : offset > Timeline.Width - reach ? "veto-gantt__now-label veto-gantt__now-label--end"
+            : "veto-gantt__now-label";
+    }
+
+    /// <summary>
+    /// Whether the header's upper row is left out. A single day in hours would only repeat, above
+    /// the hours, the date the date line already gives - so with the date line showing, it goes.
+    /// A range of days keeps it: there it is what says which day each hour belongs to.
+    /// </summary>
+    private bool SingleHeaderRow =>
+        ShowDateLine && EffectiveScale == VetoGanttScale.Hour && Timeline is not null && Timeline.Start == Timeline.End;
 
     /// <inheritdoc />
     protected override StyleBuilder StartStyle () =>
         base.StartStyle()
             .AddStyle("--veto-gantt-sidebar", SidebarWidth)
             .AddStyle("--veto-gantt-row-height", $"{RowHeight.ToString("0.##", CultureInfo.InvariantCulture)}px")
-            .AddStyle("--veto-gantt-bar-color", BarColor);
+            .AddStyle("--veto-gantt-bar-color", BarColor)
+            .AddStyle("--veto-gantt-now-band", NowBandHeight, ShowToday && ShowNowLabel);
 
     private string? FrameStyle => Height is null ? null : $"height: {Height}";
 
@@ -608,7 +768,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         var previous = Timeline?.PixelsPerDay;
         Timeline = VetoGanttTimeline.Create(visible, EffectiveScale, Start, End, Today, View,
-            FitToWidth ? _viewportWidth : 0, StartTime, EndTime, MinHourWidth);
+            FitToWidth ? _viewportWidth : 0, StartTime, EndTime, MinHourWidth, HeaderFormat, HeaderGroupFormat);
 
         // The drag handler converts pixels to days, so a new density needs it re-attached.
         if (previous is not null && previous != Timeline.PixelsPerDay)
@@ -623,7 +783,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         for (var i = 0; i < Rows.Count; i++)
         {
             _rowTops[i] = top;
-            top += RowHeight * Rows[i].Lanes;
+            top += LineHeight(Rows[i]) * Rows[i].Lanes;
         }
 
         Links = ShowDependencies ? BuildLinks() : [];
@@ -675,16 +835,31 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     }
 
     /// <summary>The height of the arrow layer: exactly the rows it spans.</summary>
-    private double LinkLayerHeight => Rows.Count == 0 ? 0 : _rowTops[^1] + RowHeight * Rows[^1].Lanes;
+    private double LinkLayerHeight => Rows.Count == 0 ? 0 : _rowTops[^1] + LineHeight(Rows[^1]) * Rows[^1].Lanes;
 
-    /// <summary>The height of a row: one lane, or as many as its stacked jobs need.</summary>
+    /// <summary>The height of one lane of a row: its item's own, or the chart's.</summary>
+    private double LineHeight ( Row row ) => row.Item.RowHeight ?? RowHeight;
+
+    /// <summary>
+    /// A row's own height, when it is not the chart's: a height of its own sets the variable
+    /// its bar is sized from, and stacked lanes multiply it.
+    /// </summary>
     private string? RowHeightStyle ( Row row )
-        => row.Lanes > 1
-            ? string.Create(CultureInfo.InvariantCulture, $"height: {RowHeight * row.Lanes:0.##}px")
-            : null;
+    {
+        if (row.Item.RowHeight is null && row.Lanes == 1)
+        {
+            return null;
+        }
+
+        var line = LineHeight(row);
+
+        return string.Create(CultureInfo.InvariantCulture,
+            $"--veto-gantt-row-height: {line:0.##}px; height: {line * row.Lanes:0.##}px");
+    }
 
     /// <summary>The vertical centre of a lane within the chart, for the arrows.</summary>
-    private double LaneCentre ( int row, int lane ) => _rowTops[row] + lane * RowHeight + RowHeight / 2;
+    private double LaneCentre ( int row, int lane )
+        => _rowTops[row] + (lane + 0.5) * LineHeight(Rows[row]);
 
     /// <summary>
     /// Builds the elbow path for one arrow, in the layer's own coordinates.
@@ -775,7 +950,10 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
                 GroupId(key),
                 key,
                 jobs.Min(job => Resolve(job).StartsAt),
-                jobs.Max(job => Resolve(job).EndsAt));
+                jobs.Max(job => Resolve(job).EndsAt))
+            {
+                RowHeight = GroupRowHeight
+            };
 
             _groupIds.Add(group.Id);
             result.Add(group);
@@ -1157,7 +1335,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         // The axis has been redrawn at a different width, so the previous scroll position no
         // longer points anywhere meaningful.
-        await ScrollToTodayAsync();
+        _scrollToNowPending = true;
     }
 
     private async Task SelectAsync ( VetoGanttItem item )
@@ -1248,9 +1426,10 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
     private string BarStyle ( VetoGanttItem item, int lane, int lanes )
     {
-        // In a row of stacked lanes a bar is centred on its own lane rather than the row.
+        // In a row of stacked lanes a bar is centred on its own lane rather than the row; the
+        // stylesheet works that out from the row's height, whatever the row's height is.
         var laneTop = lanes > 1
-            ? string.Create(CultureInfo.InvariantCulture, $"; top: {lane * RowHeight + RowHeight / 2:0.##}px")
+            ? string.Create(CultureInfo.InvariantCulture, $"; --veto-gantt-lane: {lane}")
             : string.Empty;
 
         return BarStyleCore(item) + laneTop;
@@ -1379,20 +1558,21 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         }
     }
 
-    /// <summary>
-    /// Places the card under its bar, or over it in the lower half of the chart, where below
-    /// would run out of the scrolling area.
-    /// </summary>
-    private string TooltipStyle ( VetoGanttItem item, int index )
-    {
-        var (left, _) = Timeline.Place(item.StartsAt, item.EndsAt);
-        var above = index >= Rows.Count / 2 && index > 0;
-        var laneTop = _rowTops[index] + Rows[index].LaneOf(item) * RowHeight;
+    private ElementReference _tooltipCard;
 
-        return above
-            ? string.Create(CultureInfo.InvariantCulture, $"left: {left:0.##}px; bottom: {LinkLayerHeight - laneTop:0.##}px")
-            : string.Create(CultureInfo.InvariantCulture, $"left: {left:0.##}px; top: {laneTop + RowHeight:0.##}px");
-    }
+    /// <summary>The card's own layer, when the app set one.</summary>
+    private string? TooltipLayerStyle
+        => TooltipZIndex is { } z ? $"--veto-gantt-tooltip-z: {z.ToString(CultureInfo.InvariantCulture)}" : null;
+
+    /// <summary>
+    /// Places the open card against its bar, in window coordinates: below it, or above when
+    /// there is no room below, and kept inside the window. Done by the page because only the
+    /// page knows where the bar is on screen once the chart and the page have scrolled.
+    /// </summary>
+    private Task PlaceTooltipAsync ()
+        => Hovered is { } hovered
+            ? InvokeModuleAsync("placeTooltip", _tooltipCard, RootElement, hovered.Item.Id)
+            : Task.CompletedTask;
 
     private string TooltipFor ( VetoGanttItem item )
     {
@@ -1418,20 +1598,31 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         if (firstRender)
         {
             await LoadOverridesAsync();
-
-            if (ScrollToTodayOnLoad)
-            {
-                await ScrollToTodayAsync();
-            }
+            _scrollToNowPending = ScrollToTodayOnLoad;
+            StartClock();
         }
 
         await ObserveWidthAsync();
+
+        // Scrolled only once the axis is drawn at its real width. Until the chart has heard how
+        // wide it is, the axis is at the scale's own density, and a position worked out against
+        // that would miss the marker once the axis is fitted.
+        if (_scrollToNowPending && ScrollToTodayOnLoad && (_viewportWidth > 0 || !FitToWidth))
+        {
+            _scrollToNowPending = false;
+            await InvokeModuleAsync("scrollTo", _scroller, TodayMarkerOffset ?? 0, false);
+        }
+
+        await PlaceTooltipAsync();
         await SyncDragHandlesAsync();
     }
 
     // ------------------------------------------------------------------ Fitting the width
 
     private double _viewportWidth;
+
+    // A scroll to the now marker waiting for the next render at the chart's real width.
+    private bool _scrollToNowPending;
     private string? _observedScrollerId;
 
     /// <summary>
@@ -1462,6 +1653,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             return Task.CompletedTask;
         }
 
+        // The first width the chart hears changes the axis under a scroll that was waiting for it.
+        _scrollToNowPending |= _viewportWidth == 0;
         _viewportWidth = width;
 
         return InvokeAsync(() =>
@@ -1485,10 +1678,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         await ViewChanged.InvokeAsync(view);
 
-        if (view == VetoGanttView.Schedule)
-        {
-            await ScrollToTodayAsync();
-        }
+        _scrollToNowPending = true;
     }
 
     /// <summary>Brings today into view, or the start of the axis when today is outside it.</summary>
@@ -1632,6 +1822,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <inheritdoc />
     public async ValueTask DisposeAsync ()
     {
+        _clock?.Dispose();
+
         if (_observedScrollerId is not null)
         {
             await InvokeModuleAsync("unobserveWidth", _scroller);

@@ -203,6 +203,9 @@
  * first row of bars. Any change to the header's height has to be mirrored here.
  */
 .veto-gantt__sidebar-head {
+    /* Never squeezed, for the same reason as the rows: it has to stay as tall as the timeline's
+       header, or every name below it sits out of line with its bar. */
+    flex: 0 0 auto;
     display: flex;
     align-items: flex-end;
     height: 3.25rem;
@@ -217,6 +220,9 @@
 .veto-gantt__row {
     position: relative;
     display: flex;
+    /* Never squeezed: the sidebar is a flex column, and in a chart with a fixed height a row
+       that shrank to fit would drift out of line with its bar on the timeline. */
+    flex: 0 0 auto;
     align-items: center;
     height: var(--veto-gantt-row-height, 2.25rem);
     box-sizing: border-box;
@@ -345,6 +351,9 @@
 }
 
 .veto-gantt__head-row--groups .veto-gantt__head-cell {
+    /* clip, not hidden: hidden would make the cell a scroll container, and the label inside
+       could then no longer stick to the timeline's edge. */
+    overflow: clip;
     justify-content: flex-start;
     padding-inline-start: var(--veto-space-2);
     font-weight: 600;
@@ -545,12 +554,15 @@
 /* Templated tooltip */
 
 .veto-gantt__tooltip {
-    position: absolute;
-    /* Over the bars and the arrows. It can also cover the sticky header for a moment when the
-       hovered row sits right under it - the card is transient, so that beats being cut off. */
-    z-index: 3;
+    /* Fixed, and placed against its bar by the page script: inside the timeline it would be
+       cut off by the timeline's own scrolling, and no z-index gets out of that. Hidden until it
+       has been placed, so it never flashes in the corner first. */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--veto-gantt-tooltip-z, var(--veto-z-tooltip, 1000));
+    visibility: hidden;
     max-width: 20rem;
-    margin-block: var(--veto-space-1);
     padding: var(--veto-space-2) var(--veto-space-3);
     box-sizing: border-box;
     font-size: var(--veto-font-size-sm);
@@ -585,4 +597,88 @@
     display: inline-flex;
     align-items: center;
     gap: var(--veto-space-1);
+}
+
+/* A bar in a row of stacked lanes sits in the middle of its own lane, not the row. */
+.veto-gantt__row[data-lanes] > .veto-gantt__bar,
+.veto-gantt__row[data-lanes] > .veto-gantt__milestone {
+    top: calc(var(--veto-gantt-row-height, 2.25rem) * (var(--veto-gantt-lane, 0) + 0.5));
+}
+
+/*
+ * A day or month label sticks to the timeline's left edge while any of its cell is on screen,
+ * so scrolling through a wide day never leaves the hours without the date they belong to.
+ */
+.veto-gantt__head-label {
+    position: sticky;
+    left: var(--veto-space-2);
+    white-space: nowrap;
+}
+
+/* Today's date, on a line of its own between the toolbar and the chart. */
+.veto-gantt__dateline {
+    padding: var(--veto-space-2) var(--veto-space-3);
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text);
+    border-bottom: 1px solid var(--veto-border-color, var(--veto-color-border));
+}
+
+/* One header row instead of two when the date line already names the day: the sidebar's
+   heading shrinks with the timeline's, so the rows below stay level. */
+.veto-gantt--single-header .veto-gantt__head,
+.veto-gantt--single-header .veto-gantt__sidebar-head {
+    height: calc(1.625rem + 1px);
+}
+
+/*
+ * The time on top of the now marker: a tab at the foot of the header, in the marker's colour,
+ * sitting exactly over the line below it.
+ */
+.veto-gantt__now-label {
+    position: absolute;
+    bottom: 0;
+    z-index: 1;
+    height: var(--veto-gantt-now-band);
+    box-sizing: border-box;
+    padding: 0 var(--veto-space-1);
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: var(--veto-gantt-now-band);
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-danger);
+    border-radius: var(--veto-radius-sm) var(--veto-radius-sm) 0 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Held inside the timeline at either end, rather than half cut off. */
+.veto-gantt__now-label--start {
+    transform: none;
+}
+
+.veto-gantt__now-label--end {
+    transform: translateX(-100%);
+}
+
+/*
+ * The tab gets a band of its own at the foot of the header, below the hour and day labels, so
+ * it never sits over one of them. The sidebar heading grows by the same band, so the rows below
+ * stay level with their names.
+ */
+.veto-gantt--now-label {
+    --veto-gantt-now-band: 1rem;
+}
+
+/* Two label rows, the hairline between them and the header's own bottom border: 2px more
+   than the rows alone, or the band would start inside the lower row. */
+.veto-gantt--now-label .veto-gantt__head,
+.veto-gantt--now-label .veto-gantt__sidebar-head {
+    height: calc(3.25rem + 2px + var(--veto-gantt-now-band));
+}
+
+.veto-gantt--now-label.veto-gantt--single-header .veto-gantt__head,
+.veto-gantt--now-label.veto-gantt--single-header .veto-gantt__sidebar-head {
+    height: calc(1.625rem + 1px + var(--veto-gantt-now-band));
 }

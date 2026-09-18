@@ -94,6 +94,15 @@
     opacity: 1;
 }
 
+/*
+ * Magnified items overlap their neighbours, and each is its own stacking context, so a label
+ * could be painted over by the item beside it. The item being hovered comes to the front.
+ */
+.veto-dock__item:hover,
+.veto-dock__item:focus-visible {
+    z-index: var(--veto-dock-tooltip-z, var(--veto-z-tooltip, 1000));
+}
+
 /* Badge and running indicator */
 
 .veto-dock__badge {

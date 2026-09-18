@@ -194,6 +194,20 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
+    public async Task A_hovered_dock_item_comes_to_the_front ()
+    {
+        await Page.SetViewportSizeAsync(1400, 900);
+        await GotoComponentAsync("layouts/dock");
+
+        // Magnified neighbours overlap; the hovered one is lifted so none paints over its label.
+        await Component("dock-files").HoverAsync();
+
+        var z = await Component("dock-files").EvaluateAsync<string>(
+            "el => getComputedStyle(el.closest('.veto-dock__item') ?? el).zIndex");
+        Assert.Equal("1000", z);
+    }
+
+    [Fact]
     public async Task Magnification_swells_the_item_under_the_pointer ()
     {
         await Page.SetViewportSizeAsync(1400, 900);

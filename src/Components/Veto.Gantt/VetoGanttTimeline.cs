@@ -11,8 +11,11 @@ namespace Veto.Components.Gantt;
 /// </remarks>
 internal sealed class VetoGanttTimeline
 {
-    private VetoGanttTimeline ( DateOnly start, DateOnly end, TimeOnly? startTime, TimeOnly? endTime, VetoGanttScale scale, double fitWidth, bool fitExactly = false, double minHourWidth = 0 )
+    private VetoGanttTimeline ( DateOnly start, DateOnly end, TimeOnly? startTime, TimeOnly? endTime, VetoGanttScale scale, double fitWidth, bool fitExactly = false, double minHourWidth = 0, string? columnFormat = null, string? groupFormat = null )
     {
+        _columnFormat = columnFormat;
+        _groupFormat = groupFormat;
+
         Start = start;
         End = end;
         Scale = scale;
@@ -54,6 +57,10 @@ internal sealed class VetoGanttTimeline
         Columns = Clip(BuildColumns());
         Groups = Clip(BuildGroups());
     }
+
+    // Formats an app gave for the header's two rows. Null keeps each scale's own.
+    private readonly string? _columnFormat;
+    private readonly string? _groupFormat;
 
     /// <summary>The first day on the axis.</summary>
     public DateOnly Start { get; }
@@ -107,22 +114,27 @@ internal sealed class VetoGanttTimeline
         double fitWidth = 0,
         TimeOnly? startTime = null,
         TimeOnly? endTime = null,
-        double minHourWidth = 0 )
+        double minHourWidth = 0,
+        string? columnFormat = null,
+        string? groupFormat = null )
     {
         if (start is not null && end is not null)
         {
-            return new(start.Value, end.Value, startTime, endTime, scale, fitWidth, minHourWidth: minHourWidth);
+            return new(start.Value, end.Value, startTime, endTime, scale, fitWidth,
+                minHourWidth: minHourWidth, columnFormat: columnFormat, groupFormat: groupFormat);
         }
 
         if (view == VetoGanttView.Today)
         {
             return new(start ?? today, end ?? today, startTime, endTime, scale, fitWidth,
-                fitExactly: start is null && end is null, minHourWidth: minHourWidth);
+                fitExactly: start is null && end is null, minHourWidth: minHourWidth,
+                columnFormat: columnFormat, groupFormat: groupFormat);
         }
 
         if (items.Count == 0)
         {
-            return new(today.AddDays(-7), today.AddDays(21), startTime, endTime, scale, fitWidth, minHourWidth: minHourWidth);
+            return new(today.AddDays(-7), today.AddDays(21), startTime, endTime, scale, fitWidth,
+                minHourWidth: minHourWidth, columnFormat: columnFormat, groupFormat: groupFormat);
         }
 
         var earliest = items.Min(i => i.Start);
@@ -144,7 +156,9 @@ internal sealed class VetoGanttTimeline
             endTime,
             scale,
             fitWidth,
-            minHourWidth: minHourWidth);
+            minHourWidth: minHourWidth,
+            columnFormat: columnFormat,
+            groupFormat: groupFormat);
     }
 
     /// <summary>How many pixels from the left edge an instant sits at.</summary>
@@ -219,6 +233,14 @@ internal sealed class VetoGanttTimeline
     private Column Cell ( string label, DateTime from, DateTime to, bool isWeekend = false )
         => new(label, OffsetAt(from), OffsetAt(to) - OffsetAt(from), isWeekend);
 
+    /// <summary>A lower-row cell: the app's format when it gave one, the scale's own otherwise.</summary>
+    private Column ColumnCell ( string label, DateTime from, DateTime to, bool isWeekend = false )
+        => Cell(_columnFormat is null ? label : from.ToString(_columnFormat), from, to, isWeekend);
+
+    /// <summary>An upper-row cell, likewise.</summary>
+    private Column GroupCell ( string label, DateTime from, DateTime to )
+        => Cell(_groupFormat is null ? label : from.ToString(_groupFormat), from, to);
+
     private static DateTime Midnight ( DateOnly day ) => day.ToDateTime(TimeOnly.MinValue);
 
     private List<Column> BuildColumns ()
@@ -232,7 +254,7 @@ internal sealed class VetoGanttTimeline
 
                 for (; quarter < AxisEnd; quarter = quarter.AddMinutes(15))
                 {
-                    columns.Add(Cell(quarter.ToString(":mm"), quarter, quarter.AddMinutes(15)));
+                    columns.Add(ColumnCell(quarter.ToString(":mm"), quarter, quarter.AddMinutes(15)));
                 }
 
                 break;
@@ -242,7 +264,7 @@ internal sealed class VetoGanttTimeline
 
                 for (; hour < AxisEnd; hour = hour.AddHours(1))
                 {
-                    columns.Add(Cell(hour.ToString("HH:00"), hour, hour.AddHours(1)));
+                    columns.Add(ColumnCell(hour.ToString("HH:00"), hour, hour.AddHours(1)));
                 }
 
                 break;
@@ -250,7 +272,7 @@ internal sealed class VetoGanttTimeline
             case VetoGanttScale.Day:
                 for (var day = Start; day <= End; day = day.AddDays(1))
                 {
-                    columns.Add(Cell(
+                    columns.Add(ColumnCell(
                         day.Day.ToString(),
                         Midnight(day),
                         Midnight(day.AddDays(1)),
@@ -265,7 +287,7 @@ internal sealed class VetoGanttTimeline
 
                 for (var day = weekStart; day <= End; day = day.AddDays(7))
                 {
-                    columns.Add(Cell(day.Day.ToString(), Midnight(day), Midnight(day.AddDays(7))));
+                    columns.Add(ColumnCell(day.Day.ToString(), Midnight(day), Midnight(day.AddDays(7))));
                 }
 
                 break;
@@ -275,7 +297,7 @@ internal sealed class VetoGanttTimeline
 
                 for (var month = monthStart; month <= End; month = month.AddMonths(1))
                 {
-                    columns.Add(Cell(month.ToString("MMM"), Midnight(month), Midnight(month.AddMonths(1))));
+                    columns.Add(ColumnCell(month.ToString("MMM"), Midnight(month), Midnight(month.AddMonths(1))));
                 }
 
                 break;
@@ -302,7 +324,7 @@ internal sealed class VetoGanttTimeline
             for (var first = true; hour < AxisEnd; hour = hour.AddHours(1), first = false)
             {
                 var label = first || hour.Hour == 0 ? hour.ToString("ddd d MMM, HH:00") : hour.ToString("HH:00");
-                groups.Add(Cell(label, hour, hour.AddHours(1)));
+                groups.Add(GroupCell(label, hour, hour.AddHours(1)));
             }
 
             return groups;
@@ -312,7 +334,7 @@ internal sealed class VetoGanttTimeline
         {
             for (var day = Start; day <= End; day = day.AddDays(1))
             {
-                groups.Add(Cell(day.ToString("ddd d MMMM"), Midnight(day), Midnight(day.AddDays(1))));
+                groups.Add(GroupCell(day.ToString("ddd d MMMM"), Midnight(day), Midnight(day.AddDays(1))));
             }
 
             return groups;
@@ -322,7 +344,7 @@ internal sealed class VetoGanttTimeline
         {
             for (var year = Start.Year; year <= End.Year; year++)
             {
-                groups.Add(Cell(
+                groups.Add(GroupCell(
                     year.ToString(),
                     Midnight(new DateOnly(year, 1, 1)),
                     Midnight(new DateOnly(year + 1, 1, 1))));
@@ -337,7 +359,7 @@ internal sealed class VetoGanttTimeline
             // still reads the month it is in.
             var from = month < Start ? Start : month;
 
-            groups.Add(Cell(from.ToString("MMMM yyyy"), Midnight(month), Midnight(month.AddMonths(1))));
+            groups.Add(GroupCell(from.ToString("MMMM yyyy"), Midnight(month), Midnight(month.AddMonths(1))));
         }
 
         return groups;

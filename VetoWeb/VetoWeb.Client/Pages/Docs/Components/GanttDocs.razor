@@ -72,6 +72,19 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-heights" Title="Row heights"
+               Description="RowHeight sets every row; an item's own RowHeight overrides it for that row, and its bar scales with it. Here the chart is compact at 28px and the three projects stand out at 48px. GroupRowHeight does the same for the rows GroupBy makes."
+               Code="@HeightsCode">
+        <VetoGantt TestId="heights"
+                   Items="Sized" View="VetoGanttView.Schedule"
+                   TodayOverride="Today"
+                   RowHeight="28"
+                   ShowToolbar="false"
+                   SidebarWidth="13rem"
+                   Height="20rem"
+                   ScrollToTodayOnLoad="false" />
+    </DemoBlock>
+
     <DemoBlock TestId="demo-fit" Title="A short range fills the width"
                Description="Give the chart a Start and End a few days apart and the days widen until the range spans the whole chart, rather than drawing a week at the scale's own density and leaving the rest empty. A range longer than the chart keeps its density and scrolls. FitToWidth=false turns this off."
                Code="@FitCode">
@@ -157,10 +170,32 @@
                    TodayOverride="Today"
                    Scales="DayOnly"
                    ExportFormats="CsvOnly"
+                   ShowDateLine="false"
                    ShowSearch="false"
                    ShowCategoryFilter="false"
                    SidebarWidth="13rem"
                    Height="12rem" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-wording" Title="Your own wording"
+               Description="Today's date sits on a line of its own above the timeline, outside the part that scrolls, so it stays in view wherever the timeline is scrolled - and the day above the hours sticks to the edge too. DateLineFormat changes how the date reads, DateLineTemplate draws it your own way, and ShowDateLine=false removes the line. HeaderFormat and HeaderGroupFormat set the header's two rows; every built-in text in the toolbar is a parameter."
+               Code="@WordingCode">
+        <VetoGantt TestId="wording"
+                   Items="Jobs"
+                   View="VetoGanttView.Schedule"
+                   Scale="VetoGanttScale.Hour"
+                   TodayOverride="Today"
+                   TimeOverride="new TimeOnly(11, 30)"
+                   DateLineFormat="ddd d MMM"
+                   HeaderFormat="H:mm"
+                   HeaderGroupFormat="dddd"
+                   SearchPlaceholder="Search jobs"
+                   TodayViewLabel="Now"
+                   ScheduleViewLabel="Plan"
+                   TodayButtonText="Back to now"
+                   ExportText="Download"
+                   SidebarWidth="13rem"
+                   Height="11rem" />
     </DemoBlock>
 
     <DemoBlock TestId="demo-selection"
@@ -254,7 +289,8 @@
             </VetoStack>
 
             <VetoGantt @ref="_driven"
-                       TestId="driven" View="VetoGanttView.Schedule"
+                       TestId="driven"
+                       TooltipZIndex="2500" View="VetoGanttView.Schedule"
                        Items="Tasks"
                        TodayOverride="Today"
                        ShowToolbar="false"
@@ -541,6 +577,10 @@
 
     private static string? ServerOf ( VetoGanttItem job ) => job.Category;
 
+    // The schedule again, with the projects given rows of their own height.
+    private static readonly IReadOnlyList<VetoGanttItem> Sized =
+        Tasks.Select(task => task.ParentId is null ? task with { RowHeight = 48 } : task).ToList();
+
     // Two pipelines with a job on most days. Inline, each pipeline is one row however many jobs it ran.
     private static readonly IReadOnlyList<VetoGanttItem> Pipelines =
     [
@@ -564,11 +604,20 @@
         new("Start / End", "DateOnly?", "null", "The axis range. Worked out from the items when null."),
         new("TodayOverride", "DateOnly?", "null", "The day treated as today. Set it to keep a test or screenshot stable."),
         new("SidebarWidth", "string", "\"18rem\"", "Width of the panel on the left."),
-        new("RowHeight", "double", "36", "Height of one row in pixels. A number because the dependency arrows are drawn from it."),
+        new("ShowDateLine", "bool", "true", "Shows today's date on a line of its own above the timeline, which stays in view however the timeline is scrolled."),
+        new("DateLineFormat", "string", "\"dddd d MMMM yyyy\"", "How the date line reads - any .NET date format."),
+        new("DateLineTemplate", "RenderFragment<DateOnly>?", "null", "The date line drawn your own way, given today's date."),
+        new("HeaderFormat / HeaderGroupFormat", "string?", "null", "Formats for the header's lower and upper rows. Null keeps each scale's own."),
+        new("SearchPlaceholder", "string", "\"Filter tasks\"", "The text in the empty search box."),
+        new("TodayViewLabel / ScheduleViewLabel", "string", "\"Today\" / \"Schedule\"", "The labels of the view switch."),
+        new("TodayButtonText / ExportText", "string", "\"Today\" / \"Export\"", "The texts of the Today button and the export menu."),
+        new("RowHeight", "double", "36", "Height of every row in pixels, unless an item sets its own. A number because the dependency arrows are drawn from it."),
+        new("GroupRowHeight", "double?", "null", "Height of the rows GroupBy makes. Null takes RowHeight."),
         new("ShowDependencies", "bool", "true", "Whether dependency arrows are drawn."),
         new("ShowTooltips", "bool", "true", "Whether hovering or focusing a bar shows a tooltip. Bars keep their accessible name either way."),
         new("TooltipText", "Func<VetoGanttItem, string?>?", "null", "Rewrites the native tooltip text. Return null to give a row no tooltip."),
         new("TooltipTemplate", "RenderFragment<VetoGanttItem>?", "null", "A hover card of your own in place of the native tooltip. Wins over TooltipText."),
+        new("TooltipZIndex", "int?", "null", "How high the hover card layers. Null uses the --veto-z-tooltip token, 1000. The card is placed against the window, so the chart's scrolling never cuts it off."),
         new("View", "VetoGanttView", "Today", "Today: only today, fitted to the width, listing only today's work. Schedule: the whole plan. Supports @bind-View."),
         new("ShowViewPicker", "bool", "true", "Whether the toolbar shows the Today / Schedule switch."),
         new("FitToWidth", "bool", "true", "Widens the days of a short range until it fills the chart. A long range keeps its density and scrolls."),
@@ -588,6 +637,10 @@
         new("TodayScale", "VetoGanttScale", "Hour", "The scale the today view is drawn at."),
         new("MinHourWidth", "double", "44", "The narrowest an hour is drawn. A day that would need less scrolls instead, so its time labels stay readable."),
         new("TimeOverride", "TimeOnly?", "null", "The time treated as now, for the marker at the hour scale. Set it with TodayOverride to keep a screenshot stable."),
+        new("ShowNowLabel", "bool", "true", "Shows the current time on top of the now marker, in the header."),
+        new("NowLabelFormat", "string?", "null", "The format of that time. Null reads HH:mm on the hour scales and the date on coarser ones."),
+        new("NowBandHeight", "string", "\"1rem\"", "The height of the band at the foot of the header the time sits in, clear of the hour and day labels."),
+        new("LiveNowMarker", "bool", "true", "Moves the now marker and its time as the clock moves. Has no effect with TimeOverride set."),
         new("SortBy", "VetoGanttSort", "Source", "Source, Name, Start, End or Duration. Applied within each level of the tree."),
         new("SortDescending", "bool", "false", "Reverses whatever SortBy produces."),
         new("Editable", "bool", "false", "Lets bars be dragged to move, and arrow keys to do the same."),
@@ -608,7 +661,7 @@
         new("ExportPlacement", "VetoMenuPlacement", "BottomEnd", "Which corner of the trigger the export menu hangs from."),
         new("ShowToday / ShowWeekends", "bool", "true", "The today marker and weekend shading."),
         new("ShowProgress / ShowBarLabels / ShowDates", "bool", "true", "Progress fills, names on bars, dates in the sidebar."),
-        new("ScrollToTodayOnLoad", "bool", "true", "Whether the timeline scrolls to today on first render."),
+        new("ScrollToTodayOnLoad", "bool", "true", "Whether the timeline scrolls to the now marker by itself: on load, and whenever the view or scale changes."),
         new("ExportFileName", "string", "\"gantt\"", "Base name for exported files, without an extension."),
         new("OnItemSelected", "EventCallback<VetoGanttItem>", "—", "Raised when a bar is activated."),
         new("OnExport", "EventCallback<VetoGanttExportRequest>", "—", "Raised before an export; set Handled to take it over."),
@@ -641,6 +694,7 @@
         new("Start / End", "DateOnly", "required", "Inclusive at both ends."),
         new("StartTime / EndTime", "TimeOnly?", "null", "The time of day the work starts on Start and ends on End. Null covers the whole day."),
         new("new(id, name, startsAt, endsAt)", "DateTime or DateTimeOffset", "—", "Builds an item from exact timestamps. The end is exclusive; an offset is shown in local time."),
+        new("RowHeight", "double?", "null", "This row's height in pixels, overriding the chart's. Its bar and lanes scale with it."),
         new("ParentId", "string?", "null", "The row this one sits under. Null for a top-level row."),
         new("Color", "string?", "null", "Any CSS colour, including a --veto-* token."),
         new("Progress", "double?", "null", "0 to 1. Null hides the progress fill for this row."),
@@ -887,6 +941,47 @@
                     Category = job.Server
                 }).ToList();
         }
+        """;
+
+    private const string WordingCode = """
+        <VetoGantt Items="Jobs"
+                   View="VetoGanttView.Schedule"
+                   Scale="VetoGanttScale.Hour"
+                   DateLineFormat="ddd d MMM"
+                   HeaderFormat="H:mm"
+                   HeaderGroupFormat="dddd"
+                   SearchPlaceholder="Search jobs"
+                   TodayViewLabel="Now"
+                   ScheduleViewLabel="Plan"
+                   TodayButtonText="Back to now"
+                   ExportText="Download" />
+
+        @* Or the date line drawn your own way - or not at all. *@
+        <VetoGantt Items="Jobs">
+            <DateLineTemplate Context="day">
+                On shift: <strong>@day.ToString("dddd")</strong>
+            </DateLineTemplate>
+        </VetoGantt>
+
+        <VetoGantt Items="Jobs" ShowDateLine="false" />
+        """;
+
+    private const string HeightsCode = """
+        @* Compact rows, with the projects taller. *@
+        <VetoGantt Items="Tasks" RowHeight="28" />
+
+        @code {
+            private static readonly IReadOnlyList<VetoGanttItem> Tasks =
+            [
+                new() { Id = "platform", Name = "Platform", RowHeight = 48,
+                        Start = new(2026, 3, 2), End = new(2026, 4, 10) },
+                new() { Id = "design", Name = "Design system", ParentId = "platform",
+                        Start = new(2026, 3, 2), End = new(2026, 3, 13) }
+            ];
+        }
+
+        @* The rows GroupBy makes have their own height. *@
+        <VetoGantt Items="Runs" GroupBy="run => run.Category" GroupRowHeight="44" />
         """;
 
     private const string FitCode = """
