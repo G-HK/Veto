@@ -28,7 +28,7 @@
     ships every package at this version and refuses to run if its v-tag already exists.
   -->
   <PropertyGroup>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>G-HK</Authors>
     <PackageTags>blazor;components;ui</PackageTags>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
