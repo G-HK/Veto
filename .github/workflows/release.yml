@@ -1,45 +1,77 @@
 name: release
 
-# Tag the commit to release it: `git tag v1.2.0 && git push --tags`.
-# Every package ships at that one version, and the meta package pins its 33 component
-# dependencies to it, so a consumer can never end up with a mismatched set.
+# Releases happen from the Production branch only: merge main into Production (or run this
+# workflow by hand against Production) and every package ships at the <Version> set in
+# src/Directory.Build.props. The meta package pins its component dependencies to that same
+# version, so a consumer can never end up with a mismatched set.
+#
+# Three independent locks keep anyone but G-HK from publishing:
+#   1. the `if:` on the job below refuses any run not started by G-HK on Production;
+#   2. the `nuget` environment only deploys from Production and waits for G-HK's approval;
+#   3. the nuget.org Trusted Publishing policy only trusts this repo + this file + `nuget`.
 on:
   push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+    branches: [ Production ]
   workflow_dispatch:
+
+# Two releases racing each other would both pass the "tag not taken" check below.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
   contents: read
-  # Required for Trusted Publishing. Without it the OIDC token request fails silently and the
-  # NuGet login step comes back with no key.
-  id-token: write
 
 jobs:
   publish:
+    # `actor` is who caused the run, `triggering_actor` is who started this attempt - a re-run
+    # by someone else would otherwise inherit the original actor.
+    if: >
+      github.repository == 'G-HK/Veto' &&
+      github.ref == 'refs/heads/Production' &&
+      github.actor == 'G-HK' &&
+      github.triggering_actor == 'G-HK'
+
     runs-on: ubuntu-latest
 
-    # Optional: create a `nuget` environment in repo settings with a required reviewer to gate
-    # the push behind a manual approval. Remove this line if you would rather it just run.
     environment: nuget
 
+    permissions:
+      # Pushing the release tag and creating the GitHub release.
+      contents: write
+      # Required for Trusted Publishing. Without it the OIDC token request fails silently and the
+      # NuGet login step comes back with no key.
+      id-token: write
+
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
-      - name: Get version from tag
+      - name: Read version
         id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=$(dotnet msbuild src/Veto/Veto.csproj -getProperty:Version)
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing $VERSION"
+
+      # nuget.org never lets a version be re-used, so a merge to Production that forgot to bump
+      # the version should stop here, not after a 10-minute test run.
+      - name: Check version is not already released
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/v${{ steps.version.outputs.VERSION }}" > /dev/null; then
+            echo "::error::v${{ steps.version.outputs.VERSION }} is already released. Bump <Version> in src/Directory.Build.props."
+            exit 1
+          fi
 
       - name: Restore
         run: dotnet restore Veto.slnx
 
       - name: Build
-        run: dotnet build Veto.slnx -c Release --no-restore -p:Version=${{ steps.version.outputs.VERSION }}
+        run: dotnet build Veto.slnx -c Release --no-restore
 
       - name: Install Playwright browsers
         run: pwsh tests/Veto.Tests.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
@@ -48,30 +80,48 @@ jobs:
         run: dotnet test tests/Veto.Tests.E2E -c Release --no-build
 
       - name: Pack
-        run: dotnet pack Veto.slnx -c Release --no-build -o ${{ runner.temp }}/nupkgs -p:Version=${{ steps.version.outputs.VERSION }}
+        run: dotnet pack Veto.slnx -c Release --no-build -o ${{ runner.temp }}/nupkgs
 
       - name: Verify package contents
         shell: pwsh
         run: ./tools/CheckPackageContainsStaticAssets.ps1 -PackageDirectory ${{ runner.temp }}/nupkgs
 
+      # Only the Veto and Veto.* packages go up, whatever else the solution happens to pack.
+      - name: Verify package ids
+        shell: pwsh
+        run: |
+          $bad = Get-ChildItem "${{ runner.temp }}/nupkgs" -Filter *.nupkg |
+            Where-Object { $_.Name -notmatch '^Veto(\.[A-Za-z0-9.]+)?\.\d' }
+          if ($bad) { $bad | ForEach-Object { "::error::Unexpected package $($_.Name)" }; exit 1 }
+
       # Trusted Publishing: exchanges a GitHub OIDC token for a NuGet key that lives one hour.
-      # Set this up first at nuget.org > your account > Trusted Publishing, registering this
-      # repository and this workflow file. There is no API key to store, which matters now that
-      # nuget.org caps new API keys at 30 days.
+      # The policy at nuget.org > Trusted Publishing must name owner G-HK, repository Veto,
+      # workflow file release.yml and environment nuget. There is no API key stored anywhere.
       - name: Log in to NuGet
         id: login
         uses: NuGet/login@v1
         with:
-          user: YOUR_NUGET_ORG_USERNAME # <- replace with the nuget.org account that owns Veto
+          user: ${{ vars.NUGET_USER }}
 
-      # One glob pushes all 34 packages. --skip-duplicate keeps the job re-runnable if it fails
-      # partway through: the packages already up are skipped rather than failing the whole run.
+      # --skip-duplicate keeps the job re-runnable if it fails partway through: the packages
+      # already up are skipped rather than failing the whole run. The .snupkg files next to each
+      # .nupkg are pushed to the symbol server automatically.
       - name: Publish to NuGet
         run: >
           dotnet nuget push "${{ runner.temp }}/nupkgs/*.nupkg"
           --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
+
+      - name: Tag and create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "v${{ steps.version.outputs.VERSION }}"
+          --target "${{ github.sha }}"
+          --title "v${{ steps.version.outputs.VERSION }}"
+          --generate-notes
+          ${{ runner.temp }}/nupkgs/*.nupkg
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
