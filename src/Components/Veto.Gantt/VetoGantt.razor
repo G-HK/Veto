@@ -248,18 +248,20 @@
                                     @if (row.Item.IsMilestone)
                                     {
                                         <button type="button" class="veto-gantt__milestone" style="@BarStyle(row.Item)"
-                                                title="@TooltipFor(row.Item)" aria-label="@TooltipFor(row.Item)"
-                                                data-testid="@Sub($"bar-{row.Item.Id}")" @onclick="() => SelectAsync(row.Item)">
+                                                title="@NativeTooltipFor(row.Item)" aria-label="@TooltipFor(row.Item)"
+                                                data-testid="@Sub($"bar-{row.Item.Id}")" @onclick="() => SelectAsync(row.Item)"
+                                                @attributes="TooltipHandlers(row.Item)">
                                         </button>
                                     }
                                     else
                                     {
                                         <button type="button"
                                                 class="veto-gantt__bar @(row.HasChildren ? "veto-gantt__bar--summary" : null) @(IsEditable(row) ? "veto-gantt__bar--editable" : null)"
-                                                style="@BarStyle(row.Item)" title="@TooltipFor(row.Item)" aria-label="@TooltipFor(row.Item)"
+                                                style="@BarStyle(row.Item)" title="@NativeTooltipFor(row.Item)" aria-label="@TooltipFor(row.Item)"
                                                 data-testid="@Sub($"bar-{row.Item.Id}")" data-editable="@(IsEditable(row) ? "true" : null)"
                                                 data-row-id="@row.Item.Id" @onclick="() => SelectAsync(row.Item)"
-                                                @onkeydown="args => OnBarKeyDownAsync(args, row.Item)">
+                                                @onkeydown="args => OnBarKeyDownAsync(args, row.Item)"
+                                                @attributes="TooltipHandlers(row.Item)">
                                             @if (ShowProgress && row.Item.Progress is { } progress)
                                             {
                                                 @* The washed-out part is what is left to do: the solid
@@ -279,6 +281,18 @@
                                             }
                                         </button>
                                     }
+                                </div>
+                            }
+
+                            @if (HoveredRow is var (hoveredRow, hoveredIndex))
+                            {
+                                @* One card for the whole chart, placed against its row, rather than
+                                   one per bar: a bar clips its own overflow, so a card inside it
+                                   would be cut off at the bar's edge. *@
+                                <div id="@($"{ElementId}-tooltip")" class="veto-gantt__tooltip" role="tooltip"
+                                     style="@TooltipStyle(hoveredRow.Item, hoveredIndex)"
+                                     data-testid="@Sub("tooltip")">
+                                    @TooltipTemplate!(hoveredRow.Item)
                                 </div>
                             }
                         </div>

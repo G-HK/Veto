@@ -223,6 +223,28 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     public bool ShowDependencies { get; set; } = true;
 
     /// <summary>
+    /// Whether hovering or focusing a bar shows a tooltip. Turning it off leaves each bar's
+    /// accessible name in place, so a screen reader still hears the row's name and dates.
+    /// </summary>
+    [Parameter]
+    public bool ShowTooltips { get; set; } = true;
+
+    /// <summary>
+    /// Replaces the text of the browser's native tooltip - by default the name, the dates, the
+    /// progress and the description. Return null to give that row no tooltip at all.
+    /// </summary>
+    [Parameter]
+    public Func<VetoGanttItem, string?>? TooltipText { get; set; }
+
+    /// <summary>
+    /// A rich hover card, drawn in place of the browser's native tooltip. It opens below the bar,
+    /// or above it for rows in the lower half of the chart, when the bar is hovered or focused.
+    /// Takes precedence over <see cref="TooltipText"/>.
+    /// </summary>
+    [Parameter]
+    public RenderFragment<VetoGanttItem>? TooltipTemplate { get; set; }
+
+    /// <summary>
     /// Shows a placeholder chart instead of the rows, for the wait before any data has arrived.
     /// </summary>
     /// <remarks>
@@ -604,7 +626,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         await SearchChanged.InvokeAsync(value);
     }
 
-    private async Task SetScaleAsync ( VetoGanttScale scale )
+    /// <summary>Changes the zoom level and scrolls back to today, as the scale picker does.</summary>
+    public async Task SetScaleAsync ( VetoGanttScale scale )
     {
         if (Scale == scale)
         {
@@ -613,6 +636,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         Scale = scale;
         Rebuild();
+        StateHasChanged();
 
         // The handler was given the old pixels-per-day and snap, so it is reattached with the
         // new ones on the next render.
@@ -631,6 +655,86 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         await SelectedIdChanged.InvokeAsync(item.Id);
         await OnItemSelected.InvokeAsync(item);
+    }
+
+    // ------------------------------------------------------------------ Imperative API
+    //
+    // For a caller holding an @ref: the same actions the toolbar and the bars offer, so a page
+    // can drive the chart from its own buttons, shortcuts or state. Each one re-renders, since a
+    // call from outside the chart's own event handlers would not otherwise be drawn.
+
+    /// <summary>
+    /// Selects a row by id, raising <see cref="SelectedIdChanged"/> and
+    /// <see cref="OnItemSelected"/> as a click on its bar would. Null clears the selection.
+    /// An id that matches no item is ignored.
+    /// </summary>
+    public async Task SelectAsync ( string? id )
+    {
+        if (id is null)
+        {
+            SelectedId = null;
+            StateHasChanged();
+            await SelectedIdChanged.InvokeAsync(null);
+            return;
+        }
+
+        if (Items.FirstOrDefault(i => i.Id == id) is { } item)
+        {
+            await SelectAsync(item);
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>Opens a collapsed row so its children show.</summary>
+    public void Expand ( string id ) => SetCollapsed([id], collapsed: false);
+
+    /// <summary>Folds a row's children away under it.</summary>
+    public void Collapse ( string id ) => SetCollapsed([id], collapsed: true);
+
+    /// <summary>Opens every row that has children.</summary>
+    public void ExpandAll () => SetCollapsed(ParentIds(), collapsed: false);
+
+    /// <summary>Folds every row that has children, leaving only the top level.</summary>
+    public void CollapseAll () => SetCollapsed(ParentIds(), collapsed: true);
+
+    private IEnumerable<string> ParentIds ()
+    {
+        var parents = Items.Where(i => i.ParentId is not null).Select(i => i.ParentId!).ToHashSet();
+        return Items.Where(i => parents.Contains(i.Id)).Select(i => i.Id);
+    }
+
+    private void SetCollapsed ( IEnumerable<string> ids, bool collapsed )
+    {
+        foreach (var id in ids)
+        {
+            if (collapsed)
+            {
+                _collapsed.Add(id);
+            }
+            else
+            {
+                _collapsed.Remove(id);
+            }
+        }
+
+        Rebuild();
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Opens the <see cref="TooltipTemplate"/> card on a row, as hovering its bar would - to
+    /// point something out, or to walk a reader through the chart. Does nothing without a
+    /// template: the browser's native tooltip cannot be opened from code.
+    /// </summary>
+    public void ShowTooltip ( string id )
+    {
+        if (!UsesTooltipTemplate)
+        {
+            return;
+        }
+
+        _hoveredId = id;
+        StateHasChanged();
     }
 
     private string CellStyle ( VetoGanttTimeline.Column column )
@@ -657,6 +761,88 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         => item.IsMilestone || item.Start == item.End
             ? item.Start.ToString("d MMM")
             : $"{item.Start:d MMM} – {item.End:d MMM}";
+
+    /// <summary>What goes in a bar's native <c>title</c>: nothing when a template or no tooltip is wanted.</summary>
+    private string? NativeTooltipFor ( VetoGanttItem item )
+    {
+        if (!ShowTooltips || TooltipTemplate is not null)
+        {
+            return null;
+        }
+
+        return TooltipText is null ? TooltipFor(item) : TooltipText(item);
+    }
+
+    // The row whose bar the pointer or keyboard is on, for the templated tooltip.
+    private string? _hoveredId;
+
+    private bool UsesTooltipTemplate => ShowTooltips && TooltipTemplate is not null;
+
+    /// <summary>
+    /// The hover and focus handlers, only when a templated tooltip needs them. Every UI event
+    /// re-renders the chart, so a chart without a template should not pay for pointer movement.
+    /// </summary>
+    private IReadOnlyDictionary<string, object>? TooltipHandlers ( VetoGanttItem item )
+    {
+        if (!UsesTooltipTemplate)
+        {
+            return null;
+        }
+
+        return new Dictionary<string, object>
+        {
+            ["onmouseenter"] = EventCallback.Factory.Create<MouseEventArgs>(this, () => _hoveredId = item.Id),
+            ["onfocus"] = EventCallback.Factory.Create<FocusEventArgs>(this, () => _hoveredId = item.Id),
+            ["onmouseleave"] = EventCallback.Factory.Create<MouseEventArgs>(this, HideTooltip),
+            ["onblur"] = EventCallback.Factory.Create<FocusEventArgs>(this, HideTooltip),
+            // A drag moves the bar out from under the card, so the card goes the moment one starts.
+            ["onpointerdown"] = EventCallback.Factory.Create<PointerEventArgs>(this, HideTooltip),
+            ["aria-describedby"] = _hoveredId == item.Id ? $"{ElementId}-tooltip" : null!
+        };
+    }
+
+    /// <summary>Closes the <see cref="TooltipTemplate"/> card, however it was opened.</summary>
+    public void HideTooltip ()
+    {
+        _hoveredId = null;
+        StateHasChanged();
+    }
+
+    /// <summary>The row the templated tooltip belongs to, and where that row sits.</summary>
+    private (Row Row, int Index)? HoveredRow
+    {
+        get
+        {
+            if (!UsesTooltipTemplate || _hoveredId is null)
+            {
+                return null;
+            }
+
+            for (var i = 0; i < Rows.Count; i++)
+            {
+                if (Rows[i].Item.Id == _hoveredId)
+                {
+                    return (Rows[i], i);
+                }
+            }
+
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Places the card under its bar, or over it in the lower half of the chart, where below
+    /// would run out of the scrolling area.
+    /// </summary>
+    private string TooltipStyle ( VetoGanttItem item, int index )
+    {
+        var left = Timeline.OffsetOf(item.Start);
+        var above = index >= Rows.Count / 2 && index > 0;
+
+        return above
+            ? string.Create(CultureInfo.InvariantCulture, $"left: {left:0.##}px; bottom: {(Rows.Count - index) * RowHeight:0.##}px")
+            : string.Create(CultureInfo.InvariantCulture, $"left: {left:0.##}px; top: {(index + 1) * RowHeight:0.##}px");
+    }
 
     private string TooltipFor ( VetoGanttItem item )
     {
@@ -693,7 +879,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     }
 
     /// <summary>Brings today into view, or the start of the axis when today is outside it.</summary>
-    private async Task ScrollToTodayAsync ()
+    public async Task ScrollToTodayAsync ()
     {
         var offset = Timeline.Contains(Today) ? Timeline.OffsetOf(Today) : 0;
         await InvokeModuleAsync("scrollTo", _scroller, offset);
@@ -703,13 +889,29 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private Task ScrollByAsync ( double direction )
         => InvokeModuleAsync("scrollBy", _scroller, direction * 0.8);
 
+    /// <summary>Brings a date into view. A date outside the axis scrolls to the nearer end.</summary>
+    public Task ScrollToDateAsync ( DateOnly date )
+    {
+        var offset = Timeline.Contains(date) ? Timeline.OffsetOf(date)
+            : date < Timeline.Start ? 0
+            : Timeline.Width;
+
+        return InvokeModuleAsync("scrollTo", _scroller, offset);
+    }
+
+    /// <summary>Scrolls back by most of a screen, as the Earlier button does.</summary>
+    public Task ScrollEarlierAsync () => ScrollByAsync(-1);
+
+    /// <summary>Scrolls forward by most of a screen, as the Later button does.</summary>
+    public Task ScrollLaterAsync () => ScrollByAsync(1);
+
     // ------------------------------------------------------------------ Export
 
     /// <summary>
     /// Exports the rows as currently filtered. The app gets first refusal through
     /// <see cref="OnExport"/>; if it does not take it, the file is downloaded here.
     /// </summary>
-    private async Task ExportAsync ( VetoGanttExportFormat format )
+    public async Task ExportAsync ( VetoGanttExportFormat format )
     {
         var items = Rows.Select(r => r.Item).ToList();
         var request = new VetoGanttExportRequest(format, items, ExportFileName);

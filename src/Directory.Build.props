@@ -51,9 +51,19 @@
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 
+  <!--
+    Each package ships its own README.md from beside its .csproj, so its nuget.org page is about
+    that component rather than the whole library. A project without one - the Veto meta package -
+    falls back to the repository readme.
+  -->
+  <PropertyGroup>
+    <VetoPackageReadme Condition="Exists('$(MSBuildProjectDirectory)\README.md')">$(MSBuildProjectDirectory)\README.md</VetoPackageReadme>
+    <VetoPackageReadme Condition="'$(VetoPackageReadme)' == ''">$(MSBuildThisFileDirectory)..\Readme.md</VetoPackageReadme>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(IsPackable)' != 'false'">
     <None Include="$(MSBuildThisFileDirectory)..\LICENSE.txt" Pack="true" PackagePath="\" Visible="false" />
-    <None Include="$(MSBuildThisFileDirectory)..\Readme.md" Pack="true" PackagePath="\README.md" Visible="false" />
+    <None Include="$(VetoPackageReadme)" Pack="true" PackagePath="\README.md" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>

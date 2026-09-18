@@ -53,6 +53,78 @@
                    @bind-SelectedId="_chainSelection" />
     </DemoBlock>
 
+    <DemoBlock TestId="demo-tooltips"
+               Title="Tooltips"
+               Description="Hovering or focusing a bar shows its name, dates, progress and description. TooltipText rewrites that text, and returning null leaves a row without one. TooltipTemplate swaps the browser's tooltip for a card you lay out yourself. ShowTooltips=false turns them off, and the bars keep their accessible names."
+               Code="@TooltipCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoGantt TestId="tooltip-text"
+                       Items="Tasks"
+                       TodayOverride="Today"
+                       ShowToolbar="false"
+                       SidebarWidth="12rem"
+                       Height="14rem"
+                       ScrollToTodayOnLoad="false"
+                       TooltipText="ShortTooltip" />
+
+            <VetoGantt TestId="tooltip-card"
+                       Items="Tasks"
+                       TodayOverride="Today"
+                       ShowToolbar="false"
+                       SidebarWidth="12rem"
+                       Height="14rem"
+                       ScrollToTodayOnLoad="false">
+                <TooltipTemplate Context="task">
+                    <strong>@task.Name</strong>
+                    <div>@task.Start.ToString("d MMM") – @task.End.ToString("d MMM") · @task.DurationDays days</div>
+                    @if (task.Progress is { } done)
+                    {
+                        <div>@done.ToString("P0") done</div>
+                    }
+                    @if (task.Category is not null)
+                    {
+                        <div>@task.Category</div>
+                    }
+                </TooltipTemplate>
+            </VetoGantt>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-ref"
+               Title="Driving it from code"
+               Description="Take an @@ref and the chart's own actions are yours to call: select a row, fold the tree, zoom, scroll to a date, export, or open a row's tooltip card to point something out. Each one does what its button or bar would, callbacks included, so bound state stays in step."
+               Code="@RefCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                <button class="chip" type="button" data-testid="ref-select" @onclick='() => _driven.SelectAsync("shell")'>Select App shell</button>
+                <button class="chip" type="button" data-testid="ref-collapse-all" @onclick="() => _driven.CollapseAll()">Collapse all</button>
+                <button class="chip" type="button" data-testid="ref-expand-all" @onclick="() => _driven.ExpandAll()">Expand all</button>
+                <button class="chip" type="button" data-testid="ref-week" @onclick="() => _driven.SetScaleAsync(VetoGanttScale.Week)">Week view</button>
+                <button class="chip" type="button" data-testid="ref-launch" @onclick="() => _driven.ScrollToDateAsync(new(2026, 4, 13))">Go to launch</button>
+                <button class="chip" type="button" data-testid="ref-tooltip" @onclick='() => _driven.ShowTooltip("design")'>Point out Design</button>
+                <button class="chip" type="button" data-testid="ref-hide" @onclick="() => _driven.HideTooltip()">Hide card</button>
+            </VetoStack>
+
+            <VetoGantt @ref="_driven"
+                       TestId="driven"
+                       Items="Tasks"
+                       TodayOverride="Today"
+                       ShowToolbar="false"
+                       SidebarWidth="12rem"
+                       Height="16rem"
+                       ScrollToTodayOnLoad="false"
+                       @bind-SelectedId="_drivenSelection"
+                       @bind-Scale="_drivenScale">
+                <TooltipTemplate Context="task">
+                    <strong>@task.Name</strong>
+                    <div>@task.DurationDays days</div>
+                </TooltipTemplate>
+            </VetoGantt>
+
+            <span class="demo-label" data-testid="driven-state">Selected: @(_drivenSelection ?? "none") · Scale: @_drivenScale</span>
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-edit"
                Title="Dragging, and remembering"
                Description="Drag a bar to move it, or its edges to resize - snapped to whatever zoom is showing. Arrow keys do the same from the keyboard, with Shift to change the end instead. Changes are kept in this browser for you alone, so a reload finds them again; Reset clears them. A summary row cannot be dragged, because its dates are the span of its children."
@@ -159,6 +231,7 @@
     </VetoStack>
 
     <ParameterTable Title="Parameters" TestId="parameters" Rows="Parameters" />
+    <ParameterTable Title="Methods (through @@ref)" TestId="methods" Rows="Methods" />
     <ParameterTable Title="VetoGanttItem" TestId="item-parameters" Rows="ItemRows" />
 
 </DocsPage>
@@ -167,6 +240,9 @@
     private VetoGanttScale _scale = VetoGanttScale.Day;
     private string? _selectedId;
     private string? _chainSelection;
+    private VetoGantt _driven = default!;
+    private string? _drivenSelection;
+    private VetoGanttScale _drivenScale = VetoGanttScale.Day;
     private string? _exportNote;
     private bool _loading;
     private bool _refreshing;
@@ -260,6 +336,9 @@
         new("SidebarWidth", "string", "\"18rem\"", "Width of the panel on the left."),
         new("RowHeight", "double", "36", "Height of one row in pixels. A number because the dependency arrows are drawn from it."),
         new("ShowDependencies", "bool", "true", "Whether dependency arrows are drawn."),
+        new("ShowTooltips", "bool", "true", "Whether hovering or focusing a bar shows a tooltip. Bars keep their accessible name either way."),
+        new("TooltipText", "Func<VetoGanttItem, string?>?", "null", "Rewrites the native tooltip text. Return null to give a row no tooltip."),
+        new("TooltipTemplate", "RenderFragment<VetoGanttItem>?", "null", "A hover card of your own in place of the native tooltip. Wins over TooltipText."),
         new("SortBy", "VetoGanttSort", "Source", "Source, Name, Start, End or Duration. Applied within each level of the tree."),
         new("SortDescending", "bool", "false", "Reverses whatever SortBy produces."),
         new("Editable", "bool", "false", "Lets bars be dragged to move, and arrow keys to do the same."),
@@ -285,6 +364,20 @@
         new("OnItemSelected", "EventCallback<VetoGanttItem>", "—", "Raised when a bar is activated."),
         new("OnExport", "EventCallback<VetoGanttExportRequest>", "—", "Raised before an export; set Handled to take it over."),
         new("Toolbar", "RenderFragment?", "null", "Extra controls at the end of the toolbar.")
+    ];
+
+    private static readonly ParameterTable.Row[] Methods =
+    [
+        new("SelectAsync(id)", "Task", "—", "Selects a row as a click on its bar would, raising SelectedIdChanged and OnItemSelected. Null clears it."),
+        new("Expand(id) / Collapse(id)", "void", "—", "Opens or folds one row's children."),
+        new("ExpandAll() / CollapseAll()", "void", "—", "Opens or folds every row that has children."),
+        new("SetScaleAsync(scale)", "Task", "—", "Zooms as the scale picker does, raising ScaleChanged."),
+        new("ScrollToTodayAsync()", "Task", "—", "Brings today into view."),
+        new("ScrollToDateAsync(date)", "Task", "—", "Brings a date into view; one outside the axis scrolls to the nearer end."),
+        new("ScrollEarlierAsync() / ScrollLaterAsync()", "Task", "—", "Scrolls by most of a screen, as the Earlier and Later buttons do."),
+        new("ExportAsync(format)", "Task", "—", "Exports the filtered rows as CSV or JSON, going through OnExport first."),
+        new("ShowTooltip(id) / HideTooltip()", "void", "—", "Opens or closes a row's TooltipTemplate card. Needs a template: the native tooltip cannot be opened from code."),
+        new("ResetAsync()", "Task", "—", "Clears this reader's stored edits and puts every row back to its supplied dates.")
     ];
 
     private static readonly ParameterTable.Row[] ItemRows =
@@ -388,6 +481,55 @@
                 _tasks = await Api.GetScheduleAsync();
                 _refreshing = false;
             }
+        }
+        """;
+
+    // The format the first tooltip demo uses: just the name and how long the row runs.
+    private static string? ShortTooltip ( VetoGanttItem item )
+        => item.IsMilestone ? item.Name : $"{item.Name} - {item.DurationDays} days";
+
+    private const string TooltipCode = """
+        @* Your own text in the native tooltip. Return null for no tooltip on that row. *@
+        <VetoGantt Items="Tasks" TooltipText="ShortTooltip" />
+
+        @* Or a card you lay out yourself. *@
+        <VetoGantt Items="Tasks">
+            <TooltipTemplate Context="task">
+                <strong>@task.Name</strong>
+                <div>@task.Start.ToString("d MMM") – @task.End.ToString("d MMM") · @task.DurationDays days</div>
+                @if (task.Progress is { } done)
+                {
+                    <div>@done.ToString("P0") done</div>
+                }
+            </TooltipTemplate>
+        </VetoGantt>
+
+        @* Or none at all. *@
+        <VetoGantt Items="Tasks" ShowTooltips="false" />
+
+        @code {
+            private static string? ShortTooltip ( VetoGanttItem item )
+                => item.IsMilestone ? item.Name : $"{item.Name} - {item.DurationDays} days";
+        }
+        """;
+
+    private const string RefCode = """
+        <button @onclick='() => _chart.SelectAsync("shell")'>Select App shell</button>
+        <button @onclick="() => _chart.CollapseAll()">Collapse all</button>
+        <button @onclick="() => _chart.SetScaleAsync(VetoGanttScale.Week)">Week view</button>
+        <button @onclick="() => _chart.ScrollToDateAsync(new(2026, 4, 13))">Go to launch</button>
+        <button @onclick='() => _chart.ShowTooltip("design")'>Point out Design</button>
+
+        <VetoGantt @ref="_chart" Items="Tasks" @bind-SelectedId="_selected">
+            <TooltipTemplate Context="task">
+                <strong>@task.Name</strong>
+                <div>@task.DurationDays days</div>
+            </TooltipTemplate>
+        </VetoGantt>
+
+        @code {
+            private VetoGantt _chart = default!;
+            private string? _selected;
         }
         """;
 

@@ -437,4 +437,169 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
 
         Assert.True(export >= today, $"Export should sit after the time navigation: {today}px vs {export}px.");
     }
+
+    [Fact]
+    public async Task A_bar_carries_its_details_as_a_tooltip_by_default()
+    {
+        await GotoComponentAsync(Route);
+
+        var title = await Component("chart-bar-design").GetAttributeAsync("title");
+
+        Assert.NotNull(title);
+        Assert.Contains("Design system", title);
+        Assert.Contains("100", title);
+    }
+
+    [Fact]
+    public async Task TooltipText_rewrites_the_native_tooltip()
+    {
+        await GotoComponentAsync(Route);
+
+        // Design runs 2-13 March: twelve days, both ends counted.
+        await Expect(Component("tooltip-text-bar-design")).ToHaveAttributeAsync("title", "Design system - 12 days");
+
+        // The accessible name keeps the full details whatever the tooltip says.
+        var label = await Component("tooltip-text-bar-design").GetAttributeAsync("aria-label");
+        Assert.Contains("Design system ·", label);
+    }
+
+    [Fact]
+    public async Task TooltipTemplate_shows_a_card_while_a_bar_is_hovered()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        var bar = Component("tooltip-card-bar-design");
+        var card = Component("tooltip-card-tooltip");
+
+        // The card replaces the native tooltip rather than adding to it.
+        await Expect(bar).Not.ToHaveAttributeAsync("title", new System.Text.RegularExpressions.Regex(".*"));
+        await Expect(card).ToHaveCountAsync(0);
+
+        await bar.HoverAsync();
+
+        await Expect(card).ToBeVisibleAsync();
+        await Expect(card).ToContainTextAsync("Design system");
+        await Expect(card).ToContainTextAsync("12 days");
+        await Expect(bar).ToHaveAttributeAsync("aria-describedby", new System.Text.RegularExpressions.Regex("-tooltip$"));
+
+        await Page.Mouse.MoveAsync(0, 0);
+
+        await Expect(card).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task TooltipTemplate_opens_on_keyboard_focus_too()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("tooltip-card-bar-shell").FocusAsync();
+
+        await Expect(Component("tooltip-card-tooltip")).ToContainTextAsync("App shell");
+    }
+
+    [Fact]
+    public async Task The_tooltip_card_opens_away_from_the_edge_it_would_run_out_of()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        var card = Component("tooltip-card-tooltip");
+
+        // A row near the top opens its card below the bar...
+        var top = Component("tooltip-card-bar-design");
+        await top.HoverAsync();
+        await Expect(card).ToContainTextAsync("Design system");
+        var topBar = await top.BoundingBoxAsync();
+        var belowCard = await card.BoundingBoxAsync();
+        Assert.True(belowCard!.Y >= topBar!.Y + topBar.Height - 1,
+            $"A top row's card ({belowCard.Y}px) should open below its bar ({topBar.Y + topBar.Height}px).");
+
+        // ...and a row in the lower half opens it above, where below would run out of the chart.
+        var last = Component("tooltip-card-bar-launch");
+        await last.HoverAsync();
+        await Expect(card).ToContainTextAsync("Launch");
+        var lastBar = await last.BoundingBoxAsync();
+        var aboveCard = await card.BoundingBoxAsync();
+        Assert.True(aboveCard!.Y + aboveCard.Height <= lastBar!.Y + 1,
+            $"A lower row's card (ending {aboveCard.Y + aboveCard.Height}px) should open above its bar ({lastBar.Y}px).");
+    }
+
+    [Fact]
+    public async Task SelectAsync_through_a_ref_selects_and_reports_like_a_click()
+    {
+        await GotoComponentAsync(Route);
+
+        await Page.GetByTestId("ref-select").ClickAsync();
+
+        // The bound SelectedId moved with it, so the page's own state is in step.
+        await Expect(Page.GetByTestId("driven-state")).ToContainTextAsync("Selected: shell");
+    }
+
+    [Fact]
+    public async Task CollapseAll_and_ExpandAll_fold_the_whole_tree()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("driven-label-design")).ToBeVisibleAsync();
+
+        await Page.GetByTestId("ref-collapse-all").ClickAsync();
+
+        await Expect(Component("driven-label-design")).ToHaveCountAsync(0);
+        await Expect(Component("driven-label-spike")).ToHaveCountAsync(0);
+        await Expect(Component("driven-label-platform")).ToBeVisibleAsync();
+
+        await Page.GetByTestId("ref-expand-all").ClickAsync();
+
+        await Expect(Component("driven-label-design")).ToBeVisibleAsync();
+        await Expect(Component("driven-label-spike")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task SetScaleAsync_through_a_ref_zooms_and_updates_the_binding()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        var atDay = await WidthAsync("driven-bar-design");
+
+        await Page.GetByTestId("ref-week").ClickAsync();
+
+        await Expect(Page.GetByTestId("driven-state")).ToContainTextAsync("Scale: Week");
+        var atWeek = await WidthAsync("driven-bar-design");
+        Assert.True(atWeek < atDay, $"Week view should draw the same task narrower: {atDay}px -> {atWeek}px.");
+    }
+
+    [Fact]
+    public async Task ScrollToDateAsync_brings_that_date_into_view()
+    {
+        await Page.SetViewportSizeAsync(1200, 1000);
+        await GotoComponentAsync(Route);
+
+        var scroller = Component("driven-scroller");
+        Assert.Equal(0, await scroller.EvaluateAsync<double>("el => el.scrollLeft"));
+
+        await Page.GetByTestId("ref-launch").ClickAsync();
+
+        // Scrolling is smooth, so wait for it to have moved rather than sampling it once.
+        await scroller.EvaluateAsync("el => new Promise(done => { const check = () => el.scrollLeft > 0 ? done() : requestAnimationFrame(check); check(); })");
+        Assert.True(await scroller.EvaluateAsync<double>("el => el.scrollLeft") > 0);
+    }
+
+    [Fact]
+    public async Task ShowTooltip_opens_a_rows_card_from_code_and_HideTooltip_closes_it()
+    {
+        await GotoComponentAsync(Route);
+
+        var card = Component("driven-tooltip");
+        await Expect(card).ToHaveCountAsync(0);
+
+        await Page.GetByTestId("ref-tooltip").ClickAsync();
+
+        await Expect(card).ToContainTextAsync("Design system");
+
+        await Page.GetByTestId("ref-hide").ClickAsync();
+
+        await Expect(card).ToHaveCountAsync(0);
+    }
 }

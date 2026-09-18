@@ -542,3 +542,24 @@
         transition: none;
     }
 }
+/* Templated tooltip */
+
+.veto-gantt__tooltip {
+    position: absolute;
+    /* Over the bars and the arrows. It can also cover the sticky header for a moment when the
+       hovered row sits right under it - the card is transient, so that beats being cut off. */
+    z-index: 3;
+    max-width: 20rem;
+    margin-block: var(--veto-space-1);
+    padding: var(--veto-space-2) var(--veto-space-3);
+    box-sizing: border-box;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised, var(--veto-color-surface));
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
+    border-radius: var(--veto-radius-md);
+    box-shadow: var(--veto-shadow-md, 0 4px 16px rgb(0 0 0 / 0.12));
+    /* The card describes the bar; it must never take the pointer away from it, or hovering
+       the card would close it and open it again in a loop. */
+    pointer-events: none;
+}

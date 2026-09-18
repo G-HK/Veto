@@ -106,13 +106,13 @@ id are deliberately kept identical.
 
 ## Releasing
 
-Tag the commit:
+Releases are started by hand and run from the `Production` branch:
 
-```powershell
-git tag v1.2.0
-git push --tags
-```
+1. Bump `<Version>` in `src/Directory.Build.props` and commit it to `main`.
+2. Move `Production` to that commit: `git push origin main:Production`.
+3. In GitHub Actions, run the **release** workflow on `Production`. Tick "Run the E2E tests"
+   if the release should prove itself first.
 
-That runs `.github/workflows/release.yml`, which builds, tests, packs all 36 packages at the
-tag's version, verifies each contains its static web assets, and pushes them to nuget.org via
-Trusted Publishing.
+The workflow packs every package at that version, verifies each contains its static web assets,
+pushes them to nuget.org via Trusted Publishing, then tags the commit and creates the GitHub
+release. It refuses to run if the version was already released.
