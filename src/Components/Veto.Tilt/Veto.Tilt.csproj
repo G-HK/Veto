@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Tilt</PackageId>
+    <Version>1.0.1</Version>
     <Description>3D tilt-on-hover wrapper component for Veto.</Description>
     <RootNamespace>Veto.Components.Tilt</RootNamespace>
   </PropertyGroup>

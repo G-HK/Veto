@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Table</PackageId>
+    <Version>1.0.1</Version>
     <Description>Table component for Veto.</Description>
     <RootNamespace>Veto.Components.Table</RootNamespace>
   </PropertyGroup>

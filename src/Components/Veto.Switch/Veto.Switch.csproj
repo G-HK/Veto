@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Switch</PackageId>
+    <Version>1.0.1</Version>
     <Description>Toggle switch component for Veto.</Description>
     <RootNamespace>Veto.Components.Switch</RootNamespace>
   </PropertyGroup>

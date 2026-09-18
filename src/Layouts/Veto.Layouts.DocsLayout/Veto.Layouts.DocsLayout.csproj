@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layouts.DocsLayout</PackageId>
+    <Version>1.0.1</Version>
     <Description>Ready-made documentation page layout for Veto.</Description>
     <RootNamespace>Veto.Layouts.DocsLayout</RootNamespace>
   </PropertyGroup>

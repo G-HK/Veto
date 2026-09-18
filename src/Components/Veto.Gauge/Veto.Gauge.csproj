@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Gauge</PackageId>
+    <Version>1.0.1</Version>
     <Description>Radial gauge component with banded ranges for Veto.</Description>
     <RootNamespace>Veto.Components.Gauge</RootNamespace>
   </PropertyGroup>

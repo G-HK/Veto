@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Rating</PackageId>
+    <Version>1.0.1</Version>
     <Description>Star rating component for Veto.</Description>
     <RootNamespace>Veto.Components.Rating</RootNamespace>
   </PropertyGroup>

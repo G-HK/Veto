@@ -20,12 +20,18 @@
 
 .PARAMETER PackageDirectory
     Folder holding the .nupkg files produced by `dotnet pack`.
+
+.PARAMETER Only
+    Package ids to check, for a release of some packages rather than all of them. Each must be
+    a known Veto package; only those are required to be present. Omit to require every package.
 #>
 
 [CmdletBinding()]
 param (
     [Parameter(Mandatory)]
-    [string] $PackageDirectory
+    [string] $PackageDirectory,
+
+    [string[]] $Only
 )
 
 $ErrorActionPreference = 'Stop'
@@ -84,6 +90,19 @@ $expectedAssets = @{
     'Veto.Tilt'          = @('veto-tilt.js')
     'Veto.Layouts.Dock'  = @('veto-dock.js')
     'Veto.Layouts.Shell' = @('veto-layout.js')
+}
+
+# Accepts "Veto.Gantt,Veto.Core" as one argument too, which is how a command line hands it over.
+$Only = @($Only | ForEach-Object { $_ -split '[,\s]+' } | Where-Object { $_ })
+
+if ($Only) {
+    $unknown = $Only | Where-Object { $_ -notin $expectedPackages }
+
+    if ($unknown) {
+        throw "Not a Veto package: $($unknown -join ', ')"
+    }
+
+    $expectedPackages = @($expectedPackages | Where-Object { $_ -in $Only })
 }
 
 if (-not (Test-Path $PackageDirectory)) {

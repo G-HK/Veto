@@ -106,13 +106,19 @@ id are deliberately kept identical.
 
 ## Releasing
 
-Releases are started by hand and run from the `Production` branch:
+Every package carries its own `<Version>` in its `.csproj` and is released on its own:
 
-1. Bump `<Version>` in `src/Directory.Build.props` and commit it to `main`.
+1. Bump `<Version>` in the `.csproj` of each package that changed, and commit it to `main`.
 2. Move `Production` to that commit: `git push origin main:Production`.
-3. In GitHub Actions, run the **release** workflow on `Production`. Tick "Run the E2E tests"
-   if the release should prove itself first.
+3. In GitHub Actions, run the **release** workflow on `Production` and type the packages to
+   release - `Veto.Gantt`, several separated by commas, or `all`. Tick "Run the E2E tests" if
+   the release should prove itself first.
 
-The workflow packs every package at that version, verifies each contains its static web assets,
-pushes them to nuget.org via Trusted Publishing, then tags the commit and creates the GitHub
-release. It refuses to run if the version was already released.
+Only the packages named are built and packed. The workflow stops before building if a name is
+wrong or a version is already on nuget.org, and before publishing if a package depends on a Veto
+package version that is neither on nuget.org nor in the same release. It then pushes to
+nuget.org via Trusted Publishing and tags each package, e.g. `Veto.Gantt-v1.0.2`.
+
+A package's dependencies on other Veto packages are "this version or newer", so one package can
+move ahead of the rest. Release `Veto` as well when everyone installing the whole library
+should get the new version by default.

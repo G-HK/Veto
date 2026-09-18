@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Code</PackageId>
+    <Version>1.0.1</Version>
     <Description>Syntax-highlighted code block with copy support for Veto.</Description>
     <RootNamespace>Veto.Components.Code</RootNamespace>
   </PropertyGroup>

@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.TextBox</PackageId>
+    <Version>1.0.1</Version>
     <Description>Text input component for Veto.</Description>
     <RootNamespace>Veto.Components.TextBox</RootNamespace>
   </PropertyGroup>

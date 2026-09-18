@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layout.Stack</PackageId>
+    <Version>1.0.1</Version>
     <Description>Stack layout primitive for Veto.</Description>
     <RootNamespace>Veto.Components.Layout</RootNamespace>
   </PropertyGroup>

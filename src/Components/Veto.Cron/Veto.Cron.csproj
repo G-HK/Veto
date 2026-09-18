@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Cron</PackageId>
+    <Version>1.0.1</Version>
     <Description>Cron expression builder, parser and describer for Veto.</Description>
     <RootNamespace>Veto.Components.Cron</RootNamespace>
   </PropertyGroup>

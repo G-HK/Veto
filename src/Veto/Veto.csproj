@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto</PackageId>
+    <Version>1.0.1</Version>
     <Description>Every Veto component in one package: a dependency-free component library for Blazor WebAssembly apps. 
                  Prefer an individual Veto.* package if you only need one component.
     </Description>

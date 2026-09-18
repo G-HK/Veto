@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layout.Card</PackageId>
+    <Version>1.0.1</Version>
     <Description>Card component and its header, title, description, content and footer sections for Veto.</Description>
     <RootNamespace>Veto.Components.Layout</RootNamespace>
   </PropertyGroup>

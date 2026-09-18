@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.MagicTextBox</PackageId>
+    <Version>1.0.1</Version>
     <Description>A multi-line text box that collapses when the text outruns its space, with corner slots and a copy-to-clipboard button, for Veto.</Description>
     <RootNamespace>Veto.Components.MagicTextBox</RootNamespace>
   </PropertyGroup>

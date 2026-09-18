@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.BlinkText</PackageId>
+    <Version>1.0.1</Version>
     <Description>Blinking text component for Veto.</Description>
     <RootNamespace>Veto.Components.BlinkText</RootNamespace>
   </PropertyGroup>

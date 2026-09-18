@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layouts.Shell</PackageId>
+    <Version>1.0.1</Version>
     <Description>App shell layout: Layout, AppBar, Drawer, MainContent and Footer for Veto.</Description>
     <RootNamespace>Veto.Layouts.Shell</RootNamespace>
   </PropertyGroup>

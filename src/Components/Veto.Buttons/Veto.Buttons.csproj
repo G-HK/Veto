@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Buttons</PackageId>
+    <Version>1.0.1</Version>
     <Description>Button, IconButton, ButtonGroup and ButtonReveal components for Veto.</Description>
     <RootNamespace>Veto.Components.Buttons</RootNamespace>
   </PropertyGroup>

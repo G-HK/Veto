@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layouts.Dashboard</PackageId>
+    <Version>1.0.1</Version>
     <Description>Dashboard and DashboardTile components for Veto.</Description>
     <RootNamespace>Veto.Layouts.Dashboard</RootNamespace>
   </PropertyGroup>

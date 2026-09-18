@@ -23,12 +23,15 @@
 
   <!--
     Shared package metadata. Every project under src/ ships as its own NuGet package, so the
-    only thing a component .csproj states for itself is its id, description and dependencies.
-    Version is the release version: bump it before merging into Production. The release workflow
-    ships every package at this version and refuses to run if its v-tag already exists.
+    only things a component .csproj states for itself are its id, version, description and
+    dependencies.
+
+    Each package carries its own <Version>, because each is released on its own: bump the
+    version in a package's .csproj when it changes, and release just that package. Its
+    dependencies on other Veto packages are packed as "this version or newer" of whatever
+    those projects say, so a package can move ahead without dragging the rest with it.
   -->
   <PropertyGroup>
-    <Version>1.0.1</Version>
     <Authors>G-HK</Authors>
     <PackageTags>blazor;components;ui</PackageTags>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>

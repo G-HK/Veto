@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Menu</PackageId>
+    <Version>1.0.1</Version>
     <Description>Menu, MenuItem, MenuLabel and MenuDivider components for Veto.</Description>
     <RootNamespace>Veto.Components.Menu</RootNamespace>
   </PropertyGroup>

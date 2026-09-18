@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layout.Spacer</PackageId>
+    <Version>1.0.1</Version>
     <Description>Spacer layout primitive for Veto.</Description>
     <RootNamespace>Veto.Components.Layout</RootNamespace>
   </PropertyGroup>

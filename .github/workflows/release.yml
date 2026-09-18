@@ -1,9 +1,13 @@
 name: release
 
 # Releases are started by hand only: Actions > release > Run workflow, with "Use workflow from"
-# set to Production. Every package ships at the <Version> set in src/Directory.Build.props. The
-# meta package pins its component dependencies to that same version, so a consumer can never
-# end up with a mismatched set.
+# set to Production, and the packages to release typed in - "Veto.Gantt", several separated by
+# commas, or "all".
+#
+# Each package carries its own <Version> in its .csproj and is released on its own: bump the
+# version of the package that changed, then release just that one. Only the packages named are
+# built and packed, which is what keeps a release to a minute or two - the docs site and the
+# test project, the slow half of the solution, are built only when the tests are asked for.
 #
 # Three independent locks keep anyone but G-HK from publishing:
 #   1. the `if:` on the job below refuses any run not started by G-HK on Production;
@@ -12,6 +16,10 @@ name: release
 on:
   workflow_dispatch:
     inputs:
+      packages:
+        description: 'Packages to release: ids separated by commas (e.g. Veto.Gantt, Veto.Core), or "all"'
+        type: string
+        required: true
       # Off by default: the E2E suite is the expensive part of a release. Run the ci workflow
       # with tests first, or tick this for a release that should prove itself on its own.
       run_tests:
@@ -19,7 +27,7 @@ on:
         type: boolean
         default: false
 
-# Two releases racing each other would both pass the "tag not taken" check below.
+# Two releases racing each other would both pass the "version not taken" check below.
 concurrency:
   group: release
   cancel-in-progress: false
@@ -38,11 +46,12 @@ jobs:
       github.triggering_actor == 'G-HK'
 
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     environment: nuget
 
     permissions:
-      # Pushing the release tag and creating the GitHub release.
+      # Pushing a tag per released package.
       contents: write
       # Required for Trusted Publishing. Without it the OIDC token request fails silently and the
       # NuGet login step comes back with no key.
@@ -56,27 +65,69 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Read version
-        id: version
+      # Turns the typed list into projects and versions, and stops before anything is built if
+      # a name is wrong or a version is already on nuget.org - nuget.org never lets a version be
+      # reused, so a package that changed without a version bump has to stop here.
+      - name: Resolve packages
+        id: resolve
+        shell: pwsh
+        env:
+          # Read from the environment rather than pasted into the script, so nothing typed in
+          # the form can become code.
+          REQUESTED: ${{ inputs.packages }}
         run: |
-          VERSION=$(dotnet msbuild src/Veto/Veto.csproj -getProperty:Version)
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Releasing $VERSION"
+          $projects = @{}
+          Get-ChildItem src -Recurse -Filter *.csproj |
+            Where-Object { $_.FullName -notmatch '[\\/](bin|obj)[\\/]' } |
+            ForEach-Object { $projects[$_.BaseName] = $_.FullName }
 
-      # nuget.org never lets a version be re-used, so a merge to Production that forgot to bump
-      # the version should stop here, not after a 10-minute test run.
-      - name: Check version is not already released
+          $ids = if ($env:REQUESTED.Trim() -eq 'all') {
+            $projects.Keys | Sort-Object
+          } else {
+            $env:REQUESTED -split '[,\s]+' | Where-Object { $_ } | Select-Object -Unique
+          }
+
+          # Write-Host, not a bare string: inside the loop below a bare string would be captured
+          # into $release instead of reaching the log.
+          if (-not $ids) { Write-Host "::error::No packages named."; exit 1 }
+
+          $release = foreach ($id in $ids) {
+            if (-not $projects.ContainsKey($id)) {
+              Write-Host "::error::$id is not a Veto package. Known: $(($projects.Keys | Sort-Object) -join ', ')"
+              exit 1
+            }
+
+            $version = (dotnet msbuild $projects[$id] -getProperty:Version).Trim()
+
+            # 404 is a package's first release; anything else is its list of published versions.
+            $published = try {
+              (Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/$($id.ToLowerInvariant())/index.json").versions
+            } catch { @() }
+
+            if ($published -contains $version) {
+              Write-Host "::error::$id $version is already on nuget.org. Bump <Version> in $($projects[$id] -replace '.*?[\/]src[\/]', 'src/')."
+              exit 1
+            }
+
+            [pscustomobject]@{ Id = $id; Version = $version; Project = $projects[$id] }
+          }
+
+          $release | ForEach-Object { "Releasing $($_.Id) $($_.Version)" }
+          $release | ConvertTo-Json -AsArray | Set-Content "$env:RUNNER_TEMP/release.json"
+          "ids=$(($release.Id) -join ',')" >> $env:GITHUB_OUTPUT
+
+      - name: Build packages
+        shell: pwsh
         run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/v${{ steps.version.outputs.VERSION }}" > /dev/null; then
-            echo "::error::v${{ steps.version.outputs.VERSION }} is already released. Bump <Version> in src/Directory.Build.props."
-            exit 1
-          fi
+          foreach ($package in Get-Content "$env:RUNNER_TEMP/release.json" | ConvertFrom-Json) {
+            dotnet build $package.Project -c Release
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
 
-      - name: Restore
-        run: dotnet restore Veto.slnx
-
-      - name: Build
-        run: dotnet build Veto.slnx -c Release --no-restore
+      # The test project references the docs site the specs drive, so it is built only here.
+      - name: Build tests
+        if: ${{ inputs.run_tests }}
+        run: dotnet build tests/Veto.Tests.E2E -c Release
 
       - name: Install Playwright browsers
         if: ${{ inputs.run_tests }}
@@ -87,13 +138,64 @@ jobs:
         run: dotnet test tests/Veto.Tests.E2E -c Release --no-build
 
       - name: Pack
-        run: dotnet pack Veto.slnx -c Release --no-build -o ${{ runner.temp }}/nupkgs
+        shell: pwsh
+        run: |
+          foreach ($package in Get-Content "$env:RUNNER_TEMP/release.json" | ConvertFrom-Json) {
+            dotnet pack $package.Project -c Release --no-build -o "$env:RUNNER_TEMP/nupkgs"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
 
       - name: Verify package contents
         shell: pwsh
-        run: ./tools/CheckPackageContainsStaticAssets.ps1 -PackageDirectory ${{ runner.temp }}/nupkgs
+        run: ./tools/CheckPackageContainsStaticAssets.ps1 -PackageDirectory ${{ runner.temp }}/nupkgs -Only "${{ steps.resolve.outputs.ids }}"
 
-      # Only the Veto and Veto.* packages go up, whatever else the solution happens to pack.
+      # A package released on its own still depends on other Veto packages, at whatever version
+      # their projects say. Each of those has to be on nuget.org already or go up in this run;
+      # otherwise the package would install for no one.
+      - name: Verify Veto dependencies are published
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $inRun = @{}
+          $packages = Get-ChildItem "$env:RUNNER_TEMP/nupkgs" -Filter *.nupkg
+
+          foreach ($package in $packages) {
+            $archive = [System.IO.Compression.ZipFile]::OpenRead($package.FullName)
+            try {
+              $entry = $archive.Entries | Where-Object { $_.FullName -like '*.nuspec' } | Select-Object -First 1
+              $reader = [System.IO.StreamReader]::new($entry.Open())
+              [xml] $nuspec = $reader.ReadToEnd()
+              $reader.Dispose()
+            } finally { $archive.Dispose() }
+
+            $metadata = $nuspec.package.metadata
+            $inRun["$($metadata.id)@$($metadata.version)"] = $true
+            $package | Add-Member -NotePropertyName Nuspec -NotePropertyValue $metadata
+          }
+
+          $missing = foreach ($package in $packages) {
+            foreach ($dependency in $package.Nuspec.dependencies.group.dependency) {
+              if ($dependency.id -notlike 'Veto*') { continue }
+
+              # A plain version in a nuspec is a minimum; that exact version is what must exist.
+              $version = $dependency.version.Trim('[', ']', '(', ')').Split(',')[0]
+              if ($inRun.ContainsKey("$($dependency.id)@$version")) { continue }
+
+              $published = try {
+                (Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/$($dependency.id.ToLowerInvariant())/index.json").versions
+              } catch { @() }
+
+              if ($published -notcontains $version) {
+                "$($package.Nuspec.id) $($package.Nuspec.version) needs $($dependency.id) $version, which is not on nuget.org - add $($dependency.id) to this release."
+              }
+            }
+          }
+
+          $missing = $missing | Select-Object -Unique
+          if ($missing) { $missing | ForEach-Object { "::error::$_" }; exit 1 }
+          "Every Veto dependency is published or in this release."
+
+      # Only the Veto and Veto.* packages go up, whatever else a project happens to pack.
       - name: Verify package ids
         shell: pwsh
         run: |
@@ -120,18 +222,23 @@ jobs:
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
 
-      - name: Tag and create GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: >
-          gh release create "v${{ steps.version.outputs.VERSION }}"
-          --target "${{ github.sha }}"
-          --title "v${{ steps.version.outputs.VERSION }}"
-          --generate-notes
-          ${{ runner.temp }}/nupkgs/*.nupkg
+      # One tag per package, since each has its own version: Veto.Gantt-v1.0.2.
+      - name: Tag released packages
+        shell: pwsh
+        run: |
+          $released = Get-Content "$env:RUNNER_TEMP/release.json" | ConvertFrom-Json
+          $tags = foreach ($package in $released) {
+            $tag = "$($package.Id)-v$($package.Version)"
+            git tag $tag $env:GITHUB_SHA
+            $tag
+          }
+          git push origin $tags
+
+          "### Released" >> $env:GITHUB_STEP_SUMMARY
+          $released | ForEach-Object { "- $($_.Id) $($_.Version)" } >> $env:GITHUB_STEP_SUMMARY
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
-          name: nupkgs-${{ steps.version.outputs.VERSION }}
+          name: nupkgs-${{ github.run_number }}
           path: ${{ runner.temp }}/nupkgs/*

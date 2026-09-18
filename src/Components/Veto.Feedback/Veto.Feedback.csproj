@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Feedback</PackageId>
+    <Version>1.0.1</Version>
     <Description>Spinner, Progress, Skeleton and LoadingOverlay components for Veto.</Description>
     <RootNamespace>Veto.Components.Feedback</RootNamespace>
   </PropertyGroup>

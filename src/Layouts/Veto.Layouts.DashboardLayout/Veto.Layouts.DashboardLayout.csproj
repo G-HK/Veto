@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layouts.DashboardLayout</PackageId>
+    <Version>1.0.1</Version>
     <Description>Ready-made dashboard page layout for Veto.</Description>
     <RootNamespace>Veto.Layouts.DashboardLayout</RootNamespace>
   </PropertyGroup>
