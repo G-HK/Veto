@@ -28,15 +28,14 @@
     pack produces 1.0.0 and only CI stamps a real version.
   -->
   <PropertyGroup>
-    <Authors>Veto</Authors>
-    <Company>Veto</Company>
-    <PackageTags>blazor;wasm;components;ui</PackageTags>
+    <Authors>G-HK</Authors>
+    <PackageTags>blazor;components;ui</PackageTags>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/G-HK/Veto</PackageProjectUrl>
     <RepositoryUrl>https://github.com/G-HK/Veto</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PublishRepositoryUrl>False</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

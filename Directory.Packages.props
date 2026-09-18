@@ -8,8 +8,6 @@
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="10.0.12" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.12" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.12" />
-    <!-- Test-only. Microsoft.Playwright.Xunit 1.62 targets xunit v2, so the runner is pinned to
-         xunit 2.x; xunit.runner.visualstudio 3.x is the last line that still supports it. -->
     <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.62.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
