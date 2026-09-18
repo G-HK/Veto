@@ -38,8 +38,26 @@ public class VetoMagicTextBoxTests(BlazorAppFixture app) : VetoPageTest(app)
             new() { Origin = App.BaseUrl });
     }
 
+    // The height eases over 320ms, so a reading taken straight after a toggle catches it mid-way.
+    // Two fields opened together sit on the same curve and read identical until the capped one
+    // stops, which is how ExpandedLines_caps_how_far_the_field_opens failed on CI. This waits
+    // for any running transition to finish, then for the height to hold still over a few frames
+    // - the uncapped field's inline height is set by script, so its transition can start late.
     private Task<double> HeightAsync(string testId) =>
-        TextArea(testId).EvaluateAsync<double>("el => el.getBoundingClientRect().height");
+        TextArea(testId).EvaluateAsync<double>("""
+            async el => {
+                const frame = () => new Promise(r => requestAnimationFrame(r));
+                let last = -1, still = 0;
+                for (let i = 0; i < 300 && still < 5; i++) {
+                    await frame();
+                    await Promise.all(el.getAnimations().map(a => a.finished.catch(() => {})));
+                    const height = el.getBoundingClientRect().height;
+                    still = height === last ? still + 1 : 0;
+                    last = height;
+                }
+                return last;
+            }
+            """);
 
     [Fact]
     public async Task A_value_that_overflows_gets_a_toggle()

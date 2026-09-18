@@ -12,8 +12,11 @@ name: release
 on:
   workflow_dispatch:
     inputs:
-      skip_tests:
-        description: Skip the E2E tests
+      # Off by default: the E2E suite is the expensive part of a release, and every commit on
+      # main has already been through it in the ci workflow. Tick it for a release that should
+      # re-prove itself anyway.
+      run_tests:
+        description: Run the E2E tests before publishing
         type: boolean
         default: false
 
@@ -77,11 +80,11 @@ jobs:
         run: dotnet build Veto.slnx -c Release --no-restore
 
       - name: Install Playwright browsers
-        if: ${{ !inputs.skip_tests }}
+        if: ${{ inputs.run_tests }}
         run: pwsh tests/Veto.Tests.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
       - name: Test
-        if: ${{ !inputs.skip_tests }}
+        if: ${{ inputs.run_tests }}
         run: dotnet test tests/Veto.Tests.E2E -c Release --no-build
 
       - name: Pack
