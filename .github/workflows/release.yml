@@ -1,18 +1,21 @@
 name: release
 
-# Releases happen from the Production branch only: merge main into Production (or run this
-# workflow by hand against Production) and every package ships at the <Version> set in
-# src/Directory.Build.props. The meta package pins its component dependencies to that same
-# version, so a consumer can never end up with a mismatched set.
+# Releases are started by hand only: Actions > release > Run workflow, with "Use workflow from"
+# set to Production. Every package ships at the <Version> set in src/Directory.Build.props. The
+# meta package pins its component dependencies to that same version, so a consumer can never
+# end up with a mismatched set.
 #
 # Three independent locks keep anyone but G-HK from publishing:
 #   1. the `if:` on the job below refuses any run not started by G-HK on Production;
-#   2. the `nuget` environment only deploys from Production and waits for G-HK's approval;
+#   2. the `nuget` environment only deploys from Production;
 #   3. the nuget.org Trusted Publishing policy only trusts this repo + this file + `nuget`.
 on:
-  push:
-    branches: [ Production ]
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: Skip the E2E tests
+        type: boolean
+        default: false
 
 # Two releases racing each other would both pass the "tag not taken" check below.
 concurrency:
@@ -74,9 +77,11 @@ jobs:
         run: dotnet build Veto.slnx -c Release --no-restore
 
       - name: Install Playwright browsers
+        if: ${{ !inputs.skip_tests }}
         run: pwsh tests/Veto.Tests.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
       - name: Test
+        if: ${{ !inputs.skip_tests }}
         run: dotnet test tests/Veto.Tests.E2E -c Release --no-build
 
       - name: Pack
