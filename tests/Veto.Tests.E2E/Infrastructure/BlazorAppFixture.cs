@@ -77,7 +77,12 @@ public sealed class BlazorAppFixture : IAsyncLifetime
                 "--configuration", "Release",
                 "--output", publishDir,
                 "--verbosity", "quiet",
-                "--nologo"
+                "--nologo",
+                // MSBuild's reusable worker nodes and the compiler server outlive the publish and
+                // inherit its output pipes, so ReadToEnd below never sees end-of-stream and the
+                // whole test run hangs in fixture setup. Neither may outlive this process.
+                "-nodeReuse:false",
+                "-p:UseSharedCompilation=false"
             }
         }) ?? throw new InvalidOperationException("Could not start `dotnet publish`.");
 

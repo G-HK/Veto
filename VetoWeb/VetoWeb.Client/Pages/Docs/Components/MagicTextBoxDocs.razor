@@ -90,9 +90,9 @@
 
             <VetoMagicTextBox TValue="string"
                               TestId="lines-capped"
-                              Label="Opens to six lines"
+                              Label="Opens to four lines"
                               CollapsedLines="2"
-                              ExpandedLines="6"
+                              ExpandedLines="4"
                               @bind-Value="_long" />
         </VetoStack>
     </DemoBlock>
@@ -210,9 +210,9 @@
         @* Two lines at rest, opening to fit the whole value. *@
         <VetoMagicTextBox TValue="string" @bind-Value="_text" CollapsedLines="2" />
 
-        @* Two lines at rest, opening no further than six. *@
+        @* Two lines at rest, opening no further than four. *@
         <VetoMagicTextBox TValue="string" @bind-Value="_text"
-                          CollapsedLines="2" ExpandedLines="6" />
+                          CollapsedLines="2" ExpandedLines="4" />
         """;
 
     private const string BoundCode = """
