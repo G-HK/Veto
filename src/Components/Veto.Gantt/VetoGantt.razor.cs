@@ -32,8 +32,18 @@ namespace Veto.Components.Gantt;
 /// </example>
 public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 {
+    // Folding is remembered both ways, because the two layouts start from opposite defaults:
+    // rows open, inline folded. Whichever the layout, an explicit choice is kept in both.
     private readonly HashSet<string> _collapsed = [];
+    private readonly HashSet<string> _expanded = [];
     private readonly HashSet<string> _hiddenCategories = [];
+    private readonly HashSet<string> _activeFilters = [];
+
+    // The last values the parent passed for the two bindable filter sets. A parent re-render
+    // hands the same values back; only a change is applied, so a click the parent has not bound
+    // is not undone by an unrelated render.
+    private IReadOnlyCollection<string>? _hiddenCategoriesParameter;
+    private IReadOnlyCollection<string>? _activeFiltersParameter;
 
     private readonly Dictionary<string, (DateOnly Start, DateOnly End)> _overrides = [];
 
@@ -144,6 +154,57 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public bool ShowCategoryFilter { get; set; } = true;
 
+    /// <summary>
+    /// The categories switched off. Supports <c>@bind-HiddenCategories</c>, so the page can set
+    /// the category filter itself and hear about every click on it. Null leaves it to the chart.
+    /// </summary>
+    [Parameter]
+    public IReadOnlyCollection<string>? HiddenCategories { get; set; }
+
+    /// <summary>Raised when a category is switched on or off.</summary>
+    [Parameter]
+    public EventCallback<IReadOnlyCollection<string>> HiddenCategoriesChanged { get; set; }
+
+    /// <summary>
+    /// Filters of the app's own, each a toggle in the toolbar. While one is on, only the rows its
+    /// predicate keeps are listed; several on at once must all keep a row.
+    /// </summary>
+    [Parameter]
+    public IReadOnlyList<VetoGanttFilter> Filters { get; set; } = [];
+
+    /// <summary>The ids of the <see cref="Filters"/> that are on. Supports <c>@bind-ActiveFilters</c>.</summary>
+    [Parameter]
+    public IReadOnlyCollection<string>? ActiveFilters { get; set; }
+
+    /// <summary>Raised when one of the <see cref="Filters"/> is switched on or off.</summary>
+    [Parameter]
+    public EventCallback<IReadOnlyCollection<string>> ActiveFiltersChanged { get; set; }
+
+    /// <summary>Whether the toolbar shows a toggle for each of the <see cref="Filters"/>.</summary>
+    [Parameter]
+    public bool ShowFilters { get; set; } = true;
+
+    /// <summary>
+    /// A filter with no toggle: rows it rejects are never listed. For a rule the page applies on
+    /// its own terms - a permission, a selected team - rather than one the reader switches.
+    /// </summary>
+    [Parameter]
+    public Func<VetoGanttItem, bool>? ItemFilter { get; set; }
+
+    /// <summary>
+    /// Raised after any filter changes - the text, a category, one of the <see cref="Filters"/> -
+    /// with all of them and the rows they leave, so a page can react to one event rather than three.
+    /// </summary>
+    [Parameter]
+    public EventCallback<VetoGanttFilterState> OnFilterChanged { get; set; }
+
+    /// <summary>
+    /// The zoom levels the scale picker offers, in order. <c>[VetoGanttScale.Day]</c> offers day
+    /// alone - and with one option there is nothing to pick, so the picker is not shown at all.
+    /// </summary>
+    [Parameter]
+    public IReadOnlyList<VetoGanttScale> Scales { get; set; } = [VetoGanttScale.Hour, VetoGanttScale.Day, VetoGanttScale.Week, VetoGanttScale.Month];
+
     /// <summary>Whether the toolbar includes the Day / Week / Month picker.</summary>
     [Parameter]
     public bool ShowScalePicker { get; set; } = true;
@@ -155,6 +216,13 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>Whether the toolbar includes the export menu.</summary>
     [Parameter]
     public bool Exportable { get; set; } = true;
+
+    /// <summary>
+    /// The formats the export menu offers, in order. Leave one out to disable it; an empty list
+    /// hides the menu, as <see cref="Exportable"/> = false does.
+    /// </summary>
+    [Parameter]
+    public IReadOnlyList<VetoGanttExportFormat> ExportFormats { get; set; } = [VetoGanttExportFormat.Csv, VetoGanttExportFormat.Json];
 
     /// <summary>
     /// What opens the export menu. Hover by default: export is the toolbar's least-used
@@ -245,6 +313,78 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     public RenderFragment<VetoGanttItem>? TooltipTemplate { get; set; }
 
     /// <summary>
+    /// What span the chart shows. <see cref="VetoGanttView.Today"/> by default: today alone,
+    /// fitted to the width, listing only the rows with work today. Supports <c>@bind-View</c>.
+    /// An explicit <see cref="Start"/> and <see cref="End"/> set the axis in either view.
+    /// </summary>
+    [Parameter]
+    public VetoGanttView View { get; set; } = VetoGanttView.Today;
+
+    /// <summary>Raised when the view changes.</summary>
+    [Parameter]
+    public EventCallback<VetoGanttView> ViewChanged { get; set; }
+
+    /// <summary>Whether the toolbar includes the Today / Schedule switch.</summary>
+    [Parameter]
+    public bool ShowViewPicker { get; set; } = true;
+
+    /// <summary>
+    /// Stretches a short axis across the full width of the chart, rather than drawing it at the
+    /// scale's own density and leaving the rest empty. A range longer than the chart is never
+    /// squeezed - it keeps its density and scrolls.
+    /// </summary>
+    [Parameter]
+    public bool FitToWidth { get; set; } = true;
+
+    /// <summary>
+    /// How a parent's sub-items are laid out: a row each (<see cref="VetoGanttSubItemLayout.Rows"/>),
+    /// or side by side on the parent's own line (<see cref="VetoGanttSubItemLayout.Inline"/>) -
+    /// many jobs on one row.
+    /// </summary>
+    [Parameter]
+    public VetoGanttSubItemLayout SubItemLayout { get; set; } = VetoGanttSubItemLayout.Rows;
+
+    /// <summary>
+    /// Whether parents can be folded and unfolded. Off, the fold arrows go: rows stay open, and
+    /// an inline parent keeps its sub-items on its own line.
+    /// </summary>
+    [Parameter]
+    public bool Collapsible { get; set; } = true;
+
+    /// <summary>
+    /// Trims the start of the axis to a time of day - with <see cref="EndTime"/>, a window such
+    /// as 14:00 to 20:00, which is then stretched across the chart. Null starts at midnight.
+    /// </summary>
+    [Parameter]
+    public TimeOnly? StartTime { get; set; }
+
+    /// <summary>Trims the end of the axis to a time of day. Null runs to the end of the last day.</summary>
+    [Parameter]
+    public TimeOnly? EndTime { get; set; }
+
+    /// <summary>
+    /// The scale the today view is drawn at. Hours by default: one day at a day scale would be a
+    /// single column saying nothing about when in the day anything happens.
+    /// </summary>
+    [Parameter]
+    public VetoGanttScale TodayScale { get; set; } = VetoGanttScale.Hour;
+
+    /// <summary>
+    /// The time of day treated as now, for the marker at the hour scale. Defaults to the clock;
+    /// set it, with <see cref="TodayOverride"/>, to keep a screenshot or a test stable.
+    /// </summary>
+    [Parameter]
+    public TimeOnly? TimeOverride { get; set; }
+
+    /// <summary>
+    /// The narrowest an hour is drawn, in pixels. Fitting a whole day into a narrow chart stops
+    /// here: past it, the hours keep a width their "14:00" labels fit in, and the timeline
+    /// scrolls instead.
+    /// </summary>
+    [Parameter]
+    public double MinHourWidth { get; set; } = 44;
+
+    /// <summary>
     /// Shows a placeholder chart instead of the rows, for the wait before any data has arrived.
     /// </summary>
     /// <remarks>
@@ -325,6 +465,20 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>The day treated as today.</summary>
     private DateOnly Today => TodayOverride ?? DateOnly.FromDateTime(DateTime.Now);
 
+    /// <summary>The moment treated as now: today, at the overridden time or the clock's.</summary>
+    private DateTime Now => Today.ToDateTime(TimeOverride ?? TimeOnly.FromDateTime(DateTime.Now));
+
+    /// <summary>The scale actually drawn: the today view has its own, so the picker's choice survives it.</summary>
+    private VetoGanttScale EffectiveScale => View == VetoGanttView.Today ? TodayScale : Scale;
+
+    /// <summary>
+    /// Where the today marker goes: at now on the hour scale, where the time of day is visible,
+    /// and at the start of today on the coarser ones. Null when that is off the axis.
+    /// </summary>
+    private double? TodayMarkerOffset => EffectiveScale == VetoGanttScale.Hour
+        ? (Timeline.Contains(Now) ? Timeline.OffsetAt(Now) : null)
+        : (Timeline.Contains(Today) ? Math.Max(0, Timeline.OffsetOf(Today)) : null);
+
     private VetoGanttTimeline Timeline { get; set; } = default!;
 
     private IReadOnlyList<Row> Rows { get; set; } = [];
@@ -335,20 +489,43 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>Every category present in the items, in first-seen order, with its colour.</summary>
     private IReadOnlyList<Category> Categories { get; set; } = [];
 
-    private static readonly VetoGanttScale[] ScaleOptions =
-        [VetoGanttScale.Day, VetoGanttScale.Week, VetoGanttScale.Month];
+    private static readonly VetoGanttView[] ViewOptions = [VetoGanttView.Today, VetoGanttView.Schedule];
+
 
     /// <inheritdoc />
     protected override void OnParametersSet ()
     {
         base.OnParametersSet();
+
+        ApplyBoundSet(HiddenCategories, ref _hiddenCategoriesParameter, _hiddenCategories);
+        ApplyBoundSet(ActiveFilters, ref _activeFiltersParameter, _activeFilters);
+
         Rebuild();
+    }
+
+    /// <summary>Takes a bound set from the parent when it changed since the last one it passed.</summary>
+    private static void ApplyBoundSet ( IReadOnlyCollection<string>? incoming, ref IReadOnlyCollection<string>? last, HashSet<string> into )
+    {
+        if (incoming is null)
+        {
+            last = null;
+            return;
+        }
+
+        if (last is not null && last.Count == incoming.Count && last.All(incoming.Contains))
+        {
+            return;
+        }
+
+        last = incoming.ToArray();
+        into.Clear();
+        into.UnionWith(incoming);
     }
 
     /// <inheritdoc />
     protected override CssBuilder StartCssClass () =>
         base.StartCssClass()
-            .AddClass(Modifier(Scale.ToModifier()));
+            .AddClass(Modifier(EffectiveScale.ToModifier()));
 
     /// <inheritdoc />
     protected override StyleBuilder StartStyle () =>
@@ -396,7 +573,15 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         var visible = Filter().Select(Resolve).ToList();
 
-        Timeline = VetoGanttTimeline.Create(visible, Scale, Start, End, Today);
+        var previous = Timeline?.PixelsPerDay;
+        Timeline = VetoGanttTimeline.Create(visible, EffectiveScale, Start, End, Today, View,
+            FitToWidth ? _viewportWidth : 0, StartTime, EndTime, MinHourWidth);
+
+        // The drag handler converts pixels to days, so a new density needs it re-attached.
+        if (previous is not null && previous != Timeline.PixelsPerDay)
+        {
+            _dragAttached = false;
+        }
         Rows = Flatten(visible);
         Links = ShowDependencies ? BuildLinks() : [];
     }
@@ -411,35 +596,34 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// </remarks>
     private List<Link> BuildLinks ()
     {
-        Dictionary<string, int> index = new();
+        // An inline sub-item sits on its parent's line, so arrows to and from it start and end there.
+        Dictionary<string, (VetoGanttItem Item, int Row)> index = new();
 
         for (var i = 0; i < Rows.Count; i++)
         {
-            index[Rows[i].Item.Id] = i;
+            index[Rows[i].Item.Id] = (Rows[i].Item, i);
+
+            foreach (var inline in Rows[i].Inline)
+            {
+                index[inline.Id] = (inline, i);
+            }
         }
 
         var links = new List<Link>();
 
-        foreach (var row in Rows)
+        foreach (var (item, toRow) in index.Values)
         {
-            foreach (var predecessorId in row.Item.DependsOn)
+            foreach (var predecessorId in item.DependsOn)
             {
-                if (predecessorId == row.Item.Id
-                    || !index.TryGetValue(predecessorId, out var fromRow)
-                    || !index.TryGetValue(row.Item.Id, out var toRow))
+                if (predecessorId == item.Id || !index.TryGetValue(predecessorId, out var from))
                 {
                     continue;
                 }
 
-                var predecessor = Rows[fromRow].Item;
+                var (fromLeft, fromWidth) = Timeline.Place(from.Item.StartsAt, from.Item.EndsAt);
+                var (toLeft, _) = Timeline.Place(item.StartsAt, item.EndsAt);
 
-                links.Add(new Link(
-                    predecessorId,
-                    row.Item.Id,
-                    Timeline.OffsetOf(predecessor.Start) + Timeline.WidthOf(predecessor.Start, predecessor.End),
-                    fromRow,
-                    Timeline.OffsetOf(row.Item.Start),
-                    toRow));
+                links.Add(new Link(predecessorId, item.Id, fromLeft + fromWidth, from.Row, toLeft, toRow));
             }
         }
 
@@ -485,6 +669,17 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private bool IsLinkActive ( Link link )
         => SelectedId is not null && (link.FromId == SelectedId || link.ToId == SelectedId);
 
+    /// <summary>The span the today view covers: today, or the explicit range, trimmed to the time window.</summary>
+    private (DateTime From, DateTime To) ViewWindow ()
+    {
+        var from = (Start ?? Today).ToDateTime(StartTime ?? TimeOnly.MinValue);
+        var to = EndTime is { } until
+            ? (End ?? Today).ToDateTime(until)
+            : (End ?? Today).AddDays(1).ToDateTime(TimeOnly.MinValue);
+
+        return (from, to);
+    }
+
     /// <summary>
     /// Applies the text and category filters, keeping any ancestor of a matching row so a task
     /// never appears detached from the project it belongs to.
@@ -499,6 +694,33 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
                 && !item.Name.Contains(Search, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
+            }
+
+            if (ItemFilter is not null && !ItemFilter(item))
+            {
+                return false;
+            }
+
+            foreach (var filter in Filters)
+            {
+                if (_activeFilters.Contains(filter.Id) && !filter.Predicate(item))
+                {
+                    return false;
+                }
+            }
+
+            if (View == VetoGanttView.Today)
+            {
+                // Today's work only: a row that finished yesterday or starts tomorrow is not on
+                // today's list, however close it is - and with a time window, a job outside the
+                // window is not either.
+                var dates = Resolve(item);
+                var (from, to) = ViewWindow();
+
+                if (dates.StartsAt >= to || dates.EndsAt <= from)
+                {
+                    return false;
+                }
             }
 
             return item.Category is null || !_hiddenCategories.Contains(item.Category);
@@ -544,9 +766,9 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         var ordered = SortBy switch
         {
             VetoGanttSort.Name => items.OrderBy(i => i.Name, StringComparer.CurrentCultureIgnoreCase),
-            VetoGanttSort.Start => items.OrderBy(i => i.Start).ThenBy(i => i.Name),
-            VetoGanttSort.End => items.OrderBy(i => i.End).ThenBy(i => i.Name),
-            _ => items.OrderBy(i => i.DurationDays).ThenBy(i => i.Name)
+            VetoGanttSort.Start => items.OrderBy(i => i.StartsAt).ThenBy(i => i.Name),
+            VetoGanttSort.End => items.OrderBy(i => i.EndsAt).ThenBy(i => i.Name),
+            _ => items.OrderBy(i => i.Duration).ThenBy(i => i.Name)
         };
 
         return SortDescending ? ordered.Reverse() : ordered;
@@ -562,12 +784,37 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         var rows = new List<Row>();
 
+        // Every descendant that is itself a piece of work rather than a group of them, in order.
+        void Leaves ( string id, List<VetoGanttItem> into )
+        {
+            foreach (var child in children[id])
+            {
+                if (children.ContainsKey(child.Id))
+                {
+                    Leaves(child.Id, into);
+                }
+                else
+                {
+                    into.Add(child);
+                }
+            }
+        }
+
         void Add ( VetoGanttItem item, int depth )
         {
             var hasChildren = children.ContainsKey(item.Id);
-            rows.Add(new Row(item, depth, hasChildren));
+            var expanded = hasChildren && IsExpanded(item.Id);
 
-            if (!hasChildren || !IsExpanded(item.Id))
+            List<VetoGanttItem> inline = [];
+
+            if (hasChildren && !expanded && SubItemLayout == VetoGanttSubItemLayout.Inline)
+            {
+                Leaves(item.Id, inline);
+            }
+
+            rows.Add(new Row(item, depth, hasChildren, inline));
+
+            if (!expanded)
             {
                 return;
             }
@@ -588,7 +835,23 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         return rows;
     }
 
-    private bool IsExpanded ( string id ) => !_collapsed.Contains(id);
+    private bool IsExpanded ( string id ) => SubItemLayout == VetoGanttSubItemLayout.Inline
+        ? Collapsible && _expanded.Contains(id)
+        : !Collapsible || !_collapsed.Contains(id);
+
+    private void SetExpanded ( string id, bool expanded )
+    {
+        if (expanded)
+        {
+            _collapsed.Remove(id);
+            _expanded.Add(id);
+        }
+        else
+        {
+            _expanded.Remove(id);
+            _collapsed.Add(id);
+        }
+    }
 
     private bool IsSelected ( VetoGanttItem item ) => SelectedId == item.Id;
 
@@ -600,30 +863,116 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
     private void ToggleGroup ( string id )
     {
-        if (!_collapsed.Remove(id))
-        {
-            _collapsed.Add(id);
-        }
-
+        SetExpanded(id, !IsExpanded(id));
         Rebuild();
     }
 
-    private async Task ToggleCategoryAsync ( string category )
-    {
-        if (!_hiddenCategories.Remove(category))
-        {
-            _hiddenCategories.Add(category);
-        }
-
-        Rebuild();
-        await Task.CompletedTask;
-    }
+    private Task ToggleCategoryAsync ( string category ) => SetCategoryVisibleAsync(category, !IsCategoryOn(category));
 
     private async Task OnSearchChangedAsync ( string? value )
     {
         Search = value;
         Rebuild();
         await SearchChanged.InvokeAsync(value);
+        await RaiseFilterChangedAsync();
+    }
+
+    private bool IsFilterOn ( string id ) => _activeFilters.Contains(id);
+
+    /// <summary>Tells the page about a filter change: the bound value that moved, then the whole picture.</summary>
+    private Task RaiseFilterChangedAsync ()
+        => OnFilterChanged.InvokeAsync(new VetoGanttFilterState(
+            Search,
+            _hiddenCategories.ToArray(),
+            _activeFilters.ToArray(),
+            Filter()));
+
+    /// <summary>Sets the text filter, as typing in the toolbar does.</summary>
+    public async Task SetSearchAsync ( string? text )
+    {
+        await OnSearchChangedAsync(text);
+        StateHasChanged();
+    }
+
+    /// <summary>Switches a category on or off, as its toolbar chip does.</summary>
+    public async Task SetCategoryVisibleAsync ( string category, bool visible )
+    {
+        var changed = visible ? _hiddenCategories.Remove(category) : _hiddenCategories.Add(category);
+
+        if (!changed)
+        {
+            return;
+        }
+
+        _hiddenCategoriesParameter = _hiddenCategories.ToArray();
+        Rebuild();
+        StateHasChanged();
+
+        await HiddenCategoriesChanged.InvokeAsync(_hiddenCategoriesParameter);
+        await RaiseFilterChangedAsync();
+    }
+
+    /// <summary>Switches one of the <see cref="Filters"/> on or off, as its toolbar toggle does.</summary>
+    public async Task SetFilterActiveAsync ( string id, bool active )
+    {
+        var changed = active ? _activeFilters.Add(id) : _activeFilters.Remove(id);
+
+        if (!changed)
+        {
+            return;
+        }
+
+        _activeFiltersParameter = _activeFilters.ToArray();
+        Rebuild();
+        StateHasChanged();
+
+        await ActiveFiltersChanged.InvokeAsync(_activeFiltersParameter);
+        await RaiseFilterChangedAsync();
+    }
+
+    private Task ToggleFilterAsync ( string id ) => SetFilterActiveAsync(id, !IsFilterOn(id));
+
+    /// <summary>
+    /// Clears every filter the reader controls - the text, the categories and the app's own
+    /// toggles - raising each changed binding once and <see cref="OnFilterChanged"/> once.
+    /// <see cref="ItemFilter"/> stays: the reader never set it.
+    /// </summary>
+    public async Task ClearFiltersAsync ()
+    {
+        var hadSearch = !string.IsNullOrEmpty(Search);
+        var hadCategories = _hiddenCategories.Count > 0;
+        var hadFilters = _activeFilters.Count > 0;
+
+        if (!hadSearch && !hadCategories && !hadFilters)
+        {
+            return;
+        }
+
+        Search = null;
+        _hiddenCategories.Clear();
+        _activeFilters.Clear();
+        _hiddenCategoriesParameter = [];
+        _activeFiltersParameter = [];
+
+        Rebuild();
+        StateHasChanged();
+
+        if (hadSearch)
+        {
+            await SearchChanged.InvokeAsync(null);
+        }
+
+        if (hadCategories)
+        {
+            await HiddenCategoriesChanged.InvokeAsync([]);
+        }
+
+        if (hadFilters)
+        {
+            await ActiveFiltersChanged.InvokeAsync([]);
+        }
+
+        await RaiseFilterChangedAsync();
     }
 
     /// <summary>Changes the zoom level and scrolls back to today, as the scale picker does.</summary>
@@ -707,14 +1056,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     {
         foreach (var id in ids)
         {
-            if (collapsed)
-            {
-                _collapsed.Add(id);
-            }
-            else
-            {
-                _collapsed.Remove(id);
-            }
+            SetExpanded(id, !collapsed);
         }
 
         Rebuild();
@@ -742,25 +1084,53 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
     private string BarStyle ( VetoGanttItem item )
     {
-        var offset = Timeline.OffsetOf(item.Start);
+        var (offset, width) = Timeline.Place(item.StartsAt, item.EndsAt);
         var color = item.Color ?? BarColor;
 
         if (item.IsMilestone)
         {
+            offset = Timeline.OffsetAt(item.StartsAt);
+
             return string.Create(CultureInfo.InvariantCulture,
                 $"left: {offset:0.##}px; --veto-gantt-item-color: {color}");
         }
-
-        var width = Timeline.WidthOf(item.Start, item.End);
 
         return string.Create(CultureInfo.InvariantCulture,
             $"left: {offset:0.##}px; width: {width:0.##}px; --veto-gantt-item-color: {color}");
     }
 
     private string FormatRange ( VetoGanttItem item )
-        => item.IsMilestone || item.Start == item.End
-            ? item.Start.ToString("d MMM")
-            : $"{item.Start:d MMM} – {item.End:d MMM}";
+    {
+        if (!item.HasTimes)
+        {
+            return item.IsMilestone || item.Start == item.End
+                ? item.Start.ToString("d MMM")
+                : $"{item.Start:d MMM} – {item.End:d MMM}";
+        }
+
+        var from = item.StartsAt;
+        var to = item.EndsAt;
+        var until = to.TimeOfDay == TimeSpan.Zero ? "24:00" : to.ToString("HH:mm");
+
+        // On the today view every row is today's, so the day would only crowd the times out.
+        var withinToday = from.Date == Today.ToDateTime(TimeOnly.MinValue)
+            && (to.Date == from.Date || (to.TimeOfDay == TimeSpan.Zero && to.Date == from.Date.AddDays(1)));
+
+        if (View == VetoGanttView.Today && withinToday)
+        {
+            return item.IsMilestone ? $"{from:HH:mm}" : $"{from:HH:mm}–{until}";
+        }
+
+        if (item.IsMilestone)
+        {
+            return $"{from:d MMM HH:mm}";
+        }
+
+        // A job inside one day names the day once; one that runs overnight names both.
+        return from.Date == to.Date || (to.TimeOfDay == TimeSpan.Zero && to.Date == from.Date.AddDays(1))
+            ? $"{from:d MMM} {from:HH:mm}–{until}"
+            : $"{from:d MMM HH:mm} – {to:d MMM HH:mm}";
+    }
 
     /// <summary>What goes in a bar's native <c>title</c>: nothing when a template or no tooltip is wanted.</summary>
     private string? NativeTooltipFor ( VetoGanttItem item )
@@ -808,8 +1178,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         StateHasChanged();
     }
 
-    /// <summary>The row the templated tooltip belongs to, and where that row sits.</summary>
-    private (Row Row, int Index)? HoveredRow
+    /// <summary>The item the templated tooltip belongs to, and the row it is drawn on.</summary>
+    private (VetoGanttItem Item, int Index)? Hovered
     {
         get
         {
@@ -822,7 +1192,12 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             {
                 if (Rows[i].Item.Id == _hoveredId)
                 {
-                    return (Rows[i], i);
+                    return (Rows[i].Item, i);
+                }
+
+                if (Rows[i].Inline.FirstOrDefault(item => item.Id == _hoveredId) is { } inline)
+                {
+                    return (inline, i);
                 }
             }
 
@@ -836,7 +1211,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// </summary>
     private string TooltipStyle ( VetoGanttItem item, int index )
     {
-        var left = Timeline.OffsetOf(item.Start);
+        var (left, _) = Timeline.Place(item.StartsAt, item.EndsAt);
         var above = index >= Rows.Count / 2 && index > 0;
 
         return above
@@ -875,13 +1250,76 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             }
         }
 
+        await ObserveWidthAsync();
         await SyncDragHandlesAsync();
+    }
+
+    // ------------------------------------------------------------------ Fitting the width
+
+    private double _viewportWidth;
+    private string? _observedScrollerId;
+
+    /// <summary>
+    /// Starts watching the timeline's width, so a short axis can be stretched to fill it. The
+    /// scroller is a new element after a loading placeholder, so it is re-observed whenever it
+    /// changes.
+    /// </summary>
+    private async Task ObserveWidthAsync ()
+    {
+        if (!FitToWidth || _scroller.Id is null || _scroller.Id == _observedScrollerId)
+        {
+            return;
+        }
+
+        _observedScrollerId = _scroller.Id;
+        _selfRef ??= DotNetObjectReference.Create(this);
+
+        await InvokeModuleAsync("observeWidth", _scroller, _selfRef);
+    }
+
+    /// <summary>Called from the page when the timeline's visible width changes.</summary>
+    [JSInvokable]
+    public Task OnViewportResized ( double width )
+    {
+        // Sub-pixel jitter while a layout settles would otherwise re-render the whole chart.
+        if (Math.Abs(width - _viewportWidth) < 1)
+        {
+            return Task.CompletedTask;
+        }
+
+        _viewportWidth = width;
+
+        return InvokeAsync(() =>
+        {
+            Rebuild();
+            StateHasChanged();
+        });
+    }
+
+    /// <summary>Switches between today's work and the whole schedule, as the toolbar switch does.</summary>
+    public async Task SetViewAsync ( VetoGanttView view )
+    {
+        if (View == view)
+        {
+            return;
+        }
+
+        View = view;
+        Rebuild();
+        StateHasChanged();
+
+        await ViewChanged.InvokeAsync(view);
+
+        if (view == VetoGanttView.Schedule)
+        {
+            await ScrollToTodayAsync();
+        }
     }
 
     /// <summary>Brings today into view, or the start of the axis when today is outside it.</summary>
     public async Task ScrollToTodayAsync ()
     {
-        var offset = Timeline.Contains(Today) ? Timeline.OffsetOf(Today) : 0;
+        var offset = TodayMarkerOffset ?? 0;
         await InvokeModuleAsync("scrollTo", _scroller, offset);
     }
 
@@ -941,7 +1379,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     internal static string ToCsv ( IReadOnlyList<VetoGanttItem> items )
     {
         var csv = new StringBuilder();
-        csv.AppendLine("Id,Name,Parent,Start,End,Days,Category,Progress,Milestone");
+        csv.AppendLine("Id,Name,Parent,Start,End,Days,Category,Progress,Milestone,StartTime,EndTime");
 
         foreach (var item in items)
         {
@@ -953,7 +1391,9 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
                .Append(item.DurationDays.ToString(CultureInfo.InvariantCulture)).Append(',')
                .Append(Escape(item.Category)).Append(',')
                .Append(item.Progress?.ToString("0.##", CultureInfo.InvariantCulture) ?? string.Empty).Append(',')
-               .Append(item.IsMilestone ? "true" : "false")
+               .Append(item.IsMilestone ? "true" : "false").Append(',')
+               .Append(item.StartTime?.ToString("HH:mm", CultureInfo.InvariantCulture) ?? string.Empty).Append(',')
+               .Append(item.EndTime?.ToString("HH:mm", CultureInfo.InvariantCulture) ?? string.Empty)
                .AppendLine();
         }
 
@@ -973,7 +1413,9 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
                 Days = i.DurationDays,
                 i.Category,
                 i.Progress,
-                Milestone = i.IsMilestone
+                Milestone = i.IsMilestone,
+                StartTime = i.StartTime?.ToString("HH:mm", CultureInfo.InvariantCulture),
+                EndTime = i.EndTime?.ToString("HH:mm", CultureInfo.InvariantCulture)
             }),
             new JsonSerializerOptions { WriteIndented = true });
 
@@ -1015,6 +1457,11 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <inheritdoc />
     public async ValueTask DisposeAsync ()
     {
+        if (_observedScrollerId is not null)
+        {
+            await InvokeModuleAsync("unobserveWidth", _scroller);
+        }
+
         _selfRef?.Dispose();
 
         foreach (var module in new[] { _dragModule, _storeModule })
@@ -1045,7 +1492,11 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         }
     }
 
-    private sealed record Row ( VetoGanttItem Item, int Depth, bool HasChildren );
+    /// <summary>
+    /// One line of the chart. <c>Inline</c> holds the sub-items drawn on this row's line instead
+    /// of on rows of their own - empty unless the row is a folded parent in the inline layout.
+    /// </summary>
+    private sealed record Row ( VetoGanttItem Item, int Depth, bool HasChildren, IReadOnlyList<VetoGanttItem> Inline );
 
     /// <summary>A category and the colour the rows in it are drawn with.</summary>
     private sealed record Category ( string Name, string Color );
@@ -1159,7 +1610,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             return;
         }
 
-        var step = Scale.SnapDays() * (args.Key == "ArrowRight" ? 1 : -1);
+        var step = EffectiveScale.SnapDays() * (args.Key == "ArrowRight" ? 1 : -1);
         var edit = args.ShiftKey && Resizable ? VetoGanttEdit.EndChanged : VetoGanttEdit.Moved;
 
         await ApplyEditAsync(item.Id, edit, step);
@@ -1251,7 +1702,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// Whether a row can be dragged. A summary row cannot: its dates are the span of its
     /// children, so moving it would say something the children do not agree with.
     /// </summary>
-    private bool IsEditable ( Row row ) => Editable && !row.HasChildren && !row.Item.IsMilestone;
+    private bool IsEditable ( VetoGanttItem item, bool isSummary ) => Editable && !isSummary && !item.IsMilestone;
 
     /// <summary>
     /// Attaches the delegated drag handler to the grid. Re-attaching updates the measurements,
@@ -1272,7 +1723,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             await _dragModule.InvokeVoidAsync("attach", _grid, _selfRef, new
             {
                 pixelsPerDay = Timeline.PixelsPerDay,
-                snapDays = Scale.SnapDays(),
+                snapDays = EffectiveScale.SnapDays(),
                 resizable = Resizable
             });
 

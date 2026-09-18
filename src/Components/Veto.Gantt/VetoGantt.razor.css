@@ -563,3 +563,26 @@
        the card would close it and open it again in a loop. */
     pointer-events: none;
 }
+
+/* Inline sub-items */
+
+/*
+ * Jobs that share a line often sit end to end, so each gets a hairline of the surface colour
+ * around it: two adjacent bars of the same category would otherwise read as one long bar.
+ */
+.veto-gantt__bar--inline {
+    box-shadow: 0 0 0 1px var(--veto-color-surface);
+}
+
+/* The row is highlighted for a selected inline job too, so the job itself is picked out. */
+.veto-gantt__bar--selected {
+    box-shadow: 0 0 0 1px var(--veto-color-surface), 0 0 0 3px var(--veto-color-primary);
+    z-index: 3;
+}
+
+/* An app filter with an icon lines the icon up with its label, as a category chip does its swatch. */
+.veto-gantt__chip--filter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--veto-space-1);
+}

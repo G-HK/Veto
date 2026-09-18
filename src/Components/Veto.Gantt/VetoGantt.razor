@@ -41,10 +41,44 @@
                     </div>
                 }
 
-                @if (ShowScalePicker)
+                @if (ShowViewPicker)
+                {
+                    <div class="veto-gantt__scales" role="group" aria-label="View">
+                        @foreach (var option in ViewOptions)
+                        {
+                            <button type="button" class="veto-gantt__chip @(View == option ? "veto-gantt__chip--on" : null)"
+                                    data-testid="@Sub($"view-{option.ToString().ToLowerInvariant()}")" aria-pressed="@(View == option ? "true" : "false")"
+                                    @onclick="() => SetViewAsync(option)">
+                                @option
+                            </button>
+                        }
+                    </div>
+                }
+
+                @if (ShowFilters && Filters.Count > 0)
+                {
+                    <div class="veto-gantt__filters" role="group" aria-label="Filters">
+                        @foreach (var filter in Filters)
+                        {
+                            <button type="button" class="veto-gantt__chip veto-gantt__chip--filter @(IsFilterOn(filter.Id) ? "veto-gantt__chip--on" : null)"
+                                    title="@filter.Tooltip" data-testid="@Sub($"filter-{Slug(filter.Id)}")"
+                                    aria-pressed="@(IsFilterOn(filter.Id) ? "true" : "false")"
+                                    @onclick="() => ToggleFilterAsync(filter.Id)">
+                                @if (filter.Icon is not null)
+                                {
+                                    <VetoIcon Icon="@filter.Icon" />
+                                }
+                                @filter.Label
+                            </button>
+                        }
+                    </div>
+                }
+
+                @* One option is no choice, so a chart held to a single scale shows no picker. *@
+                @if (ShowScalePicker && View == VetoGanttView.Schedule && Scales.Count > 1)
                 {
                     <div class="veto-gantt__scales" role="group" aria-label="Time scale">
-                        @foreach (var option in ScaleOptions)
+                        @foreach (var option in Scales)
                         {
                             <button type="button" class="veto-gantt__chip @(Scale == option ? "veto-gantt__chip--on" : null)"
                                     data-testid="@Sub($"scale-{option.ToModifier()}")" aria-pressed="@(Scale == option ? "true" : "false")"
@@ -76,7 +110,7 @@
                         </div>
                     }
 
-                    @if (Exportable)
+                    @if (Exportable && ExportFormats.Count > 0)
                     {
                         @* One control instead of a button per format: the toolbar is already full
                            of filters and scales, and export is the thing a reader wants least
@@ -87,10 +121,19 @@
                                   OpenOn="ExportOpenOn" Placement="ExportPlacement" 
                                   Appearance="ExportAppearance">
                             <VetoMenuLabel Text="Export as" />
-                            <VetoMenuItem Icon="@VetoIcons.Csv" Text="CSV" Tooltip="Export as CSV"
-                                          TestId="@Sub("export-csv")" OnClick="() => ExportAsync(VetoGanttExportFormat.Csv)" />
-                            <VetoMenuItem Icon="@VetoIcons.Json" Text="JSON" Tooltip="Export as JSON"
-                                          TestId="@Sub("export-json")" OnClick="() => ExportAsync(VetoGanttExportFormat.Json)" />
+                            @foreach (var format in ExportFormats)
+                            {
+                                @if (format == VetoGanttExportFormat.Csv)
+                                {
+                                    <VetoMenuItem Icon="@VetoIcons.Csv" Text="CSV" Tooltip="Export as CSV"
+                                                  TestId="@Sub("export-csv")" OnClick="() => ExportAsync(VetoGanttExportFormat.Csv)" />
+                                }
+                                else
+                                {
+                                    <VetoMenuItem Icon="@VetoIcons.Json" Text="JSON" Tooltip="Export as JSON"
+                                                  TestId="@Sub("export-json")" OnClick="() => ExportAsync(VetoGanttExportFormat.Json)" />
+                                }
+                            }
                         </VetoMenu>
                     }
 
@@ -148,7 +191,7 @@
                     {
                         <div class="veto-gantt__row veto-gantt__row--label @(IsSelected(row.Item) ? "veto-gantt__row--selected" : null)"
                              style="@($"--veto-gantt-depth: {row.Depth}")" data-testid="@Sub($"label-{row.Item.Id}")">
-                            @if (row.HasChildren)
+                            @if (row.HasChildren && Collapsible)
                             {
                                 <button type="button" class="veto-gantt__twisty"
                                         aria-expanded="@(IsExpanded(row.Item.Id) ? "true" : "false")"
@@ -206,10 +249,10 @@
                                 }
                             }
 
-                            @if (ShowToday && Timeline.Contains(Today))
+                            @if (ShowToday && TodayMarkerOffset is { } todayOffset)
                             {
                                 <span class="veto-gantt__today"
-                                      style="@($"left: {Timeline.OffsetOf(Today).ToString("0.##", CultureInfo.InvariantCulture)}px")"
+                                      style="@($"left: {todayOffset.ToString("0.##", CultureInfo.InvariantCulture)}px")"
                                       data-testid="@Sub("today-marker")" aria-hidden="true"></span>
                             }
 
@@ -244,55 +287,34 @@
 
                             @foreach (var row in Rows)
                             {
-                                <div class="veto-gantt__row @(IsSelected(row.Item) ? "veto-gantt__row--selected" : null)">
-                                    @if (row.Item.IsMilestone)
+                                <div class="veto-gantt__row @(IsSelected(row.Item) || row.Inline.Any(IsSelected) ? "veto-gantt__row--selected" : null)"
+                                     data-testid="@Sub($"row-{row.Item.Id}")">
+                                    @if (row.Inline.Count > 0)
                                     {
-                                        <button type="button" class="veto-gantt__milestone" style="@BarStyle(row.Item)"
-                                                title="@NativeTooltipFor(row.Item)" aria-label="@TooltipFor(row.Item)"
-                                                data-testid="@Sub($"bar-{row.Item.Id}")" @onclick="() => SelectAsync(row.Item)"
-                                                @attributes="TooltipHandlers(row.Item)">
-                                        </button>
+                                        @* A folded parent in the inline layout: its sub-items take
+                                           its line, each a bar of its own, instead of the summary
+                                           bar that would cover them all. *@
+                                        @foreach (var item in row.Inline)
+                                        {
+                                            @Bar(item, isSummary: false, isInline: true)
+                                        }
                                     }
                                     else
                                     {
-                                        <button type="button"
-                                                class="veto-gantt__bar @(row.HasChildren ? "veto-gantt__bar--summary" : null) @(IsEditable(row) ? "veto-gantt__bar--editable" : null)"
-                                                style="@BarStyle(row.Item)" title="@NativeTooltipFor(row.Item)" aria-label="@TooltipFor(row.Item)"
-                                                data-testid="@Sub($"bar-{row.Item.Id}")" data-editable="@(IsEditable(row) ? "true" : null)"
-                                                data-row-id="@row.Item.Id" @onclick="() => SelectAsync(row.Item)"
-                                                @onkeydown="args => OnBarKeyDownAsync(args, row.Item)"
-                                                @attributes="TooltipHandlers(row.Item)">
-                                            @if (ShowProgress && row.Item.Progress is { } progress)
-                                            {
-                                                @* The washed-out part is what is left to do: the solid
-                                                   part reads as done, and the label keeps its contrast
-                                                   against the bar's full colour. *@
-                                                <span class="veto-gantt__remaining"
-                                                      style="@($"width: {((1 - Math.Clamp(progress, 0, 1)) * 100).ToString("0.##", CultureInfo.InvariantCulture)}%")"
-                                                      aria-hidden="true">
-                                                </span>
-                                            }
-
-                                            @if (ShowBarLabels)
-                                            {
-                                                <span class="veto-gantt__bar-label">
-                                                    @row.Item.Name
-                                                </span>
-                                            }
-                                        </button>
+                                        @Bar(row.Item, row.HasChildren, isInline: false)
                                     }
                                 </div>
                             }
 
-                            @if (HoveredRow is var (hoveredRow, hoveredIndex))
+                            @if (Hovered is var (hoveredItem, hoveredIndex))
                             {
                                 @* One card for the whole chart, placed against its row, rather than
                                    one per bar: a bar clips its own overflow, so a card inside it
                                    would be cut off at the bar's edge. *@
                                 <div id="@($"{ElementId}-tooltip")" class="veto-gantt__tooltip" role="tooltip"
-                                     style="@TooltipStyle(hoveredRow.Item, hoveredIndex)"
+                                     style="@TooltipStyle(hoveredItem, hoveredIndex)"
                                      data-testid="@Sub("tooltip")">
-                                    @TooltipTemplate!(hoveredRow.Item)
+                                    @TooltipTemplate!(hoveredItem)
                                 </div>
                             }
                         </div>
@@ -302,4 +324,54 @@
             </VetoLoadingOverlay>
         }
     </div>
+}
+
+@code {
+    /// <summary>
+    /// One bar or milestone. Shared by a row's own bar and by the sub-items an inline parent
+    /// draws on its line, so the two can never drift apart in what they show or respond to.
+    /// </summary>
+    private RenderFragment Bar ( VetoGanttItem item, bool isSummary, bool isInline ) =>
+        @<text>
+            @* Work entirely outside the axis draws nothing, rather than a stub pinned to the
+               edge that would read as a one-day task. *@
+            @if (!Timeline.Overlaps(item.StartsAt, item.EndsAt))
+            {
+            }
+            else if (item.IsMilestone)
+            {
+                <button type="button" class="veto-gantt__milestone @(isInline ? "veto-gantt__milestone--inline" : null)" style="@BarStyle(item)"
+                        title="@NativeTooltipFor(item)" aria-label="@TooltipFor(item)"
+                        data-testid="@Sub($"bar-{item.Id}")" @onclick="() => SelectAsync(item)"
+                        @attributes="TooltipHandlers(item)">
+                </button>
+            }
+            else
+            {
+                <button type="button"
+                        class="veto-gantt__bar @(isSummary ? "veto-gantt__bar--summary" : null) @(isInline ? "veto-gantt__bar--inline" : null) @(IsSelected(item) && isInline ? "veto-gantt__bar--selected" : null) @(IsEditable(item, isSummary) ? "veto-gantt__bar--editable" : null)"
+                        style="@BarStyle(item)" title="@NativeTooltipFor(item)" aria-label="@TooltipFor(item)"
+                        data-testid="@Sub($"bar-{item.Id}")" data-editable="@(IsEditable(item, isSummary) ? "true" : null)"
+                        data-row-id="@item.Id" @onclick="() => SelectAsync(item)"
+                        @onkeydown="args => OnBarKeyDownAsync(args, item)"
+                        @attributes="TooltipHandlers(item)">
+                    @if (ShowProgress && item.Progress is { } progress)
+                    {
+                        @* The washed-out part is what is left to do: the solid part reads as
+                           done, and the label keeps its contrast against the bar's full colour. *@
+                        <span class="veto-gantt__remaining"
+                              style="@($"width: {((1 - Math.Clamp(progress, 0, 1)) * 100).ToString("0.##", CultureInfo.InvariantCulture)}%")"
+                              aria-hidden="true">
+                        </span>
+                    }
+
+                    @if (ShowBarLabels)
+                    {
+                        <span class="veto-gantt__bar-label">
+                            @item.Name
+                        </span>
+                    }
+                </button>
+            }
+        </text>;
 }

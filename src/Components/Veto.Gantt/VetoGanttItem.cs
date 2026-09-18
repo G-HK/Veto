@@ -21,6 +21,35 @@ public sealed record VetoGanttItem
     /// <summary>The day the work ends, inclusive. Equal to <see cref="Start"/> for a single day.</summary>
     public required DateOnly End { get; init; }
 
+    /// <summary>
+    /// The time of day the work starts on <see cref="Start"/>. Null starts it at the beginning of
+    /// the day, which is what a whole-day task means.
+    /// </summary>
+    public TimeOnly? StartTime { get; init; }
+
+    /// <summary>
+    /// The time of day the work ends on <see cref="End"/>. Null runs it to the end of the day. A
+    /// job from 14:00 to 20:00 on one day is <c>Start = End</c> with these two set.
+    /// </summary>
+    public TimeOnly? EndTime { get; init; }
+
+    /// <summary>When the work starts: <see cref="Start"/> at <see cref="StartTime"/>, or at midnight.</summary>
+    public DateTime StartsAt => Start.ToDateTime(StartTime ?? TimeOnly.MinValue);
+
+    /// <summary>
+    /// When the work ends, exclusive: <see cref="End"/> at <see cref="EndTime"/>, or the midnight
+    /// after <see cref="End"/> for a task that runs the whole day.
+    /// </summary>
+    public DateTime EndsAt => EndTime is { } time
+        ? End.ToDateTime(time)
+        : End.AddDays(1).ToDateTime(TimeOnly.MinValue);
+
+    /// <summary>How long the work runs, from <see cref="StartsAt"/> to <see cref="EndsAt"/>.</summary>
+    public TimeSpan Duration => EndsAt - StartsAt;
+
+    /// <summary>Whether the row is timed to the hour rather than whole days.</summary>
+    public bool HasTimes => StartTime is not null || EndTime is not null;
+
     /// <summary>The <see cref="Id"/> of the row this one sits under. Null for a top-level row.</summary>
     public string? ParentId { get; init; }
 

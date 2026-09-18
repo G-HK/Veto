@@ -8,11 +8,130 @@
           Title="Gantt"
           Lead="Projects and tasks on the left, a scrollable timeline on the right. Filtering, zoom, date navigation and export are built in.">
 
+    <DemoBlock TestId="demo-today" Title="Today's work"
+               Description="The chart opens on today: the axis covers today alone, stretched across the full width, and only the rows with work today are listed - not yesterday's, not tomorrow's. The Today / Schedule switch in the toolbar opens the whole plan, and View can be bound or set to start there."
+               Code="@TodayCode">
+        <VetoGantt TestId="today-view"
+                   Items="Tasks"
+                   TodayOverride="Today"
+                   SidebarWidth="13rem"
+                   Height="14rem"
+                   @bind-View="_todayView" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-hours" Title="Jobs by the hour"
+               Description="Give an item a StartTime and EndTime and it is placed to the minute. The today view draws hours, marks now, and lists only what runs today - last night's backup and tomorrow's release are not on it. Inline, a whole day of jobs sits on one line. StartTime and EndTime on the chart itself trim the day to a window: 14:00 to 20:00 below, stretched across the full width."
+               Code="@HoursCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoGantt TestId="hours"
+                       Items="Jobs"
+                       TodayOverride="Today"
+                       TimeOverride="new TimeOnly(11, 30)"
+                       SubItemLayout="VetoGanttSubItemLayout.Inline"
+                       SidebarWidth="13rem"
+                       Height="11rem" />
+
+            <VetoGantt TestId="window"
+                       Items="Jobs"
+                       TodayOverride="Today"
+                       TimeOverride="new TimeOnly(11, 30)"
+                       StartTime="new TimeOnly(14, 0)"
+                       EndTime="new TimeOnly(20, 0)"
+                       ShowToolbar="false"
+                       SidebarWidth="13rem"
+                       Height="11rem" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-fit" Title="A short range fills the width"
+               Description="Give the chart a Start and End a few days apart and the days widen until the range spans the whole chart, rather than drawing a week at the scale's own density and leaving the rest empty. A range longer than the chart keeps its density and scrolls. FitToWidth=false turns this off."
+               Code="@FitCode">
+        <VetoGantt TestId="fit"
+                   Items="Tasks"
+                   View="VetoGanttView.Schedule"
+                   TodayOverride="Today"
+                   Start="new DateOnly(2026, 3, 14)"
+                   End="new DateOnly(2026, 3, 20)"
+                   ShowToolbar="false"
+                   SidebarWidth="13rem"
+                   Height="17rem" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-inline" Title="Many jobs on one line"
+               Description="SubItemLayout=Inline draws a parent's jobs side by side on the parent's own line, rather than a row each - a pipeline with a run a day stays one row. The fold arrow still opens it into rows when you want the detail; Collapsible=false takes the arrow away and keeps every parent on one line."
+               Code="@InlineCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoGantt TestId="inline"
+                       Items="Pipelines"
+                       View="VetoGanttView.Schedule"
+                       TodayOverride="Today"
+                       SubItemLayout="VetoGanttSubItemLayout.Inline"
+                       ShowToolbar="false"
+                       SidebarWidth="13rem"
+                       Height="9rem"
+                       ScrollToTodayOnLoad="false" />
+
+            <VetoGantt TestId="inline-fixed"
+                       Items="Pipelines"
+                       View="VetoGanttView.Schedule"
+                       TodayOverride="Today"
+                       SubItemLayout="VetoGanttSubItemLayout.Inline"
+                       Collapsible="false"
+                       ShowToolbar="false"
+                       SidebarWidth="13rem"
+                       Height="9rem"
+                       ScrollToTodayOnLoad="false" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-basic" Title="A schedule"
                Description="Projects collapse, tasks indent beneath them, and a summary bar spans its children as a slim rail rather than a block. Each category carries its own colour, and the filter chips are tinted to match - so the filter is also the key to the bars. Switch the scale, or use Today to jump back to now."
                Code="@BasicCode">
-        <VetoGantt TestId="chart" Items="Tasks" TodayOverride="Today" @bind-Scale="_scale"
+        <VetoGantt TestId="chart" View="VetoGanttView.Schedule" Items="Tasks" TodayOverride="Today" @bind-Scale="_scale"
                    @bind-SelectedId="_selectedId" Height="26rem" OnExport="OnExport" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-filters" Title="Filters you control"
+               Description="Filters takes toggles of your own - any predicate over an item - and they sit in the toolbar beside the categories. The category filter and your toggles bind both ways, so the page can set them and hears every click; OnFilterChanged reports the whole picture, rows included, after any change. ItemFilter applies a rule with no toggle at all."
+               Code="@FiltersCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+                <button class="chip" type="button" data-testid="filters-hide-marketing" @onclick='() => _hidden = ["Marketing"]'>Hide Marketing</button>
+                <button class="chip" type="button" data-testid="filters-underway" @onclick='() => _active = ["underway"]'>Only work under way</button>
+                <button class="chip" type="button" data-testid="filters-clear" @onclick="() => _filtered.ClearFiltersAsync()">Clear filters</button>
+            </VetoStack>
+
+            <VetoGantt @ref="_filtered"
+                       TestId="filters"
+                       Items="Tasks"
+                       View="VetoGanttView.Schedule"
+                       TodayOverride="Today"
+                       Filters="TaskFilters"
+                       @bind-HiddenCategories="_hidden"
+                       @bind-ActiveFilters="_active"
+                       OnFilterChanged="OnFilterChanged"
+                       Exportable="false"
+                       SidebarWidth="13rem"
+                       Height="17rem"
+                       ScrollToTodayOnLoad="false" />
+
+            <span class="demo-label" data-testid="filters-state">@_filterState</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-limits" Title="Only the controls you want"
+               Description="Scales lists the zoom levels the picker offers - give it one, Day here, and there is nothing to pick, so the picker goes. ExportFormats lists the formats the export menu offers; CSV alone here, and an empty list hides the menu."
+               Code="@LimitsCode">
+        <VetoGantt TestId="limited"
+                   Items="Tasks"
+                   View="VetoGanttView.Schedule"
+                   TodayOverride="Today"
+                   Scales="DayOnly"
+                   ExportFormats="CsvOnly"
+                   ShowSearch="false"
+                   ShowCategoryFilter="false"
+                   SidebarWidth="13rem"
+                   Height="12rem" />
     </DemoBlock>
 
     <DemoBlock TestId="demo-selection"
@@ -29,7 +148,7 @@
                Title="Milestones and colours"
                Description="A milestone is a point rather than a span, drawn as the conventional diamond. Any row can carry its own colour - including a theme token, so it follows light and dark."
                Code="@ColorCode">
-        <VetoGantt TestId="colors"
+        <VetoGantt TestId="colors" View="VetoGanttView.Schedule"
                    Items="Milestones"
                    TodayOverride="Today"
                    Scale="VetoGanttScale.Week"
@@ -43,7 +162,7 @@
                Title="Chained tasks"
                Description="A row that cannot start until another finishes lists it in DependsOn, and the chain is drawn as an arrow from the end of one bar to the start of the next. Select a row and the arrows touching it are picked out, which is how you follow a chain through a crowded schedule. The last arrow here routes back on itself, because that dependency is already broken - the successor starts before its predecessor ends."
                Code="@ChainCode">
-        <VetoGantt TestId="chain"
+        <VetoGantt TestId="chain" View="VetoGanttView.Schedule"
                    Items="Chain"
                    TodayOverride="Today"
                    ShowToolbar="false"
@@ -58,7 +177,7 @@
                Description="Hovering or focusing a bar shows its name, dates, progress and description. TooltipText rewrites that text, and returning null leaves a row without one. TooltipTemplate swaps the browser's tooltip for a card you lay out yourself. ShowTooltips=false turns them off, and the bars keep their accessible names."
                Code="@TooltipCode">
         <VetoStack Gap="VetoSpacing.Large">
-            <VetoGantt TestId="tooltip-text"
+            <VetoGantt TestId="tooltip-text" View="VetoGanttView.Schedule"
                        Items="Tasks"
                        TodayOverride="Today"
                        ShowToolbar="false"
@@ -67,7 +186,7 @@
                        ScrollToTodayOnLoad="false"
                        TooltipText="ShortTooltip" />
 
-            <VetoGantt TestId="tooltip-card"
+            <VetoGantt TestId="tooltip-card" View="VetoGanttView.Schedule"
                        Items="Tasks"
                        TodayOverride="Today"
                        ShowToolbar="false"
@@ -106,7 +225,7 @@
             </VetoStack>
 
             <VetoGantt @ref="_driven"
-                       TestId="driven"
+                       TestId="driven" View="VetoGanttView.Schedule"
                        Items="Tasks"
                        TodayOverride="Today"
                        ShowToolbar="false"
@@ -130,7 +249,7 @@
                Description="Drag a bar to move it, or its edges to resize - snapped to whatever zoom is showing. Arrow keys do the same from the keyboard, with Shift to change the end instead. Changes are kept in this browser for you alone, so a reload finds them again; Reset clears them. A summary row cannot be dragged, because its dates are the span of its children."
                Code="@EditCode">
         <VetoStack Gap="VetoSpacing.Medium">
-            <VetoGantt TestId="editable"
+            <VetoGantt TestId="editable" View="VetoGanttView.Schedule"
                        Items="Editable"
                        TodayOverride="Today"
                        Editable="true"
@@ -180,7 +299,7 @@
                 </VetoButton>
             </VetoStack>
 
-            <VetoGantt TestId="loader"
+            <VetoGantt TestId="loader" View="VetoGanttView.Schedule"
                        Items="Chain"
                        TodayOverride="Today"
                        Loading="_loading"
@@ -197,7 +316,7 @@
                Title="Nothing to show"
                Description="A filter that matches nothing says so, rather than leaving an empty panel that looks broken."
                Code="@EmptyCode">
-        <VetoGantt TestId="empty"
+        <VetoGantt TestId="empty" View="VetoGanttView.Schedule"
                    Items="Tasks"
                    TodayOverride="Today"
                    Search="a task that does not exist"
@@ -240,6 +359,29 @@
     private VetoGanttScale _scale = VetoGanttScale.Day;
     private string? _selectedId;
     private string? _chainSelection;
+    private VetoGanttView _todayView = VetoGanttView.Today;
+    private VetoGantt _filtered = default!;
+    private IReadOnlyCollection<string> _hidden = [];
+    private IReadOnlyCollection<string> _active = [];
+    private string _filterState = "No filter changed yet.";
+
+    private static readonly VetoGanttScale[] DayOnly = [VetoGanttScale.Day];
+    private static readonly VetoGanttExportFormat[] CsvOnly = [VetoGanttExportFormat.Csv];
+
+    // Two toggles of the page's own, alongside the chart's category filter.
+    private static readonly IReadOnlyList<VetoGanttFilter> TaskFilters =
+    [
+        new("underway", "Under way", item => item.Progress is > 0 and < 1) { Tooltip = "Started, not finished" },
+        new("unstarted", "Not started", item => item.Progress is null or 0)
+    ];
+
+    private void OnFilterChanged ( VetoGanttFilterState state )
+    {
+        var active = state.ActiveFilters.Count == 0 ? "none" : string.Join(", ", state.ActiveFilters);
+        var hidden = state.HiddenCategories.Count == 0 ? "none" : string.Join(", ", state.HiddenCategories);
+
+        _filterState = $"Filters: {active} · Hidden: {hidden} · {state.VisibleItems.Count} rows";
+    }
     private VetoGantt _driven = default!;
     private string? _drivenSelection;
     private VetoGanttScale _drivenScale = VetoGanttScale.Day;
@@ -325,6 +467,34 @@
         new() { Id = "publish", Name = "Publish", Start = new(2026, 3, 20), End = new(2026, 3, 26), DependsOn = ["review"] }
     ];
 
+    // A day of timed jobs on 18 March - the demo's today - plus one either side of it, which the
+    // today view must leave out.
+    private static readonly IReadOnlyList<VetoGanttItem> Jobs =
+    [
+        new() { Id = "ops", Name = "Operations", Start = new(2026, 3, 18), End = new(2026, 3, 18), StartTime = new(6, 0), EndTime = new(21, 0), Category = "Engineering", Color = Engineering },
+        new() { Id = "etl", Name = "Data load", ParentId = "ops", Start = new(2026, 3, 18), End = new(2026, 3, 18), StartTime = new(6, 0), EndTime = new(8, 30), Category = "Engineering", Color = Engineering },
+        new() { Id = "reports", Name = "Reports", ParentId = "ops", Start = new(2026, 3, 18), End = new(2026, 3, 18), StartTime = new(9, 0), EndTime = new(10, 0), Category = "Research", Color = Research },
+        new() { Id = "deploy", Name = "Deploy", ParentId = "ops", Start = new(2026, 3, 18), End = new(2026, 3, 18), StartTime = new(14, 0), EndTime = new(15, 30), Category = "Engineering", Color = Engineering },
+        new() { Id = "cleanup", Name = "Cleanup", ParentId = "ops", Start = new(2026, 3, 18), End = new(2026, 3, 18), StartTime = new(19, 0), EndTime = new(21, 0), Category = "Engineering", Color = Engineering },
+        new() { Id = "support", Name = "Support rota", Start = new(2026, 3, 18), End = new(2026, 3, 18), StartTime = new(8, 0), EndTime = new(17, 0), Category = "Marketing", Color = Marketing },
+        new() { Id = "backup", Name = "Backup (last night)", Start = new(2026, 3, 17), End = new(2026, 3, 17), StartTime = new(22, 0), EndTime = new(23, 30), Category = "Engineering", Color = Engineering },
+        new() { Id = "release", Name = "Release (tomorrow)", Start = new(2026, 3, 19), End = new(2026, 3, 19), StartTime = new(9, 0), EndTime = new(10, 0), Category = "Engineering", Color = Engineering }
+    ];
+
+    // Two pipelines with a job on most days. Inline, each pipeline is one row however many jobs it ran.
+    private static readonly IReadOnlyList<VetoGanttItem> Pipelines =
+    [
+        new() { Id = "nightly", Name = "Nightly build", Start = new(2026, 3, 16), End = new(2026, 3, 20), Category = "Engineering", Color = Engineering },
+        new() { Id = "compile", Name = "Compile", ParentId = "nightly", Start = new(2026, 3, 16), End = new(2026, 3, 16), Category = "Engineering", Color = Engineering },
+        new() { Id = "test", Name = "Test", ParentId = "nightly", Start = new(2026, 3, 17), End = new(2026, 3, 17), Category = "Engineering", Color = Engineering },
+        new() { Id = "package", Name = "Package", ParentId = "nightly", Start = new(2026, 3, 18), End = new(2026, 3, 18), Category = "Engineering", Color = Engineering },
+        new() { Id = "deploy", Name = "Deploy", ParentId = "nightly", Start = new(2026, 3, 19), End = new(2026, 3, 20), Category = "Engineering", Color = Engineering },
+
+        new() { Id = "reports", Name = "Reports", Start = new(2026, 3, 16), End = new(2026, 3, 19), Category = "Research", Color = Research },
+        new() { Id = "extract", Name = "Extract", ParentId = "reports", Start = new(2026, 3, 16), End = new(2026, 3, 16), Category = "Research", Color = Research },
+        new() { Id = "publish", Name = "Publish", ParentId = "reports", Start = new(2026, 3, 18), End = new(2026, 3, 19), Category = "Research", Color = Research }
+    ];
+
     private static readonly ParameterTable.Row[] Parameters =
     [
         new("Items", "IReadOnlyList<VetoGanttItem>", "[]", "The rows to chart. Hierarchy comes from each item's ParentId."),
@@ -339,6 +509,23 @@
         new("ShowTooltips", "bool", "true", "Whether hovering or focusing a bar shows a tooltip. Bars keep their accessible name either way."),
         new("TooltipText", "Func<VetoGanttItem, string?>?", "null", "Rewrites the native tooltip text. Return null to give a row no tooltip."),
         new("TooltipTemplate", "RenderFragment<VetoGanttItem>?", "null", "A hover card of your own in place of the native tooltip. Wins over TooltipText."),
+        new("View", "VetoGanttView", "Today", "Today: only today, fitted to the width, listing only today's work. Schedule: the whole plan. Supports @bind-View."),
+        new("ShowViewPicker", "bool", "true", "Whether the toolbar shows the Today / Schedule switch."),
+        new("FitToWidth", "bool", "true", "Widens the days of a short range until it fills the chart. A long range keeps its density and scrolls."),
+        new("SubItemLayout", "VetoGanttSubItemLayout", "Rows", "Rows: a row per sub-item. Inline: every sub-item on its parent's line."),
+        new("Collapsible", "bool", "true", "Whether parents can be folded. Off, rows stay open and inline parents stay on one line."),
+        new("Filters", "IReadOnlyList<VetoGanttFilter>", "[]", "Toggles of your own in the toolbar, each a predicate over an item. Several on must all keep a row."),
+        new("ActiveFilters", "IReadOnlyCollection<string>?", "null", "Ids of the Filters that are on. Supports @bind-ActiveFilters."),
+        new("HiddenCategories", "IReadOnlyCollection<string>?", "null", "Categories switched off. Supports @bind-HiddenCategories."),
+        new("ShowFilters", "bool", "true", "Whether the toolbar shows a toggle for each of the Filters."),
+        new("ItemFilter", "Func<VetoGanttItem, bool>?", "null", "A rule with no toggle: rows it rejects are never listed."),
+        new("OnFilterChanged", "EventCallback<VetoGanttFilterState>", "—", "Raised after any filter change, with every filter and the rows they leave."),
+        new("Scales", "IReadOnlyList<VetoGanttScale>", "Hour, Day, Week, Month", "The zoom levels the picker offers. One level hides the picker."),
+        new("ExportFormats", "IReadOnlyList<VetoGanttExportFormat>", "Csv, Json", "The formats the export menu offers. Empty hides the menu."),
+        new("StartTime / EndTime", "TimeOnly?", "null", "Trims the axis to a window of the day, such as 14:00 to 20:00, which is then fitted to the width."),
+        new("TodayScale", "VetoGanttScale", "Hour", "The scale the today view is drawn at."),
+        new("MinHourWidth", "double", "44", "The narrowest an hour is drawn. A day that would need less scrolls instead, so its time labels stay readable."),
+        new("TimeOverride", "TimeOnly?", "null", "The time treated as now, for the marker at the hour scale. Set it with TodayOverride to keep a screenshot stable."),
         new("SortBy", "VetoGanttSort", "Source", "Source, Name, Start, End or Duration. Applied within each level of the tree."),
         new("SortDescending", "bool", "false", "Reverses whatever SortBy produces."),
         new("Editable", "bool", "false", "Lets bars be dragged to move, and arrow keys to do the same."),
@@ -372,6 +559,11 @@
         new("Expand(id) / Collapse(id)", "void", "—", "Opens or folds one row's children."),
         new("ExpandAll() / CollapseAll()", "void", "—", "Opens or folds every row that has children."),
         new("SetScaleAsync(scale)", "Task", "—", "Zooms as the scale picker does, raising ScaleChanged."),
+        new("SetViewAsync(view)", "Task", "—", "Switches between today's work and the whole schedule, raising ViewChanged."),
+        new("SetSearchAsync(text)", "Task", "—", "Sets the text filter, as typing does."),
+        new("SetCategoryVisibleAsync(category, visible)", "Task", "—", "Switches a category on or off, as its chip does."),
+        new("SetFilterActiveAsync(id, active)", "Task", "—", "Switches one of the Filters on or off, as its toggle does."),
+        new("ClearFiltersAsync()", "Task", "—", "Clears the text, the categories and the toggles. ItemFilter stays."),
         new("ScrollToTodayAsync()", "Task", "—", "Brings today into view."),
         new("ScrollToDateAsync(date)", "Task", "—", "Brings a date into view; one outside the axis scrolls to the nearer end."),
         new("ScrollEarlierAsync() / ScrollLaterAsync()", "Task", "—", "Scrolls by most of a screen, as the Earlier and Later buttons do."),
@@ -385,6 +577,7 @@
         new("Id", "string", "required", "Unique across the chart."),
         new("Name", "string", "required", "Shown in the panel on the left."),
         new("Start / End", "DateOnly", "required", "Inclusive at both ends."),
+        new("StartTime / EndTime", "TimeOnly?", "null", "The time of day the work starts on Start and ends on End. Null covers the whole day."),
         new("ParentId", "string?", "null", "The row this one sits under. Null for a top-level row."),
         new("Color", "string?", "null", "Any CSS colour, including a --veto-* token."),
         new("Progress", "double?", "null", "0 to 1. Null hides the progress fill for this row."),
@@ -396,6 +589,7 @@
 
     private const string BasicCode = """
         <VetoGantt Items="Tasks"
+                   View="VetoGanttView.Schedule"
                    @bind-Scale="_scale"
                    @bind-SelectedId="_selectedId"
                    Height="26rem" />
@@ -530,6 +724,114 @@
         @code {
             private VetoGantt _chart = default!;
             private string? _selected;
+        }
+        """;
+
+    private const string TodayCode = """
+        @* The default: today alone, fitted to the width, with only today's work listed. *@
+        <VetoGantt Items="Tasks" @bind-View="_view" />
+
+        @* Or open on the whole plan. *@
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule" />
+
+        @code {
+            private VetoGanttView _view = VetoGanttView.Today;
+        }
+        """;
+
+    private const string FiltersCode = """
+        <button @onclick='() => _hidden = ["Marketing"]'>Hide Marketing</button>
+        <button @onclick="() => _chart.ClearFiltersAsync()">Clear filters</button>
+
+        <VetoGantt @ref="_chart"
+                   Items="Tasks"
+                   Filters="TaskFilters"
+                   @bind-HiddenCategories="_hidden"
+                   @bind-ActiveFilters="_active"
+                   OnFilterChanged="OnFilterChanged" />
+
+        @code {
+            private VetoGantt _chart = default!;
+            private IReadOnlyCollection<string> _hidden = [];
+            private IReadOnlyCollection<string> _active = [];
+
+            private static readonly IReadOnlyList<VetoGanttFilter> TaskFilters =
+            [
+                new("underway", "Under way", item => item.Progress is > 0 and < 1),
+                new("unstarted", "Not started", item => item.Progress is null or 0)
+            ];
+
+            private void OnFilterChanged ( VetoGanttFilterState state )
+                => Console.WriteLine($"{state.VisibleItems.Count} rows");
+        }
+        """;
+
+    private const string LimitsCode = """
+        @* Day only: one scale, so no picker. CSV only in the export menu. *@
+        <VetoGantt Items="Tasks"
+                   Scales="[VetoGanttScale.Day]"
+                   ExportFormats="[VetoGanttExportFormat.Csv]" />
+
+        @* No export at all. *@
+        <VetoGantt Items="Tasks" ExportFormats="[]" />
+        """;
+
+    private const string HoursCode = """
+        @* Today's jobs by the hour, a whole day of them on the Operations line. *@
+        <VetoGantt Items="Jobs" SubItemLayout="VetoGanttSubItemLayout.Inline" />
+
+        @* Only 14:00 to 20:00, stretched across the chart. *@
+        <VetoGantt Items="Jobs"
+                   StartTime="new TimeOnly(14, 0)"
+                   EndTime="new TimeOnly(20, 0)" />
+
+        @code {
+            private static readonly IReadOnlyList<VetoGanttItem> Jobs =
+            [
+                new() { Id = "ops", Name = "Operations",
+                        Start = new(2026, 3, 18), End = new(2026, 3, 18),
+                        StartTime = new(6, 0), EndTime = new(21, 0) },
+                new() { Id = "deploy", Name = "Deploy", ParentId = "ops",
+                        Start = new(2026, 3, 18), End = new(2026, 3, 18),
+                        StartTime = new(14, 0), EndTime = new(15, 30) },
+                new() { Id = "cleanup", Name = "Cleanup", ParentId = "ops",
+                        Start = new(2026, 3, 18), End = new(2026, 3, 18),
+                        StartTime = new(19, 0), EndTime = new(21, 0) }
+            ];
+        }
+        """;
+
+    private const string FitCode = """
+        @* Seven days, stretched across the whole chart. *@
+        <VetoGantt Items="Tasks"
+                   View="VetoGanttView.Schedule"
+                   Start="new DateOnly(2026, 3, 14)"
+                   End="new DateOnly(2026, 3, 20)" />
+
+        @* Or keep the scale's own density: *@
+        <VetoGantt Items="Tasks" Start="..." End="..." FitToWidth="false" />
+        """;
+
+    private const string InlineCode = """
+        @* Each pipeline's jobs on its own line; the fold arrow opens them into rows. *@
+        <VetoGantt Items="Pipelines"
+                   SubItemLayout="VetoGanttSubItemLayout.Inline" />
+
+        @* Always one line: no fold arrows. *@
+        <VetoGantt Items="Pipelines"
+                   SubItemLayout="VetoGanttSubItemLayout.Inline"
+                   Collapsible="false" />
+
+        @code {
+            private static readonly IReadOnlyList<VetoGanttItem> Pipelines =
+            [
+                new() { Id = "nightly", Name = "Nightly build",
+                        Start = new(2026, 3, 16), End = new(2026, 3, 20) },
+                new() { Id = "compile", Name = "Compile", ParentId = "nightly",
+                        Start = new(2026, 3, 16), End = new(2026, 3, 16) },
+                new() { Id = "test", Name = "Test", ParentId = "nightly",
+                        Start = new(2026, 3, 17), End = new(2026, 3, 17) }
+            ];
         }
         """;
 

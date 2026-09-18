@@ -1,4 +1,4 @@
-// Interop for VetoGantt: file downloads and horizontal scrolling.
+// Interop for VetoGantt: file downloads, horizontal scrolling and width tracking.
 
 /**
  * Downloads text as a file.
@@ -37,4 +37,45 @@ export function scrollBy(element, fraction) {
     }
 
     element.scrollBy({ left: element.clientWidth * fraction, behavior: 'smooth' });
+}
+
+// One observer per timeline, kept on the element so a re-observe replaces rather than stacks.
+const widthObservers = new WeakMap();
+
+/**
+ * Reports the timeline's visible width now and whenever it changes, so the chart can stretch a
+ * short axis to fill it. clientWidth rather than the observer's own measurement: it leaves out
+ * a vertical scrollbar, which is exactly the room the axis must not spill into.
+ */
+export function observeWidth(element, dotNetRef) {
+    if (!element) {
+        return;
+    }
+
+    unobserveWidth(element);
+
+    let last = -1;
+    const report = () => {
+        const width = Math.floor(element.clientWidth);
+
+        if (width !== last) {
+            last = width;
+            dotNetRef.invokeMethodAsync('OnViewportResized', width).catch(() => { });
+        }
+    };
+
+    const observer = new ResizeObserver(report);
+    observer.observe(element);
+    widthObservers.set(element, observer);
+    report();
+}
+
+/** Stops reporting a timeline's width. */
+export function unobserveWidth(element) {
+    const observer = element && widthObservers.get(element);
+
+    if (observer) {
+        observer.disconnect();
+        widthObservers.delete(element);
+    }
 }

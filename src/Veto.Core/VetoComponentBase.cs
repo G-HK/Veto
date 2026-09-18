@@ -192,7 +192,7 @@ public abstract class VetoComponentBase : ComponentBase, IVetoComponent
     /// <summary>
     /// Whether the component's own stylesheet gives its root a non-static <c>position</c>.
     /// Override to true in a component that positions itself - a fixed overlay, a sticky bar -
-    /// so <see cref="ZIndex"/> does not overwrite that with <c>relative</c> and drop it back
+    /// so <see cref="RootZIndex"/> does not overwrite that with <c>relative</c> and drop it back
     /// into the flow.
     /// </summary>
     protected virtual bool PositionsItself => false;

@@ -15,6 +15,33 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
     private Task<double> WidthAsync(string testId)
         => Component(testId).EvaluateAsync<double>("el => el.getBoundingClientRect().width");
 
+    /// <summary>
+    /// Waits until an element's width has settled to within a pixel of the scroller it sits in.
+    /// The chart widens its days only after the page reports its width, one render later, so
+    /// sampling straight after load would read the unfitted axis.
+    /// </summary>
+    private async Task<(double Width, double Available)> FittedWidthAsync(string testId, string scrollerTestId)
+    {
+        var scroller = Component(scrollerTestId);
+        var element = Component(testId);
+
+        for (var attempt = 0; attempt < 50; attempt++)
+        {
+            var width = await element.EvaluateAsync<double>("el => el.getBoundingClientRect().width");
+            var available = await scroller.EvaluateAsync<double>("el => el.clientWidth");
+
+            if (Math.Abs(width - available) <= 2)
+            {
+                return (width, available);
+            }
+
+            await Page.WaitForTimeoutAsync(100);
+        }
+
+        return (await element.EvaluateAsync<double>("el => el.getBoundingClientRect().width"),
+                await scroller.EvaluateAsync<double>("el => el.clientWidth"));
+    }
+
     private Task<double> IndentAsync(string testId)
         => Component(testId).EvaluateAsync<double>("el => parseFloat(getComputedStyle(el).paddingInlineStart)");
 
@@ -601,5 +628,397 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
         await Page.GetByTestId("ref-hide").ClickAsync();
 
         await Expect(card).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task The_chart_opens_on_todays_work_only()
+    {
+        await GotoComponentAsync(Route);
+
+        // The demo pins today to 18 March. App shell (9-24 March) and the component library
+        // (from 16 March) are under way, so they are listed with the project they belong to.
+        await Expect(Component("today-view-label-shell")).ToBeVisibleAsync();
+        await Expect(Component("today-view-label-components")).ToBeVisibleAsync();
+        await Expect(Component("today-view-label-platform")).ToBeVisibleAsync();
+
+        // Design finished on the 13th, the spike starts on the 23rd and launch in April: none of
+        // it is today's work.
+        await Expect(Component("today-view-label-design")).ToHaveCountAsync(0);
+        await Expect(Component("today-view-label-spike")).ToHaveCountAsync(0);
+        await Expect(Component("today-view-label-launch")).ToHaveCountAsync(0);
+
+        await Expect(Component("today-view-view-today")).ToHaveAttributeAsync("aria-pressed", "true");
+    }
+
+    [Fact]
+    public async Task Today_spans_the_whole_axis_and_at_least_the_chart()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        var scroller = Component("today-view-scroller");
+        var canvas = scroller.Locator(".veto-gantt__canvas");
+        var available = await scroller.EvaluateAsync<double>("el => el.clientWidth");
+
+        // Wait for the chart to hear its width: the axis is then never narrower than the chart.
+        for (var attempt = 0; attempt < 50
+             && await canvas.EvaluateAsync<double>("el => el.getBoundingClientRect().width") < available - 2; attempt++)
+        {
+            await Page.WaitForTimeoutAsync(100);
+        }
+
+        var axis = await canvas.EvaluateAsync<double>("el => el.getBoundingClientRect().width");
+        Assert.True(axis >= available - 2, $"Today's axis ({axis}px) should fill at least the chart ({available}px).");
+
+        // App shell runs through today, so its bar is the whole axis: today, and nothing else.
+        var bar = await WidthAsync("today-view-bar-shell");
+        Assert.True(Math.Abs(bar - axis) <= 2, $"Today's bar ({bar}px) should span the whole axis ({axis}px).");
+    }
+
+    [Fact]
+    public async Task The_view_switch_opens_the_whole_schedule()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("today-view-label-design")).ToHaveCountAsync(0);
+
+        await Component("today-view-view-schedule").ClickAsync();
+
+        await Expect(Component("today-view-view-schedule")).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(Component("today-view-label-design")).ToBeVisibleAsync();
+        await Expect(Component("today-view-label-launch")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task A_short_range_is_stretched_to_fill_the_width()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // Seven days at the day scale's own 40px would be 280px wide.
+        var canvas = Component("fit-scroller").Locator(".veto-gantt__canvas");
+        var available = await Component("fit-scroller").EvaluateAsync<double>("el => el.clientWidth");
+
+        for (var attempt = 0; attempt < 50
+             && Math.Abs(await canvas.EvaluateAsync<double>("el => el.getBoundingClientRect().width") - available) > 2; attempt++)
+        {
+            await Page.WaitForTimeoutAsync(100);
+        }
+
+        var width = await canvas.EvaluateAsync<double>("el => el.getBoundingClientRect().width");
+
+        Assert.True(Math.Abs(width - available) <= 2, $"The axis ({width}px) should fill the chart ({available}px).");
+        Assert.True(width > 280, $"The axis ({width}px) should be wider than seven days at 40px.");
+
+        // Nothing scrolls sideways: the whole range is on screen.
+        Assert.True(await Component("fit-scroller").EvaluateAsync<bool>("el => el.scrollWidth <= el.clientWidth + 1"));
+    }
+
+    [Fact]
+    public async Task Work_outside_an_explicit_range_draws_no_bar()
+    {
+        await GotoComponentAsync(Route);
+
+        // Design ended on the 13th, before the demo's 14-20 March range: it keeps its row in the
+        // schedule view, but no stub is pinned to the edge.
+        await Expect(Component("fit-label-design")).ToBeVisibleAsync();
+        await Expect(Component("fit-bar-design")).ToHaveCountAsync(0);
+        await Expect(Component("fit-bar-shell")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task Inline_jobs_share_their_parents_line()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // No row per job...
+        await Expect(Component("inline-label-compile")).ToHaveCountAsync(0);
+        await Expect(Component("inline-label-test")).ToHaveCountAsync(0);
+
+        // ...but every job has its bar, on the pipeline's own line.
+        var row = await Component("inline-row-nightly").BoundingBoxAsync();
+
+        foreach (var job in new[] { "compile", "test", "package", "deploy" })
+        {
+            var bar = await Component($"inline-bar-{job}").BoundingBoxAsync();
+
+            Assert.NotNull(bar);
+            Assert.True(bar!.Y >= row!.Y && bar.Y + bar.Height <= row.Y + row.Height + 1,
+                $"The {job} bar ({bar.Y}px) should sit on the pipeline's line ({row.Y}-{row.Y + row.Height}px).");
+        }
+
+        // And side by side: a later job starts further along the line.
+        Assert.True(await LeftAsync("inline-bar-test") > await LeftAsync("inline-bar-compile"));
+    }
+
+    [Fact]
+    public async Task Unfolding_an_inline_parent_lists_its_jobs_as_rows()
+    {
+        await GotoComponentAsync(Route);
+
+        var twisty = Component("inline-twisty-nightly");
+        await Expect(twisty).ToHaveAttributeAsync("aria-expanded", "false");
+
+        await twisty.ClickAsync();
+
+        await Expect(twisty).ToHaveAttributeAsync("aria-expanded", "true");
+        await Expect(Component("inline-label-compile")).ToBeVisibleAsync();
+        await Expect(Component("inline-label-deploy")).ToBeVisibleAsync();
+
+        // The pipeline goes back to a summary bar over its jobs.
+        await Expect(Component("inline-bar-nightly")).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("veto-gantt__bar--summary"));
+    }
+
+    [Fact]
+    public async Task Collapsible_off_keeps_jobs_on_one_line_with_no_fold_arrow()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("inline-fixed-twisty-nightly")).ToHaveCountAsync(0);
+        await Expect(Component("inline-fixed-label-compile")).ToHaveCountAsync(0);
+        await Expect(Component("inline-fixed-bar-compile")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task An_inline_job_is_selected_on_its_own()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        await Component("inline-bar-package").ClickAsync();
+
+        await Expect(Component("inline-bar-package")).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("veto-gantt__bar--selected"));
+        await Expect(Component("inline-bar-compile")).Not.ToHaveClassAsync(new System.Text.RegularExpressions.Regex("veto-gantt__bar--selected"));
+    }
+
+    [Fact]
+    public async Task The_today_view_is_drawn_in_hours()
+    {
+        await GotoComponentAsync(Route);
+
+        var header = Component("hours-scroller").Locator(".veto-gantt__head-cell");
+
+        await Expect(header.Filter(new() { HasText = "14:00" })).ToHaveCountAsync(1);
+        await Expect(header.Filter(new() { HasText = "Wed 18 March" })).ToHaveCountAsync(1);
+    }
+
+    [Fact]
+    public async Task Timed_jobs_are_placed_to_the_hour()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+        await FittedWidthAsync("hours-scroller", "hours-scroller");
+
+        // Deploy runs 14:00-15:30, Reports 09:00-10:00: half as long again, and later.
+        var reports = await WidthAsync("hours-bar-reports");
+        var deploy = await WidthAsync("hours-bar-deploy");
+
+        Assert.InRange(deploy / reports, 1.4, 1.6);
+        Assert.True(await LeftAsync("hours-bar-deploy") > await LeftAsync("hours-bar-reports"));
+
+        // The tooltip names the times, not just the day.
+        await Expect(Component("hours-bar-deploy")).ToHaveAttributeAsync("title", new System.Text.RegularExpressions.Regex("14:00–15:30"));
+    }
+
+    [Fact]
+    public async Task Today_leaves_out_last_night_and_tomorrow()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("hours-label-support")).ToBeVisibleAsync();
+
+        // Backup ran 22:00-23:30 yesterday and the release is 09:00 tomorrow. Close, but not today.
+        await Expect(Component("hours-label-backup")).ToHaveCountAsync(0);
+        await Expect(Component("hours-label-release")).ToHaveCountAsync(0);
+        await Expect(Component("hours-bar-backup")).ToHaveCountAsync(0);
+        await Expect(Component("hours-bar-release")).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task A_whole_day_of_jobs_shares_one_line()
+    {
+        await GotoComponentAsync(Route);
+
+        // Inline: every Operations job is a bar, none of them a row.
+        await Expect(Component("hours-label-deploy")).ToHaveCountAsync(0);
+
+        foreach (var job in new[] { "etl", "reports", "deploy", "cleanup" })
+        {
+            await Expect(Component($"hours-bar-{job}")).ToBeVisibleAsync();
+        }
+    }
+
+    [Fact]
+    public async Task The_now_marker_sits_at_the_time_of_day()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+        await FittedWidthAsync("hours-scroller", "hours-scroller");
+
+        // Now is pinned to 11:30: after Reports ends at 10:00, before Deploy starts at 14:00.
+        var marker = await LeftAsync("hours-today-marker");
+        var reports = await Component("hours-bar-reports").BoundingBoxAsync();
+        var deploy = await LeftAsync("hours-bar-deploy");
+
+        Assert.True(marker > reports!.X + reports.Width && marker < deploy,
+            $"Now ({marker}px) should sit between 10:00 ({reports.X + reports.Width}px) and 14:00 ({deploy}px).");
+    }
+
+    [Fact]
+    public async Task A_time_window_trims_the_day_and_fills_the_width()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        var header = Component("window-scroller").Locator(".veto-gantt__head-cell");
+
+        // 14:00 to 20:00: six hours, and nothing either side of them.
+        await Expect(header.Filter(new() { HasText = "14:00" })).ToHaveCountAsync(1);
+        await Expect(header.Filter(new() { HasText = "19:00" })).ToHaveCountAsync(1);
+        await Expect(header.Filter(new() { HasText = "13:00" })).ToHaveCountAsync(0);
+        await Expect(header.Filter(new() { HasText = "20:00" })).ToHaveCountAsync(0);
+
+        // The morning's data load is outside the window, so it is not listed; Deploy is.
+        await Expect(Component("window-label-etl")).ToHaveCountAsync(0);
+        await Expect(Component("window-bar-deploy")).ToBeVisibleAsync();
+
+        var canvas = Component("window-scroller").Locator(".veto-gantt__canvas");
+        var available = await Component("window-scroller").EvaluateAsync<double>("el => el.clientWidth");
+
+        for (var attempt = 0; attempt < 50
+             && Math.Abs(await canvas.EvaluateAsync<double>("el => el.getBoundingClientRect().width") - available) > 2; attempt++)
+        {
+            await Page.WaitForTimeoutAsync(100);
+        }
+
+        var width = await canvas.EvaluateAsync<double>("el => el.getBoundingClientRect().width");
+        Assert.True(Math.Abs(width - available) <= 2, $"The six hours ({width}px) should fill the chart ({available}px).");
+    }
+
+    [Fact]
+    public async Task An_app_filter_narrows_the_rows_and_reports_it()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("filters-label-design")).ToBeVisibleAsync();
+
+        await Component("filters-filter-underway").ClickAsync();
+
+        await Expect(Component("filters-filter-underway")).ToHaveAttributeAsync("aria-pressed", "true");
+
+        // Design is finished and launch not started, so neither is under way; the app shell is.
+        await Expect(Component("filters-label-design")).ToHaveCountAsync(0);
+        await Expect(Component("filters-label-launch")).ToHaveCountAsync(0);
+        await Expect(Component("filters-label-shell")).ToBeVisibleAsync();
+
+        // OnFilterChanged hands the page the whole picture: platform, shell, components, mobile, spike.
+        await Expect(Page.GetByTestId("filters-state")).ToContainTextAsync("Filters: underway · Hidden: none · 5 rows");
+    }
+
+    [Fact]
+    public async Task A_category_click_reaches_the_pages_binding()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("filters-category-design").ClickAsync();
+
+        await Expect(Page.GetByTestId("filters-state")).ToContainTextAsync("Hidden: Design");
+        await Expect(Component("filters-label-design")).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task The_page_can_set_the_filters_itself()
+    {
+        await GotoComponentAsync(Route);
+
+        await Page.GetByTestId("filters-hide-marketing").ClickAsync();
+
+        await Expect(Component("filters-category-marketing")).ToHaveAttributeAsync("aria-pressed", "false");
+        await Expect(Component("filters-label-launch")).ToHaveCountAsync(0);
+
+        await Page.GetByTestId("filters-underway").ClickAsync();
+
+        await Expect(Component("filters-filter-underway")).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(Component("filters-label-design")).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task ClearFiltersAsync_puts_every_row_back()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("filters-filter-underway").ClickAsync();
+        await Component("filters-category-marketing").ClickAsync();
+        await Expect(Component("filters-label-design")).ToHaveCountAsync(0);
+
+        await Page.GetByTestId("filters-clear").ClickAsync();
+
+        await Expect(Component("filters-label-design")).ToBeVisibleAsync();
+        await Expect(Component("filters-label-launch")).ToBeVisibleAsync();
+        await Expect(Component("filters-filter-underway")).ToHaveAttributeAsync("aria-pressed", "false");
+        await Expect(Page.GetByTestId("filters-state")).ToContainTextAsync("Filters: none · Hidden: none");
+    }
+
+    [Fact]
+    public async Task One_scale_means_no_scale_picker()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("limited-toolbar")).ToBeVisibleAsync();
+        await Expect(Component("limited-scale-day")).ToHaveCountAsync(0);
+        await Expect(Component("limited-scale-week")).ToHaveCountAsync(0);
+        await Expect(Component("limited-scale-month")).ToHaveCountAsync(0);
+
+        // The full chart still offers every level, hours included.
+        await Expect(Component("chart-scale-hour")).ToBeVisibleAsync();
+        await Expect(Component("chart-scale-month")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task A_left_out_export_format_is_not_offered()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        await Component("limited-export").HoverAsync();
+
+        await Expect(Component("limited-export-csv")).ToBeVisibleAsync();
+        await Expect(Component("limited-export-json")).ToHaveCountAsync(0);
+
+        // And a chart with export switched off has no menu at all.
+        await Expect(Component("filters-export")).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task A_narrow_chart_scrolls_its_hours_rather_than_squeezing_them()
+    {
+        await Page.SetViewportSizeAsync(1100, 900);
+        await GotoComponentAsync(Route);
+
+        var scroller = Component("today-view-scroller");
+        var hour = Component("today-view-scroller").Locator(".veto-gantt__head-row:not(.veto-gantt__head-row--groups) .veto-gantt__head-cell").First;
+
+        // Every hour keeps room for its label...
+        await Expect(hour).ToHaveTextAsync("00:00");
+        var width = await hour.EvaluateAsync<double>("el => el.getBoundingClientRect().width");
+        Assert.True(width >= 43.5, $"An hour ({width}px) should not be squeezed below 44px.");
+
+        var fits = await hour.EvaluateAsync<bool>("el => el.scrollWidth <= el.clientWidth");
+        Assert.True(fits, "The hour label should fit its cell without being cut off.");
+
+        // ...and the day scrolls instead.
+        Assert.True(await scroller.EvaluateAsync<bool>("el => el.scrollWidth > el.clientWidth + 1"),
+            "A day that does not fit should scroll.");
+    }
+
+    [Fact]
+    public async Task The_today_view_lists_times_without_the_day()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // Support runs 08:00-17:00 today; on the today view the day goes without saying.
+        await Expect(Component("hours-label-support").Locator(".veto-gantt__dates")).ToHaveTextAsync("08:00–17:00");
     }
 }
