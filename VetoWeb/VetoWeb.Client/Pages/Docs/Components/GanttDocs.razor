@@ -6,7 +6,7 @@
 
 <DocsPage Eyebrow="Components"
           Title="Gantt"
-          Lead="Projects and tasks on the left, a scrollable timeline on the right. Filtering, zoom, date navigation and export are built in.">
+          Lead="Today's work to the minute, or the whole plan: jobs, projects and servers on the left, a timeline on the right. It opens on today; filters, zoom from fifteen minutes to months, date navigation, export and dark mode are built in, and every part of it can be switched off or reworded.">
 
     <DemoBlock TestId="demo-today" Title="Today's work"
                Description="The chart opens on today: the axis covers today alone, stretched across the full width, and only the rows with work today are listed - not yesterday's, not tomorrow's. The Today / Schedule switch in the toolbar opens the whole plan, and View can be bound or set to start there."
@@ -766,7 +766,7 @@
         """;
 
     private const string SelectionCode = """
-        <VetoGantt Items="Tasks" OnItemSelected="Open" @bind-SelectedId="_selectedId" />
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule" OnItemSelected="Open" @bind-SelectedId="_selectedId" />
 
         @code {
             private void Open(VetoGanttItem item) => _detail = item;
@@ -781,7 +781,7 @@
         """;
 
     private const string ChainCode = """
-        <VetoGantt Items="Tasks" />
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule" />
 
         @code {
             private static readonly VetoGanttItem[] Tasks =
@@ -801,7 +801,7 @@
         """;
 
     private const string EditCode = """
-        <VetoGantt Items="Tasks"
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule"
                    Editable="true"
                    PersistKey="schedule"
                    SortBy="VetoGanttSort.Name"
@@ -816,10 +816,10 @@
 
     private const string LoadingCode = """
         @* Nothing has arrived yet: a placeholder chart holds the layout *@
-        <VetoGantt Items="@(_tasks ?? [])" Loading="_tasks is null" />
+        <VetoGantt Items="@(_tasks ?? [])" View="VetoGanttView.Schedule" Loading="_tasks is null" />
 
         @* Rows are already on screen: veil them rather than replacing them *@
-        <VetoGantt Items="@(_tasks ?? [])" Refreshing="_refreshing" />
+        <VetoGantt Items="@(_tasks ?? [])" View="VetoGanttView.Schedule" Refreshing="_refreshing" />
 
         <VetoButton OnClick="LoadAsync">Load</VetoButton>
 
@@ -842,10 +842,10 @@
 
     private const string TooltipCode = """
         @* Your own text in the native tooltip. Return null for no tooltip on that row. *@
-        <VetoGantt Items="Tasks" TooltipText="ShortTooltip" />
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule" TooltipText="ShortTooltip" />
 
         @* Or a card you lay out yourself. *@
-        <VetoGantt Items="Tasks">
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule">
             <TooltipTemplate Context="task">
                 <strong>@task.Name</strong>
                 <div>@task.Start.ToString("d MMM") – @task.End.ToString("d MMM") · @task.DurationDays days</div>
@@ -857,7 +857,7 @@
         </VetoGantt>
 
         @* Or none at all. *@
-        <VetoGantt Items="Tasks" ShowTooltips="false" />
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule" ShowTooltips="false" />
 
         @code {
             private static string? ShortTooltip ( VetoGanttItem item )
@@ -872,7 +872,7 @@
         <button @onclick="() => _chart.ScrollToDateAsync(new(2026, 4, 13))">Go to launch</button>
         <button @onclick='() => _chart.ShowTooltip("design")'>Point out Design</button>
 
-        <VetoGantt @ref="_chart" Items="Tasks" @bind-SelectedId="_selected">
+        <VetoGantt @ref="_chart" Items="Tasks" View="VetoGanttView.Schedule" @bind-SelectedId="_selected">
             <TooltipTemplate Context="task">
                 <strong>@task.Name</strong>
                 <div>@task.DurationDays days</div>
@@ -902,7 +902,7 @@
         <button @onclick="() => _chart.ClearFiltersAsync()">Clear filters</button>
 
         <VetoGantt @ref="_chart"
-                   Items="Tasks"
+                   Items="Tasks" View="VetoGanttView.Schedule"
                    Filters="TaskFilters"
                    @bind-HiddenCategories="_hidden"
                    @bind-ActiveFilters="_active"
@@ -926,12 +926,12 @@
 
     private const string LimitsCode = """
         @* Day only: one scale, so no picker. CSV only in the export menu. *@
-        <VetoGantt Items="Tasks"
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule"
                    Scales="[VetoGanttScale.Day]"
                    ExportFormats="[VetoGanttExportFormat.Csv]" />
 
         @* No export at all. *@
-        <VetoGantt Items="Tasks" ExportFormats="[]" />
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule" ExportFormats="[]" />
         """;
 
     private const string HoursCode = """
@@ -1062,7 +1062,7 @@
 
     private const string HeightsCode = """
         @* Compact rows, with the projects taller. *@
-        <VetoGantt Items="Tasks" RowHeight="28" />
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule" RowHeight="28" />
 
         @code {
             private static readonly IReadOnlyList<VetoGanttItem> Tasks =
@@ -1091,11 +1091,11 @@
 
     private const string InlineCode = """
         @* Each pipeline's jobs on its own line; the fold arrow opens them into rows. *@
-        <VetoGantt Items="Pipelines"
+        <VetoGantt Items="Pipelines" View="VetoGanttView.Schedule"
                    SubItemLayout="VetoGanttSubItemLayout.Inline" />
 
         @* Always one line: no fold arrows. *@
-        <VetoGantt Items="Pipelines"
+        <VetoGantt Items="Pipelines" View="VetoGanttView.Schedule"
                    SubItemLayout="VetoGanttSubItemLayout.Inline"
                    Collapsible="false" />
 
@@ -1113,13 +1113,13 @@
         """;
 
     private const string EmptyCode = """
-        <VetoGantt Items="Tasks"
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule"
                    Search="nothing matches this"
                    EmptyText="No tasks match these filters." />
         """;
 
     private const string ExportCode = """
-        <VetoGantt Items="Tasks" OnExport="OnExport" ExportFileName="schedule" />
+        <VetoGantt Items="Tasks" View="VetoGanttView.Schedule" OnExport="OnExport" ExportFileName="schedule" />
 
         @code {
             private async Task OnExport(VetoGanttExportRequest request)
