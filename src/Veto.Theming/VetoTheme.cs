@@ -38,7 +38,9 @@ public sealed partial record VetoTheme
 
     /// <summary>
     /// Renders the overrides as CSS. Light values and the shape/type tokens go on
-    /// <c>:root</c>; dark values go behind both <c>[data-veto-theme="dark"]</c> and
+    /// <c>:root</c> and on <c>[data-veto-theme="light"]</c>, so a component pinned to the light
+    /// palette on a dark page gets the app's light palette rather than the library's default;
+    /// dark values go behind both <c>[data-veto-theme="dark"]</c> and
     /// <c>prefers-color-scheme</c>, matching how <c>VetoStyles.css</c> is structured.
     /// </summary>
     public string ToCss ()
@@ -53,7 +55,7 @@ public sealed partial record VetoTheme
 
         if (root.Length > 0)
         {
-            css.Append(":root{").Append(root).Append('}');
+            css.Append(":root,[data-veto-theme=\"light\"]{").Append(root).Append('}');
         }
 
         StringBuilder dark = new();

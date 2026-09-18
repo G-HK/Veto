@@ -1,5 +1,34 @@
 namespace Veto.Core;
 
+/// <summary>
+/// Which palette a component is drawn in. <see cref="Inherit"/> follows the page - the theme
+/// the app set, or the reader's system setting; the other two pin one component, whatever the
+/// page around it is doing.
+/// </summary>
+public enum VetoColorScheme
+{
+    /// <summary>Follow the page's theme.</summary>
+    Inherit,
+
+    /// <summary>Always the light palette, even on a dark page.</summary>
+    Light,
+
+    /// <summary>Always the dark palette, even on a light page.</summary>
+    Dark
+}
+
+/// <summary>The attribute value that pins a palette, or null to follow the page.</summary>
+public static class VetoColorSchemeExtensions
+{
+    /// <summary>The value for <c>data-veto-theme</c>, or null for <see cref="VetoColorScheme.Inherit"/>.</summary>
+    public static string? ToThemeAttribute ( this VetoColorScheme scheme ) => scheme switch
+    {
+        VetoColorScheme.Light => "light",
+        VetoColorScheme.Dark => "dark",
+        _ => null
+    };
+}
+
 /// <summary>Relative size of a component. Maps to a <c>--sm</c>/<c>--md</c>/<c>--lg</c> modifier class.</summary>
 public enum VetoSize
 {

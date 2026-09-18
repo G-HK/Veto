@@ -682,3 +682,11 @@
 .veto-gantt--now-label.veto-gantt--single-header .veto-gantt__sidebar-head {
     height: calc(1.625rem + 1px + var(--veto-gantt-now-band));
 }
+
+/* The time alone, in the marker's colour: no tab behind it. */
+.veto-gantt__now-label--text {
+    padding: 0;
+    color: var(--veto-color-danger);
+    background-color: transparent;
+    border-radius: 0;
+}

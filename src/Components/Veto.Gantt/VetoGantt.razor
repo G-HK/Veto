@@ -11,7 +11,7 @@
 @if (Visible)
 {
     <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
-         style="@CssStyle" data-testid="@TestId" data-store="@(PersistKey is null ? null : StoreBackend)"
+         style="@CssStyle" data-testid="@TestId" data-veto-theme="@ColorScheme.ToThemeAttribute()" data-store="@(PersistKey is null ? null : StoreBackend)"
          data-draggable="@(Editable ? (DragHandleAttached ? "true" : "false") : null)">
 
         @if (ShowToolbar)

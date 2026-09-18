@@ -458,6 +458,17 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public string NowBandHeight { get; set; } = "1rem";
 
+    /// <summary>How the time on the now marker is drawn: a coloured tab, or the time alone.</summary>
+    [Parameter]
+    public VetoGanttNowLabelAppearance NowLabelAppearance { get; set; } = VetoGanttNowLabelAppearance.Tab;
+
+    /// <summary>
+    /// Pins the chart to the light or dark palette, whatever the page is in. Inherit, the
+    /// default, follows the page - so a theme toggle anywhere on it switches the chart too.
+    /// </summary>
+    [Parameter]
+    public VetoColorScheme ColorScheme { get; set; } = VetoColorScheme.Inherit;
+
     /// <summary>
     /// Moves the now marker, and its time, as the clock moves - checked twice a minute. Has no
     /// effect with <see cref="TimeOverride"/> set, which holds now still.
@@ -704,9 +715,12 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     {
         const double reach = 24;
 
-        return offset < reach ? "veto-gantt__now-label veto-gantt__now-label--start"
-            : offset > Timeline.Width - reach ? "veto-gantt__now-label veto-gantt__now-label--end"
-            : "veto-gantt__now-label";
+        var edge = offset < reach ? " veto-gantt__now-label--start"
+            : offset > Timeline.Width - reach ? " veto-gantt__now-label--end"
+            : string.Empty;
+        var appearance = NowLabelAppearance == VetoGanttNowLabelAppearance.Text ? " veto-gantt__now-label--text" : string.Empty;
+
+        return "veto-gantt__now-label" + edge + appearance;
     }
 
     /// <summary>

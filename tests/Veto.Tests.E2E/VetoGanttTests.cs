@@ -1331,4 +1331,97 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
             Assert.True(Math.Abs(y1 - y2) <= 1, $"In {chart}, the first name ({y1}px) should be level with its row ({y2}px).");
         }
     }
+
+    private Task<string> BackgroundAsync(string testId)
+        => Component(testId).EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
+
+    private Task SetPageThemeAsync(string mode)
+        => Page.EvaluateAsync($"() => document.documentElement.setAttribute('data-veto-theme', '{mode}')");
+
+    [Fact]
+    public async Task A_following_chart_switches_with_the_page()
+    {
+        await GotoComponentAsync(Route);
+
+        await SetPageThemeAsync("light");
+        var light = await BackgroundAsync("theme-follow");
+
+        await SetPageThemeAsync("dark");
+        var dark = await BackgroundAsync("theme-follow");
+
+        Assert.NotEqual(light, dark);
+    }
+
+    [Fact]
+    public async Task A_pinned_chart_keeps_its_palette_whatever_the_page_is_in()
+    {
+        await GotoComponentAsync(Route);
+
+        await SetPageThemeAsync("light");
+        var darkOnLight = await BackgroundAsync("theme-dark");
+        var lightOnLight = await BackgroundAsync("theme-light");
+
+        await SetPageThemeAsync("dark");
+        var darkOnDark = await BackgroundAsync("theme-dark");
+        var lightOnDark = await BackgroundAsync("theme-light");
+
+        // Each stays put while the page flips around it...
+        Assert.Equal(darkOnLight, darkOnDark);
+        Assert.Equal(lightOnLight, lightOnDark);
+
+        // ...and they really are the two palettes.
+        Assert.NotEqual(darkOnLight, lightOnLight);
+        Assert.Equal(lightOnLight, await Page.EvaluateAsync<string>(@"() => {
+            document.documentElement.setAttribute('data-veto-theme', 'light');
+            return getComputedStyle(document.querySelector('[data-testid=theme-follow]')).backgroundColor;
+        }"));
+    }
+
+    [Fact]
+    public async Task A_chart_pinned_to_light_keeps_the_apps_own_colours()
+    {
+        await GotoComponentAsync(Route);
+        await SetPageThemeAsync("dark");
+
+        // The docs site has a theme of its own. Pinned light on a dark page, the chart should be
+        // drawn in the site's light palette - not fall back to the library's default one.
+        var pinned = await Component("theme-light-bar-etl").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
+
+        await SetPageThemeAsync("light");
+        var following = await Component("theme-follow-bar-etl").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
+
+        Assert.Equal(following, pinned);
+    }
+
+    [Fact]
+    public async Task The_needle_time_can_be_just_the_time()
+    {
+        await GotoComponentAsync(Route);
+
+        var plain = Component("theme-dark-now-label");
+        await Expect(plain).ToHaveTextAsync("11:30");
+        Assert.Equal("rgba(0, 0, 0, 0)", await plain.EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor"));
+
+        // The default is still the tab.
+        Assert.NotEqual("rgba(0, 0, 0, 0)", await Component("theme-light-now-label").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor"));
+    }
+
+    [Fact]
+    public async Task The_theme_toggle_in_the_charts_toolbar_switches_the_chart()
+    {
+        await GotoComponentAsync(Route);
+        await SetPageThemeAsync("light");
+
+        var before = await BackgroundAsync("theme-follow");
+        await Component("theme-follow-toggle").ClickAsync();
+
+        var after = before;
+        for (var attempt = 0; attempt < 50 && after == before; attempt++)
+        {
+            await Page.WaitForTimeoutAsync(100);
+            after = await BackgroundAsync("theme-follow");
+        }
+
+        Assert.NotEqual(before, after);
+    }
 }

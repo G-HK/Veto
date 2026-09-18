@@ -198,6 +198,45 @@
                    Height="11rem" />
     </DemoBlock>
 
+    <DemoBlock TestId="demo-theme" Title="Dark and light mode"
+               Description="The chart takes every colour from Veto's theme tokens, so it switches with the page: set up Veto.Theming once - AddVetoTheming(), the init script, a VetoThemeProvider in the layout - and any VetoThemeToggle switches the chart along with everything else. The Toolbar slot puts one in the chart's own toolbar, as in the first chart. ColorScheme pins one chart to a palette whatever the page is doing: the second is always dark, the third always light. The dark one also shows NowLabelAppearance=Text - the time on the needle with no tab behind it. To change the colours themselves, give the theme service a VetoTheme with a light and a dark palette: the chart, and every other Veto component, picks up both - and a chart pinned to one palette gets your version of it."
+               Code="@ThemeCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoGantt TestId="theme-follow"
+                       Items="Jobs"
+                       TodayOverride="Today"
+                       TimeOverride="new TimeOnly(11, 30)"
+                       ShowSearch="false"
+                       ShowCategoryFilter="false"
+                       Exportable="false"
+                       SidebarWidth="13rem"
+                       Height="11rem">
+                <Toolbar>
+                    <VetoThemeToggle TestId="theme-follow-toggle" />
+                </Toolbar>
+            </VetoGantt>
+
+            <VetoGantt TestId="theme-dark"
+                       Items="Jobs"
+                       TodayOverride="Today"
+                       TimeOverride="new TimeOnly(11, 30)"
+                       ColorScheme="VetoColorScheme.Dark"
+                       NowLabelAppearance="VetoGanttNowLabelAppearance.Text"
+                       ShowToolbar="false"
+                       SidebarWidth="13rem"
+                       Height="9rem" />
+
+            <VetoGantt TestId="theme-light"
+                       Items="Jobs"
+                       TodayOverride="Today"
+                       TimeOverride="new TimeOnly(11, 30)"
+                       ColorScheme="VetoColorScheme.Light"
+                       ShowToolbar="false"
+                       SidebarWidth="13rem"
+                       Height="9rem" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-selection"
                Title="Selection"
                Description="Bars are buttons, so they are reachable by keyboard and announce themselves. OnItemSelected gives you the row that was activated; SelectedId can be bound both ways."
@@ -640,6 +679,8 @@
         new("ShowNowLabel", "bool", "true", "Shows the current time on top of the now marker, in the header."),
         new("NowLabelFormat", "string?", "null", "The format of that time. Null reads HH:mm on the hour scales and the date on coarser ones."),
         new("NowBandHeight", "string", "\"1rem\"", "The height of the band at the foot of the header the time sits in, clear of the hour and day labels."),
+        new("NowLabelAppearance", "VetoGanttNowLabelAppearance", "Tab", "Tab: the time on a tab in the marker's colour. Text: the time alone, no tab."),
+        new("ColorScheme", "VetoColorScheme", "Inherit", "Inherit follows the page's theme. Light or Dark pins this chart to one palette."),
         new("LiveNowMarker", "bool", "true", "Moves the now marker and its time as the clock moves. Has no effect with TimeOverride set."),
         new("SortBy", "VetoGanttSort", "Source", "Source, Name, Start, End or Duration. Applied within each level of the tree."),
         new("SortDescending", "bool", "false", "Reverses whatever SortBy produces."),
@@ -940,6 +981,59 @@
                 {
                     Category = job.Server
                 }).ToList();
+        }
+        """;
+
+    private const string ThemeCode = """
+        @* Once, in Program.cs: *@
+        builder.Services.AddVetoTheming();
+
+        @* Once, in <head> - before the stylesheet, so the saved theme applies before first paint: *@
+        <script src="_content/Veto.Theming/veto-theme-init.js"></script>
+        <link rel="stylesheet" href="_content/Veto.Core/VetoStyles.css" />
+
+        @* Once, in the layout: *@
+        <VetoThemeProvider />
+
+        @* The chart follows the page. A toggle anywhere switches it - or put one in its toolbar: *@
+        <VetoGantt Items="Jobs">
+            <Toolbar>
+                <VetoThemeToggle />
+            </Toolbar>
+        </VetoGantt>
+
+        @* Or pin one chart to a palette, whatever the page is in: *@
+        <VetoGantt Items="Jobs"
+                   ColorScheme="VetoColorScheme.Dark"
+                   NowLabelAppearance="VetoGanttNowLabelAppearance.Text" />
+
+        @* Or switch from code: *@
+        @inject IVetoThemeService Theme
+        <button @onclick="() => Theme.ToggleAsync()">Dark / light</button>
+
+        @* Your own colours, one palette per mode. The bars take Primary unless an item has a
+           Color of its own; a Color given as a token - var(--veto-color-success) - follows the
+           mode too. *@
+        @code {
+            protected override Task OnInitializedAsync () => Theme.SetThemeAsync(new VetoTheme
+            {
+                Light = new VetoPalette
+                {
+                    Primary = "#0f766e",
+                    Danger = "#b91c1c",            // the now marker and its time
+                    Surface = "#ffffff",
+                    Text = "#0f172a",
+                    Border = "#e2e8f0"
+                },
+                Dark = new VetoPalette
+                {
+                    Primary = "#2dd4bf",
+                    Danger = "#f87171",
+                    Surface = "#0b1220",
+                    Text = "#e2e8f0",
+                    Border = "#1e293b"
+                }
+            });
         }
         """;
 

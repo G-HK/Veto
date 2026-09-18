@@ -11,9 +11,15 @@
  * twice - once behind an explicit [data-veto-theme="dark"] on the root element,
  * and once behind prefers-color-scheme for users who never made a choice. Set
  * data-veto-theme="light" or "dark" on <html> to override the OS preference.
+ *
+ * The attribute works on any element, not only <html>: the tokens are custom properties and
+ * inherit, so data-veto-theme on a component's root pins that component to one palette on a
+ * page in the other. The light palette is therefore declared for the attribute too - on :root
+ * alone, a light component on a dark page would inherit the dark values.
  */
 
-:root {
+:root,
+[data-veto-theme="light"] {
     color-scheme: light;
 
     /* Accent roles */

@@ -70,6 +70,16 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
            GroupRowHeight="44"
            DateLineFormat="ddd d MMM" />
 
+@* Dark and light: the chart follows the page's theme (Veto.Theming), so a VetoThemeToggle
+   anywhere switches it - the Toolbar slot puts one in the chart itself. ColorScheme pins one
+   chart to a palette; a VetoTheme with Light and Dark palettes recolours it in both modes.
+   NowLabelAppearance="Text" shows the needle's time without the tab. *@
+<VetoGantt Items="Tasks" ColorScheme="VetoColorScheme.Dark" NowLabelAppearance="VetoGanttNowLabelAppearance.Text">
+    <Toolbar>
+        <VetoThemeToggle />
+    </Toolbar>
+</VetoGantt>
+
 @* Filters of your own, bound both ways, with one event for any change. Scales and
    ExportFormats choose which zoom levels and export formats are offered. *@
 <VetoGantt Items="Tasks"

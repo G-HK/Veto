@@ -106,6 +106,16 @@ public static class VetoGanttScaleExtensions
         _ => 30
     };
 }
+/// <summary>How the time on the now marker is drawn.</summary>
+public enum VetoGanttNowLabelAppearance
+{
+    /// <summary>A tab in the marker's colour, the time in the contrasting colour on it.</summary>
+    Tab,
+
+    /// <summary>Just the time, in the marker's colour - no background, no border.</summary>
+    Text
+}
+
 /// <summary>What span of time the chart opens on.</summary>
 public enum VetoGanttView
 {

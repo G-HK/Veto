@@ -46,6 +46,19 @@ script first: it applies the saved theme before anything renders.
 <VetoThemeToggle ShowSystemOption="true" />
 ```
 
+Your own colours, one palette for each mode. Every Veto component follows them, including one
+pinned to a palette with `ColorScheme`:
+
+```csharp
+@inject IVetoThemeService Theme
+
+await Theme.SetThemeAsync(new VetoTheme
+{
+    Light = new VetoPalette { Primary = "#0f766e", Surface = "#ffffff", Text = "#0f172a" },
+    Dark = new VetoPalette { Primary = "#2dd4bf", Surface = "#0b1220", Text = "#e2e8f0" }
+});
+```
+
 ## Documentation
 
 The provider and the tokens are documented on the Veto docs site at `/docs/theming/provider`.
