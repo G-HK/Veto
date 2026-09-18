@@ -1,10 +1,14 @@
 name: ci
 
+# Started by hand only (Actions > ci > Run workflow), so a push costs nothing until you ask.
+# The E2E suite is the expensive part; untick run_tests for a build-and-pack check only.
 on:
-  pull_request:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      run_tests:
+        description: Run the E2E tests
+        type: boolean
+        default: true
 
 jobs:
   build:
@@ -25,9 +29,11 @@ jobs:
         run: dotnet build Veto.slnx -c Release --no-restore
 
       - name: Install Playwright browsers
+        if: ${{ inputs.run_tests }}
         run: pwsh tests/Veto.Tests.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
       - name: Test
+        if: ${{ inputs.run_tests }}
         run: dotnet test tests/Veto.Tests.E2E -c Release --no-build
 
       # Packing on every run, not just on release, is the point: a broken .nuspec or a static

@@ -12,9 +12,8 @@ name: release
 on:
   workflow_dispatch:
     inputs:
-      # Off by default: the E2E suite is the expensive part of a release, and every commit on
-      # main has already been through it in the ci workflow. Tick it for a release that should
-      # re-prove itself anyway.
+      # Off by default: the E2E suite is the expensive part of a release. Run the ci workflow
+      # with tests first, or tick this for a release that should prove itself on its own.
       run_tests:
         description: Run the E2E tests before publishing
         type: boolean
