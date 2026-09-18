@@ -203,7 +203,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// alone - and with one option there is nothing to pick, so the picker is not shown at all.
     /// </summary>
     [Parameter]
-    public IReadOnlyList<VetoGanttScale> Scales { get; set; } = [VetoGanttScale.Hour, VetoGanttScale.Day, VetoGanttScale.Week, VetoGanttScale.Month];
+    public IReadOnlyList<VetoGanttScale> Scales { get; set; } = [VetoGanttScale.QuarterHour, VetoGanttScale.Hour, VetoGanttScale.Day, VetoGanttScale.Week, VetoGanttScale.Month];
 
     /// <summary>Whether the toolbar includes the Day / Week / Month picker.</summary>
     [Parameter]
@@ -385,6 +385,26 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     public double MinHourWidth { get; set; } = 44;
 
     /// <summary>
+    /// Stacks jobs that overlap in time into lanes when they share a line, growing the row a
+    /// lane at a time, so two jobs running at once are both visible. Off, they are drawn over
+    /// each other at the row's own height.
+    /// </summary>
+    [Parameter]
+    public bool StackOverlaps { get; set; } = true;
+
+    /// <summary>
+    /// Groups the top-level rows by a key - a server, a project, a team - under a row per key,
+    /// without the app writing those rows itself. A group spans its jobs, folds like any parent,
+    /// and with <see cref="SubItemLayout"/> set to inline keeps its jobs on one line. Rows whose
+    /// key is null are left ungrouped.
+    /// </summary>
+    /// <example>
+    /// <code>GroupBy="item =&gt; item.Category"</code>
+    /// </example>
+    [Parameter]
+    public Func<VetoGanttItem, string?>? GroupBy { get; set; }
+
+    /// <summary>
     /// Shows a placeholder chart instead of the rows, for the wait before any data has arrived.
     /// </summary>
     /// <remarks>
@@ -475,11 +495,22 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// Where the today marker goes: at now on the hour scale, where the time of day is visible,
     /// and at the start of today on the coarser ones. Null when that is off the axis.
     /// </summary>
-    private double? TodayMarkerOffset => EffectiveScale == VetoGanttScale.Hour
+    private double? TodayMarkerOffset => EffectiveScale.ShowsClockTime()
         ? (Timeline.Contains(Now) ? Timeline.OffsetAt(Now) : null)
         : (Timeline.Contains(Today) ? Math.Max(0, Timeline.OffsetOf(Today)) : null);
 
     private VetoGanttTimeline Timeline { get; set; } = default!;
+
+    /// <summary>The items plus any rows <see cref="GroupBy"/> makes. What every lookup works from.</summary>
+    private IReadOnlyList<VetoGanttItem> AllItems { get; set; } = [];
+
+    // The ids of the rows GroupBy made, which are never matched by a filter in their own right:
+    // a group is listed only for the jobs under it.
+    private readonly HashSet<string> _groupIds = [];
+
+    // Where each row starts, top to bottom. A row with stacked lanes is taller than the rest, so
+    // a row's position is a running total rather than its index times the row height.
+    private double[] _rowTops = [];
 
     private IReadOnlyList<Row> Rows { get; set; } = [];
 
@@ -571,6 +602,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
                 g.Select(i => i.Color).FirstOrDefault(c => c is not null) ?? BarColor))
             .ToList();
 
+        AllItems = WithGroups();
+
         var visible = Filter().Select(Resolve).ToList();
 
         var previous = Timeline?.PixelsPerDay;
@@ -583,6 +616,16 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             _dragAttached = false;
         }
         Rows = Flatten(visible);
+
+        _rowTops = new double[Rows.Count];
+        var top = 0.0;
+
+        for (var i = 0; i < Rows.Count; i++)
+        {
+            _rowTops[i] = top;
+            top += RowHeight * Rows[i].Lanes;
+        }
+
         Links = ShowDependencies ? BuildLinks() : [];
     }
 
@@ -596,22 +639,23 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// </remarks>
     private List<Link> BuildLinks ()
     {
-        // An inline sub-item sits on its parent's line, so arrows to and from it start and end there.
-        Dictionary<string, (VetoGanttItem Item, int Row)> index = new();
+        // An inline sub-item sits on its parent's line, in its own lane, so arrows to and from it
+        // start and end there.
+        Dictionary<string, (VetoGanttItem Item, double Y)> index = new();
 
         for (var i = 0; i < Rows.Count; i++)
         {
-            index[Rows[i].Item.Id] = (Rows[i].Item, i);
+            index[Rows[i].Item.Id] = (Rows[i].Item, LaneCentre(i, 0));
 
             foreach (var inline in Rows[i].Inline)
             {
-                index[inline.Id] = (inline, i);
+                index[inline.Id] = (inline, LaneCentre(i, Rows[i].LaneOf(inline)));
             }
         }
 
         var links = new List<Link>();
 
-        foreach (var (item, toRow) in index.Values)
+        foreach (var (item, toY) in index.Values)
         {
             foreach (var predecessorId in item.DependsOn)
             {
@@ -623,7 +667,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
                 var (fromLeft, fromWidth) = Timeline.Place(from.Item.StartsAt, from.Item.EndsAt);
                 var (toLeft, _) = Timeline.Place(item.StartsAt, item.EndsAt);
 
-                links.Add(new Link(predecessorId, item.Id, fromLeft + fromWidth, from.Row, toLeft, toRow));
+                links.Add(new Link(predecessorId, item.Id, fromLeft + fromWidth, from.Y, toLeft, toY));
             }
         }
 
@@ -631,7 +675,16 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     }
 
     /// <summary>The height of the arrow layer: exactly the rows it spans.</summary>
-    private double LinkLayerHeight => Rows.Count * RowHeight;
+    private double LinkLayerHeight => Rows.Count == 0 ? 0 : _rowTops[^1] + RowHeight * Rows[^1].Lanes;
+
+    /// <summary>The height of a row: one lane, or as many as its stacked jobs need.</summary>
+    private string? RowHeightStyle ( Row row )
+        => row.Lanes > 1
+            ? string.Create(CultureInfo.InvariantCulture, $"height: {RowHeight * row.Lanes:0.##}px")
+            : null;
+
+    /// <summary>The vertical centre of a lane within the chart, for the arrows.</summary>
+    private double LaneCentre ( int row, int lane ) => _rowTops[row] + lane * RowHeight + RowHeight / 2;
 
     /// <summary>
     /// Builds the elbow path for one arrow, in the layer's own coordinates.
@@ -645,8 +698,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     {
         const double stub = 10;
 
-        var y1 = link.FromRow * RowHeight + RowHeight / 2;
-        var y2 = link.ToRow * RowHeight + RowHeight / 2;
+        var y1 = link.FromY;
+        var y2 = link.ToY;
         var x1 = link.FromX;
         var x2 = link.ToX;
 
@@ -669,6 +722,105 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private bool IsLinkActive ( Link link )
         => SelectedId is not null && (link.FromId == SelectedId || link.ToId == SelectedId);
 
+    /// <summary>
+    /// The items with a row added per <see cref="GroupBy"/> key, each group placed where its
+    /// first job was, and its jobs moved under it.
+    /// </summary>
+    private IReadOnlyList<VetoGanttItem> WithGroups ()
+    {
+        _groupIds.Clear();
+
+        if (GroupBy is null)
+        {
+            return Items;
+        }
+
+        var ids = Items.Select(i => i.Id).ToHashSet();
+        var members = new Dictionary<string, List<VetoGanttItem>>();
+
+        string? KeyOf ( VetoGanttItem item )
+            => item.ParentId is null || !ids.Contains(item.ParentId) ? GroupBy(item) : null;
+
+        foreach (var item in Items)
+        {
+            if (KeyOf(item) is { } key)
+            {
+                if (!members.TryGetValue(key, out var list))
+                {
+                    members[key] = list = [];
+                }
+
+                list.Add(item with { ParentId = GroupId(key) });
+            }
+        }
+
+        var result = new List<VetoGanttItem>(Items.Count + members.Count);
+        var emitted = new HashSet<string>();
+
+        foreach (var item in Items)
+        {
+            if (KeyOf(item) is not { } key)
+            {
+                result.Add(item);
+                continue;
+            }
+
+            if (!emitted.Add(key))
+            {
+                continue;
+            }
+
+            var jobs = members[key];
+            var group = new VetoGanttItem(
+                GroupId(key),
+                key,
+                jobs.Min(job => Resolve(job).StartsAt),
+                jobs.Max(job => Resolve(job).EndsAt));
+
+            _groupIds.Add(group.Id);
+            result.Add(group);
+            result.AddRange(jobs);
+        }
+
+        return result;
+    }
+
+    /// <summary>A group row's id: readable in a test id, and apart from any id an app would use.</summary>
+    private static string GroupId ( string key ) => $"group-{Slug(key)}";
+
+    /// <summary>
+    /// Puts overlapping jobs on separate lanes: each job takes the first lane that is free by
+    /// the time it starts. Jobs that only touch - one ending at 09:00, the next starting then -
+    /// share a lane.
+    /// </summary>
+    private static Dictionary<string, int> AssignLanes ( IEnumerable<VetoGanttItem> jobs, out int lanes )
+    {
+        var lane = new Dictionary<string, int>();
+        var freeAt = new List<DateTime>();
+
+        foreach (var job in jobs.OrderBy(j => j.StartsAt).ThenBy(j => j.EndsAt))
+        {
+            // A milestone is a moment, so it only collides with another at the same instant.
+            var end = job.IsMilestone ? job.StartsAt.AddTicks(1) : job.EndsAt;
+            var index = freeAt.FindIndex(free => free <= job.StartsAt);
+
+            if (index < 0)
+            {
+                index = freeAt.Count;
+                freeAt.Add(end);
+            }
+            else
+            {
+                freeAt[index] = end;
+            }
+
+            lane[job.Id] = index;
+        }
+
+        lanes = Math.Max(1, freeAt.Count);
+        return lane;
+    }
+
     /// <summary>The span the today view covers: today, or the explicit range, trimmed to the time window.</summary>
     private (DateTime From, DateTime To) ViewWindow ()
     {
@@ -686,12 +838,17 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// </summary>
     private List<VetoGanttItem> Filter ()
     {
-        var byId = Items.ToDictionary(i => i.Id);
+        var byId = AllItems.ToDictionary(i => i.Id);
 
         bool Matches ( VetoGanttItem item )
         {
             if (!string.IsNullOrWhiteSpace(Search)
                 && !item.Name.Contains(Search, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (_groupIds.Contains(item.Id))
             {
                 return false;
             }
@@ -728,7 +885,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         var keep = new HashSet<string>();
 
-        foreach (var item in Items.Where(Matches))
+        foreach (var item in AllItems.Where(Matches))
         {
             keep.Add(item.Id);
 
@@ -746,7 +903,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             }
         }
 
-        return Items.Where(i => keep.Contains(i.Id)).ToList();
+        return AllItems.Where(i => keep.Contains(i.Id)).ToList();
     }
 
     /// <summary>
@@ -812,7 +969,12 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
                 Leaves(item.Id, inline);
             }
 
-            rows.Add(new Row(item, depth, hasChildren, inline));
+            var lanes = 1;
+            var lane = StackOverlaps && inline.Count > 1
+                ? AssignLanes(inline, out lanes)
+                : new Dictionary<string, int>();
+
+            rows.Add(new Row(item, depth, hasChildren, inline, lanes, lane));
 
             if (!expanded)
             {
@@ -1027,7 +1189,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             return;
         }
 
-        if (Items.FirstOrDefault(i => i.Id == id) is { } item)
+        if (AllItems.FirstOrDefault(i => i.Id == id) is { } item)
         {
             await SelectAsync(item);
             StateHasChanged();
@@ -1048,8 +1210,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
     private IEnumerable<string> ParentIds ()
     {
-        var parents = Items.Where(i => i.ParentId is not null).Select(i => i.ParentId!).ToHashSet();
-        return Items.Where(i => parents.Contains(i.Id)).Select(i => i.Id);
+        var parents = AllItems.Where(i => i.ParentId is not null).Select(i => i.ParentId!).ToHashSet();
+        return AllItems.Where(i => parents.Contains(i.Id)).Select(i => i.Id);
     }
 
     private void SetCollapsed ( IEnumerable<string> ids, bool collapsed )
@@ -1082,7 +1244,19 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private string CellStyle ( VetoGanttTimeline.Column column )
         => string.Create(CultureInfo.InvariantCulture, $"left: {column.Offset:0.##}px; width: {column.Width:0.##}px");
 
-    private string BarStyle ( VetoGanttItem item )
+    private string BarStyle ( VetoGanttItem item ) => BarStyle(item, lane: 0, lanes: 1);
+
+    private string BarStyle ( VetoGanttItem item, int lane, int lanes )
+    {
+        // In a row of stacked lanes a bar is centred on its own lane rather than the row.
+        var laneTop = lanes > 1
+            ? string.Create(CultureInfo.InvariantCulture, $"; top: {lane * RowHeight + RowHeight / 2:0.##}px")
+            : string.Empty;
+
+        return BarStyleCore(item) + laneTop;
+    }
+
+    private string BarStyleCore ( VetoGanttItem item )
     {
         var (offset, width) = Timeline.Place(item.StartsAt, item.EndsAt);
         var color = item.Color ?? BarColor;
@@ -1213,10 +1387,11 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     {
         var (left, _) = Timeline.Place(item.StartsAt, item.EndsAt);
         var above = index >= Rows.Count / 2 && index > 0;
+        var laneTop = _rowTops[index] + Rows[index].LaneOf(item) * RowHeight;
 
         return above
-            ? string.Create(CultureInfo.InvariantCulture, $"left: {left:0.##}px; bottom: {(Rows.Count - index) * RowHeight:0.##}px")
-            : string.Create(CultureInfo.InvariantCulture, $"left: {left:0.##}px; top: {(index + 1) * RowHeight:0.##}px");
+            ? string.Create(CultureInfo.InvariantCulture, $"left: {left:0.##}px; bottom: {LinkLayerHeight - laneTop:0.##}px")
+            : string.Create(CultureInfo.InvariantCulture, $"left: {left:0.##}px; top: {laneTop + RowHeight:0.##}px");
     }
 
     private string TooltipFor ( VetoGanttItem item )
@@ -1496,7 +1671,11 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// One line of the chart. <c>Inline</c> holds the sub-items drawn on this row's line instead
     /// of on rows of their own - empty unless the row is a folded parent in the inline layout.
     /// </summary>
-    private sealed record Row ( VetoGanttItem Item, int Depth, bool HasChildren, IReadOnlyList<VetoGanttItem> Inline );
+    private sealed record Row ( VetoGanttItem Item, int Depth, bool HasChildren, IReadOnlyList<VetoGanttItem> Inline, int Lanes, IReadOnlyDictionary<string, int> Lane )
+    {
+        /// <summary>The lane an inline job is drawn on; zero for everything else.</summary>
+        public int LaneOf ( VetoGanttItem item ) => Lane.TryGetValue(item.Id, out var lane) ? lane : 0;
+    }
 
     /// <summary>A category and the colour the rows in it are drawn with.</summary>
     private sealed record Category ( string Name, string Color );
@@ -1536,7 +1715,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>Applies a move or resize, whether it came from a drag or the keyboard.</summary>
     private async Task ApplyEditAsync ( string id, VetoGanttEdit edit, int days )
     {
-        var item = Items.FirstOrDefault(i => i.Id == id);
+        var item = AllItems.FirstOrDefault(i => i.Id == id);
 
         if (item is null || days == 0 || !Editable)
         {
@@ -1765,5 +1944,5 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private sealed record StoredOverride ( string Item, string Start, string Finish );
 
     /// <summary>One dependency arrow, resolved to row positions and pixel offsets.</summary>
-    private sealed record Link ( string FromId, string ToId, double FromX, int FromRow, double ToX, int ToRow );
+    private sealed record Link ( string FromId, string ToId, double FromX, double FromY, double ToX, double ToY );
 }

@@ -4,6 +4,12 @@ namespace Veto.Components.Gantt;
 public enum VetoGanttScale
 {
     /// <summary>
+    /// One column per quarter of an hour, under the hour it belongs to. For jobs that run for
+    /// minutes, where an hour column would lump a five-minute run with a fifty-minute one.
+    /// </summary>
+    QuarterHour,
+
+    /// <summary>
     /// One column per hour. For a single day's jobs, and what the today view uses by default.
     /// </summary>
     Hour,
@@ -44,12 +50,13 @@ public enum VetoGanttSort
 public static class VetoGanttScaleExtensions
 {
     /// <summary>
-    /// How wide one day is at this scale, in pixels. Bars are always positioned by day and
-    /// multiplied by this, so a bar never has to know which scale is showing.
+    /// How wide one day is at this scale, in pixels. Bars are positioned in days - fractional
+    /// for times of day - multiplied by this, so a bar never has to know which scale is showing.
     /// </summary>
     public static double PixelsPerDay ( this VetoGanttScale scale ) => scale switch
     {
         // 48px an hour: room for an "08:00" label, and a half-hour job is still a visible bar.
+        VetoGanttScale.QuarterHour => 24 * 4 * 36,
         VetoGanttScale.Hour => 24 * 48,
         VetoGanttScale.Day => 40,
         VetoGanttScale.Week => 16,
@@ -59,10 +66,22 @@ public static class VetoGanttScaleExtensions
     /// <summary>How far the Previous and Next buttons move, in days.</summary>
     public static int StepDays ( this VetoGanttScale scale ) => scale switch
     {
+        VetoGanttScale.QuarterHour => 1,
         VetoGanttScale.Hour => 1,
         VetoGanttScale.Day => 7,
         VetoGanttScale.Week => 28,
         _ => 90
+    };
+
+    /// <summary>Whether the scale shows the time of day rather than whole days.</summary>
+    public static bool ShowsClockTime ( this VetoGanttScale scale ) =>
+        scale is VetoGanttScale.Hour or VetoGanttScale.QuarterHour;
+
+    /// <summary>The scale's name in the picker.</summary>
+    public static string ToLabel ( this VetoGanttScale scale ) => scale switch
+    {
+        VetoGanttScale.QuarterHour => "15 min",
+        _ => scale.ToString()
     };
 
     /// <summary>The modifier suffix for this scale, e.g. <c>day</c>.</summary>
@@ -80,6 +99,7 @@ public static class VetoGanttScaleExtensions
     /// </remarks>
     public static int SnapDays ( this VetoGanttScale scale ) => scale switch
     {
+        VetoGanttScale.QuarterHour => 1,
         VetoGanttScale.Hour => 1,
         VetoGanttScale.Day => 1,
         VetoGanttScale.Week => 7,

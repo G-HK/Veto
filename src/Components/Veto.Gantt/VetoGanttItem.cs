@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Veto.Components.Gantt;
 
 /// <summary>
@@ -9,6 +11,48 @@ namespace Veto.Components.Gantt;
 /// </remarks>
 public sealed record VetoGanttItem
 {
+    /// <summary>Creates an item to fill in with an object initializer: <c>new() { Id = ..., Start = ... }</c>.</summary>
+    public VetoGanttItem ()
+    {
+    }
+
+    /// <summary>
+    /// Creates an item from exact timestamps - a job that ran from 08:00 to 08:05 - rather than
+    /// from days and times of day. The end is exclusive, as a timestamp's end is: a job ending
+    /// at midnight ends with the day before, not a moment into the next one.
+    /// </summary>
+    [SetsRequiredMembers]
+    public VetoGanttItem ( string id, string name, DateTime startsAt, DateTime endsAt )
+    {
+        Id = id;
+        Name = name;
+
+        Start = DateOnly.FromDateTime(startsAt);
+        StartTime = startsAt.TimeOfDay == TimeSpan.Zero ? null : TimeOnly.FromDateTime(startsAt);
+
+        if (endsAt.TimeOfDay == TimeSpan.Zero && endsAt > startsAt)
+        {
+            End = DateOnly.FromDateTime(endsAt).AddDays(-1);
+            EndTime = null;
+        }
+        else
+        {
+            End = DateOnly.FromDateTime(endsAt);
+            EndTime = TimeOnly.FromDateTime(endsAt);
+        }
+    }
+
+    /// <summary>
+    /// Creates an item from exact timestamps with an offset - what an API or a database
+    /// usually hands over. They are shown in the local time of wherever the chart runs: the
+    /// reader's browser for WebAssembly, the server for Blazor Server.
+    /// </summary>
+    [SetsRequiredMembers]
+    public VetoGanttItem ( string id, string name, DateTimeOffset startsAt, DateTimeOffset endsAt )
+        : this(id, name, startsAt.LocalDateTime, endsAt.LocalDateTime)
+    {
+    }
+
     /// <summary>Identifies the row. Must be unique across the chart.</summary>
     public required string Id { get; init; }
 

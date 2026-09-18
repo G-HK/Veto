@@ -1021,4 +1021,90 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
         // Support runs 08:00-17:00 today; on the today view the day goes without saying.
         await Expect(Component("hours-label-support").Locator(".veto-gantt__dates")).ToHaveTextAsync("08:00–17:00");
     }
+
+    [Fact]
+    public async Task GroupBy_puts_each_servers_runs_on_its_own_line()
+    {
+        await GotoComponentAsync(Route);
+
+        foreach (var server in new[] { "web-01", "batch-01", "db-01" })
+        {
+            await Expect(Component($"runs-label-group-{server}")).ToBeVisibleAsync();
+        }
+
+        // Inline: no row per job, but a bar for each.
+        await Expect(Component("runs-label-deploy")).ToHaveCountAsync(0);
+        await Expect(Component("runs-bar-deploy")).ToBeVisibleAsync();
+        await Expect(Component("runs-bar-import")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task Overlapping_runs_are_stacked_into_lanes()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // Import 08:00-09:30, reindex 08:45-10:00 and the ping at 09:10 all overlap: three lanes.
+        var row = Component("runs-row-group-batch-01");
+        await Expect(row).ToHaveAttributeAsync("data-lanes", "3");
+
+        var tops = new List<double>();
+        foreach (var job in new[] { "import", "reindex", "ping" })
+        {
+            tops.Add((await Component($"runs-bar-{job}").BoundingBoxAsync())!.Y);
+        }
+
+        Assert.Equal(3, tops.Select(y => Math.Round(y)).Distinct().Count());
+
+        // The sidebar row grows with it, so names stay level with their bars.
+        var timeline = await row.BoundingBoxAsync();
+        var label = await Component("runs-label-group-batch-01").BoundingBoxAsync();
+        Assert.True(Math.Abs(timeline!.Height - label!.Height) <= 1,
+            $"The label row ({label.Height}px) should be as tall as the stacked row ({timeline.Height}px).");
+        Assert.True(timeline.Height >= 3 * 35, $"Three lanes should make a taller row ({timeline.Height}px).");
+    }
+
+    [Fact]
+    public async Task Runs_that_only_touch_share_a_lane()
+    {
+        await GotoComponentAsync(Route);
+
+        // Deploy ends at 08:30 as the smoke test starts: back to back, not overlapping.
+        await Expect(Component("runs-row-group-web-01")).Not.ToHaveAttributeAsync("data-lanes", new System.Text.RegularExpressions.Regex(".*"));
+    }
+
+    [Fact]
+    public async Task A_five_minute_run_is_drawn_to_scale()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+        await FittedWidthAsync("runs-scroller", "runs-scroller");
+
+        // The ping runs 5 minutes, the import 90: eighteen times as long.
+        var ping = await WidthAsync("runs-bar-ping");
+        var import = await WidthAsync("runs-bar-import");
+
+        Assert.InRange(import / ping, 14, 22);
+    }
+
+    [Fact]
+    public async Task Yesterdays_run_is_not_on_todays_schedule()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("runs-bar-backup")).ToBeVisibleAsync();
+        await Expect(Component("runs-bar-yesterday")).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task The_quarter_hour_scale_labels_every_fifteen_minutes()
+    {
+        await GotoComponentAsync(Route);
+
+        var cells = Component("runs-quarter-scroller").Locator(".veto-gantt__head-cell");
+
+        // 08:00 to 10:00: two hours overhead, eight quarters beneath them.
+        await Expect(cells.Filter(new() { HasText = ":45" })).ToHaveCountAsync(2);
+        await Expect(cells.Filter(new() { HasText = "09:00" })).ToHaveCountAsync(1);
+    }
 }

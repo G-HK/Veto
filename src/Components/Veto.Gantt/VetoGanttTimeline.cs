@@ -40,9 +40,14 @@ internal sealed class VetoGanttTimeline
 
         // Fitting a whole day into a narrow chart would squeeze each hour until "14:00" no longer
         // fits its cell. Below the floor, the hours keep a readable width and the axis scrolls.
-        if (scale == VetoGanttScale.Hour && minHourWidth > 0)
+        // A quarter-hour column only has ":15" to fit, so it may be narrower than an hour.
+        if (minHourWidth > 0 && scale == VetoGanttScale.Hour)
         {
             PixelsPerDay = Math.Max(PixelsPerDay, minHourWidth * 24);
+        }
+        else if (minHourWidth > 0 && scale == VetoGanttScale.QuarterHour)
+        {
+            PixelsPerDay = Math.Max(PixelsPerDay, 28 * 4 * 24);
         }
         IsFitted = Math.Abs(PixelsPerDay - natural) > 0.001;
 
@@ -126,7 +131,7 @@ internal sealed class VetoGanttTimeline
         // Padding scales with the zoom, so the breathing room looks the same at every scale.
         var padding = scale switch
         {
-            VetoGanttScale.Hour => 0,
+            VetoGanttScale.QuarterHour or VetoGanttScale.Hour => 0,
             VetoGanttScale.Day => 2,
             VetoGanttScale.Week => 7,
             _ => 31
@@ -222,6 +227,16 @@ internal sealed class VetoGanttTimeline
 
         switch (Scale)
         {
+            case VetoGanttScale.QuarterHour:
+                var quarter = new DateTime(AxisStart.Year, AxisStart.Month, AxisStart.Day, AxisStart.Hour, AxisStart.Minute / 15 * 15, 0);
+
+                for (; quarter < AxisEnd; quarter = quarter.AddMinutes(15))
+                {
+                    columns.Add(Cell(quarter.ToString(":mm"), quarter, quarter.AddMinutes(15)));
+                }
+
+                break;
+
             case VetoGanttScale.Hour:
                 var hour = new DateTime(AxisStart.Year, AxisStart.Month, AxisStart.Day, AxisStart.Hour, 0, 0);
 
@@ -278,6 +293,20 @@ internal sealed class VetoGanttTimeline
     private List<Column> BuildGroups ()
     {
         var groups = new List<Column>();
+
+        if (Scale == VetoGanttScale.QuarterHour)
+        {
+            // The hours head the quarters; the first, and each midnight, also names the day.
+            var hour = new DateTime(AxisStart.Year, AxisStart.Month, AxisStart.Day, AxisStart.Hour, 0, 0);
+
+            for (var first = true; hour < AxisEnd; hour = hour.AddHours(1), first = false)
+            {
+                var label = first || hour.Hour == 0 ? hour.ToString("ddd d MMM, HH:00") : hour.ToString("HH:00");
+                groups.Add(Cell(label, hour, hour.AddHours(1)));
+            }
+
+            return groups;
+        }
 
         if (Scale == VetoGanttScale.Hour)
         {

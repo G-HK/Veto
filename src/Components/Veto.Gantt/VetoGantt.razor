@@ -83,7 +83,7 @@
                             <button type="button" class="veto-gantt__chip @(Scale == option ? "veto-gantt__chip--on" : null)"
                                     data-testid="@Sub($"scale-{option.ToModifier()}")" aria-pressed="@(Scale == option ? "true" : "false")"
                                     @onclick="() => SetScaleAsync(option)">
-                                @option
+                                @option.ToLabel()
                             </button>
                         }
                     </div>
@@ -190,7 +190,7 @@
                     @foreach (var row in Rows)
                     {
                         <div class="veto-gantt__row veto-gantt__row--label @(IsSelected(row.Item) ? "veto-gantt__row--selected" : null)"
-                             style="@($"--veto-gantt-depth: {row.Depth}")" data-testid="@Sub($"label-{row.Item.Id}")">
+                             style="@($"--veto-gantt-depth: {row.Depth}; {RowHeightStyle(row)}")" data-testid="@Sub($"label-{row.Item.Id}")">
                             @if (row.HasChildren && Collapsible)
                             {
                                 <button type="button" class="veto-gantt__twisty"
@@ -288,6 +288,7 @@
                             @foreach (var row in Rows)
                             {
                                 <div class="veto-gantt__row @(IsSelected(row.Item) || row.Inline.Any(IsSelected) ? "veto-gantt__row--selected" : null)"
+                                     style="@RowHeightStyle(row)" data-lanes="@(row.Lanes > 1 ? row.Lanes : null)"
                                      data-testid="@Sub($"row-{row.Item.Id}")">
                                     @if (row.Inline.Count > 0)
                                     {
@@ -296,12 +297,12 @@
                                            bar that would cover them all. *@
                                         @foreach (var item in row.Inline)
                                         {
-                                            @Bar(item, isSummary: false, isInline: true)
+                                            @Bar(item, isSummary: false, isInline: true, row.LaneOf(item), row.Lanes)
                                         }
                                     }
                                     else
                                     {
-                                        @Bar(row.Item, row.HasChildren, isInline: false)
+                                        @Bar(row.Item, row.HasChildren, isInline: false, lane: 0, lanes: 1)
                                     }
                                 </div>
                             }
@@ -331,7 +332,7 @@
     /// One bar or milestone. Shared by a row's own bar and by the sub-items an inline parent
     /// draws on its line, so the two can never drift apart in what they show or respond to.
     /// </summary>
-    private RenderFragment Bar ( VetoGanttItem item, bool isSummary, bool isInline ) =>
+    private RenderFragment Bar ( VetoGanttItem item, bool isSummary, bool isInline, int lane, int lanes ) =>
         @<text>
             @* Work entirely outside the axis draws nothing, rather than a stub pinned to the
                edge that would read as a one-day task. *@
@@ -340,7 +341,7 @@
             }
             else if (item.IsMilestone)
             {
-                <button type="button" class="veto-gantt__milestone @(isInline ? "veto-gantt__milestone--inline" : null)" style="@BarStyle(item)"
+                <button type="button" class="veto-gantt__milestone @(isInline ? "veto-gantt__milestone--inline" : null)" style="@BarStyle(item, lane, lanes)"
                         title="@NativeTooltipFor(item)" aria-label="@TooltipFor(item)"
                         data-testid="@Sub($"bar-{item.Id}")" @onclick="() => SelectAsync(item)"
                         @attributes="TooltipHandlers(item)">
@@ -350,7 +351,7 @@
             {
                 <button type="button"
                         class="veto-gantt__bar @(isSummary ? "veto-gantt__bar--summary" : null) @(isInline ? "veto-gantt__bar--inline" : null) @(IsSelected(item) && isInline ? "veto-gantt__bar--selected" : null) @(IsEditable(item, isSummary) ? "veto-gantt__bar--editable" : null)"
-                        style="@BarStyle(item)" title="@NativeTooltipFor(item)" aria-label="@TooltipFor(item)"
+                        style="@BarStyle(item, lane, lanes)" title="@NativeTooltipFor(item)" aria-label="@TooltipFor(item)"
                         data-testid="@Sub($"bar-{item.Id}")" data-editable="@(IsEditable(item, isSummary) ? "true" : null)"
                         data-row-id="@item.Id" @onclick="() => SelectAsync(item)"
                         @onkeydown="args => OnBarKeyDownAsync(args, item)"

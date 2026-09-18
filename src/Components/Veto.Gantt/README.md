@@ -1,6 +1,6 @@
 # Veto.Gantt
 
-An interactive Gantt chart that opens on today's work, to the hour: nested tasks or many jobs on one line, drag to reschedule, zoom from hours to months, short ranges that fill the width, filters of your own, selection, export, and tooltips you can reword or replace with your own card.
+An interactive Gantt chart that opens on today's work, to the minute: nested tasks, or many jobs on one line grouped by server with overlaps stacked, drag to reschedule, zoom from hours to months, short ranges that fill the width, filters of your own, selection, export, and tooltips you can reword or replace with your own card.
 
 Part of [Veto](https://github.com/G-HK/Veto), a Blazor component library with no third-party dependencies. Install the `Veto` package instead to get every component at once.
 
@@ -57,6 +57,12 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
    drawn in hours. StartTime/EndTime on the chart trim the day to a window. *@
 <VetoGantt Items="Jobs" StartTime="new TimeOnly(14, 0)" EndTime="new TimeOnly(20, 0)" />
 
+@* An operations schedule: runs from exact timestamps, one line per server, overlapping
+   runs stacked into lanes. TodayScale="VetoGanttScale.QuarterHour" for 15-minute columns. *@
+<VetoGantt Items="Runs"
+           GroupBy="run => run.Category"
+           SubItemLayout="VetoGanttSubItemLayout.Inline" />
+
 @* Filters of your own, bound both ways, with one event for any change. Scales and
    ExportFormats choose which zoom levels and export formats are offered. *@
 <VetoGantt Items="Tasks"
@@ -72,6 +78,11 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
     private int _rows;
 
     // Pipelines and Jobs are lists like Tasks below: jobs under a parent, and items with times.
+
+    // Runs come straight from timestamps - DateTime or DateTimeOffset - with the server in Category.
+    private IReadOnlyList<VetoGanttItem> Runs => apiRuns
+        .Select(run => new VetoGanttItem(run.Id, run.Name, run.StartedAt, run.FinishedAt) { Category = run.Server })
+        .ToList();
 
     private static readonly VetoGanttFilter[] LateFilter =
     [

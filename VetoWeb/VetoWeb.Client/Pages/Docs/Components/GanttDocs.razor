@@ -43,6 +43,35 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-runs" Title="Today's runs, by server"
+               Description="An operations schedule: jobs from exact timestamps, grouped by server with GroupBy, each server one line. Jobs that overlap are stacked into lanes and the row grows to fit them, so two runs at once are both visible - and a five-minute job is a five-minute sliver next to a ninety-minute one. The first chart shows 07:00 to 12:00 in hours; the second zooms to 08:00-10:00 in quarter hours."
+               Code="@RunsCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoGantt TestId="runs"
+                       Items="Runs"
+                       TodayOverride="Today"
+                       TimeOverride="new TimeOnly(9, 20)"
+                       StartTime="new TimeOnly(7, 0)"
+                       EndTime="new TimeOnly(12, 0)"
+                       GroupBy="ServerOf"
+                       SubItemLayout="VetoGanttSubItemLayout.Inline"
+                       ShowCategoryFilter="false"
+                       SidebarWidth="11rem" />
+
+            <VetoGantt TestId="runs-quarter"
+                       Items="Runs"
+                       TodayOverride="Today"
+                       TimeOverride="new TimeOnly(9, 20)"
+                       StartTime="new TimeOnly(8, 0)"
+                       EndTime="new TimeOnly(10, 0)"
+                       TodayScale="VetoGanttScale.QuarterHour"
+                       GroupBy="ServerOf"
+                       SubItemLayout="VetoGanttSubItemLayout.Inline"
+                       ShowToolbar="false"
+                       SidebarWidth="11rem" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-fit" Title="A short range fills the width"
                Description="Give the chart a Start and End a few days apart and the days widen until the range spans the whole chart, rather than drawing a week at the scale's own density and leaving the rest empty. A range longer than the chart keeps its density and scrolls. FitToWidth=false turns this off."
                Code="@FitCode">
@@ -481,6 +510,37 @@
         new() { Id = "release", Name = "Release (tomorrow)", Start = new(2026, 3, 19), End = new(2026, 3, 19), StartTime = new(9, 0), EndTime = new(10, 0), Category = "Engineering", Color = Engineering }
     ];
 
+    // A morning of job runs on three servers, from exact timestamps as an API would hand them
+    // over. batch-01 has three runs that overlap - one of them five minutes long - and web-01
+    // two that only touch, which share a lane. The last one ran yesterday.
+    private static readonly DateTime Morning = new(2026, 3, 18);
+
+    private static VetoGanttItem Run ( string id, string name, string server, string color, int fromHour, int fromMinute, int toHour, int toMinute )
+        => new(id, name, Morning.AddHours(fromHour).AddMinutes(fromMinute), Morning.AddHours(toHour).AddMinutes(toMinute))
+        {
+            Category = server,
+            Color = color
+        };
+
+    private static readonly IReadOnlyList<VetoGanttItem> Runs =
+    [
+        Run("deploy", "Deploy", "web-01", Engineering, 8, 0, 8, 30),
+        Run("smoke", "Smoke test", "web-01", Engineering, 8, 30, 8, 40),
+        Run("warm", "Cache warm", "web-01", Engineering, 10, 15, 10, 45),
+        Run("import", "Nightly import", "batch-01", Research, 8, 0, 9, 30),
+        Run("reindex", "Reindex", "batch-01", Research, 8, 45, 10, 0),
+        Run("ping", "Health ping", "batch-01", Research, 9, 10, 9, 15),
+        Run("backup", "Backup", "db-01", Marketing, 7, 0, 7, 45),
+        Run("vacuum", "Vacuum", "db-01", Marketing, 11, 0, 11, 20),
+        new VetoGanttItem("yesterday", "Late export", new DateTime(2026, 3, 17, 22, 0, 0), new DateTime(2026, 3, 17, 23, 0, 0))
+        {
+            Category = "db-01",
+            Color = Marketing
+        }
+    ];
+
+    private static string? ServerOf ( VetoGanttItem job ) => job.Category;
+
     // Two pipelines with a job on most days. Inline, each pipeline is one row however many jobs it ran.
     private static readonly IReadOnlyList<VetoGanttItem> Pipelines =
     [
@@ -514,13 +574,15 @@
         new("FitToWidth", "bool", "true", "Widens the days of a short range until it fills the chart. A long range keeps its density and scrolls."),
         new("SubItemLayout", "VetoGanttSubItemLayout", "Rows", "Rows: a row per sub-item. Inline: every sub-item on its parent's line."),
         new("Collapsible", "bool", "true", "Whether parents can be folded. Off, rows stay open and inline parents stay on one line."),
+        new("GroupBy", "Func<VetoGanttItem, string?>?", "null", "Groups top-level rows under a row per key - a server, a project - without writing those rows yourself."),
+        new("StackOverlaps", "bool", "true", "Stacks jobs that overlap on one line into lanes, growing the row. Off, they draw over each other."),
         new("Filters", "IReadOnlyList<VetoGanttFilter>", "[]", "Toggles of your own in the toolbar, each a predicate over an item. Several on must all keep a row."),
         new("ActiveFilters", "IReadOnlyCollection<string>?", "null", "Ids of the Filters that are on. Supports @bind-ActiveFilters."),
         new("HiddenCategories", "IReadOnlyCollection<string>?", "null", "Categories switched off. Supports @bind-HiddenCategories."),
         new("ShowFilters", "bool", "true", "Whether the toolbar shows a toggle for each of the Filters."),
         new("ItemFilter", "Func<VetoGanttItem, bool>?", "null", "A rule with no toggle: rows it rejects are never listed."),
         new("OnFilterChanged", "EventCallback<VetoGanttFilterState>", "—", "Raised after any filter change, with every filter and the rows they leave."),
-        new("Scales", "IReadOnlyList<VetoGanttScale>", "Hour, Day, Week, Month", "The zoom levels the picker offers. One level hides the picker."),
+        new("Scales", "IReadOnlyList<VetoGanttScale>", "QuarterHour, Hour, Day, Week, Month", "The zoom levels the picker offers. One level hides the picker."),
         new("ExportFormats", "IReadOnlyList<VetoGanttExportFormat>", "Csv, Json", "The formats the export menu offers. Empty hides the menu."),
         new("StartTime / EndTime", "TimeOnly?", "null", "Trims the axis to a window of the day, such as 14:00 to 20:00, which is then fitted to the width."),
         new("TodayScale", "VetoGanttScale", "Hour", "The scale the today view is drawn at."),
@@ -578,6 +640,7 @@
         new("Name", "string", "required", "Shown in the panel on the left."),
         new("Start / End", "DateOnly", "required", "Inclusive at both ends."),
         new("StartTime / EndTime", "TimeOnly?", "null", "The time of day the work starts on Start and ends on End. Null covers the whole day."),
+        new("new(id, name, startsAt, endsAt)", "DateTime or DateTimeOffset", "—", "Builds an item from exact timestamps. The end is exclusive; an offset is shown in local time."),
         new("ParentId", "string?", "null", "The row this one sits under. Null for a top-level row."),
         new("Color", "string?", "null", "Any CSS colour, including a --veto-* token."),
         new("Progress", "double?", "null", "0 to 1. Null hides the progress fill for this row."),
@@ -798,6 +861,31 @@
                         Start = new(2026, 3, 18), End = new(2026, 3, 18),
                         StartTime = new(19, 0), EndTime = new(21, 0) }
             ];
+        }
+        """;
+
+    private const string RunsCode = """
+        <VetoGantt Items="Runs"
+                   StartTime="new TimeOnly(7, 0)"
+                   EndTime="new TimeOnly(12, 0)"
+                   GroupBy="job => job.Category"
+                   SubItemLayout="VetoGanttSubItemLayout.Inline" />
+
+        @* Quarter-hour columns for the busy part of the morning. *@
+        <VetoGantt Items="Runs"
+                   StartTime="new TimeOnly(8, 0)"
+                   EndTime="new TimeOnly(10, 0)"
+                   TodayScale="VetoGanttScale.QuarterHour"
+                   GroupBy="job => job.Category"
+                   SubItemLayout="VetoGanttSubItemLayout.Inline" />
+
+        @code {
+            // Straight from the API: exact timestamps, and the server in Category.
+            private IReadOnlyList<VetoGanttItem> Runs =>
+                jobs.Select(job => new VetoGanttItem(job.Id, job.Name, job.StartedAt, job.FinishedAt)
+                {
+                    Category = job.Server
+                }).ToList();
         }
         """;
 
