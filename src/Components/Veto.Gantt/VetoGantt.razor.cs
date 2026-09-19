@@ -47,6 +47,17 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
     private readonly Dictionary<string, (DateOnly Start, DateOnly End)> _overrides = [];
 
+    // How many days Earlier and Later have moved the range from the one the parent set, and the
+    // parameters that range came from - a change to them starts paging again from nothing.
+    private int _pagedDays;
+    private (DateOnly?, DateOnly?, VetoGanttView)? _rangeParameters;
+
+    // Which edge of the timeline to scroll to once a paged range is drawn: -1 the start, 1 the end.
+    private int _pagedScrollPending;
+
+    // The Today button's scroll, waiting for the range it moved back to be drawn.
+    private bool _centreNowPending;
+
     private IJSObjectReference? _module;
     private IJSObjectReference? _dragModule;
     private IJSObjectReference? _storeModule;
@@ -54,6 +65,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private ElementReference _scroller;
     private ElementReference _grid;
     private bool _dragAttached;
+    private (string? Grid, double PixelsPerDay, int SnapDays, bool Resizable) _dragAttachment;
     private bool _storeOpened;
     private string _storeBackend = "none";
 
@@ -264,6 +276,22 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>Whether the toolbar includes the Today and earlier/later buttons.</summary>
     [Parameter]
     public bool ShowNavigation { get; set; } = true;
+
+    /// <summary>
+    /// What Earlier and Later do once the timeline cannot scroll any further that way - always,
+    /// on a range fitted to the width. On, the range itself moves: a day at a time on the today
+    /// view, and by a step of the scale otherwise (never more than the range is long, so no day
+    /// is skipped). Off, the buttons only scroll, and do nothing at either end.
+    /// </summary>
+    [Parameter]
+    public bool PageBeyondRange { get; set; } = true;
+
+    /// <summary>
+    /// Raised when Earlier or Later moves the range, with the days now on the axis - for a page
+    /// that loads its rows a range at a time. The Today button, which moves it back, raises it too.
+    /// </summary>
+    [Parameter]
+    public EventCallback<VetoGanttRange> OnRangeChanged { get; set; }
 
     /// <summary>Whether the toolbar includes the export menu.</summary>
     [Parameter]
@@ -539,8 +567,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     public int LoadingRows { get; set; } = 6;
 
     /// <summary>
-    /// Whether the timeline scrolls to the now marker by itself: on load, and again whenever the
-    /// view or the scale changes. On the hour scales that is the current time; on the coarser
+    /// Whether the timeline scrolls the now marker to its centre by itself: on load, and again
+    /// whenever the view or the scale changes. On the hour scales that is the current time; on the coarser
     /// ones, today. Off, the timeline opens at the start of its axis.
     /// </summary>
     [Parameter]
@@ -596,6 +624,12 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>The day treated as today.</summary>
     private DateOnly Today => TodayOverride ?? DateOnly.FromDateTime(DateTime.Now);
 
+    /// <summary>
+    /// The day the date line names: the day on the axis in the today view - today, until Earlier
+    /// or Later moves it - and today itself on the schedule.
+    /// </summary>
+    private DateOnly ShownDay => View == VetoGanttView.Today ? Timeline.Start : Today;
+
     /// <summary>The moment treated as now: today, at the overridden time or the clock's.</summary>
     private DateTime Now => Today.ToDateTime(TimeOverride ?? TimeOnly.FromDateTime(DateTime.Now));
 
@@ -618,6 +652,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         }
 
         var shown = DateTime.Now.ToString("yyyyMMddHHmm");
+        var day = DateOnly.FromDateTime(DateTime.Now);
 
         _clock = new Timer(_ =>
         {
@@ -629,7 +664,22 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             }
 
             shown = current;
-            _ = InvokeAsync(StateHasChanged);
+
+            // Past midnight the axis itself is out of date - the today view is still drawing
+            // yesterday - so it is rebuilt, not just redrawn.
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            var newDay = today != day && TodayOverride is null;
+            day = today;
+
+            _ = InvokeAsync(() =>
+            {
+                if (newDay)
+                {
+                    Rebuild();
+                }
+
+                StateHasChanged();
+            });
         }, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
     }
 
@@ -677,6 +727,13 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         ApplyBoundSet(HiddenCategories, ref _hiddenCategoriesParameter, _hiddenCategories);
         ApplyBoundSet(ActiveFilters, ref _activeFiltersParameter, _activeFilters);
+
+        // A new range from the parent starts from where it says, not from where paging had got to.
+        if ((Start, End, View) != _rangeParameters)
+        {
+            _rangeParameters = (Start, End, View);
+            _pagedDays = 0;
+        }
 
         Rebuild();
     }
@@ -781,8 +838,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         var visible = Filter().Select(Resolve).ToList();
 
         var previous = Timeline?.PixelsPerDay;
-        Timeline = VetoGanttTimeline.Create(visible, EffectiveScale, Start, End, Today, View,
-            FitToWidth ? _viewportWidth : 0, StartTime, EndTime, MinHourWidth, HeaderFormat, HeaderGroupFormat);
+        Timeline = CreateTimeline(visible);
 
         // The drag handler converts pixels to days, so a new density needs it re-attached.
         if (previous is not null && previous != Timeline.PixelsPerDay)
@@ -1013,13 +1069,38 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         return lane;
     }
 
+    /// <summary>
+    /// The axis: the range the parent set, or the one worked out from the items, moved by however
+    /// far Earlier and Later have paged it.
+    /// </summary>
+    private VetoGanttTimeline CreateTimeline ( IReadOnlyList<VetoGanttItem> visible )
+    {
+        VetoGanttTimeline Make ( DateOnly? start, DateOnly? end, DateOnly today ) =>
+            VetoGanttTimeline.Create(visible, EffectiveScale, start, end, today, View,
+                FitToWidth ? _viewportWidth : 0, StartTime, EndTime, MinHourWidth, HeaderFormat, HeaderGroupFormat);
+
+        // Today alone, paged to another day: that day is drawn exactly as today would be.
+        if (View == VetoGanttView.Today && Start is null && End is null)
+        {
+            return Make(null, null, Today.AddDays(_pagedDays));
+        }
+
+        var timeline = Make(Start, End, Today);
+
+        return _pagedDays == 0
+            ? timeline
+            : Make(timeline.Start.AddDays(_pagedDays), timeline.End.AddDays(_pagedDays), Today);
+    }
+
     /// <summary>The span the today view covers: today, or the explicit range, trimmed to the time window.</summary>
     private (DateTime From, DateTime To) ViewWindow ()
     {
-        var from = (Start ?? Today).ToDateTime(StartTime ?? TimeOnly.MinValue);
+        var first = (Start ?? Today).AddDays(_pagedDays);
+        var last = (End ?? Today).AddDays(_pagedDays);
+        var from = first.ToDateTime(StartTime ?? TimeOnly.MinValue);
         var to = EndTime is { } until
-            ? (End ?? Today).ToDateTime(until)
-            : (End ?? Today).AddDays(1).ToDateTime(TimeOnly.MinValue);
+            ? last.ToDateTime(until)
+            : last.AddDays(1).ToDateTime(TimeOnly.MinValue);
 
         return (from, to);
     }
@@ -1031,6 +1112,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private List<VetoGanttItem> Filter ()
     {
         var byId = AllItems.ToDictionary(i => i.Id);
+        var (from, to) = ViewWindow();
 
         bool Matches ( VetoGanttItem item )
         {
@@ -1064,7 +1146,6 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
                 // today's list, however close it is - and with a time window, a job outside the
                 // window is not either.
                 var dates = Resolve(item);
-                var (from, to) = ViewWindow();
 
                 if (dates.StartsAt >= to || dates.EndsAt <= from)
                 {
@@ -1179,7 +1260,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             }
         }
 
-        var roots = items.Where(i => i.ParentId is null || !items.Any(p => p.Id == i.ParentId));
+        var ids = items.Select(i => i.Id).ToHashSet();
+        var roots = items.Where(i => i.ParentId is null || !ids.Contains(i.ParentId));
 
         foreach (var root in Order(roots))
         {
@@ -1480,7 +1562,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         var until = to.TimeOfDay == TimeSpan.Zero ? "24:00" : to.ToString("HH:mm");
 
         // On the today view every row is today's, so the day would only crowd the times out.
-        var withinToday = from.Date == Today.ToDateTime(TimeOnly.MinValue)
+        var withinToday = from.Date == ShownDay.ToDateTime(TimeOnly.MinValue)
             && (to.Date == from.Date || (to.TimeOfDay == TimeSpan.Zero && to.Date == from.Date.AddDays(1)));
 
         if (View == VetoGanttView.Today && withinToday)
@@ -1624,7 +1706,21 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         if (_scrollToNowPending && ScrollToTodayOnLoad && (_viewportWidth > 0 || !FitToWidth))
         {
             _scrollToNowPending = false;
-            await InvokeModuleAsync("scrollTo", _scroller, TodayMarkerOffset ?? 0, false);
+            await InvokeModuleAsync("scrollTo", _scroller, TodayMarkerOffset ?? 0, false, 0.5);
+        }
+
+        // Back from a paged range, the now marker is found on the range as redrawn.
+        if (_centreNowPending)
+        {
+            _centreNowPending = false;
+            await InvokeModuleAsync("scrollTo", _scroller, TodayMarkerOffset ?? 0, true, 0.5);
+        }
+
+        // A paged range opens at the edge PageAsync chose for it.
+        if (_pagedScrollPending != 0)
+        {
+            await InvokeModuleAsync("scrollToEdge", _scroller, _pagedScrollPending > 0);
+            _pagedScrollPending = 0;
         }
 
         await PlaceTooltipAsync();
@@ -1687,6 +1783,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         }
 
         View = view;
+        _rangeParameters = (Start, End, View);
+        _pagedDays = 0;
         Rebuild();
         StateHasChanged();
 
@@ -1695,16 +1793,64 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         _scrollToNowPending = true;
     }
 
-    /// <summary>Brings today into view, or the start of the axis when today is outside it.</summary>
+    /// <summary>
+    /// Scrolls the now marker to the centre of the timeline, or to the start of the axis when
+    /// today is outside it. A range that Earlier or Later has paged away is moved back first.
+    /// </summary>
     public async Task ScrollToTodayAsync ()
     {
+        if (_pagedDays != 0)
+        {
+            _pagedDays = 0;
+            Rebuild();
+            _centreNowPending = true;
+            StateHasChanged();
+
+            await OnRangeChanged.InvokeAsync(new VetoGanttRange(Timeline.Start, Timeline.End));
+            return;
+        }
+
         var offset = TodayMarkerOffset ?? 0;
-        await InvokeModuleAsync("scrollTo", _scroller, offset);
+        await InvokeModuleAsync("scrollTo", _scroller, offset, true, 0.5);
     }
 
-    /// <summary>Scrolls by a screenful in either direction.</summary>
-    private Task ScrollByAsync ( double direction )
-        => InvokeModuleAsync("scrollBy", _scroller, direction * 0.8);
+    /// <summary>
+    /// Scrolls by a screenful in either direction, or - with nothing left to scroll that way -
+    /// pages the range, when <see cref="PageBeyondRange"/> allows it.
+    /// </summary>
+    private async Task ScrollByAsync ( int direction )
+    {
+        var scrolled = await InvokeModuleAsync<bool?>("scrollBy", _scroller, direction * 0.8);
+
+        // Null is no answer from the page at all - prerendering - where paging would be a guess.
+        if (scrolled is not false || !PageBeyondRange)
+        {
+            return;
+        }
+
+        await PageAsync(direction);
+    }
+
+    /// <summary>
+    /// Moves the range a page earlier or later. A page is the scale's step, but never longer
+    /// than the range itself: a range of five days fitted to the width moves five days, so the
+    /// next page starts the day after this one ends. The today view moves a day at a time.
+    /// </summary>
+    private async Task PageAsync ( int direction )
+    {
+        var length = Timeline.End.DayNumber - Timeline.Start.DayNumber + 1;
+        var step = Math.Min(length, EffectiveScale.StepDays());
+
+        _pagedDays += direction * step;
+
+        // A whole new page is read from its beginning going on, and from its end going back. A
+        // range that only slid is read on from the edge it slid past, where the new days are.
+        _pagedScrollPending = step >= length ? -direction : direction;
+        Rebuild();
+        StateHasChanged();
+
+        await OnRangeChanged.InvokeAsync(new VetoGanttRange(Timeline.Start, Timeline.End));
+    }
 
     /// <summary>Brings a date into view. A date outside the axis scrolls to the nearer end.</summary>
     public Task ScrollToDateAsync ( DateOnly date )
@@ -1716,10 +1862,10 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         return InvokeModuleAsync("scrollTo", _scroller, offset);
     }
 
-    /// <summary>Scrolls back by most of a screen, as the Earlier button does.</summary>
+    /// <summary>Scrolls back by most of a screen, or pages the range back, as the Earlier button does.</summary>
     public Task ScrollEarlierAsync () => ScrollByAsync(-1);
 
-    /// <summary>Scrolls forward by most of a screen, as the Later button does.</summary>
+    /// <summary>Scrolls forward by most of a screen, or pages the range on, as the Later button does.</summary>
     public Task ScrollLaterAsync () => ScrollByAsync(1);
 
     // ------------------------------------------------------------------ Export
@@ -1817,6 +1963,20 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         return needsQuoting
             ? $"\"{value.Replace("\"", "\"\"")}\""
             : value;
+    }
+
+    private async Task<T?> InvokeModuleAsync<T> ( string function, params object?[] args )
+    {
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Gantt/veto-gantt.js");
+            return await _module.InvokeAsync<T>(function, args);
+        }
+        catch (Exception ex) when (ex is JSException or InvalidOperationException or JSDisconnectedException)
+        {
+            // As below: no page to answer, so no answer.
+            return default;
+        }
     }
 
     private async Task InvokeModuleAsync ( string function, params object?[] args )
@@ -1990,7 +2150,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// </summary>
     private async Task OnBarKeyDownAsync ( KeyboardEventArgs args, VetoGanttItem item )
     {
-        if (!Editable || args.Key is not ("ArrowLeft" or "ArrowRight"))
+        if (!Editable || args.Key is not ("ArrowLeft" or "ArrowRight") || !IsEditable(item, IsSummary(item)))
         {
             return;
         }
@@ -2089,6 +2249,10 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// </summary>
     private bool IsEditable ( VetoGanttItem item, bool isSummary ) => Editable && !isSummary && !item.IsMilestone;
 
+    /// <summary>Whether a row is drawn as a summary: one with children of its own, or a group.</summary>
+    private bool IsSummary ( VetoGanttItem item )
+        => _groupIds.Contains(item.Id) || AllItems.Any(i => i.ParentId == item.Id);
+
     /// <summary>
     /// Attaches the delegated drag handler to the grid. Re-attaching updates the measurements,
     /// which is how a change of scale takes effect.
@@ -2096,6 +2260,15 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private async Task SyncDragHandlesAsync ()
     {
         if (!Editable)
+        {
+            return;
+        }
+
+        // Every hover and click re-renders, and nothing the handler measures changed in most of
+        // them - so it is only re-attached when the grid, the density, the snap or the resizing did.
+        var attachment = (_grid.Id, Timeline.PixelsPerDay, EffectiveScale.SnapDays(), Resizable);
+
+        if (_dragAttached && attachment == _dragAttachment)
         {
             return;
         }
@@ -2111,6 +2284,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
                 snapDays = EffectiveScale.SnapDays(),
                 resizable = Resizable
             });
+
+            _dragAttachment = attachment;
 
             if (!_dragAttached)
             {

@@ -156,11 +156,11 @@
             <div class="veto-gantt__dateline" data-testid="@Sub("dateline")">
                 @if (DateLineTemplate is not null)
                 {
-                    @DateLineTemplate(Today)
+                    @DateLineTemplate(ShownDay)
                 }
                 else
                 {
-                    @Today.ToString(DateLineFormat)
+                    @ShownDay.ToString(DateLineFormat)
                 }
             </div>
         }
@@ -271,7 +271,7 @@
                         </div>
 
                         <div @ref="_grid" class="veto-gantt__grid">
-                            @if (ShowWeekends && Scale == VetoGanttScale.Day)
+                            @if (ShowWeekends && EffectiveScale == VetoGanttScale.Day)
                             {
                                 @foreach (var column in Timeline.Columns.Where(c => c.IsWeekend))
                                 {

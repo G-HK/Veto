@@ -1424,4 +1424,112 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
 
         Assert.NotEqual(before, after);
     }
+    // ------------------------------------------------------------------ Paging, and the needle
+
+    /// <summary>How far the now marker sits from the middle of the timeline's visible part, once scrolling settles.</summary>
+    private async Task<double> NeedleOffCentreAsync(string chart)
+    {
+        var off = double.MaxValue;
+
+        for (var attempt = 0; attempt < 30; attempt++)
+        {
+            off = await Page.EvaluateAsync<double>(@"chart => {
+                const scroller = document.querySelector(`[data-testid='${chart}-scroller']`);
+                const marker = document.querySelector(`[data-testid='${chart}-today-marker']`);
+                const box = scroller.getBoundingClientRect();
+                const needle = marker.getBoundingClientRect();
+                return Math.abs((needle.left + needle.width / 2) - (box.left + scroller.clientWidth / 2));
+            }", chart);
+
+            if (off <= 4)
+            {
+                break;
+            }
+
+            await Page.WaitForTimeoutAsync(100);
+        }
+
+        return off;
+    }
+
+    [Fact]
+    public async Task The_needle_opens_in_the_centre_of_the_timeline()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("hours-today-marker")).ToBeVisibleAsync();
+
+        var off = await NeedleOffCentreAsync("hours");
+        Assert.True(off <= 4, $"The needle should open in the centre of the timeline, not {off}px from it.");
+    }
+
+    [Fact]
+    public async Task Later_moves_a_fitted_week_on_a_week_and_earlier_moves_it_back()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        // Fitted to the width, the week has nothing to scroll - which used to leave Later dead.
+        Assert.True(await Component("paging-week-scroller").EvaluateAsync<bool>("el => el.scrollWidth <= el.clientWidth + 1"));
+
+        await Component("paging-week-next").ClickAsync();
+        await Expect(Component("paging-state")).ToContainTextAsync("Week: 23 Mar – 29 Mar");
+
+        await Component("paging-week-previous").ClickAsync();
+        await Component("paging-week-previous").ClickAsync();
+        await Expect(Component("paging-state")).ToContainTextAsync("Week: 9 Mar – 15 Mar");
+
+        await Component("paging-week-today").ClickAsync();
+        await Expect(Component("paging-state")).ToContainTextAsync("Week: 16 Mar – 22 Mar");
+    }
+
+    [Fact]
+    public async Task Later_scrolls_to_the_end_of_today_then_moves_to_tomorrow()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("paging-day-dateline")).ToHaveTextAsync("Wednesday 18 March 2026");
+        await Expect(Component("paging-day-label-support")).ToBeVisibleAsync();
+
+        // The day is wider than the chart, so the first presses scroll; only at the end of the
+        // day does Later move on.
+        for (var press = 0; press < 6 && !(await Component("paging-state").InnerTextAsync()).Contains("19 Mar"); press++)
+        {
+            await Component("paging-day-next").ClickAsync();
+            await Page.WaitForTimeoutAsync(700);
+        }
+
+        await Expect(Component("paging-day-dateline")).ToHaveTextAsync("Thursday 19 March 2026");
+        await Expect(Component("paging-day-label-release")).ToBeVisibleAsync();
+        await Expect(Component("paging-day-label-support")).ToHaveCountAsync(0);
+
+        // A new day is read from its start.
+        var scrolled = await Component("paging-day-scroller").EvaluateAsync<double>("el => el.scrollLeft");
+        Assert.True(scrolled <= 1, $"Tomorrow should open at its start, not {scrolled}px in.");
+    }
+
+    [Fact]
+    public async Task Today_brings_a_paged_day_back_with_the_needle_in_the_centre()
+    {
+        await Page.SetViewportSizeAsync(1500, 1000);
+        await GotoComponentAsync(Route);
+
+        for (var press = 0; press < 6 && !(await Component("paging-state").InnerTextAsync()).Contains("19 Mar"); press++)
+        {
+            await Component("paging-day-next").ClickAsync();
+            await Page.WaitForTimeoutAsync(700);
+        }
+
+        await Expect(Component("paging-day-today-marker")).ToHaveCountAsync(0);
+
+        await Component("paging-day-today").ClickAsync();
+
+        await Expect(Component("paging-day-dateline")).ToHaveTextAsync("Wednesday 18 March 2026");
+        await Expect(Component("paging-day-today-marker")).ToBeVisibleAsync();
+
+        var off = await NeedleOffCentreAsync("paging-day");
+        Assert.True(off <= 4, $"Today should put the needle in the centre, not {off}px from it.");
+    }
 }

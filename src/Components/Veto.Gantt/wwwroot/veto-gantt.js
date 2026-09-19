@@ -22,25 +22,47 @@ export function download(fileName, mimeType, content) {
 }
 
 /**
- * Scrolls the timeline so a given pixel offset sits a third of the way in from the left, with
- * what is coming up in view. Smooth when the reader asked for it; instant when the chart is
- * placing itself, where an animation would only be a delay.
+ * Scrolls the timeline so a given pixel offset sits a fraction of the way in from the left: the
+ * centre for the now marker, a third for a date, with what comes after it in view. Smooth when
+ * the reader asked for it; instant when the chart is placing itself, where an animation would
+ * only be a delay.
  */
-export function scrollTo(element, offset, smooth = true) {
+export function scrollTo(element, offset, smooth = true, at = 1 / 3) {
     if (!element) {
         return;
     }
 
-    element.scrollTo({ left: Math.max(0, offset - element.clientWidth / 3), behavior: smooth ? 'smooth' : 'instant' });
+    element.scrollTo({ left: Math.max(0, offset - element.clientWidth * at), behavior: smooth ? 'smooth' : 'instant' });
 }
 
-/** Scrolls the timeline by a fraction of its visible width. */
+/**
+ * Scrolls the timeline by a fraction of its visible width. Returns false when it is already as
+ * far as it goes that way - a range fitted to the width never scrolls at all - so the chart can
+ * page the range instead of doing nothing.
+ */
 export function scrollBy(element, fraction) {
     if (!element) {
-        return;
+        return false;
+    }
+
+    const max = element.scrollWidth - element.clientWidth;
+    const atEnd = fraction > 0 ? element.scrollLeft >= max - 1 : element.scrollLeft <= 1;
+
+    if (atEnd) {
+        return false;
     }
 
     element.scrollBy({ left: element.clientWidth * fraction, behavior: 'smooth' });
+    return true;
+}
+
+/** Jumps the timeline to its start or its end, as a paged range is redrawn. */
+export function scrollToEdge(element, end) {
+    if (!element) {
+        return;
+    }
+
+    element.scrollTo({ left: end ? element.scrollWidth : 0, behavior: 'instant' });
 }
 
 // One observer per timeline, kept on the element so a re-observe replaces rather than stacks.
