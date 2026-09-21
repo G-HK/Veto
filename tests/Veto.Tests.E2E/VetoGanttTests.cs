@@ -1532,4 +1532,57 @@ public class VetoGanttTests(BlazorAppFixture app) : VetoPageTest(app)
         var off = await NeedleOffCentreAsync("paging-day");
         Assert.True(off <= 4, $"Today should put the needle in the centre, not {off}px from it.");
     }
+
+    // ------------------------------------------------------------------ The item menu
+
+    [Fact]
+    public async Task Right_clicking_a_bar_opens_the_items_menu_and_choosing_runs_it()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("rightclick-bar-shell").ClickAsync(new() { Button = Microsoft.Playwright.MouseButton.Right });
+
+        var menu = Component("rightclick-context-menu");
+        await Expect(menu).ToBeVisibleAsync();
+        await Expect(menu).ToHaveAttributeAsync("data-item-id", "shell");
+        await Expect(Component("rightclick-open")).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("ArrowDown");
+        await Expect(Component("rightclick-copy")).ToBeFocusedAsync();
+        await Page.Keyboard.PressAsync("Enter");
+
+        await Expect(Component("rightclick-note")).ToHaveTextAsync("Copied shell");
+        await Expect(menu).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task The_items_menu_opens_on_a_name_too_and_closes_on_escape_or_a_click_away()
+    {
+        await GotoComponentAsync(Route);
+
+        // Design is done, so the demo switches Delete off for it.
+        await Component("rightclick-label-design").ClickAsync(new() { Button = Microsoft.Playwright.MouseButton.Right });
+        await Expect(Component("rightclick-context-menu")).ToHaveAttributeAsync("data-item-id", "design");
+        await Expect(Component("rightclick-delete")).ToBeDisabledAsync();
+
+        await Page.Keyboard.PressAsync("Escape");
+        await Expect(Component("rightclick-context-menu")).ToHaveCountAsync(0);
+
+        await Component("rightclick-bar-shell").ClickAsync(new() { Button = Microsoft.Playwright.MouseButton.Right });
+        await Component("rightclick-context-scrim").ClickAsync(new() { Position = new() { X = 5, Y = 5 } });
+        await Expect(Component("rightclick-context-menu")).ToHaveCountAsync(0);
+        await Expect(Component("rightclick-note")).ToHaveTextAsync("Right-click a bar or a name.");
+    }
+
+    [Fact]
+    public async Task A_chart_without_an_items_menu_leaves_right_click_to_the_browser()
+    {
+        await GotoComponentAsync(Route);
+
+        var prevented = await Component("paging-week-bar-shell").EvaluateAsync<bool>(
+            "el => !el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+
+        Assert.False(prevented);
+        await Expect(Component("paging-week-context-menu")).ToHaveCountAsync(0);
+    }
 }

@@ -119,8 +119,8 @@
                        Items="Tasks"
                        View="VetoGanttView.Schedule"
                        TodayOverride="Today"
-                       Start="new DateOnly(2026, 3, 16)"
-                       End="new DateOnly(2026, 3, 22)"
+                       Start="_weekRange?.Start ?? new DateOnly(2026, 3, 16)"
+                       End="_weekRange?.End ?? new DateOnly(2026, 3, 22)"
                        ShowViewPicker="false"
                        ShowScalePicker="false"
                        ShowSearch="false"
@@ -282,6 +282,31 @@
         <VetoStack Gap="VetoSpacing.Small">
             <span class="demo-value" data-testid="selection">@(_selectedId is null ? "Nothing selected — click a bar above." : $"Selected: {_selectedId}")</span>
             <span class="demo-value" data-testid="export-note">@_exportNote</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-context"
+               Title="Right-click menu"
+               Description="ItemContextMenu is a menu of your own for the row under a right-click - on its bar or its name - opened at the pointer. It is handed the item, and filled with VetoMenuItem, VetoMenuLabel and VetoMenuDivider as any VetoMenu is: each item does what its OnClick says, and choosing one closes the menu. Escape or a click elsewhere closes it too; the arrow keys move between items. Leave it null and right-click is the browser's own."
+               Code="@ContextCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <VetoGantt TestId="rightclick"
+                       Items="Tasks"
+                       View="VetoGanttView.Schedule"
+                       TodayOverride="Today"
+                       ShowToolbar="false"
+                       SidebarWidth="13rem"
+                       Height="17rem">
+                <ItemContextMenu Context="item">
+                    <VetoMenuLabel Text="@item.Name" />
+                    <VetoMenuItem TestId="rightclick-open" Text="Open" OnClick='() => _contextNote = $"Opened {item.Name}"' />
+                    <VetoMenuItem TestId="rightclick-copy" Text="Copy id" OnClick='() => _contextNote = $"Copied {item.Id}"' />
+                    <VetoMenuDivider />
+                    <VetoMenuItem TestId="rightclick-delete" Text="Delete" Destructive="true" Disabled="@(item.Progress == 1)"
+                                  OnClick='() => _contextNote = $"Deleted {item.Name}"' />
+                </ItemContextMenu>
+            </VetoGantt>
+            <span class="demo-value" data-testid="rightclick-note">@(_contextNote ?? "Right-click a bar or a name.")</span>
         </VetoStack>
     </DemoBlock>
 
@@ -530,6 +555,7 @@
     private string? _drivenSelection;
     private VetoGanttScale _drivenScale = VetoGanttScale.Day;
     private string? _exportNote;
+    private string? _contextNote;
     private bool _loading;
     private bool _refreshing;
     private string? _change;
@@ -747,6 +773,7 @@
         new("ScrollToTodayOnLoad", "bool", "true", "Whether the timeline scrolls the now marker to its centre by itself: on load, and whenever the view or scale changes."),
         new("ExportFileName", "string", "\"gantt\"", "Base name for exported files, without an extension."),
         new("OnItemSelected", "EventCallback<VetoGanttItem>", "—", "Raised when a bar is activated."),
+        new("ItemContextMenu", "RenderFragment<VetoGanttItem>?", "null", "A menu of VetoMenuItems for the row under a right-click, opened at the pointer. Null leaves the browser's own."),
         new("OnExport", "EventCallback<VetoGanttExportRequest>", "—", "Raised before an export; set Handled to take it over."),
         new("Toolbar", "RenderFragment?", "null", "Extra controls at the end of the toolbar.")
     ];
@@ -988,12 +1015,13 @@
                    Height="11rem"
                    OnRangeChanged="range => _dayRange = range" />
 
-        @* A week fitted to the width: nothing to scroll, so Later moves it a week on. *@
+        @* A week fitted to the width: nothing to scroll, so Later moves it a week on. The page owns
+           the range - each new one is fed back as Start and End, as a page loading rows per range does. *@
         <VetoGantt Items="Tasks"
                    View="VetoGanttView.Schedule"
                    TodayOverride="Today"
-                   Start="new DateOnly(2026, 3, 16)"
-                   End="new DateOnly(2026, 3, 22)"
+                   Start="_weekRange?.Start ?? new DateOnly(2026, 3, 16)"
+                   End="_weekRange?.End ?? new DateOnly(2026, 3, 22)"
                    ShowViewPicker="false"
                    ShowScalePicker="false"
                    ShowSearch="false"
@@ -1316,6 +1344,33 @@
             private VetoGanttItem? _detail;
 
             // _scale, _selectedId, _exportNote, OnExport, Today and Tasks: as under "A schedule".
+        }
+        """;
+
+    private const string ContextCode = """
+        <VetoGantt Items="Tasks"
+                   View="VetoGanttView.Schedule"
+                   TodayOverride="Today"
+                   ShowToolbar="false"
+                   SidebarWidth="13rem"
+                   Height="17rem">
+            <ItemContextMenu Context="item">
+                <VetoMenuLabel Text="@item.Name" />
+                <VetoMenuItem Text="Open" OnClick='() => _contextNote = $"Opened {item.Name}"' />
+                <VetoMenuItem Text="Copy id" OnClick='() => _contextNote = $"Copied {item.Id}"' />
+                <VetoMenuDivider />
+                @* Any item can be switched off for the row it was opened on. *@
+                <VetoMenuItem Text="Delete" Destructive="true" Disabled="@(item.Progress == 1)"
+                              OnClick='() => _contextNote = $"Deleted {item.Name}"' />
+            </ItemContextMenu>
+        </VetoGantt>
+
+        <span>@(_contextNote ?? "Right-click a bar or a name.")</span>
+
+        @code {
+            private string? _contextNote;
+
+            // Today and Tasks: as under "A schedule".
         }
         """;
 

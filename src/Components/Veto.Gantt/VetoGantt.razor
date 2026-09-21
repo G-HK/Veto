@@ -205,7 +205,8 @@
                     @foreach (var row in Rows)
                     {
                         <div class="veto-gantt__row veto-gantt__row--label @(IsSelected(row.Item) ? "veto-gantt__row--selected" : null)"
-                             style="@($"--veto-gantt-depth: {row.Depth}; {RowHeightStyle(row)}")" data-testid="@Sub($"label-{row.Item.Id}")">
+                             style="@($"--veto-gantt-depth: {row.Depth}; {RowHeightStyle(row)}")" data-testid="@Sub($"label-{row.Item.Id}")"
+                             @oncontextmenu="args => OpenContextMenu(args, row.Item)" @oncontextmenu:preventDefault="ItemContextMenu is not null">
                             @if (row.HasChildren && Collapsible)
                             {
                                 <button type="button" class="veto-gantt__twisty"
@@ -354,6 +355,20 @@
             </div>
             </VetoLoadingOverlay>
         }
+
+        @* Fixed to the window at the pointer, over a scrim that closes it on any click or
+           right-click elsewhere. A click inside bubbles up to close it once the item has run. *@
+        @if (_contextMenu is var (menuItem, menuX, menuY))
+        {
+            <div class="veto-gantt__context-scrim" aria-hidden="true" data-testid="@Sub("context-scrim")"
+                 @onclick="CloseContextMenu" @oncontextmenu="CloseContextMenu" @oncontextmenu:preventDefault></div>
+            <div @ref="_contextMenuPanel" class="veto-gantt__context-menu" role="menu" tabindex="-1"
+                 aria-label="@menuItem.Name" data-testid="@Sub("context-menu")" data-item-id="@menuItem.Id"
+                 style="@($"left: {menuX.ToString(CultureInfo.InvariantCulture)}px; top: {menuY.ToString(CultureInfo.InvariantCulture)}px")"
+                 @onclick="CloseContextMenu" @onkeydown="OnContextMenuKeyDownAsync">
+                @ItemContextMenu!(menuItem)
+            </div>
+        }
     </div>
 }
 
@@ -374,6 +389,7 @@
                 <button type="button" class="veto-gantt__milestone @(isInline ? "veto-gantt__milestone--inline" : null)" style="@BarStyle(item, lane, lanes)"
                         title="@NativeTooltipFor(item)" aria-label="@TooltipFor(item)"
                         data-testid="@Sub($"bar-{item.Id}")" data-item-id="@item.Id" @onclick="() => SelectAsync(item)"
+                        @oncontextmenu="args => OpenContextMenu(args, item)" @oncontextmenu:preventDefault="ItemContextMenu is not null"
                         @attributes="TooltipHandlers(item)">
                 </button>
             }
@@ -384,6 +400,7 @@
                         style="@BarStyle(item, lane, lanes)" title="@NativeTooltipFor(item)" aria-label="@TooltipFor(item)"
                         data-testid="@Sub($"bar-{item.Id}")" data-editable="@(IsEditable(item, isSummary) ? "true" : null)"
                         data-row-id="@item.Id" data-item-id="@item.Id" @onclick="() => SelectAsync(item)"
+                        @oncontextmenu="args => OpenContextMenu(args, item)" @oncontextmenu:preventDefault="ItemContextMenu is not null"
                         @onkeydown="args => OnBarKeyDownAsync(args, item)"
                         @attributes="TooltipHandlers(item)">
                     @if (ShowProgress && item.Progress is { } progress)

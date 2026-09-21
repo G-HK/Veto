@@ -58,6 +58,11 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     // The Today button's scroll, waiting for the range it moved back to be drawn.
     private bool _centreNowPending;
 
+    // The right-clicked item and where the pointer was; the menu takes focus once it is drawn.
+    private (VetoGanttItem Item, double X, double Y)? _contextMenu;
+    private ElementReference _contextMenuPanel;
+    private bool _contextMenuOpening;
+
     private IJSObjectReference? _module;
     private IJSObjectReference? _dragModule;
     private IJSObjectReference? _storeModule;
@@ -103,6 +108,14 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>Raised when a bar is activated, with the row it belongs to.</summary>
     [Parameter]
     public EventCallback<VetoGanttItem> OnItemSelected { get; set; }
+
+    /// <summary>
+    /// A menu for the item under a right-click - on its bar or its name - opened at the pointer.
+    /// Fill it with <c>VetoMenuItem</c>s: each does what its <c>OnClick</c> says, and choosing one
+    /// closes the menu. Null leaves right-click to the browser.
+    /// </summary>
+    [Parameter]
+    public RenderFragment<VetoGanttItem>? ItemContextMenu { get; set; }
 
     /// <summary>
     /// Raised when an export is requested, before anything is downloaded. Set
@@ -1723,8 +1736,45 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             _pagedScrollPending = 0;
         }
 
+        if (_contextMenuOpening)
+        {
+            _contextMenuOpening = false;
+            await InvokeModuleAsync("openMenu", _contextMenuPanel);
+        }
+
         await PlaceTooltipAsync();
         await SyncDragHandlesAsync();
+    }
+
+    // ------------------------------------------------------------------ The item menu
+
+    private void OpenContextMenu ( MouseEventArgs args, VetoGanttItem item )
+    {
+        if (ItemContextMenu is null)
+        {
+            return;
+        }
+
+        _contextMenu = (item, args.ClientX, args.ClientY);
+        _contextMenuOpening = true;
+    }
+
+    private void CloseContextMenu () => _contextMenu = null;
+
+    private async Task OnContextMenuKeyDownAsync ( KeyboardEventArgs args )
+    {
+        switch (args.Key)
+        {
+            case "Escape" or "Tab":
+                CloseContextMenu();
+                break;
+            case "ArrowDown":
+                await InvokeModuleAsync("moveMenuFocus", _contextMenuPanel, 1);
+                break;
+            case "ArrowUp":
+                await InvokeModuleAsync("moveMenuFocus", _contextMenuPanel, -1);
+                break;
+        }
     }
 
     // ------------------------------------------------------------------ Fitting the width
@@ -1799,9 +1849,13 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// </summary>
     public async Task ScrollToTodayAsync ()
     {
-        if (_pagedDays != 0)
+        // A parent that takes each paged range back as its own Start and End leaves nothing
+        // paged to undo, so a range without today on it is paged by whole steps until it has.
+        var back = _pagedDays != 0 ? -_pagedDays : PageBeyondRange ? DaysToToday() : 0;
+
+        if (back != 0)
         {
-            _pagedDays = 0;
+            _pagedDays += back;
             Rebuild();
             _centreNowPending = true;
             StateHasChanged();
@@ -1812,6 +1866,17 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
 
         var offset = TodayMarkerOffset ?? 0;
         await InvokeModuleAsync("scrollTo", _scroller, offset, true, 0.5);
+    }
+
+    /// <summary>How far to page the axis, in the steps Earlier and Later take, to bring today onto it.</summary>
+    private int DaysToToday ()
+    {
+        var length = Timeline.End.DayNumber - Timeline.Start.DayNumber + 1;
+        var step = Math.Min(length, EffectiveScale.StepDays());
+
+        return Today > Timeline.End ? (Today.DayNumber - Timeline.End.DayNumber + step - 1) / step * step
+            : Today < Timeline.Start ? -((Timeline.Start.DayNumber - Today.DayNumber + step - 1) / step * step)
+            : 0;
     }
 
     /// <summary>
