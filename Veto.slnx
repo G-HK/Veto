@@ -9,6 +9,9 @@
     <File Path="src/Directory.Build.props" />
   </Folder>
   <Folder Name="/docs/">
+    <File Path="docs/Concept.md" />
+    <File Path="docs/Contributing.md" />
+    <File Path="docs/Roadmap.md" />
     <File Path="Readme.md" />
   </Folder>
   <Folder Name="/src/">
@@ -34,8 +37,8 @@
     <Project Path="src/Components/Veto.Slider/Veto.Slider.csproj" />
     <Project Path="src/Components/Veto.Switch/Veto.Switch.csproj" />
     <Project Path="src/Components/Veto.Table/Veto.Table.csproj" />
-    <Project Path="src/Components/Veto.TextBox/Veto.TextBox.csproj" />
     <Project Path="src/Components/Veto.TerminalBox/Veto.TerminalBox.csproj" />
+    <Project Path="src/Components/Veto.TextBox/Veto.TextBox.csproj" />
     <Project Path="src/Components/Veto.Tilt/Veto.Tilt.csproj" />
     <Project Path="src/Components/Veto.Toast/Veto.Toast.csproj" />
   </Folder>
