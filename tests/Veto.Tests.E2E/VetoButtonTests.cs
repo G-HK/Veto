@@ -4,15 +4,15 @@ using Xunit;
 namespace Veto.Tests.E2E;
 
 /// <summary>End-to-end specs for VetoButton, driven against /docs/components/button.</summary>
-public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
+public class VetoButtonTests(BlazorAppFixture app) : VetoPageTest(app)
 {
     private const string Route = "docs/components/button";
 
-    private Task<string> TagAsync ( string testId )
+    private Task<string> TagAsync(string testId)
         => Component(testId).EvaluateAsync<string>("el => el.tagName.toLowerCase()");
 
     [Fact]
-    public async Task Renders_a_button_by_default ()
+    public async Task Renders_a_button_by_default()
     {
         await GotoComponentAsync(Route);
 
@@ -23,7 +23,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Renders_an_anchor_when_given_an_href ()
+    public async Task Renders_an_anchor_when_given_an_href()
     {
         await GotoComponentAsync(Route);
 
@@ -32,7 +32,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_disabled_button_never_becomes_a_link ()
+    public async Task A_disabled_button_never_becomes_a_link()
     {
         await GotoComponentAsync(Route);
 
@@ -42,7 +42,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Sizes_differ_in_height ()
+    public async Task Sizes_differ_in_height()
     {
         await GotoComponentAsync(Route);
 
@@ -54,7 +54,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Full_width_fills_its_container ()
+    public async Task Full_width_fills_its_container()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync(Route);
@@ -66,7 +66,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Variants_are_visually_distinct ()
+    public async Task Variants_are_visually_distinct()
     {
         await GotoComponentAsync(Route);
 
@@ -78,7 +78,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_danger_role_differs_from_the_default ()
+    public async Task The_danger_role_differs_from_the_default()
     {
         await GotoComponentAsync(Route);
 
@@ -89,7 +89,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Icons_render_beside_the_label ()
+    public async Task Icons_render_beside_the_label()
     {
         await GotoComponentAsync(Route);
 
@@ -101,7 +101,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_loading_button_reports_itself_busy_and_cannot_be_clicked_twice ()
+    public async Task A_loading_button_reports_itself_busy_and_cannot_be_clicked_twice()
     {
         await GotoComponentAsync(Route);
 
@@ -116,7 +116,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_label_does_not_move_when_loading_starts ()
+    public async Task The_label_does_not_move_when_loading_starts()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync(Route);
@@ -130,7 +130,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_disabled_button_cannot_be_activated ()
+    public async Task A_disabled_button_cannot_be_activated()
     {
         await GotoComponentAsync(Route);
 
@@ -138,7 +138,7 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_button_is_operable_from_the_keyboard ()
+    public async Task The_button_is_operable_from_the_keyboard()
     {
         await GotoComponentAsync(Route);
 
@@ -146,5 +146,54 @@ public class VetoButtonTests ( BlazorAppFixture app ) : VetoPageTest(app)
         await Page.Keyboard.PressAsync("Enter");
 
         await Expect(Page.GetByTestId("save-state")).ToHaveTextAsync("Saved", new() { Timeout = 10_000 });
+    }
+
+    // ------------------------------------------------------------------ The right-click menu
+
+    [Fact]
+    public async Task Right_clicking_opens_the_menu_and_choosing_runs_it()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("rightclick").ClickAsync(new() { Button = Microsoft.Playwright.MouseButton.Right });
+
+        var menu = Component("rightclick-context-menu");
+        await Expect(menu).ToBeVisibleAsync();
+        await Expect(menu).ToHaveAttributeAsync("aria-label", "Report actions");
+        await Expect(Component("rightclick-rename")).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("ArrowDown");
+        await Expect(Component("rightclick-copy")).ToBeFocusedAsync();
+        await Page.Keyboard.PressAsync("Enter");
+
+        await Expect(Component("rightclick-note")).ToHaveTextAsync("Duplicated report");
+        await Expect(menu).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task The_menu_closes_on_escape_or_a_click_away_without_running_anything()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("rightclick").ClickAsync(new() { Button = Microsoft.Playwright.MouseButton.Right });
+        await Page.Keyboard.PressAsync("Escape");
+        await Expect(Component("rightclick-context-menu")).ToHaveCountAsync(0);
+        await Expect(Component("rightclick")).ToBeFocusedAsync();
+
+        await Component("rightclick").ClickAsync(new() { Button = Microsoft.Playwright.MouseButton.Right });
+        await Component("rightclick-context-menu-scrim").ClickAsync(new() { Position = new() { X = 5, Y = 5 } });
+        await Expect(Component("rightclick-context-menu")).ToHaveCountAsync(0);
+        await Expect(Component("rightclick-note")).ToHaveTextAsync("Right-click the button.");
+    }
+
+    [Fact]
+    public async Task A_button_without_a_menu_leaves_right_click_to_the_browser()
+    {
+        await GotoComponentAsync(Route);
+
+        var prevented = await Component("filled").EvaluateAsync<bool>(
+            "el => !el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+
+        Assert.False(prevented);
     }
 }

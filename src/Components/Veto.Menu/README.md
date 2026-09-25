@@ -40,3 +40,15 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
 ## Documentation
 
 Every parameter, with a live demo, is documented on the Veto docs site at `/docs/components/menu`. Source and issues: https://github.com/G-HK/Veto
+
+## Right-click menus
+
+`VetoContextMenu` opens at the pointer instead of under a trigger. Call `Open(args)` from any element's `contextmenu` event; `VetoButton` wires one up for you through its `ContextMenu` parameter.
+
+```razor
+<div @oncontextmenu="args => _menu.Open(args)" @oncontextmenu:preventDefault>Right-click me</div>
+
+<VetoContextMenu @ref="_menu" Label="Row actions">
+    <VetoMenuItem Text="Rename" OnClick="Rename" />
+</VetoContextMenu>
+```

@@ -89,6 +89,24 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-context-menu" Title="Right-click menu"
+               Description="ContextMenu is a menu of your own opened at the pointer on right-click, filled with VetoMenuItem, VetoMenuLabel and VetoMenuDivider as any VetoMenu is. Each item does what its OnClick says, and choosing one closes the menu. Escape or a click elsewhere closes it too; the arrow keys move between items. Leave it null, or disable the button, and right-click is the browser's own."
+               Code="@ContextMenuCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
+            <VetoButton TestId="rightclick" StartIcon="@VetoIcons.Document" ContextMenuLabel="Report actions"
+                        OnClick='() => _contextNote = "Opened report"'>
+                <ChildContent>Report.pdf</ChildContent>
+                <ContextMenu>
+                    <VetoMenuItem TestId="rightclick-rename" Icon="@VetoIcons.Edit" Text="Rename" OnClick='() => _contextNote = "Renamed report"' />
+                    <VetoMenuItem TestId="rightclick-copy" Icon="@VetoIcons.Copy" Text="Duplicate" OnClick='() => _contextNote = "Duplicated report"' />
+                    <VetoMenuDivider />
+                    <VetoMenuItem TestId="rightclick-delete" Icon="@VetoIcons.Trash" Text="Delete" Destructive="true" OnClick='() => _contextNote = "Deleted report"' />
+                </ContextMenu>
+            </VetoButton>
+            <span class="demo-value" data-testid="rightclick-note">@(_contextNote ?? "Right-click the button.")</span>
+        </VetoStack>
+    </DemoBlock>
+
     <ParameterTable TestId="parameters" Rows="Parameters" />
 
 </DocsPage>
@@ -96,6 +114,7 @@
 @code {
     private bool _saving;
     private string? _saveState;
+    private string? _contextNote;
 
     private async Task SaveAsync ()
     {
@@ -124,7 +143,9 @@
         new("Type", "string", "\"button\"", "The type attribute. Defaults to button so it never submits a form by accident."),
         new("Href", "string?", "null", "Renders an anchor and navigates instead of raising OnClick."),
         new("Target", "string?", "null", "The link target, when Href is set."),
-        new("OnClick", "EventCallback<MouseEventArgs>", "—", "Raised when the button is activated.")
+        new("OnClick", "EventCallback<MouseEventArgs>", "—", "Raised when the button is activated."),
+        new("ContextMenu", "RenderFragment?", "null", "A menu opened at the pointer on right-click. Null leaves right-click to the browser."),
+        new("ContextMenuLabel", "string?", "null", "The accessible name of the right-click menu.")
     ];
 
     private const string VariantsCode = """
@@ -170,6 +191,18 @@
     private const string LinkCode = """
         <VetoButton Href="/docs/usage" EndIcon="@VetoIcons.ChevronRight">
             Read the usage guide
+        </VetoButton>
+        """;
+
+    private const string ContextMenuCode = """
+        <VetoButton StartIcon="@VetoIcons.Document" ContextMenuLabel="Report actions" OnClick="Open">
+            <ChildContent>Report.pdf</ChildContent>
+            <ContextMenu>
+                <VetoMenuItem Icon="@VetoIcons.Edit" Text="Rename" OnClick="Rename" />
+                <VetoMenuItem Icon="@VetoIcons.Copy" Text="Duplicate" OnClick="Duplicate" />
+                <VetoMenuDivider />
+                <VetoMenuItem Icon="@VetoIcons.Trash" Text="Delete" Destructive="true" OnClick="Delete" />
+            </ContextMenu>
         </VetoButton>
         """;
 }

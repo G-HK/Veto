@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Veto.Components.Icon;
+using Veto.Components.Menu;
 using Veto.Core;
 
 namespace Veto.Components.Buttons;
@@ -93,6 +94,22 @@ public partial class VetoButton : VetoComponentBase
     [Parameter]
     public EventCallback<MouseEventArgs> OnClick { get; set; }
 
+    /// <summary>
+    /// A menu opened at the pointer on right-click. Fill it with <c>VetoMenuItem</c>s: each does
+    /// what its <c>OnClick</c> says, and choosing one closes the menu. Null leaves right-click to
+    /// the browser, as does a disabled or loading button.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ContextMenu { get; set; }
+
+    /// <summary>The accessible name of <see cref="ContextMenu"/>.</summary>
+    [Parameter]
+    public string? ContextMenuLabel { get; set; }
+
+    private VetoContextMenu? _contextMenu;
+
+    private bool HasContextMenu => ContextMenu is not null && !Disabled && !Loading;
+
     /// <inheritdoc />
     protected override CssBuilder StartCssClass () =>
         base.StartCssClass()
@@ -114,5 +131,13 @@ public partial class VetoButton : VetoComponentBase
         }
 
         await OnClick.InvokeAsync(args);
+    }
+
+    private void OpenContextMenu ( MouseEventArgs args )
+    {
+        if (HasContextMenu)
+        {
+            _contextMenu?.Open(args);
+        }
     }
 }

@@ -1,0 +1,21 @@
+@namespace Veto.Components.Menu
+@inherits Veto.Core.VetoComponentBase
+@implements IAsyncDisposable
+@using System.Globalization
+@inject IJSRuntime JS
+
+@* Fixed to the window at the pointer, over a scrim that closes it on any click or right-click
+   elsewhere. A click inside bubbles up to close it once the item has run. *@
+@if (Visible && _at is var (x, y))
+{
+    <div class="veto-context-menu__scrim" aria-hidden="true"
+         data-testid="@(TestId is null ? null : $"{TestId}-scrim")"
+         @onclick="Close" @oncontextmenu="Close" @oncontextmenu:preventDefault>
+    </div>
+    <div @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
+         style="@($"left: {x.ToString(CultureInfo.InvariantCulture)}px; top: {y.ToString(CultureInfo.InvariantCulture)}px; {CssStyle}")"
+         data-testid="@TestId" role="menu" tabindex="-1" aria-label="@Label"
+         @onclick="Close" @onkeydown="OnKeyDownAsync">
+        @ChildContent
+    </div>
+}

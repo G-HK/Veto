@@ -7,7 +7,8 @@
     @if (Href is not null && !Disabled)
     {
         <a @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
-           style="@CssStyle" data-testid="@TestId" href="@Href" target="@Target" rel="@Rel">
+           style="@CssStyle" data-testid="@TestId" href="@Href" target="@Target" rel="@Rel"
+           @oncontextmenu="OpenContextMenu" @oncontextmenu:preventDefault="HasContextMenu">
             @RenderContents()
         </a>
     }
@@ -16,9 +17,18 @@
         <button @ref="RootElement" @attributes="InnerAttributes"  id="@ElementId" class="@CssClass"
                 style="@CssStyle" data-testid="@TestId" type="@Type" disabled="@(Disabled || Loading)"
                 aria-busy="@(Loading ? "true" : null)"
-                @onclick="OnClickAsync">
+                @onclick="OnClickAsync"
+                @oncontextmenu="OpenContextMenu" @oncontextmenu:preventDefault="HasContextMenu">
             @RenderContents()
         </button>
+    }
+
+    @if (ContextMenu is not null)
+    {
+        <VetoContextMenu @ref="_contextMenu" TestId="@(TestId is null ? null : $"{TestId}-context-menu")"
+                         Label="@ContextMenuLabel">
+            @ContextMenu
+        </VetoContextMenu>
     }
 }
 

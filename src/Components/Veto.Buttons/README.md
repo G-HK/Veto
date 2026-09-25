@@ -43,3 +43,15 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
 ## Documentation
 
 Every parameter, with a live demo, is documented on the Veto docs site at `/docs/components/button`. Source and issues: https://github.com/G-HK/Veto
+
+## Right-click menu
+
+```razor
+<VetoButton ContextMenuLabel="Report actions" OnClick="Open">
+    <ChildContent>Report.pdf</ChildContent>
+    <ContextMenu>
+        <VetoMenuItem Text="Rename" OnClick="Rename" />
+        <VetoMenuItem Text="Delete" Destructive="true" OnClick="Delete" />
+    </ContextMenu>
+</VetoButton>
+```
