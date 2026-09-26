@@ -294,3 +294,35 @@
 .veto-slider__message--error {
     color: var(--veto-color-danger);
 }
+/* In range mode the high input sits on top. When both thumbs meet in the upper half the low
+   one has to be reachable instead - see LowerOnTop. */
+.veto-slider--lower-on-top .veto-slider__input--lower {
+    z-index: 1;
+}
+
+/* The value bubble over a thumb. --veto-slider-at is the thumb's position as a bare
+   percentage; the correction term follows the thumb's centre, which travels a thumb-width
+   less than the rail. */
+.veto-slider__bubble {
+    position: absolute;
+    bottom: calc(50% + var(--veto-slider-thumb) / 2 + var(--veto-space-1));
+    left: calc(var(--veto-slider-at) * 1% + (0.5 - var(--veto-slider-at) / 100) * var(--veto-slider-thumb));
+    z-index: 2;
+    padding: 0.15em 0.45em;
+    font-size: var(--veto-font-size-sm);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-slider-accent, var(--veto-color-primary));
+    border-radius: var(--veto-radius-sm);
+    transform: translateX(-50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--veto-transition);
+}
+
+.veto-slider--bubble-always .veto-slider__bubble,
+.veto-slider__input--lower:is(:hover, :focus-visible, :active) ~ .veto-slider__bubble--lower,
+.veto-slider__input--upper:is(:hover, :focus-visible, :active) ~ .veto-slider__bubble--upper {
+    opacity: 1;
+}

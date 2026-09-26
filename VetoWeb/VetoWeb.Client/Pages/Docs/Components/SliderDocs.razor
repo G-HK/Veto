@@ -108,6 +108,30 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-bubble"
+               Title="Value over the thumb"
+               Description="ThumbValue puts the value in a bubble over each thumb - Active while it is hovered, focused or dragged, Always to keep it up. It uses the same Format, Prefix and Suffix as ShowValue; the input's own min, max and step are always written culture-free, so a format like N0 never reaches them."
+               Code="@BubbleCode">
+        <VetoStack Gap="VetoSpacing.ExtraLarge">
+            <VetoSlider TValue="int"
+                        TestId="bubble"
+                        Label="Monthly budget"
+                        Min="0" Max="5000" Step="250"
+                        Format="N0" Prefix="$"
+                        ThumbValue="VetoSliderThumbValue.Always"
+                        @bind-Value="_monthly" />
+            <VetoSlider TValue="int"
+                        TestId="bubble-range"
+                        Range="true"
+                        Label="Age"
+                        Min="18" Max="99"
+                        ThumbValue="VetoSliderThumbValue.Active"
+                        @bind-Value="_ageFrom"
+                        @bind-UpperValue="_ageTo" />
+            <span class="demo-value" data-testid="bubble-range-output">@_ageFrom – @_ageTo</span>
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-sizes"
                Title="Sizes, colours and variants"
                Description="The same enums the rest of the library uses."
@@ -162,6 +186,9 @@
     private int _priority = 50;
     private int _priceFrom = 200;
     private int _priceTo = 800;
+    private int _monthly = 1500;
+    private int _ageFrom = 99;
+    private int _ageTo = 99;
     private int _scratch = 60;
     private int _locked = 70;
     private readonly FormModel _form = new();
@@ -198,6 +225,7 @@
         new("Format / Prefix / Suffix", "string?", "null", "How every printed number is formatted and dressed."),
         new("RangeSeparator", "string", "\" – \"", "What goes between the two numbers of a printed range."),
         new("LowerThumbLabel / UpperThumbLabel", "string", "\"Minimum\" / \"Maximum\"", "Accessible names for a range's two thumbs."),
+        new("ThumbValue", "VetoSliderThumbValue", "Never", "A value bubble over each thumb: Never, Active (hovered, focused or dragged) or Always."),
         new("Immediate", "bool", "true", "Follow the thumb as it is dragged, rather than updating only when the drag ends."),
         new("Color", "VetoColor", "Primary", "The accent the filled rail takes."),
         new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
@@ -267,6 +295,17 @@
                     UpperThumbLabel="Highest price"
                     @bind-Value="_from"
                     @bind-UpperValue="_to" />
+        """;
+
+    private const string BubbleCode = """
+        <VetoSlider TValue="int" Label="Monthly budget"
+                    Min="0" Max="5000" Step="250" Format="N0" Prefix="$"
+                    ThumbValue="VetoSliderThumbValue.Always"
+                    @bind-Value="_monthly" />
+
+        <VetoSlider TValue="int" Range="true" Label="Age" Min="18" Max="99"
+                    ThumbValue="VetoSliderThumbValue.Active"
+                    @bind-Value="_from" @bind-UpperValue="_to" />
         """;
 
     private const string SizesCode = """

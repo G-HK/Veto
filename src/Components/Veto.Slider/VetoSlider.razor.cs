@@ -144,6 +144,14 @@ public partial class VetoSlider<TValue> : VetoInputBase<TValue>
     [Parameter]
     public bool Immediate { get; set; } = true;
 
+    /// <summary>
+    /// A bubble over each thumb carrying its value, formatted like <see cref="ShowValue"/>.
+    /// <see cref="VetoSliderThumbValue.Active"/> shows it while the thumb is hovered, focused or
+    /// dragged; <see cref="VetoSliderThumbValue.Always"/> keeps it up.
+    /// </summary>
+    [Parameter]
+    public VetoSliderThumbValue ThumbValue { get; set; } = VetoSliderThumbValue.Never;
+
     /// <summary>Raised after the bound value changes, with the new value.</summary>
     [Parameter]
     public EventCallback<TValue> OnValueChanged { get; set; }
@@ -213,12 +221,12 @@ public partial class VetoSlider<TValue> : VetoInputBase<TValue>
         {
             if (!SnapToMarks || _marks.Count == 0)
             {
-                return FormatNumber(StepNumber);
+                return AttrNumber(StepNumber);
             }
 
             var spacing = EvenMarkSpacing();
 
-            return spacing is null ? "any" : FormatNumber(spacing.Value);
+            return spacing is null ? "any" : AttrNumber(spacing.Value);
         }
     }
 
@@ -262,7 +270,17 @@ public partial class VetoSlider<TValue> : VetoInputBase<TValue>
             .AddClass(Modifier(Color.ToModifier()))
             .AddClass(Modifier("range"), Range)
             .AddClass(Modifier("marked"), _marks.Count > 0)
-            .AddClass(Modifier("mark-labels"), ShowMarkLabels && HasMarkLabels);
+            .AddClass(Modifier("mark-labels"), ShowMarkLabels && HasMarkLabels)
+            .AddClass(Modifier("bubble-always"), ThumbValue == VetoSliderThumbValue.Always)
+            .AddClass(Modifier("lower-on-top"), LowerOnTop);
+
+    /// <summary>
+    /// Whether the low thumb must sit above the high one. The inputs overlap, and normally the
+    /// high one is on top - but when both thumbs meet in the upper half, the one on top could
+    /// only move right, which it cannot, and the slider would be stuck. There the low thumb,
+    /// which can move left, has to be the one the pointer finds.
+    /// </summary>
+    private bool LowerOnTop => Range && LowerNumber >= UpperNumber && LowerNumber > MinNumber + Span / 2;
 
     private IReadOnlyList<VetoSliderMark> BuildMarks ()
     {
@@ -318,6 +336,13 @@ public partial class VetoSlider<TValue> : VetoInputBase<TValue>
 
     private string FormatNumber ( double value )
         => Format is null ? value.ToString("0.##########", Inv) : value.ToString(Format, CultureInfo.CurrentCulture);
+
+    /// <summary>
+    /// A number for an HTML attribute - <c>min</c>, <c>max</c>, <c>step</c>, <c>data-value</c>.
+    /// Never <see cref="Format"/> or the current culture: <c>max="5,000"</c> or <c>step="0,1"</c>
+    /// is not a number to the browser, which then quietly falls back to its defaults.
+    /// </summary>
+    private static string AttrNumber ( double value ) => value.ToString("0.##########", Inv);
 
     private string TextFor ( double value ) => $"{Prefix}{FormatNumber(value)}{Suffix}";
 
