@@ -125,10 +125,15 @@ public partial class VetoProgress : VetoComponentBase
     /// The value as a percentage of <see cref="Max"/>, clamped to 0-100. Public so a
     /// <see cref="Runner"/> or <see cref="ValueContent"/> can read how far along it is.
     /// </summary>
-    public double Percent => Max <= 0 ? 0 : Math.Clamp(Value / Max * 100, 0, 100);
+    public double Percent => ToPercent(Value);
 
     /// <summary>The trail as a percentage of <see cref="Max"/>, clamped to 0-100.</summary>
-    public double TrailPercent => Max <= 0 || Trail is null ? 0 : Math.Clamp(Trail.Value / Max * 100, 0, 100);
+    public double TrailPercent => Trail is null ? 0 : ToPercent(Trail.Value);
+
+    // NaN and infinities - a division by a zero total upstream, say - read as empty. Clamp
+    // passes NaN straight through, which rendered "width: NaN%" and "NaN%".
+    private double ToPercent ( double value )
+        => Max <= 0 || !double.IsFinite(Max) || !double.IsFinite(value) ? 0 : Math.Clamp(value / Max * 100, 0, 100);
 
     private string ValueText =>
         Percent.ToString(ValueFormat, CultureInfo.InvariantCulture) + ValueSuffix;

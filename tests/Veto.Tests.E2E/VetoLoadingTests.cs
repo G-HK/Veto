@@ -372,4 +372,42 @@ public class VetoLoadingTests ( BlazorAppFixture app ) : VetoPageTest(app)
             .ToHaveAttributeAsync("aria-hidden", "true");
     }
 
+
+    [Fact]
+    public async Task A_refresh_shorter_than_the_delay_never_shows_the_veil ()
+    {
+        await GotoComponentAsync(Route);
+
+        var overlay = Component("overlay-delayed");
+
+        // Watch the veil's opacity for the whole quick refresh; it must never rise.
+        await overlay.EvaluateAsync(@"el => {
+            window.__maxVeil = 0;
+            const tick = () => {
+                const veil = el.querySelector('.veto-loading-overlay__veil');
+                if (veil) window.__maxVeil = Math.max(window.__maxVeil, parseFloat(getComputedStyle(veil).opacity));
+                if (!window.__stopVeil) requestAnimationFrame(tick);
+            };
+            tick();
+        }");
+
+        await Component("delayed-quick").ClickAsync();
+        await Expect(overlay).ToHaveAttributeAsync("aria-busy", "true");
+        await Expect(overlay).ToHaveAttributeAsync("aria-busy", "false");
+
+        var max = await Page.EvaluateAsync<double>("() => { window.__stopVeil = true; return window.__maxVeil; }");
+        Assert.True(max < 0.05, $"The veil should not have shown for a quick refresh, but reached opacity {max}.");
+    }
+
+    [Fact]
+    public async Task A_slow_refresh_shows_the_veil_after_the_delay_and_is_inert_throughout ()
+    {
+        await GotoComponentAsync(Route);
+
+        var overlay = Component("overlay-delayed");
+        await Component("delayed-slow").ClickAsync();
+
+        await Expect(overlay.Locator(".veto-loading-overlay__content")).ToHaveAttributeAsync("inert", string.Empty);
+        await Expect(overlay.Locator(".veto-loading-overlay__veil")).ToHaveCSSAsync("opacity", "1");
+    }
 }
