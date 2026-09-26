@@ -539,4 +539,26 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
             await Expect(Component($"{testId}-main")).ToBeVisibleAsync();
         }
     }
+
+    [Fact]
+    public async Task A_dock_moved_to_a_side_magnifies_along_its_new_axis ()
+    {
+        await Page.SetViewportSizeAsync(1400, 900);
+        await GotoComponentAsync("layouts/dock");
+
+        await Component("position-left").ClickAsync();
+        await Expect(Component("layout-dock")).ToHaveClassAsync(new Regex(@"\bveto-dock--left\b"));
+
+        var box = await DockItem("dock-home").BoundingBoxAsync()
+            ?? throw new InvalidOperationException("The home item has no box.");
+        await Page.Mouse.MoveAsync(box.X + box.Width / 2, box.Y + box.Height / 2, new() { Steps = 4 });
+
+        // Settings is four items down. Measured along x - the axis the dock was attached with at
+        // the bottom - every item in the column sat under the pointer and magnified fully.
+        var far = await DockItem("dock-settings").EvaluateAsync<string>("el => el.style.getPropertyValue('--veto-dock-scale')");
+        var near = await DockItem("dock-home").EvaluateAsync<string>("el => el.style.getPropertyValue('--veto-dock-scale')");
+
+        Assert.True(double.Parse(near, CultureInfo.InvariantCulture) > 1.3, $"The hovered item should magnify, but was {near}.");
+        Assert.True(double.Parse(far, CultureInfo.InvariantCulture) < 1.1, $"An item far along the dock should not, but was {far}.");
+    }
 }
