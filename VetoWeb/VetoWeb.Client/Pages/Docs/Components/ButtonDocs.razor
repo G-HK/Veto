@@ -86,6 +86,19 @@
         <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
             <VetoButton TestId="link" Href="/docs/usage" EndIcon="@VetoIcons.ChevronRight">Read the usage guide</VetoButton>
             <VetoButton TestId="disabled-link" Href="/docs/usage" Disabled="true">Disabled link</VetoButton>
+            <VetoButton TestId="tab-link" Href="https://github.com/G-HK/Veto" Target="_blank" Variant="VetoVariant.Outlined"
+                        OnClick='() => _linkClicks++'>Source (new tab)</VetoButton>
+            <span class="demo-value" data-testid="link-clicks">@_linkClicks</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-busy"
+               Title="Busy while it works"
+               Description="LoadingOnClick shows the loading state for exactly as long as the OnClick handler runs, and ignores clicks meanwhile - no double submit, and no flag on the page to keep in step."
+               Code="@BusyCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
+            <VetoButton TestId="busy" StartIcon="@VetoIcons.Check" LoadingOnClick="true" OnClick="SubmitAsync">Submit</VetoButton>
+            <span class="demo-value" data-testid="busy-count">@_submits</span>
         </VetoStack>
     </DemoBlock>
 
@@ -116,6 +129,15 @@
     private string? _saveState;
     private string? _contextNote;
 
+    private int _linkClicks;
+    private int _submits;
+
+    private async Task SubmitAsync ()
+    {
+        _submits++;
+        await Task.Delay(1200);
+    }
+
     private async Task SaveAsync ()
     {
         _saving = true;
@@ -139,6 +161,7 @@
         new("FullWidth", "bool", "false", "Stretches to the width of the container."),
         new("Rounded", "bool", "false", "Fully rounds the ends."),
         new("Loading", "bool", "false", "Swaps the leading icon for a spinner and disables the button."),
+        new("LoadingOnClick", "bool", "false", "Shows the loading state while the OnClick handler runs, and ignores clicks until it finishes."),
         new("Disabled", "bool", "false", "Disables the button. A disabled button never renders as a link."),
         new("Type", "string", "\"button\"", "The type attribute. Defaults to button so it never submits a form by accident."),
         new("Href", "string?", "null", "Renders an anchor and navigates instead of raising OnClick."),
@@ -186,6 +209,10 @@
                 _saving = false;
             }
         }
+        """;
+
+    private const string BusyCode = """
+        <VetoButton LoadingOnClick="true" OnClick="SubmitAsync">Submit</VetoButton>
         """;
 
     private const string LinkCode = """

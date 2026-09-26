@@ -4,10 +4,13 @@
 
 @if (Visible)
 {
-    @if (Href is not null)
+    @* A disabled link is a disabled button: an anchor has no disabled state, and one that
+       still navigates is not disabled at all. *@
+    @if (Href is not null && !Disabled)
     {
         <a @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
-           style="@CssStyle" data-testid="@TestId" href="@Href" target="@Target" title="@Label" aria-label="@Label">
+           style="@CssStyle" data-testid="@TestId" href="@Href" target="@Target" rel="@ResolvedRel"
+           title="@Label" aria-label="@Label" @onclick="OnClick">
             <VetoIcon Icon="@Icon" Size="@IconSize" ChildContent="@ChildContent" />
         </a>
     }
