@@ -1,21 +1,81 @@
-﻿@typeparam TItem
-<table class="table table-striped table-bordered">
-    <thead class="thead-green">
-        <tr>
-            @HeaderTemplate
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Items)
-        {
-            <tr>
-                @RowTemplate(item)
-            </tr>
-        }
-    </tbody>
-    <tfoot>
-        <tr>
-            @FooterTemplate
-        </tr>
-    </tfoot>
-</table>
+@namespace Veto.Components.Table
+@typeparam TItem
+@inherits Veto.Core.VetoComponentBase
+
+@if (Visible)
+{
+    @* The wrapper is what scrolls: a wide table scrolls sideways inside it, and with
+       RootMaxHeight set a sticky header stays put while the rows scroll under it. *@
+    <div @ref="RootElement"
+         @attributes="InnerAttributes"
+         id="@ElementId"
+         class="@CssClass"
+         style="@CssStyle"
+         data-testid="@TestId">
+        <table class="veto-table__table">
+            @if (!string.IsNullOrEmpty(Caption))
+            {
+                <caption class="veto-table__caption">@Caption</caption>
+            }
+
+            @if (HeaderTemplate is not null)
+            {
+                <thead class="veto-table__head">
+                    <tr>@HeaderTemplate</tr>
+                </thead>
+            }
+
+            <tbody class="veto-table__body">
+                @if (_items.Count == 0)
+                {
+                    <tr class="veto-table__empty-row">
+                        @* colspan is clamped by the browser to the real column count. *@
+                        <td class="veto-table__empty" colspan="1000" data-testid="@(TestId is null ? null : $"{TestId}-empty")">
+                            @if (EmptyContent is not null)
+                            {
+                                @EmptyContent
+                            }
+                            else
+                            {
+                                @EmptyText
+                            }
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @for (var i = 0; i < _items.Count; i++)
+                    {
+                        var item = _items[i];
+                        var index = i;
+
+                        @if (OnRowClick.HasDelegate)
+                        {
+                            <tr @key="KeyOf(item)"
+                                class="@RowCss(item)"
+                                tabindex="0"
+                                data-index="@index"
+                                @onclick="() => OnRowClick.InvokeAsync(item)"
+                                @onkeydown="e => OnRowKeyDownAsync(e, item)">
+                                @RowTemplate(item)
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr @key="KeyOf(item)" class="@RowCss(item)" data-index="@index">
+                                @RowTemplate(item)
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+
+            @if (FooterTemplate is not null)
+            {
+                <tfoot class="veto-table__foot">
+                    <tr>@FooterTemplate</tr>
+                </tfoot>
+            }
+        </table>
+    </div>
+}
