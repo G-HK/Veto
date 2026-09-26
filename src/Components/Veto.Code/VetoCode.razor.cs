@@ -68,22 +68,101 @@ public partial class VetoCode : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public string? MaxHeight { get; set; }
 
+    /// <summary>
+    /// Numbers each line in a gutter. Needs <see cref="Code"/>: content supplied through
+    /// <see cref="ChildContent"/> is markup, not lines, and is shown as it is.
+    /// </summary>
+    [Parameter]
+    public bool ShowLineNumbers { get; set; }
+
+    /// <summary>The number given to the first line, for an excerpt from the middle of a file.</summary>
+    [Parameter]
+    public int FirstLineNumber { get; set; } = 1;
+
+    /// <summary>
+    /// Lines to highlight, as a comma-separated list of numbers and ranges - <c>"2, 5-7"</c>.
+    /// Numbers are the displayed ones, so they follow <see cref="FirstLineNumber"/>. Needs
+    /// <see cref="Code"/>.
+    /// </summary>
+    [Parameter]
+    public string? HighlightLines { get; set; }
+
+    /// <summary>When true long lines wrap instead of scrolling sideways.</summary>
+    [Parameter]
+    public bool Wrap { get; set; }
+
+    private ElementReference _codeElement;
+    private IReadOnlyList<(string Text, int Number)> _lines = [];
+    private HashSet<int> _highlighted = [];
+
+    private bool UsesLines => Code is not null && (ShowLineNumbers || _highlighted.Count > 0);
+
+    /// <inheritdoc />
+    protected override void OnParametersSet ()
+    {
+        base.OnParametersSet();
+
+        _highlighted = ParseLineSet(HighlightLines);
+
+        var lines = (Code ?? string.Empty).Replace("\r\n", "\n").Split('\n');
+
+        // A trailing newline ends the last line; it does not start an empty one.
+        var count = lines.Length > 1 && lines[^1].Length == 0 ? lines.Length - 1 : lines.Length;
+        _lines = [.. lines.Take(count).Select(( text, i ) => (text, FirstLineNumber + i))];
+    }
+
+    /// <inheritdoc />
+    protected override CssBuilder StartCssClass ()
+        => base.StartCssClass()
+            .AddClass(Modifier("numbered"), ShowLineNumbers && Code is not null)
+            .AddClass(Modifier("wrap"), Wrap);
+
     /// <inheritdoc />
     protected override StyleBuilder StartStyle ()
         => base.StartStyle()
-            .AddStyle("--veto-code-max-height", MaxHeight);
+            .AddStyle("--veto-code-max-height", MaxHeight)
+            .AddStyle("--veto-code-gutter", ShowLineNumbers ? $"{(FirstLineNumber + _lines.Count - 1).ToString().Length}ch" : null);
+
+    private string LineClass ( int number )
+        => _highlighted.Contains(number) ? "veto-code__line veto-code__line--highlight" : "veto-code__line";
+
+    /// <summary>Parses <c>"2, 5-7"</c> into {2, 5, 6, 7}. Anything unreadable is skipped.</summary>
+    private static HashSet<int> ParseLineSet ( string? spec )
+    {
+        var set = new HashSet<int>();
+
+        foreach (var part in (spec ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var range = part.Split('-', 2, StringSplitOptions.TrimEntries);
+
+            if (range.Length == 1 && int.TryParse(range[0], out var single))
+            {
+                set.Add(single);
+            }
+            else if (range.Length == 2 && int.TryParse(range[0], out var from) && int.TryParse(range[1], out var to))
+            {
+                // ponytail: capped so "1-99999999" cannot allocate a huge set.
+                for (var n = Math.Min(from, to); n <= Math.Max(from, to) && set.Count < 10_000; n++)
+                {
+                    set.Add(n);
+                }
+            }
+        }
+
+        return set;
+    }
 
     private async Task CopyAsync ()
     {
-        if (string.IsNullOrEmpty(Code))
-        {
-            return;
-        }
-
         try
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Code/veto-code.js");
-            _copied = await _module.InvokeAsync<bool>("copyText", Code);
+
+            // Code passed as ChildContent has no string to copy, so the browser reads it back
+            // off the element instead.
+            _copied = Code is not null
+                ? await _module.InvokeAsync<bool>("copyText", Code)
+                : await _module.InvokeAsync<bool>("copyElementText", _codeElement);
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException or JSDisconnectedException)
         {
