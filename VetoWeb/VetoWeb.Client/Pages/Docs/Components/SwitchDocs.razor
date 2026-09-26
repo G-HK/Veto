@@ -112,6 +112,17 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-guard"
+               Title="Confirming or saving before the change"
+               Description="BeforeChange is asked with the state the switch is about to take, and can say no. While it runs the switch is busy - a spinner in the thumb, aria-busy, input ignored - which is what you want while a setting saves to the server. Loading shows the same busy state on demand."
+               Code="@GuardCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Start">
+            <VetoSwitch TValue="bool" TestId="guarded" Label="Sync to cloud" BeforeChange="SaveAsync" @bind-Value="_synced" />
+            <VetoSwitch TValue="bool" TestId="server-ok" Label="Server accepts saves" @bind-Value="_serverOk" />
+            <VetoSwitch TValue="bool" TestId="loading" Label="Loading" Loading="true" @bind-Value="_scratch" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-validation"
                Title="Validation"
                Description="Inside an EditForm the switch picks up the model's validation attributes like any other input: it sets aria-invalid, swaps its helper text for the message, and announces it."
@@ -143,6 +154,14 @@
     private bool _scratch;
     private bool _visibility;
     private bool _locked = true;
+    private bool _synced;
+    private bool _serverOk = true;
+
+    private async Task<bool> SaveAsync ( bool? next )
+    {
+        await Task.Delay(400);   // stands in for the round trip
+        return _serverOk;
+    }
     private readonly FormModel _form = new();
     private string? _submitted;
 
@@ -172,6 +191,8 @@
         new("Disabled", "bool", "false", "Cannot be focused or changed."),
         new("ReadOnly", "bool", "false", "Can be focused, but will not change."),
         new("Required", "bool", "false", "Renders the required marker and sets aria-required. Enforcement comes from the model."),
+        new("BeforeChange", "Func<bool?, Task<bool>>?", "null", "Asked before every change with the next state; return false to keep the current one. The switch is busy while it runs."),
+        new("Loading", "bool", "false", "Shows the busy state and ignores input."),
         new("OnValueChanged", "EventCallback<TValue?>", "—", "Raised after the bound value changes."),
         new("State", "bool?", "—", "Read-only: the current state, with null for indeterminate."),
         new("ToggleAsync() / SetStateAsync(bool?)", "Task", "—", "Drive the switch from code; both respect Disabled and ReadOnly.")
@@ -225,6 +246,19 @@
                     OffText="Private"
                     Label="Visibility"
                     @bind-Value="_visibility" />
+        """;
+
+    private const string GuardCode = """
+        <VetoSwitch TValue="bool" Label="Sync to cloud"
+                    BeforeChange="SaveAsync" @bind-Value="_synced" />
+
+        @code {
+            private async Task<bool> SaveAsync(bool? next)
+            {
+                var response = await Http.PutAsJsonAsync("api/settings/sync", next);
+                return response.IsSuccessStatusCode;   // false keeps the old state
+            }
+        }
         """;
 
     private const string StatesCode = """

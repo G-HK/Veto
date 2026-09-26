@@ -239,3 +239,38 @@
 .veto-switch__message--error {
     color: var(--veto-color-danger);
 }
+/* Busy: a BeforeChange is running, or Loading is set. The thumb spins in place of its icon. */
+
+.veto-switch--busy .veto-switch__button {
+    cursor: progress;
+}
+
+.veto-switch--busy .veto-switch__thumb {
+    position: relative;
+}
+
+.veto-switch--busy .veto-switch__thumb ::deep .veto-switch__icon {
+    visibility: hidden;
+}
+
+.veto-switch--busy .veto-switch__thumb::after {
+    content: "";
+    position: absolute;
+    inset: 18%;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: veto-switch-spin 0.7s linear infinite;
+}
+
+@keyframes veto-switch-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .veto-switch--busy .veto-switch__thumb::after {
+        animation-duration: 2s;
+    }
+}
