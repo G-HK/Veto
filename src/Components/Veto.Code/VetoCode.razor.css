@@ -41,3 +41,35 @@
     white-space: pre;
     tab-size: 4;
 }
+
+/* Lines are spans only when numbered or highlighted; plain listings stay one text node. */
+.veto-code__line {
+    display: block;
+    min-height: 1.65em;
+}
+
+.veto-code--numbered .veto-code__line::before {
+    content: attr(data-line);
+    display: inline-block;
+    box-sizing: content-box;
+    width: var(--veto-code-gutter, 2ch);
+    margin-inline-end: var(--veto-space-4);
+    padding-inline-end: var(--veto-space-2);
+    border-inline-end: 1px solid var(--veto-border-color, var(--veto-color-border));
+    text-align: end;
+    color: var(--veto-color-text-muted);
+    user-select: none;
+}
+
+.veto-code__line--highlight {
+    /* Bleeds out to the edges of the padded listing so the band reads as a whole row. */
+    margin-inline: calc(-1 * var(--veto-space-4));
+    padding-inline: var(--veto-space-4);
+    background-color: color-mix(in srgb, var(--veto-color-primary) 14%, transparent);
+    box-shadow: inset 3px 0 0 var(--veto-color-primary);
+}
+
+.veto-code--wrap .veto-code__code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
