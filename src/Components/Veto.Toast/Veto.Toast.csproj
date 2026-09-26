@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Toast</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>Toast notification host and service for Veto.</Description>
     <RootNamespace>Veto.Components.Toast</RootNamespace>
   </PropertyGroup>
