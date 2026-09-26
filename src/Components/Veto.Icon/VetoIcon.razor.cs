@@ -94,7 +94,8 @@ public partial class VetoIcon : VetoComponentBase
     /// <inheritdoc />
     protected override StyleBuilder StartStyle ()
         => base.StartStyle()
-            .AddStyle("--veto-icon-rotation", $"{Rotation}deg", Rotation != 0);
+            // Invariant: some cultures (sv-SE, nb-NO) write a negative number with U+2212, not "-".
+            .AddStyle("--veto-icon-rotation", string.Create(CultureInfo.InvariantCulture, $"{Rotation}deg"), Rotation != 0);
 }
 
 /// <summary>Which way a <see cref="VetoIcon"/> is mirrored.</summary>
