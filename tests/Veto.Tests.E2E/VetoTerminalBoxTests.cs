@@ -116,7 +116,7 @@ public class VetoTerminalBoxTests(BlazorAppFixture app) : VetoPageTest(app)
         var text = Component("typed-once-line").Locator(".veto-terminal-line__text");
 
         Assert.Equal("1", await text.EvaluateAsync<string>("el => getComputedStyle(el).animationIterationCount"));
-        Assert.Equal("forwards", await text.EvaluateAsync<string>("el => getComputedStyle(el).animationFillMode"));
+        Assert.Equal("backwards", await text.EvaluateAsync<string>("el => getComputedStyle(el).animationFillMode"));
         Assert.Equal("3s", await text.EvaluateAsync<string>("el => getComputedStyle(el).animationDuration"));
     }
 
@@ -380,4 +380,42 @@ public class VetoTerminalBoxTests(BlazorAppFixture app) : VetoPageTest(app)
             $"expected the stack on the right, its right edge was at {box.X + box.Width}px of {viewport.Width}px");
     }
 
+
+    [Fact]
+    public async Task Wide_characters_are_not_clipped_once_typed ()
+    {
+        await GotoComponentAsync(Route);
+
+        var text = Component("typed-wide").Locator(".veto-terminal-line__text");
+
+        // TypingDuration is 0.6s and Loop is off, so it has long finished by now.
+        await Page.WaitForTimeoutAsync(1500);
+        var clipped = await text.EvaluateAsync<bool>("el => el.scrollWidth > el.clientWidth + 1");
+        Assert.False(clipped, "The typed command should end fully revealed.");
+    }
+
+    [Fact]
+    public async Task Max_height_scrolls_a_long_session ()
+    {
+        await GotoComponentAsync(Route);
+
+        var scrolls = await Component("long").Locator(".veto-terminal-box__body")
+            .EvaluateAsync<bool>("el => el.scrollHeight > el.clientHeight");
+        Assert.True(scrolls);
+    }
+
+    [Fact]
+    public async Task A_line_typed_once_stays_visible_when_it_finishes ()
+    {
+        await GotoComponentAsync(Route);
+
+        var text = Component("typed-once-line").Locator(".veto-terminal-line__text");
+
+        // TypingDuration is 3s. The animation used to hold its last frame, width 0.
+        await Page.WaitForTimeoutAsync(4000);
+        var width = await text.EvaluateAsync<double>("el => el.getBoundingClientRect().width");
+        var natural = await text.EvaluateAsync<double>("el => el.scrollWidth");
+
+        Assert.True(width > 0 && width + 1 >= natural, $"Expected the whole command visible, but it was {width} of {natural}px wide.");
+    }
 }
