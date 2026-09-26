@@ -64,7 +64,7 @@ public class VetoRatingTests ( BlazorAppFixture app ) : VetoPageTest(app)
         var row = Row("basic");
         await row.ScrollIntoViewIfNeededAsync();
         await row.FocusAsync();
-        var before = await Page.EvaluateAsync<double>("() => window.scrollY");
+        var before = await Page.EvaluateAsync<double>("() => [document.scrollingElement, ...document.querySelectorAll('*')].reduce((a, e) => a + e.scrollTop, 0)");
 
         await row.PressAsync("End");
         await Expect(Component("basic")).ToHaveAttributeAsync("data-value", "6");
@@ -75,7 +75,7 @@ public class VetoRatingTests ( BlazorAppFixture app ) : VetoPageTest(app)
         await row.PressAsync("Home");
         await Expect(Component("basic")).ToHaveAttributeAsync("data-value", "0");
 
-        Assert.Equal(before, await Page.EvaluateAsync<double>("() => window.scrollY"));
+        Assert.Equal(before, await Page.EvaluateAsync<double>("() => [document.scrollingElement, ...document.querySelectorAll('*')].reduce((a, e) => a + e.scrollTop, 0)"));
     }
 
     [Fact]
