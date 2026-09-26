@@ -49,10 +49,17 @@
                Title="As a link"
                Description="Give it an Href and it renders an anchor instead of a button, so navigation stays real navigation - middle-click, open in new tab and the status bar all keep working."
                Code="@LinkCode">
-        <VetoIconButton Icon="@VetoIcons.ExternalLink"
-                        Label="Open documentation"
-                        TestId="link"
-                        Href="/docs/usage" />
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
+            <VetoIconButton Icon="@VetoIcons.ExternalLink"
+                            Label="Open documentation"
+                            TestId="link"
+                            Href="/docs/usage" />
+            <VetoIconButton Icon="@VetoIcons.ExternalLink"
+                            Label="Documentation is unavailable"
+                            TestId="link-disabled"
+                            Href="/docs/usage"
+                            Disabled="true" />
+        </VetoStack>
     </DemoBlock>
 
     <ParameterTable TestId="parameters" Rows="Parameters" />

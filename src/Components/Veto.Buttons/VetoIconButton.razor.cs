@@ -76,6 +76,12 @@ public partial class VetoIconButton : VetoComponentBase
     [Parameter]
     public EventCallback<MouseEventArgs> OnClick { get; set; }
 
+    /// <summary>The link's <c>rel</c>. With <c>Target="_blank"</c> it defaults to <c>noopener noreferrer</c>.</summary>
+    [Parameter]
+    public string? Rel { get; set; }
+
+    private string? ResolvedRel => Rel ?? (Target == "_blank" ? "noopener noreferrer" : null);
+
     private VetoIconSize IconSize => Size switch
     {
         VetoSize.Small => VetoIconSize.Medium,
