@@ -56,17 +56,31 @@ public partial class VetoGrid : VetoComponentBase
     [Parameter]
     public VetoAlign Align { get; set; } = VetoAlign.Stretch;
 
+    /// <summary>
+    /// Lays out as many columns as fit, none narrower than this CSS length (<c>16rem</c>,
+    /// <c>240px</c>) - responsive without breakpoints. Overrides <see cref="Columns"/> and its
+    /// per-breakpoint variants when set.
+    /// </summary>
+    [Parameter]
+    public string? MinItemWidth { get; set; }
+
     /// <inheritdoc />
     protected override CssBuilder StartCssClass ()
         => base.StartCssClass()
+            .AddClass(Modifier("auto"), MinItemWidth is not null)
             .AddClass(Modifier($"gap-{Gap.ToModifier()}"))
             .AddClass(Modifier($"align-{Align.ToModifier()}"));
 
     /// <inheritdoc />
     protected override StyleBuilder StartStyle ()
         => base.StartStyle()
-            .AddStyle("--veto-grid-columns", Columns.ToString())
-            .AddStyle("--veto-grid-columns-sm", ColumnsSmall?.ToString())
-            .AddStyle("--veto-grid-columns-md", ColumnsMedium?.ToString())
-            .AddStyle("--veto-grid-columns-lg", ColumnsLarge?.ToString());
+            // At least one column: repeat(0, ...) is invalid, and the whole declaration drops.
+            .AddStyle("--veto-grid-columns", Count(Columns))
+            .AddStyle("--veto-grid-columns-sm", ColumnsSmall is { } sm ? Count(sm) : null)
+            .AddStyle("--veto-grid-columns-md", ColumnsMedium is { } md ? Count(md) : null)
+            .AddStyle("--veto-grid-columns-lg", ColumnsLarge is { } lg ? Count(lg) : null)
+            .AddStyle("--veto-grid-min-item-width", MinItemWidth, MinItemWidth is not null);
+
+    private static string Count ( int value )
+        => Math.Max(1, value).ToString(System.Globalization.CultureInfo.InvariantCulture);
 }

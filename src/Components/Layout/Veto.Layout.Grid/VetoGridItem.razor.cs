@@ -35,8 +35,11 @@ public partial class VetoGridItem : VetoComponentBase
     /// <inheritdoc />
     protected override StyleBuilder StartStyle ()
         => base.StartStyle()
-            .AddStyle("--veto-grid-span", Span.ToString())
-            .AddStyle("--veto-grid-span-sm", SpanSmall?.ToString())
-            .AddStyle("--veto-grid-span-md", SpanMedium?.ToString())
-            .AddStyle("--veto-grid-span-lg", SpanLarge?.ToString());
+            .AddStyle("--veto-grid-span", Count(Span))
+            .AddStyle("--veto-grid-span-sm", SpanSmall is { } sm ? Count(sm) : null)
+            .AddStyle("--veto-grid-span-md", SpanMedium is { } md ? Count(md) : null)
+            .AddStyle("--veto-grid-span-lg", SpanLarge is { } lg ? Count(lg) : null);
+
+    private static string Count ( int value )
+        => Math.Max(1, value).ToString(System.Globalization.CultureInfo.InvariantCulture);
 }

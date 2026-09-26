@@ -32,6 +32,30 @@
         </VetoGrid>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-clamp"
+               Title="A span never outgrows the grid"
+               Description="A span wider than the columns in force at that width is clamped to them, so a two-column item in a grid that is one column on a phone takes the full row instead of pushing the layout off the side."
+               Code="@ClampCode">
+        <VetoGrid Columns="1" ColumnsMedium="3" Gap="VetoSpacing.Medium" TestId="clamp">
+            <VetoGridItem Span="2" TestId="clamp-wide">
+                <VetoCard Padding="VetoSpacing.Medium">Span 2</VetoCard>
+            </VetoGridItem>
+            <VetoCard Padding="VetoSpacing.Medium">One</VetoCard>
+        </VetoGrid>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-auto"
+               Title="As many columns as fit"
+               Description="MinItemWidth fills the row with as many columns as fit, none narrower than the width given - responsive without a single breakpoint."
+               Code="@AutoCode">
+        <VetoGrid MinItemWidth="12rem" Gap="VetoSpacing.Medium" TestId="auto">
+            @foreach (var cell in Cells)
+            {
+                <VetoCard Padding="VetoSpacing.Medium">@cell</VetoCard>
+            }
+        </VetoGrid>
+    </DemoBlock>
+
     <ParameterTable Title="VetoGrid" TestId="parameters" Rows="GridRows" />
     <ParameterTable Title="VetoGridItem" TestId="item-parameters" Rows="ItemRows" />
 
@@ -47,12 +71,13 @@
         new("ColumnsMedium", "int?", "null", "Columns from 960px up."),
         new("ColumnsLarge", "int?", "null", "Columns from 1280px up."),
         new("Gap", "VetoSpacing", "Large", "Space between cells, both directions."),
-        new("Align", "VetoAlign", "Stretch", "Alignment of cell content within its row.")
+        new("Align", "VetoAlign", "Stretch", "Alignment of cell content within its row."),
+        new("MinItemWidth", "string?", "null", "As many columns as fit, none narrower than this CSS length. Overrides Columns.")
     ];
 
     private static readonly ParameterTable.Row[] ItemRows =
     [
-        new("Span", "int", "1", "Columns to span at every width."),
+        new("Span", "int", "1", "Columns to span at every width. Never more than the grid has at that width."),
         new("SpanSmall", "int?", "null", "Columns to span from 640px up."),
         new("SpanMedium", "int?", "null", "Columns to span from 960px up."),
         new("SpanLarge", "int?", "null", "Columns to span from 1280px up.")
@@ -71,6 +96,18 @@
                 <VetoCard>Spans two</VetoCard>
             </VetoGridItem>
             <VetoCard>One</VetoCard>
+        </VetoGrid>
+        """;
+
+    private const string ClampCode = """
+        <VetoGrid Columns="1" ColumnsMedium="3">
+            <VetoGridItem Span="2">…</VetoGridItem>   @* one column wide on a phone *@
+        </VetoGrid>
+        """;
+
+    private const string AutoCode = """
+        <VetoGrid MinItemWidth="12rem">
+            …
         </VetoGrid>
         """;
 }
