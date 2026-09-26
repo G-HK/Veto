@@ -199,4 +199,45 @@ public class VetoTilt3DTests ( BlazorAppFixture app ) : VetoPageTest(app)
         // The tilt wraps content; it must not swallow it or its accessible text.
         await Expect(Component("basic")).ToContainTextAsync("The whole card is the tilt surface.");
     }
+
+    [Fact]
+    public async Task Changed_parameters_apply_while_attached ()
+    {
+        await GotoComponentAsync(Route);
+
+        // Not right at the edge: at 30 degrees the surface turns far enough that a point at the
+        // very edge of its flat box falls outside it, and the pointer "leaves".
+        await PointAtAsync("live", 0.8, 0.5);
+        var before = await TiltDegreesAsync("live", "y");
+        Assert.True(before <= 4.01, $"MaxTilt 4 should bound the angle, but was {before}.");
+
+        await Page.Mouse.MoveAsync(0, 0);
+        await Component("live-toggle").ClickAsync();
+        await Expect(Component("live")).ToContainTextAsync("MaxTilt 30");
+
+        await PointAtAsync("live", 0.8, 0.5);
+        var after = await TiltDegreesAsync("live", "y");
+        Assert.True(after > 12, $"After raising MaxTilt to 30 the edge should tilt further, but was {after}.");
+    }
+
+    [Fact]
+    public async Task Reverse_leans_towards_the_pointer ()
+    {
+        await GotoComponentAsync(Route);
+
+        await PointAtAsync("reverse", 0.95, 0.5);
+
+        Assert.True(await TiltDegreesAsync("reverse", "y") < 0, "Reverse should flip the sign of the tilt.");
+    }
+
+    [Fact]
+    public async Task A_horizontal_axis_never_tilts_up_or_down ()
+    {
+        await GotoComponentAsync(Route);
+
+        await PointAtAsync("axis", 0.9, 0.05);
+
+        Assert.Equal(0, await TiltDegreesAsync("axis", "x"));
+        Assert.True(await TiltDegreesAsync("axis", "y") > 0);
+    }
 }

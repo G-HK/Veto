@@ -30,6 +30,7 @@ public partial class VetoTilt3D : VetoComponentBase, IAsyncDisposable
 {
     private IJSObjectReference? _module;
     private bool _attached;
+    private object? _sentOptions;
 
     /// <inheritdoc />
     protected override string RootClass => "veto-tilt-3d";
@@ -68,6 +69,17 @@ public partial class VetoTilt3D : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public int ResetDuration { get; set; } = 400;
 
+    /// <summary>
+    /// When true the surface leans towards the pointer instead of being pushed away from it -
+    /// as though it were being pulled.
+    /// </summary>
+    [Parameter]
+    public bool Reverse { get; set; }
+
+    /// <summary>Limits the tilt to one axis: left-right only, or up-down only.</summary>
+    [Parameter]
+    public VetoTiltAxis Axis { get; set; } = VetoTiltAxis.Both;
+
     /// <summary>Turns the effect off while leaving the content and its layout untouched.</summary>
     [Parameter]
     public bool Disabled { get; set; }
@@ -101,6 +113,38 @@ public partial class VetoTilt3D : VetoComponentBase, IAsyncDisposable
         {
             await AttachAsync();
         }
+        else if (!Equals(Options, _sentOptions))
+        {
+            // Options are read by the JS handlers on each event; before this they were captured
+            // once at attach, so changing MaxTilt or Glare afterwards did nothing.
+            await UpdateAsync();
+        }
+    }
+
+    // An anonymous type compares by value, which is what makes the change check above work.
+    private object Options => new
+    {
+        maxTilt = MaxTilt,
+        scale = Scale,
+        glare = Glare,
+        reset = Reset,
+        reverse = Reverse,
+        axis = Axis.ToString().ToLowerInvariant()
+    };
+
+    private async Task UpdateAsync ()
+    {
+        var options = Options;
+
+        try
+        {
+            await _module!.InvokeVoidAsync("update", RootElement, options);
+            _sentOptions = options;
+        }
+        catch (Exception ex) when (ex is JSException or JSDisconnectedException)
+        {
+            // The page is going away.
+        }
     }
 
     private async Task AttachAsync ()
@@ -108,15 +152,11 @@ public partial class VetoTilt3D : VetoComponentBase, IAsyncDisposable
         try
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Tilt/veto-tilt.js");
-            await _module.InvokeVoidAsync("attach", RootElement, new
-            {
-                maxTilt = MaxTilt,
-                scale = Scale,
-                glare = Glare,
-                reset = Reset
-            });
+            var options = Options;
+            await _module.InvokeVoidAsync("attach", RootElement, options);
 
             _attached = true;
+            _sentOptions = options;
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException or JSDisconnectedException)
         {
@@ -162,4 +202,17 @@ public partial class VetoTilt3D : VetoComponentBase, IAsyncDisposable
             }
         }
     }
+}
+
+/// <summary>Which way a <see cref="VetoTilt3D"/> may tilt.</summary>
+public enum VetoTiltAxis
+{
+    /// <summary>Both ways - the default.</summary>
+    Both,
+
+    /// <summary>Left and right only, following the pointer across the surface.</summary>
+    Horizontal,
+
+    /// <summary>Up and down only, following the pointer down the surface.</summary>
+    Vertical
 }
