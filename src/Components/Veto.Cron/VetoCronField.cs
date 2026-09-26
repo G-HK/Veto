@@ -111,7 +111,8 @@ public sealed class VetoCronField
 
             for (var value = part!.From; value <= part.To; value += part.Step)
             {
-                values.Add(value);
+                // Sunday as 7 - the end of a range like 5-7 - is the same day as 0.
+                values.Add(IsDayOfWeek(min, max) && value == 7 ? 0 : value);
             }
         }
 
@@ -157,8 +158,10 @@ public sealed class VetoCronField
 
         if (dash > 0)
         {
-            if (!TryValue(body[..dash], min, max, names, out var from, out error) ||
-                !TryValue(body[(dash + 1)..], min, max, names, out var to, out error))
+            // In a range Sunday stays 7, so 5-7 (Friday to Sunday) reads forwards rather than as
+            // 5-0, which it was rejected as.
+            if (!TryValue(body[..dash], min, max, names, out var from, out error, keepSeven: true) ||
+                !TryValue(body[(dash + 1)..], min, max, names, out var to, out error, keepSeven: true))
             {
                 return false;
             }
@@ -187,7 +190,9 @@ public sealed class VetoCronField
         return true;
     }
 
-    private static bool TryValue ( string text, int min, int max, IReadOnlyList<string>? names, out int value, out string? error )
+    private static bool IsDayOfWeek ( int min, int max ) => min == 0 && max == 6;
+
+    private static bool TryValue ( string text, int min, int max, IReadOnlyList<string>? names, out int value, out string? error, bool keepSeven = false )
     {
         error = null;
         text = text.Trim();
@@ -211,9 +216,9 @@ public sealed class VetoCronField
         }
 
         // Sunday is both 0 and 7 in every cron anyone has ever shipped.
-        if (value == 7 && max == 6 && min == 0)
+        if (value == 7 && IsDayOfWeek(min, max))
         {
-            value = 0;
+            value = keepSeven ? 7 : 0;
             return true;
         }
 

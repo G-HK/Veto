@@ -92,7 +92,29 @@ public sealed class VetoCronExpression
             return false;
         }
 
-        var fields = text.Trim().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        text = text.Trim();
+
+        // The nicknames most crons accept. Expanded to their five fields, so everything after
+        // this - the builder, the describer, the scheduler - sees an ordinary expression.
+        if (text.StartsWith('@'))
+        {
+            var expanded = ExpandMacro(text);
+
+            if (expanded is null)
+            {
+                error = $"'{text}' is not a nickname cron knows: @yearly, @monthly, @weekly, @daily, @midnight or @hourly.";
+                return false;
+            }
+
+            if (includeSeconds == true)
+            {
+                expanded = "0 " + expanded;
+            }
+
+            text = expanded;
+        }
+
+        var fields = text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
 
         var withSeconds = includeSeconds ?? fields.Length == 6;
         var expected = withSeconds ? 6 : 5;
@@ -152,6 +174,16 @@ public sealed class VetoCronExpression
 
         return true;
     }
+
+    private static string? ExpandMacro ( string macro ) => macro.ToLowerInvariant() switch
+    {
+        "@yearly" or "@annually" => "0 0 1 1 *",
+        "@monthly" => "0 0 1 * *",
+        "@weekly" => "0 0 * * 0",
+        "@daily" or "@midnight" => "0 0 * * *",
+        "@hourly" => "0 * * * *",
+        _ => null
+    };
 
     /// <summary>True when the expression fires at this moment.</summary>
     public bool Matches ( DateTime moment )
