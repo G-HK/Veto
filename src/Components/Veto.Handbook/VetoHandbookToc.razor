@@ -1,7 +1,7 @@
 @namespace Veto.Components.Handbook
 @inherits Veto.Core.VetoComponentBase
 @inject NavigationManager Nav
-@implements IDisposable
+@implements IAsyncDisposable
 
 @if (Visible && Sections.Count > 0)
 {

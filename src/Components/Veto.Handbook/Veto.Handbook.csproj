@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Handbook</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>Handbook page and table-of-contents components for Veto.</Description>
     <RootNamespace>Veto.Components.Handbook</RootNamespace>
   </PropertyGroup>
