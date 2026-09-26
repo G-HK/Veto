@@ -94,6 +94,15 @@ public partial class VetoContextMenu : VetoComponentBase, IAsyncDisposable
             case "ArrowUp":
                 await InvokeModuleAsync("moveMenuFocus", RootElement, -1);
                 break;
+            case "Home":
+                await InvokeModuleAsync("focusEdge", RootElement, true);
+                break;
+            case "End":
+                await InvokeModuleAsync("focusEdge", RootElement, false);
+                break;
+            case { Length: 1 } key when char.IsLetterOrDigit(key[0]):
+                await InvokeModuleAsync("focusByLetter", RootElement, key);
+                break;
         }
     }
 

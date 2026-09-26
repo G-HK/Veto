@@ -414,4 +414,46 @@ public class VetoMenuTests ( BlazorAppFixture app ) : VetoPageTest(app)
         Assert.False(string.IsNullOrWhiteSpace(token), "The raised-surface token should be defined.");
         Assert.False(string.IsNullOrWhiteSpace(background), "The panel should have a painted background.");
     }
+
+    [Fact]
+    public async Task Typing_a_letter_jumps_to_the_next_item_starting_with_it ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("basic-trigger").FocusAsync();
+        await Page.Keyboard.PressAsync("ArrowDown");
+        await Expect(Component("basic-rename")).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("d");
+        await Expect(Component("basic-duplicate")).ToBeFocusedAsync();
+
+        // Again from there: the next "d" after Duplicate, not the first one again.
+        await Page.Keyboard.PressAsync("d");
+        await Expect(Component("basic-delete")).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("s");
+        await Expect(Component("basic-share")).ToBeFocusedAsync();
+    }
+
+    [Fact]
+    public async Task The_context_menu_takes_home_end_and_type_ahead ()
+    {
+        // VetoContextMenu's live demo is the right-click menu on the button page.
+        await GotoComponentAsync("docs/components/button");
+
+        await Component("rightclick").ClickAsync(new() { Button = MouseButton.Right });
+        await Expect(Component("rightclick-rename")).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("End");
+        await Expect(Component("rightclick-delete")).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("Home");
+        await Expect(Component("rightclick-rename")).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("d");
+        await Expect(Component("rightclick-copy")).ToBeFocusedAsync();
+
+        await Page.Keyboard.PressAsync("d");
+        await Expect(Component("rightclick-delete")).ToBeFocusedAsync();
+    }
 }

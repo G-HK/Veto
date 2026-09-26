@@ -33,6 +33,27 @@ export function moveMenuFocus(panel, step) {
     items[next].focus();
 }
 
+// Home and End: the first or the last enabled item.
+export function focusEdge(panel, first) {
+    const items = [...(panel?.querySelectorAll('[role^="menuitem"]:not([disabled])') ?? [])];
+    items[first ? 0 : items.length - 1]?.focus();
+}
+
+// Type-ahead: the next enabled item, after the focused one, whose text starts with the letter.
+export function focusByLetter(panel, letter) {
+    const items = [...(panel?.querySelectorAll('[role^="menuitem"]:not([disabled])') ?? [])];
+    const at = items.indexOf(document.activeElement);
+    const wanted = letter.toLowerCase();
+
+    for (let i = 1; i <= items.length; i++) {
+        const item = items[(at + i + items.length) % items.length];
+        if (item.textContent.trim().toLowerCase().startsWith(wanted)) {
+            item.focus();
+            return;
+        }
+    }
+}
+
 export function restoreFocus() {
     if (returnTo?.isConnected && returnTo !== document.body) {
         returnTo.focus();
