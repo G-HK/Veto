@@ -231,3 +231,10 @@
 .veto-magic-textbox--disabled .veto-magic-textbox__label {
     color: var(--veto-color-text-disabled);
 }
+.veto-magic-textbox__counter {
+    margin: 0;
+    align-self: flex-end;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    font-variant-numeric: tabular-nums;
+}

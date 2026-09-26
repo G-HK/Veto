@@ -402,4 +402,17 @@ public class VetoMagicTextBoxTests(BlazorAppFixture app) : VetoPageTest(app)
         // re-measures on render; the toggle has to reflect the new value, not the old one.
         await Expect(Component("bound")).ToHaveAttributeAsync("data-overflowing", "true");
     }
+
+    [Fact]
+    public async Task Counter_follows_typing_up_to_the_limit ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Page.GetByTestId("counter-counter")).ToHaveTextAsync("24 / 280");
+        await Expect(TextArea("counter")).ToHaveAttributeAsync("maxlength", "280");
+
+        await TextArea("counter").FillAsync("Hello");
+        await Expect(Page.GetByTestId("counter-counter")).ToHaveTextAsync("5 / 280");
+    }
+
 }
