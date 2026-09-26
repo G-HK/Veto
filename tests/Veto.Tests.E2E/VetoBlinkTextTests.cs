@@ -187,4 +187,28 @@ public class VetoBlinkTextTests ( BlazorAppFixture app ) : VetoPageTest(app)
         // Either the passage ended, or the next character is a space - so no word is cut in half.
         return revealed.Length == source.Length || char.IsWhiteSpace(source[revealed.Length]);
     }
+
+    [Fact]
+    public async Task A_finished_stream_completes_and_drops_its_cursor ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("stream-start").ClickAsync();
+
+        // Before the fix the reveal kept polling an ended stream for ever: no OnCompleted, and
+        // the cursor never left.
+        await Expect(Page.GetByTestId("stream-done")).ToHaveTextAsync("Finished", new() { Timeout = 20_000 });
+        await Expect(Component("stream-cursor")).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task Clicking_the_text_skips_to_the_end ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("basic").ClickAsync();
+
+        await Expect(Page.GetByTestId("done")).ToHaveTextAsync("Finished", new() { Timeout = 2_000 });
+        Assert.Contains("mollit anim id est laborum.", await VisibleAsync("basic"));
+    }
 }

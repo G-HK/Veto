@@ -11,13 +11,14 @@
 
     <DemoBlock TestId="demo-basic"
                Title="Typing"
-               Description="A full paragraph, so the pauses are visible at work: longer at a full stop than at a comma, which is what makes it read like speech rather than a ticker. The text below it does not move as the passage types, because PreserveSpace holds the finished footprint."
+               Description="A full paragraph, so the pauses are visible at work: longer at a full stop than at a comma, which is what makes it read like speech rather than a ticker. The text below it does not move as the passage types, because PreserveSpace holds the finished footprint. SkipOnClick lets an impatient reader click the text to finish it."
                Code="@BasicCode">
         <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
             <p class="terminal" data-testid="terminal">
                 <VetoBlinkText TestId="basic"
                                Text="@(_run == 0 ? Line : Line + " ")"
                                CharactersPerSecond="34"
+                               SkipOnClick="true"
                                OnCompleted="() => _done = true" />
             </p>
             <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
@@ -57,8 +58,10 @@
                 <VetoBlinkText TestId="stream"
                                Stream="_stream"
                                CharactersPerSecond="60"
-                               PreserveSpace="false" />
+                               PreserveSpace="false"
+                               OnCompleted="() => _streamDone = true" />
             </p>
+            <span class="demo-value" data-testid="stream-done">@(_streamDone ? "Finished" : "Waiting…")</span>
             <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Neutral"
                         TestId="stream-start" OnClick="StartStream">
                 Start the stream
@@ -143,7 +146,13 @@
         _run = _run == 0 ? 1 : 0;
     }
 
-    private void StartStream () => _stream = ProduceAsync();
+    private bool _streamDone;
+
+    private void StartStream ()
+    {
+        _streamDone = false;
+        _stream = ProduceAsync();
+    }
 
     /// <summary>Stands in for a slow endpoint, arriving in uneven chunks.</summary>
     private static async IAsyncEnumerable<string> ProduceAsync (
@@ -180,7 +189,8 @@
         new("Loop / LoopDelay", "bool / int", "false / 1600", "Start again once complete, after a hold."),
         new("PreserveSpace", "bool", "true", "Hold the finished text's space so the layout does not reflow. Text only."),
         new("Instant", "bool", "false", "Show the text immediately, skipping the reveal."),
-        new("OnCompleted", "EventCallback", "—", "Raised once the whole text has been revealed.")
+        new("SkipOnClick", "bool", "false", "A click on the text finishes the reveal at once. Skip() does the same from code."),
+        new("OnCompleted", "EventCallback", "—", "Raised once the whole text has been revealed - for a stream, once it has ended and been drained.")
     ];
 
     private const string BasicCode = """
