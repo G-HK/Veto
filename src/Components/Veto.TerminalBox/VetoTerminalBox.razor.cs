@@ -153,6 +153,18 @@ public partial class VetoTerminalBox : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public EventCallback<bool> OnCopied { get; set; }
 
+    /// <summary>
+    /// Caps the height of the window's body, which then scrolls - for a long session or a log.
+    /// Any CSS length. Null lets the window grow with its lines.
+    /// </summary>
+    [Parameter]
+    public string? MaxHeight { get; set; }
+
+    /// <inheritdoc />
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
+            .AddStyle("--veto-terminal-max-height", MaxHeight, MaxHeight is not null);
+
     /// <inheritdoc />
     protected override CssBuilder StartCssClass () =>
         base.StartCssClass()
