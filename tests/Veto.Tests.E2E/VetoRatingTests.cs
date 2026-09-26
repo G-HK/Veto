@@ -38,7 +38,56 @@ public class VetoRatingTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         Assert.False(string.IsNullOrWhiteSpace(id));
         await Expect(Row("basic")).ToHaveAttributeAsync("id", new Regex(@"^veto-rating-\d+$"));
-        await Expect(Component("basic").Locator("label")).ToHaveAttributeAsync("for", id!);
+
+        // A div cannot be the target of <label for>; the name has to come through aria-labelledby.
+        var labelId = await Component("basic").Locator("label").GetAttributeAsync("id");
+        await Expect(Row("basic")).ToHaveAttributeAsync("aria-labelledby", labelId!);
+        await Expect(Row("basic")).ToHaveAccessibleNameAsync("How was it?");
+    }
+
+    [Fact]
+    public async Task Clicking_the_label_focuses_the_row ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("basic").Locator("label").ClickAsync();
+
+        await Expect(Row("basic")).ToBeFocusedAsync();
+    }
+
+    [Fact]
+    public async Task Home_and_end_jump_to_the_ends_without_scrolling ()
+    {
+        await Page.SetViewportSizeAsync(1200, 500);
+        await GotoComponentAsync(Route);
+
+        var row = Row("basic");
+        await row.ScrollIntoViewIfNeededAsync();
+        await row.FocusAsync();
+        var before = await Page.EvaluateAsync<double>("() => window.scrollY");
+
+        await row.PressAsync("End");
+        await Expect(Component("basic")).ToHaveAttributeAsync("data-value", "6");
+
+        await row.PressAsync("ArrowDown");
+        await Expect(Component("basic")).ToHaveAttributeAsync("data-value", "5");
+
+        await row.PressAsync("Home");
+        await Expect(Component("basic")).ToHaveAttributeAsync("data-value", "0");
+
+        Assert.Equal(before, await Page.EvaluateAsync<double>("() => window.scrollY"));
+    }
+
+    [Fact]
+    public async Task Item_label_names_the_score_and_follows_the_pointer ()
+    {
+        await GotoComponentAsync(Route);
+
+        var label = Page.GetByTestId("named-item-label");
+        await Expect(label).ToHaveTextAsync("Good");
+
+        await Page.GetByTestId("named-pick-5").HoverAsync();
+        await Expect(label).ToHaveTextAsync("Great");
     }
 
     [Fact]
