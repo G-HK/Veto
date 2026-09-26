@@ -12,6 +12,7 @@ const STORAGE_KEY = 'veto-theme-mode';
 
 let query = null;
 let listener = null;
+let storageListener = null;
 
 function apply(mode) {
     const root = document.documentElement;
@@ -69,6 +70,19 @@ export function initialize(dotNetRef) {
         query.addEventListener('change', listener);
     }
 
+    // Another tab changed the theme: follow it, so two tabs of one site never disagree. The
+    // storage event only fires in the other tabs, never in the one that wrote.
+    if (!storageListener) {
+        storageListener = e => {
+            if (e.key === STORAGE_KEY || e.key === null) {
+                const next = storedMode();
+                apply(next);
+                dotNetRef.invokeMethodAsync('OnStoredModeChanged', next);
+            }
+        };
+        window.addEventListener('storage', storageListener);
+    }
+
     return { mode, prefersDark: prefersDark() };
 }
 
@@ -85,6 +99,11 @@ export function dispose() {
         query.removeEventListener('change', listener);
     }
 
+    if (storageListener) {
+        window.removeEventListener('storage', storageListener);
+    }
+
     query = null;
     listener = null;
+    storageListener = null;
 }
