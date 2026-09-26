@@ -181,6 +181,23 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-overlay-delay"
+               Title="No flash for a fast refresh"
+               Description="ShowDelay holds the veil back for that many milliseconds. A refresh that finishes sooner never shows it - no flicker for a fast response - while a slow one still gets the veil. The content is inert from the first moment either way."
+               Code="@OverlayDelayCode">
+        <VetoStack Gap="VetoSpacing.Medium" Align="VetoAlign.Start">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small">
+                <VetoButton Size="VetoSize.Small" TestId="delayed-quick" OnClick="() => RefreshDelayedAsync(150)">Quick refresh (150 ms)</VetoButton>
+                <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" TestId="delayed-slow" OnClick="() => RefreshDelayedAsync(1500)">Slow refresh (1.5 s)</VetoButton>
+            </VetoStack>
+            <VetoLoadingOverlay Loading="_delayedRefreshing" ShowDelay="400" Label="Refreshing" TestId="overlay-delayed">
+                <VetoCard Title="Inbox" Padding="VetoSpacing.Large">
+                    <span>3 unread messages</span>
+                </VetoCard>
+            </VetoLoadingOverlay>
+        </VetoStack>
+    </DemoBlock>
+
     <VetoStack Gap="VetoSpacing.Medium">
         <h2 class="docs-heading">Reduced motion</h2>
         <p class="docs-prose">
@@ -229,6 +246,15 @@
     }
     private bool _refreshing;
 
+    private bool _delayedRefreshing;
+
+    private async Task RefreshDelayedAsync ( int milliseconds )
+    {
+        _delayedRefreshing = true;
+        await Task.Delay(milliseconds);
+        _delayedRefreshing = false;
+    }
+
     private async Task ToggleOverlay ()
     {
         if (_refreshing)
@@ -276,7 +302,8 @@
         new("Loading", "bool", "false", "Whether the veil is showing."),
         new("Label", "string", "\"Loading\"", "What is being waited for. Announced, and shown beside the spinner."),
         new("Indicator", "RenderFragment?", "null", "Replaces the default spinner and label."),
-        new("Dim", "bool", "true", "Whether the content is dimmed as well as veiled.")
+        new("Dim", "bool", "true", "Whether the content is dimmed as well as veiled."),
+        new("ShowDelay", "int", "0", "Milliseconds before the veil fades in. A shorter refresh never shows it; the content is inert from the start.")
     ];
 
     private const string SpinnerCode = """
@@ -340,6 +367,12 @@
         <VetoSkeleton Variant="VetoSkeletonVariant.Circle" />
         <VetoSkeleton Lines="3" />
         <VetoSkeleton Variant="VetoSkeletonVariant.Rectangle" Width="12rem" />
+        """;
+
+    private const string OverlayDelayCode = """
+        <VetoLoadingOverlay Loading="_refreshing" ShowDelay="400" Label="Refreshing">
+            …
+        </VetoLoadingOverlay>
         """;
 
     private const string OverlayCode = """

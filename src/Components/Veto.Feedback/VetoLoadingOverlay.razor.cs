@@ -38,6 +38,14 @@ public partial class VetoLoadingOverlay : VetoComponentBase
     [Parameter]
     public RenderFragment? Indicator { get; set; }
 
+    /// <summary>
+    /// How long, in milliseconds, the veil waits before it fades in. A refresh that finishes
+    /// sooner never shows it, so a fast response does not flash. The content is inert from the
+    /// start either way. 0, the default, shows it at once.
+    /// </summary>
+    [Parameter]
+    public int ShowDelay { get; set; }
+
     /// <summary>Whether the content is dimmed as well as veiled.</summary>
     [Parameter]
     public bool Dim { get; set; } = true;
@@ -46,5 +54,11 @@ public partial class VetoLoadingOverlay : VetoComponentBase
     protected override CssBuilder StartCssClass () =>
         base.StartCssClass()
             .AddClass(Modifier("loading"), Loading)
-            .AddClass(Modifier("dim"), Dim);
+            .AddClass(Modifier("dim"), Dim)
+            .AddClass(Modifier("delayed"), ShowDelay > 0);
+
+    /// <inheritdoc />
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
+            .AddStyle("--veto-loading-overlay-delay", string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{ShowDelay}ms"), ShowDelay > 0);
 }
