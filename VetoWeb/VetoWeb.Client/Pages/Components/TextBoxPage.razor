@@ -68,6 +68,29 @@
     </section>
 
     <section class="demo-section">
+        <h2>Clearable with a counter</h2>
+        <VetoTextBox TValue="string"
+                     TestId="clearable"
+                     Label="Title"
+                     Clearable="true"
+                     MaxLength="10"
+                     ShowCounter="true"
+                     @bind-Value="_clearable" />
+        <p class="demo-output" data-testid="clearable-output">@(_clearable ?? "null")</p>
+    </section>
+
+    <section class="demo-section">
+        <h2>Prefix and suffix</h2>
+        <VetoTextBox TValue="decimal?" TestId="affix" Label="Price" Prefix="$" Suffix="USD" @bind-Value="_price" />
+    </section>
+
+    <section class="demo-section">
+        <h2>Formatted date</h2>
+        <VetoTextBox TValue="DateTime?" TestId="formatted" Label="Day" Format="dd/MM/yyyy" @bind-Value="_day" />
+        <p class="demo-output" data-testid="formatted-output">@(_day?.ToString("yyyy-MM-dd") ?? "null")</p>
+    </section>
+
+    <section class="demo-section">
         <h2>Validation</h2>
         <EditForm Model="_form" OnValidSubmit="OnValidSubmit" data-testid="form">
             <DataAnnotationsValidator />
@@ -103,6 +126,9 @@
     private string? _splat;
     private string? _readOnlyValue = "Cannot edit this";
     private int? _quantity = 1;
+    private string? _clearable = "Veto";
+    private decimal? _price = 9.99m;
+    private DateTime? _day = new(2026, 9, 30);
     private readonly FormModel _form = new();
     private string? _submitted;
 
