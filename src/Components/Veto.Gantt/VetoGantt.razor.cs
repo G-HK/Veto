@@ -1955,79 +1955,10 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         }
 
         var (extension, mime, content) = format == VetoGanttExportFormat.Csv
-            ? ("csv", "text/csv", ToCsv(items))
-            : ("json", "application/json", ToJson(items));
+            ? ("csv", "text/csv", VetoGanttExporter.ToCsv(items))
+            : ("json", "application/json", VetoGanttExporter.ToJson(items));
 
         await InvokeModuleAsync("download", $"{ExportFileName}.{extension}", mime, content);
-    }
-
-    /// <summary>Renders the rows as CSV.</summary>
-    /// <remarks>
-    /// Dates are written round-trippable (yyyy-MM-dd) rather than in the display format, so a
-    /// spreadsheet in another locale reads them as the same days.
-    /// </remarks>
-    internal static string ToCsv ( IReadOnlyList<VetoGanttItem> items )
-    {
-        var csv = new StringBuilder();
-        csv.AppendLine("Id,Name,Parent,Start,End,Days,Category,Progress,Milestone,StartTime,EndTime");
-
-        foreach (var item in items)
-        {
-            csv.Append(Escape(item.Id)).Append(',')
-               .Append(Escape(item.Name)).Append(',')
-               .Append(Escape(item.ParentId)).Append(',')
-               .Append(item.Start.ToString("yyyy-MM-dd")).Append(',')
-               .Append(item.End.ToString("yyyy-MM-dd")).Append(',')
-               .Append(item.DurationDays.ToString(CultureInfo.InvariantCulture)).Append(',')
-               .Append(Escape(item.Category)).Append(',')
-               .Append(item.Progress?.ToString("0.##", CultureInfo.InvariantCulture) ?? string.Empty).Append(',')
-               .Append(item.IsMilestone ? "true" : "false").Append(',')
-               .Append(item.StartTime?.ToString("HH:mm", CultureInfo.InvariantCulture) ?? string.Empty).Append(',')
-               .Append(item.EndTime?.ToString("HH:mm", CultureInfo.InvariantCulture) ?? string.Empty)
-               .AppendLine();
-        }
-
-        return csv.ToString();
-    }
-
-    /// <summary>Renders the rows as JSON.</summary>
-    internal static string ToJson ( IReadOnlyList<VetoGanttItem> items ) =>
-        JsonSerializer.Serialize(
-            items.Select(i => new
-            {
-                i.Id,
-                i.Name,
-                Parent = i.ParentId,
-                Start = i.Start.ToString("yyyy-MM-dd"),
-                End = i.End.ToString("yyyy-MM-dd"),
-                Days = i.DurationDays,
-                i.Category,
-                i.Progress,
-                Milestone = i.IsMilestone,
-                StartTime = i.StartTime?.ToString("HH:mm", CultureInfo.InvariantCulture),
-                EndTime = i.EndTime?.ToString("HH:mm", CultureInfo.InvariantCulture)
-            }),
-            new JsonSerializerOptions { WriteIndented = true });
-
-    /// <summary>
-    /// Quotes a CSV field when it needs it. A field containing a comma, a quote or a newline
-    /// would otherwise split the row in two when read back.
-    /// </summary>
-    private static string Escape ( string? value )
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            return string.Empty;
-        }
-
-        var needsQuoting = value.Contains(',')
-            || value.Contains('"')
-            || value.Contains('\r')
-            || value.Contains('\n');
-
-        return needsQuoting
-            ? $"\"{value.Replace("\"", "\"\"")}\""
-            : value;
     }
 
     private async Task<T?> InvokeModuleAsync<T> ( string function, params object?[] args )
