@@ -18,3 +18,16 @@ namespace Veto.Components.Slider;
 /// </code>
 /// </example>
 public sealed record VetoSliderMark ( double Value, string? Label = null );
+
+/// <summary>When a slider shows its value in a bubble over the thumb.</summary>
+public enum VetoSliderThumbValue
+{
+    /// <summary>No bubble. The default.</summary>
+    Never,
+
+    /// <summary>While the thumb is hovered, focused or being dragged.</summary>
+    Active,
+
+    /// <summary>All the time.</summary>
+    Always
+}
