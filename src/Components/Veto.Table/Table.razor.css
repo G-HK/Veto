@@ -1,4 +1,94 @@
-﻿.thead-green {
-    background-color: darkgreen;
-    color: white;
+/* VetoTable - styled entirely from the tokens in wwwroot/VetoStyles.css. Cells come from the
+   consumer's templates, so everything below reaches them through ::deep. */
+
+.veto-table {
+    --veto-table-cell-padding: var(--veto-space-2) var(--veto-space-3);
+    max-width: 100%;
+    overflow: auto;
+    font-family: var(--veto-font-sans);
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-border-color, var(--veto-color-border));
+    border-radius: var(--veto-radius-md);
+}
+
+.veto-table__table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.veto-table__caption {
+    caption-side: top;
+    padding: var(--veto-space-2) var(--veto-space-3);
+    text-align: start;
+    font-weight: 600;
+    color: var(--veto-color-text-muted);
+}
+
+.veto-table ::deep th,
+.veto-table ::deep td {
+    padding: var(--veto-table-cell-padding);
+    text-align: start;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--veto-border-color, var(--veto-color-border));
+}
+
+.veto-table ::deep th {
+    font-weight: 600;
+    white-space: nowrap;
+    background-color: var(--veto-color-surface-raised);
+}
+
+.veto-table ::deep tbody tr:last-child > td {
+    border-bottom: 0;
+}
+
+.veto-table ::deep tfoot td,
+.veto-table ::deep tfoot th {
+    border-top: 1px solid var(--veto-border-color, var(--veto-color-border));
+    border-bottom: 0;
+    font-weight: 600;
+    background-color: var(--veto-color-surface-raised);
+}
+
+.veto-table--bordered ::deep th + th,
+.veto-table--bordered ::deep td + td,
+.veto-table--bordered ::deep td + th,
+.veto-table--bordered ::deep th + td {
+    border-inline-start: 1px solid var(--veto-border-color, var(--veto-color-border));
+}
+
+.veto-table--striped ::deep tbody tr.veto-table__row:nth-child(even) {
+    background-color: var(--veto-color-surface-raised);
+}
+
+.veto-table--hover ::deep tbody tr.veto-table__row:hover {
+    background-color: color-mix(in srgb, var(--veto-color-primary) 8%, transparent);
+}
+
+.veto-table--dense {
+    --veto-table-cell-padding: var(--veto-space-1) var(--veto-space-2);
+}
+
+.veto-table--sticky ::deep thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.veto-table--clickable ::deep tbody tr.veto-table__row {
+    cursor: pointer;
+}
+
+.veto-table--clickable ::deep tbody tr.veto-table__row:focus-visible {
+    outline: none;
+    box-shadow: inset var(--veto-focus-ring);
+}
+
+.veto-table ::deep .veto-table__empty {
+    padding: var(--veto-space-6, 1.5rem) var(--veto-space-3);
+    text-align: center;
+    color: var(--veto-color-text-muted);
 }

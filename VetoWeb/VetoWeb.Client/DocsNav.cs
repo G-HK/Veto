@@ -96,6 +96,7 @@ public static class DocsNav
                     Label = "Data",
                     Children =
                     [
+                        new VetoNavEntry { Label = "Table", Href = "/docs/components/table" },
                         new VetoNavEntry { Label = "Gantt", Href = "/docs/components/gantt" },
                         new VetoNavEntry { Label = "Cron", Href = "/docs/components/cron" }
                     ]
