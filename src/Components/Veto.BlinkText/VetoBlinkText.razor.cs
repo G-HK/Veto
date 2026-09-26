@@ -36,6 +36,10 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
     private string? _lastText;
     private object? _lastStream;
 
+    // Set once the current stream has delivered its last chunk - or failed. Until then an
+    // empty queue means "wait for more", afterwards it means "done".
+    private bool _streamDone;
+
     /// <inheritdoc />
     protected override string RootClass => "veto-blink-text";
 
@@ -112,6 +116,13 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
     [Parameter]
     public bool PreserveSpace { get; set; } = true;
 
+    /// <summary>
+    /// When true a click on the text finishes the reveal at once - for a reader who does not
+    /// want to wait. The rest of a stream still arrives as it comes.
+    /// </summary>
+    [Parameter]
+    public bool SkipOnClick { get; set; }
+
     /// <summary>Raised once the whole text has been revealed.</summary>
     [Parameter]
     public EventCallback OnCompleted { get; set; }
@@ -151,7 +162,8 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
     protected override CssBuilder StartCssClass () =>
         base.StartCssClass()
             .AddClass(Modifier("preserve-space"), PreserveSpace && Text is not null)
-            .AddClass(Modifier("complete"), IsComplete);
+            .AddClass(Modifier("complete"), IsComplete)
+            .AddClass(Modifier("skippable"), SkipOnClick && !IsComplete);
 
     /// <inheritdoc />
     protected override void OnParametersSet ()
@@ -164,8 +176,15 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
         {
             _lastStream = Stream;
             _lastText = null;
-            Restart(consumeStream: true);
-            return;
+
+            if (Stream is not null)
+            {
+                Restart(consumeStream: true);
+                return;
+            }
+
+            // Stream removed: fall through, so a Text given in the same render shows now
+            // rather than on some later one.
         }
 
         if (Stream is null && Text != _lastText)
@@ -184,6 +203,7 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
         _target.Clear();
         _revealed = string.Empty;
         _scrambled = string.Empty;
+        _streamDone = !consumeStream || Stream is null;
 
         if (!consumeStream && Text is not null)
         {
@@ -217,7 +237,15 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
         catch (OperationCanceledException)
         {
             // Superseded by a newer stream, or the component has gone.
+            return;
         }
+        catch (Exception)
+        {
+            // ponytail: a failing stream ends the reveal with what arrived; surface the error
+            // through a callback if a consumer ever needs it.
+        }
+
+        _streamDone = true;
     }
 
     private async Task RevealAsync ( CancellationToken token )
@@ -229,57 +257,88 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
                 await Task.Delay(StartDelay, token);
             }
 
-            while (!token.IsCancellationRequested)
+            // A loop rather than recursion: a looping reveal runs for as long as the page is
+            // open, and awaiting itself would grow the async chain by one frame per cycle.
+            while (true)
             {
-                // A stream may not have delivered anything yet; wait rather than finishing early.
-                if (_revealed.Length >= _target.Length)
-                {
-                    if (Stream is not null)
-                    {
-                        await Task.Delay(DelayPerStep, token);
-                        continue;
-                    }
+                await RevealOnceAsync(token);
 
-                    break;
+                if (token.IsCancellationRequested)
+                {
+                    return;
                 }
 
-                var next = NextStep();
-                _revealed = _target.ToString(0, next);
-                _scrambled = BuildScramble(next);
-
+                _scrambled = string.Empty;
                 await InvokeAsync(StateHasChanged);
+                await OnCompleted.InvokeAsync();
 
-                var pause = DelayPerStep;
-
-                if (next > 0 && PauseOn.TryGetValue(_target[next - 1], out var extra))
+                if (!Loop)
                 {
-                    pause += extra;
+                    return;
                 }
 
-                await Task.Delay(pause, token);
-            }
-
-            if (token.IsCancellationRequested)
-            {
-                return;
-            }
-
-            _scrambled = string.Empty;
-            await InvokeAsync(StateHasChanged);
-            await OnCompleted.InvokeAsync();
-
-            if (Loop)
-            {
                 await Task.Delay(LoopDelay, token);
 
                 _revealed = string.Empty;
                 await InvokeAsync(StateHasChanged);
-                await RevealAsync(token);
             }
         }
         catch (OperationCanceledException)
         {
             // Restarted or disposed; the newer run owns the text now.
+        }
+    }
+
+    private async Task RevealOnceAsync ( CancellationToken token )
+    {
+        while (!token.IsCancellationRequested)
+        {
+            if (_revealed.Length >= _target.Length)
+            {
+                // Caught up. A live stream may still send more; a finished one - or plain
+                // text - is done.
+                if (_streamDone)
+                {
+                    return;
+                }
+
+                await Task.Delay(Math.Max(DelayPerStep, 16), token);
+                continue;
+            }
+
+            var next = Instant ? _target.Length : NextStep();
+            _revealed = _target.ToString(0, next);
+            _scrambled = Instant ? string.Empty : BuildScramble(next);
+
+            await InvokeAsync(StateHasChanged);
+
+            var pause = Instant ? 16 : DelayPerStep;
+
+            if (!Instant && next > 0 && PauseOn.TryGetValue(_target[next - 1], out var extra))
+            {
+                pause += extra;
+            }
+
+            await Task.Delay(pause, token);
+        }
+    }
+
+    /// <summary>
+    /// Finishes the reveal now: everything received so far is shown at once. A stream keeps
+    /// arriving, and what it adds afterwards is revealed at the normal pace.
+    /// </summary>
+    public void Skip ()
+    {
+        _revealed = FullText;
+        _scrambled = string.Empty;
+        StateHasChanged();
+    }
+
+    private void OnClick ()
+    {
+        if (SkipOnClick && !IsComplete)
+        {
+            Skip();
         }
     }
 

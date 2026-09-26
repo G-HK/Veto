@@ -9,7 +9,8 @@
           id="@ElementId"
           class="@CssClass"
           style="@CssStyle"
-          data-testid="@TestId">
+          data-testid="@TestId"
+          @onclick="OnClick">
 
             @* The reveal is decoration. Assistive technology gets the whole text at once rather
                than one character at a time, which would be unusable. Clipped rather than hidden,

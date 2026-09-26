@@ -73,3 +73,6 @@
         display: none;
     }
 }
+.veto-blink-text--skippable {
+    cursor: pointer;
+}
