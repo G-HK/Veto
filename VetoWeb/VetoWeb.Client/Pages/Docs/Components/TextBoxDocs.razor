@@ -48,6 +48,17 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-extras"
+               Title="Clear button, counter, prefix and suffix"
+               Description="Clearable adds a button that empties the field. MaxLength caps the input and ShowCounter shows how much is left. Prefix and Suffix put a unit or a scheme inside the field."
+               Code="@ExtrasCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" Align="VetoAlign.Start">
+            <VetoTextBox TValue="string" TestId="clearable" Label="Title" Clearable="true" MaxLength="40" ShowCounter="true" @bind-Value="_title" />
+            <VetoTextBox TValue="decimal?" TestId="affix" Label="Price" Prefix="$" Suffix="USD" @bind-Value="_price" />
+            <VetoTextBox TValue="string" Label="Website" Prefix="https://" Clearable="true" Style="--veto-textbox-prefix-width: 7ch" @bind-Value="_site" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-sizes"
                Title="Sizes and variants"
                Description="Three sizes and three visual treatments, all driven by modifier classes rather than inline styles."
@@ -104,6 +115,9 @@
     private string? _scratch;
     private string _fixed = "Cannot edit this";
     private int? _quantity = 1;
+    private string? _title = "Quarterly report";
+    private decimal? _price = 9.99m;
+    private string? _site = "veto.dev";
     private DateOnly? _due = new(2026, 9, 30);
     private readonly FormModel _form = new();
     private string? _submitted;
@@ -125,7 +139,13 @@
         new("Placeholder", "string?", "null", "Shown while the field is empty."),
         new("Type", "string", "\"text\"", "The input's type: text, email, password, search, tel, url, number, date."),
         new("Immediate", "bool", "false", "Update the bound value on every keystroke instead of on blur."),
-        new("Format", "string?", "null", "Format used to convert the value to and from its string form."),
+        new("Format", "string?", "null", "Format used to convert the value to and from its string form, e.g. dd/MM/yyyy. Dates and times are parsed back with the same format."),
+        new("Clearable", "bool", "false", "Shows a button that empties the field while it has a value and can be edited."),
+        new("ClearLabel", "string", "\"Clear\"", "The clear button's accessible name."),
+        new("MaxLength", "int?", "null", "The most characters the browser lets the user type."),
+        new("ShowCounter", "bool", "false", "Shows a length / MaxLength counter under the field."),
+        new("Prefix", "string?", "null", "Text inside the field before the value. Widen its slot with --veto-textbox-prefix-width."),
+        new("Suffix", "string?", "null", "Text inside the field after the value. Widen its slot with --veto-textbox-suffix-width."),
         new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
         new("Variant", "VetoVariant", "Outlined", "Outlined, Filled or Text."),
         new("Disabled", "bool", "false", "Cannot be focused or edited."),
@@ -152,6 +172,14 @@
     private const string TypedCode = """
         <VetoTextBox TValue="int?" Label="Quantity" Type="number" @bind-Value="_quantity" />
         <VetoTextBox TValue="DateOnly?" Label="Due" Type="date" @bind-Value="_due" />
+        """;
+
+    private const string ExtrasCode = """
+        <VetoTextBox TValue="string" Label="Title" Clearable="true"
+                     MaxLength="40" ShowCounter="true" @bind-Value="_title" />
+        <VetoTextBox TValue="decimal?" Label="Price" Prefix="$" Suffix="USD" @bind-Value="_price" />
+        <VetoTextBox TValue="string" Label="Website" Prefix="https://"
+                     Style="--veto-textbox-prefix-width: 7ch" @bind-Value="_site" />
         """;
 
     private const string SizesCode = """

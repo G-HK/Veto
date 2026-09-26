@@ -196,4 +196,52 @@ public class VetoTextBoxTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         Assert.False(string.IsNullOrEmpty(token));
     }
+
+    [Fact]
+    public async Task Clear_button_empties_the_field_and_the_binding ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Input("clearable")).ToHaveValueAsync("Veto");
+        await Page.GetByTestId("clearable-clear").ClickAsync();
+
+        await Expect(Input("clearable")).ToHaveValueAsync(string.Empty);
+        await Expect(Page.GetByTestId("clearable-output")).ToHaveTextAsync("null");
+        await Expect(Page.GetByTestId("clearable-clear")).ToHaveCountAsync(0);
+        await Expect(Input("clearable")).ToBeFocusedAsync();
+    }
+
+    [Fact]
+    public async Task Counter_tracks_typing_before_the_value_is_bound ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Page.GetByTestId("clearable-counter")).ToHaveTextAsync("4 / 10");
+        await Expect(Input("clearable")).ToHaveAttributeAsync("maxlength", "10");
+
+        await Input("clearable").FillAsync("Blazor");
+        await Expect(Page.GetByTestId("clearable-counter")).ToHaveTextAsync("6 / 10");
+    }
+
+    [Fact]
+    public async Task Prefix_and_suffix_render_inside_the_field ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("affix").Locator(".veto-textbox__affix--prefix")).ToHaveTextAsync("$");
+        await Expect(Component("affix").Locator(".veto-textbox__affix--suffix")).ToHaveTextAsync("USD");
+    }
+
+    [Fact]
+    public async Task Format_is_used_to_parse_as_well_as_to_display ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Input("formatted")).ToHaveValueAsync("30/09/2026");
+
+        await Input("formatted").FillAsync("25/12/2026");
+        await Input("formatted").BlurAsync();
+
+        await Expect(Page.GetByTestId("formatted-output")).ToHaveTextAsync("2026-12-25");
+    }
 }

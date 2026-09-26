@@ -33,6 +33,11 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
              Placeholder="e.g. Veto"
              HelperText="Shown until the field becomes invalid."
              @bind-Value="_name" />
+
+<VetoTextBox TValue="string" Label="Title" Clearable="true"
+             MaxLength="40" ShowCounter="true" @bind-Value="_title" />
+
+<VetoTextBox TValue="decimal?" Label="Price" Prefix="$" Suffix="USD" @bind-Value="_price" />
 ```
 
 ## Documentation
