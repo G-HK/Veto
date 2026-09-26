@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Veto.Core;
 
@@ -65,18 +66,51 @@ public partial class VetoIcon : VetoComponentBase
     [Parameter]
     public bool Spin { get; set; }
 
+    /// <summary>
+    /// A theme colour for the icon. Null - the default - inherits the colour of the text around
+    /// it, which is what an icon beside a label wants.
+    /// </summary>
+    [Parameter]
+    public VetoColor? Color { get; set; }
+
+    /// <summary>Mirrors the icon - one arrow drawn once serves as its own reflection.</summary>
+    [Parameter]
+    public VetoIconFlip Flip { get; set; } = VetoIconFlip.None;
+
     private bool IsDecorative => string.IsNullOrWhiteSpace(Title);
+
+    // SVG wants "1.5". Written through the current culture a German or French browser got
+    // "1,5", which is not a number, and the stroke fell back to its default width.
+    private string StrokeWidthAttribute => StrokeWidth.ToString(CultureInfo.InvariantCulture);
 
     /// <inheritdoc />
     protected override CssBuilder StartCssClass ()
         => base.StartCssClass()
             .AddClass(Modifier(Size.ToString().ToLowerInvariant()))
-            .AddClass(Modifier("spin"), Spin);
+            .AddClass(Modifier("spin"), Spin)
+            .AddClass(Modifier(Color?.ToModifier() ?? string.Empty), Color is not null)
+            .AddClass(Modifier($"flip-{Flip.ToString().ToLowerInvariant()}"), Flip != VetoIconFlip.None);
 
     /// <inheritdoc />
     protected override StyleBuilder StartStyle ()
         => base.StartStyle()
             .AddStyle("--veto-icon-rotation", $"{Rotation}deg", Rotation != 0);
+}
+
+/// <summary>Which way a <see cref="VetoIcon"/> is mirrored.</summary>
+public enum VetoIconFlip
+{
+    /// <summary>Drawn as designed.</summary>
+    None,
+
+    /// <summary>Mirrored left to right.</summary>
+    Horizontal,
+
+    /// <summary>Mirrored top to bottom.</summary>
+    Vertical,
+
+    /// <summary>Mirrored both ways - the same as a half turn.</summary>
+    Both
 }
 
 /// <summary>How large a <see cref="VetoIcon"/> renders.</summary>

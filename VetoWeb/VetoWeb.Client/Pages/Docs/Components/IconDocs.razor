@@ -57,6 +57,20 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-color"
+               Title="Colour, weight and mirroring"
+               Description="Icons take the text colour around them. Color picks a theme colour instead. StrokeWidth matches the weight of nearby text, and Flip mirrors an icon so one drawing serves as its own reflection."
+               Code="@ColorCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Align="VetoAlign.Center" Wrap="true">
+            <VetoIcon Icon="@VetoIcons.Success" TestId="color-success" Color="VetoColor.Success" Size="VetoIconSize.Large" />
+            <VetoIcon Icon="@VetoIcons.Warning" TestId="color-warning" Color="VetoColor.Warning" Size="VetoIconSize.Large" />
+            <VetoIcon Icon="@VetoIcons.Error" TestId="color-danger" Color="VetoColor.Danger" Size="VetoIconSize.Large" />
+            <VetoIcon Icon="@VetoIcons.Bell" TestId="thin" StrokeWidth="1.5" Size="VetoIconSize.Large" />
+            <VetoIcon Icon="@VetoIcons.ExternalLink" Size="VetoIconSize.Large" />
+            <VetoIcon Icon="@VetoIcons.ExternalLink" TestId="flipped" Flip="VetoIconFlip.Horizontal" Size="VetoIconSize.Large" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-custom"
                Title="Your own icons"
                Description="Icon takes any SVG markup, so you are never limited to the built-in set. Draw with currentColor and it behaves like the rest."
@@ -94,8 +108,16 @@
         new("Rotation", "int", "0", "Rotation in degrees."),
         new("Spin", "bool", "false", "Spins continuously. Ignored under prefers-reduced-motion."),
         new("StrokeWidth", "double", "2", "Stroke weight, for matching surrounding text."),
+        new("Color", "VetoColor?", "null", "A theme colour. Null inherits the surrounding text colour."),
+        new("Flip", "VetoIconFlip", "None", "None, Horizontal, Vertical or Both."),
         new("ViewBox", "string", "\"0 0 24 24\"", "Only needs changing for icons not drawn on a 24x24 grid.")
     ];
+
+    private const string ColorCode = """
+        <VetoIcon Icon="@VetoIcons.Success" Color="VetoColor.Success" />
+        <VetoIcon Icon="@VetoIcons.Bell" StrokeWidth="1.5" />
+        <VetoIcon Icon="@VetoIcons.ExternalLink" Flip="VetoIconFlip.Horizontal" />
+        """;
 
     private const string SetCode = """
         <VetoIcon Icon="@VetoIcons.Search" />
