@@ -6,7 +6,11 @@
 @if (Visible)
 {
     <div class="@RootCssClass" style="@RootCssStyle" data-testid="@TestId" data-state="@StateName">
-        <div class="veto-switch__row">
+        @* Arrows, Home and End set the state, so they must not also scroll the page - End
+           would jump to the bottom. Blazor cannot prevent a default conditionally, so the
+           row does it for the switch's own keys and lets Tab, Space and Enter through. *@
+        <div class="veto-switch__row"
+             onkeydown="if(event.target.classList.contains('veto-switch__button')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))event.preventDefault()">
             @if (HasLabel && LabelPlacement != VetoSwitchLabelPlacement.End)
             {
                 @RenderLabel()
@@ -24,6 +28,7 @@
                     aria-readonly="@(ReadOnly ? "true" : null)"
                     aria-invalid="@(HasErrors ? "true" : null)"
                     aria-describedby="@DescribedBy"
+                    aria-busy="@(IsBusy ? "true" : null)"
                     disabled="@Disabled"
                     @onclick="AdvanceAsync"
                     @onkeydown="OnKeyDownAsync">
