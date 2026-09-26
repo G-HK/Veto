@@ -200,4 +200,49 @@ public class VetoLinkTests ( BlazorAppFixture app ) : VetoPageTest(app)
         await Expect(Component("link-menu-overview")).Not.ToHaveAttributeAsync("aria-current", "page");
         await Expect(Component("link-menu-installation")).ToBeVisibleAsync();
     }
+
+    [Fact]
+    public async Task A_link_is_not_active_on_a_page_that_merely_shares_its_prefix ()
+    {
+        await GotoComponentAsync("docs/components/button-group");
+
+        // "/docs/components/button" used to match "/docs/components/button-group" too.
+        await Expect(Page.GetByTestId("nav-button-group")).ToHaveAttributeAsync("aria-current", "page");
+        await Expect(Page.GetByTestId("nav-button")).Not.ToHaveAttributeAsync("aria-current", "page");
+    }
+
+    [Fact]
+    public async Task Groups_with_the_same_label_open_and_close_on_their_own ()
+    {
+        await GotoComponentAsync(Route);
+
+        // The docs navigation has two groups called Feedback; they used to share one state.
+        var groups = Page.GetByTestId("nav-feedback");
+        await Expect(groups).ToHaveCountAsync(2);
+        await Expect(groups.Nth(0)).ToHaveAttributeAsync("aria-expanded", "true");
+        await Expect(groups.Nth(1)).ToHaveAttributeAsync("aria-expanded", "true");
+
+        await groups.Nth(0).ClickAsync();
+
+        await Expect(groups.Nth(0)).ToHaveAttributeAsync("aria-expanded", "false");
+        await Expect(groups.Nth(1)).ToHaveAttributeAsync("aria-expanded", "true");
+    }
+
+    [Fact]
+    public async Task An_accordion_opens_one_group_at_a_time ()
+    {
+        await GotoComponentAsync(Route);
+
+        var inputs = Page.GetByTestId("accordion-inputs");
+        var data = Page.GetByTestId("accordion-data");
+
+        // Collapsed starts Data closed.
+        await Expect(inputs).ToHaveAttributeAsync("aria-expanded", "true");
+        await Expect(data).ToHaveAttributeAsync("aria-expanded", "false");
+
+        await data.ClickAsync();
+
+        await Expect(data).ToHaveAttributeAsync("aria-expanded", "true");
+        await Expect(inputs).ToHaveAttributeAsync("aria-expanded", "false");
+    }
 }

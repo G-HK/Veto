@@ -65,6 +65,15 @@
         </div>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-accordion"
+               Title="Groups that take turns"
+               Description="Accordion keeps one group open at a time: opening one closes its siblings. An entry's Collapsed makes a group start closed. A group holding the current page stays open either way."
+               Code="@AccordionCode">
+        <div class="link-nav">
+            <VetoNavMenu Items="GroupItems" Accordion="true" Label="Grouped example" TestId="accordion" />
+        </div>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-current"
                Title="Knowing where it is"
                Description="The first of these points at the page you are reading. It carries aria-current and sets itself in a heavier weight, without anything on this page telling it to."
@@ -101,6 +110,32 @@
         new VetoNavEntry { Label = "Installation", Href = "/docs/installation", Icon = VetoIcons.Document },
         new VetoNavEntry { Label = "Usage", Href = "/docs/usage", Icon = VetoIcons.Terminal }
     ];
+
+    private static readonly IReadOnlyList<VetoNavEntry> GroupItems =
+    [
+        new VetoNavEntry
+        {
+            Label = "Inputs", Icon = VetoIcons.Edit,
+            Children = [new VetoNavEntry { Label = "Text box", Href = "/docs/components/text-box" }, new VetoNavEntry { Label = "Switch", Href = "/docs/components/switch" }]
+        },
+        new VetoNavEntry
+        {
+            Label = "Data", Icon = VetoIcons.Grid, Collapsed = true,
+            Children = [new VetoNavEntry { Label = "Gantt", Href = "/docs/components/gantt" }, new VetoNavEntry { Label = "Cron", Href = "/docs/components/cron" }]
+        }
+    ];
+
+    private const string AccordionCode = """
+        <VetoNavMenu Items="_items" Accordion="true" />
+
+        @code {
+            private readonly VetoNavEntry[] _items =
+            [
+                new() { Label = "Inputs", Children = [ ... ] },
+                new() { Label = "Data", Collapsed = true, Children = [ ... ] }
+            ];
+        }
+        """;
 
     private static readonly ParameterTable.Row[] Parameters =
     [

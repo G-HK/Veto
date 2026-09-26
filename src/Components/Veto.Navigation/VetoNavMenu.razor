@@ -14,9 +14,9 @@
          data-testid="@TestId"
          aria-label="@Label">
         <ul class="veto-nav-menu__list">
-            @foreach (var entry in Items)
+            @for (var i = 0; i < Items.Count; i++)
             {
-                @RenderEntry(entry, 0)
+                @RenderEntry(Items[i], 0, i.ToString(System.Globalization.CultureInfo.InvariantCulture), Items)
             }
         </ul>
         @ChildContent
@@ -24,15 +24,17 @@
 }
 
 @code {
-    private RenderFragment RenderEntry ( VetoNavEntry entry, int depth ) =>
+    // key is the entry's position in the tree ("2.0.1"), which is what its open/closed state is
+    // kept under - labels repeat, positions do not.
+    private RenderFragment RenderEntry ( VetoNavEntry entry, int depth, string key, IReadOnlyList<VetoNavEntry> siblings ) =>
         @<li class="veto-nav-menu__item" style="@($"--veto-nav-depth: {depth}")">
             @if (entry.IsGroup)
             {
                 <button type="button"
                         class="veto-nav-menu__link veto-nav-menu__link--group"
-                        aria-expanded="@(IsExpanded(entry) ? "true" : "false")"
+                        aria-expanded="@(IsExpanded(entry, key) ? "true" : "false")"
                         data-testid="@EntryTestId(entry)"
-                        @onclick="() => ToggleGroup(entry)">
+                        @onclick="() => ToggleGroup(entry, key, siblings)">
                     @if (entry.Icon is not null)
                     {
                         <VetoIcon Icon="@entry.Icon" Size="VetoIconSize.Large" Class="veto-nav-menu__icon" />
@@ -40,15 +42,15 @@
                     <span class="veto-nav-menu__label">@entry.Label</span>
                     <VetoIcon Icon="@VetoIcons.ChevronDown"
                               Class="veto-nav-menu__chevron"
-                              Rotation="@(IsExpanded(entry) ? 180 : 0)" />
+                              Rotation="@(IsExpanded(entry, key) ? 180 : 0)" />
                 </button>
 
-                @if (IsExpanded(entry))
+                @if (IsExpanded(entry, key))
                 {
                     <ul class="veto-nav-menu__list">
-                        @foreach (var child in entry.Children)
+                        @for (var c = 0; c < entry.Children.Count; c++)
                         {
-                            @RenderEntry(child, depth + 1)
+                            @RenderEntry(entry.Children[c], depth + 1, $"{key}.{c}", entry.Children)
                         }
                     </ul>
                 }
