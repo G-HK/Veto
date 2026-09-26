@@ -81,13 +81,14 @@
 
     <DemoBlock TestId="demo-labels"
                Title="Named scores"
-               Description="ItemLabels names each score. The name goes into the icon's tooltip, its accessible name, and the value a screen reader announces - a number out of six says much less than 'Great'."
+               Description="ItemLabels names each score. The name goes into the icon's tooltip, its accessible name, and the value a screen reader announces - a number out of six says much less than 'Great'. ShowItemLabel prints the name beside the row, and it follows the pointer while it previews."
                Code="@LabelsCode">
         <VetoRating TValue="int"
                     TestId="named"
                     Max="5"
                     ItemLabels="Names"
                     ShowValue="true"
+                    ShowItemLabel="true"
                     Label="Service"
                     @bind-Value="_named" />
     </DemoBlock>
@@ -157,6 +158,7 @@
         new("Clearable", "bool", "true", "Picking the current score again clears it back to zero."),
         new("HoverPreview", "bool", "true", "Preview the score under the pointer before it is picked."),
         new("ShowValue", "bool", "false", "Print the score after the row."),
+        new("ShowItemLabel", "bool", "false", "Print the ItemLabels name for the score after the row; it follows the pointer while previewing."),
         new("ItemLabels", "IReadOnlyList<string>?", "null", "A name per score, used for tooltips and for what is announced."),
         new("Color", "VetoColor", "Warning", "The colour the earned icons take."),
         new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
@@ -208,7 +210,7 @@
         <VetoRating TValue="int"
                     Max="5"
                     ItemLabels="Names"
-                    ShowValue="true"
+                    ShowItemLabel="true"
                     Label="Service"
                     @bind-Value="_score" />
 

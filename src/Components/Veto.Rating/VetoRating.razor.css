@@ -125,6 +125,17 @@
     font-variant-numeric: tabular-nums;
 }
 
+.veto-rating__item-label {
+    min-width: 6ch;
+    font-size: var(--veto-font-size-sm);
+    font-weight: 600;
+    color: var(--veto-color-text);
+}
+
+.veto-rating__label {
+    cursor: default;
+}
+
 /* Colours */
 
 .veto-rating--primary {
