@@ -36,3 +36,17 @@
         animation: none;
     }
 }
+
+/* Colour. Unset, the icon inherits the text colour around it. */
+.veto-icon--primary { color: var(--veto-color-primary); }
+.veto-icon--secondary { color: var(--veto-color-secondary); }
+.veto-icon--neutral { color: var(--veto-color-text-muted); }
+.veto-icon--success { color: var(--veto-color-success); }
+.veto-icon--warning { color: var(--veto-color-warning); }
+.veto-icon--danger { color: var(--veto-color-danger); }
+
+/* Flip. The individual scale property composes with rotate and the spin animation rather
+   than replacing either. */
+.veto-icon--flip-horizontal { scale: -1 1; }
+.veto-icon--flip-vertical { scale: 1 -1; }
+.veto-icon--flip-both { scale: -1 -1; }
