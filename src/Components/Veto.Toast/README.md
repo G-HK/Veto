@@ -47,6 +47,12 @@ builder.Services.AddVetoToast();
 }
 ```
 
+## Following a task
+
+```csharp
+await Toasts.TrackAsync(SaveAsync(), "Saving…", "Saved", "Could not save");
+```
+
 ## Documentation
 
 Every parameter, with a live demo, is documented on the Veto docs site at `/docs/components/toast`. Source and issues: https://github.com/G-HK/Veto

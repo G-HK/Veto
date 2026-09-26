@@ -31,7 +31,9 @@
                      aria-live="@(toast.Type is VetoToastType.Error or VetoToastType.Warning ? "assertive" : "polite")"
                      @onclick="() => OnToastClickAsync(toast)"
                      @onmouseenter="() => SetPaused(toast, true)"
-                     @onmouseleave="() => SetPaused(toast, false)">
+                     @onmouseleave="() => SetPaused(toast, false)"
+                     @onfocusin="() => SetPaused(toast, true)"
+                     @onfocusout="() => SetPaused(toast, false)">
 
                     @if (!toast.Options.HideIcon && IconFor(toast) is { } icon)
                     {
