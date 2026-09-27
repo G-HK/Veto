@@ -10,9 +10,7 @@
 
 const STORAGE_KEY = 'veto-theme-mode';
 
-let query = null;
-let listener = null;
-let storageListener = null;
+let query, listener, storageListener = null;
 
 function apply(mode) {
     const root = document.documentElement;
@@ -27,7 +25,8 @@ function apply(mode) {
 }
 
 function store(mode) {
-    try {
+    try
+    {
         if (mode === 'System') {
             localStorage.removeItem(STORAGE_KEY);
         }
@@ -35,7 +34,8 @@ function store(mode) {
         {
             localStorage.setItem(STORAGE_KEY, mode);
         }
-    } catch {
+    }
+    catch {
         // Private windows and blocked site data throw on access. Theme still applies for
         // this page; it just will not be remembered.
     }
@@ -95,15 +95,15 @@ export function setMode(mode) {
 
 /** Drops the OS preference subscription. */
 export function dispose() {
-    if (query && listener) {
+    if (query && listener)
+    {
         query.removeEventListener('change', listener);
     }
 
-    if (storageListener) {
+    if (storageListener)
+    {
         window.removeEventListener('storage', storageListener);
     }
 
-    query = null;
-    listener = null;
-    storageListener = null;
+    query, listener, storageListener = null;
 }
