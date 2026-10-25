@@ -50,19 +50,38 @@
 
     <DemoBlock TestId="demo-sizes"
                Title="Sizes and variants"
-               Description="Three sizes and three visual treatments, all driven by modifier classes rather than inline styles."
+               Description="Five sizes and seven visual treatments, all driven by modifier classes rather than inline styles."
                Code="@SizesCode">
         <VetoStack Gap="VetoSpacing.Large">
             <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+                <VetoTextBox TValue="string" Label="Extra small" Size="VetoSize.ExtraSmall" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" TestId="size-sm" Label="Small" Size="VetoSize.Small" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" Label="Medium" Size="VetoSize.Medium" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" TestId="size-lg" Label="Large" Size="VetoSize.Large" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" Label="Extra large" Size="VetoSize.ExtraLarge" @bind-Value="_scratch" />
             </VetoStack>
             <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
                 <VetoTextBox TValue="string" Label="Outlined" Variant="VetoVariant.Outlined" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" TestId="variant-filled" Label="Filled" Variant="VetoVariant.Filled" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" TestId="variant-text" Label="Text" Variant="VetoVariant.Text" @bind-Value="_scratch" />
             </VetoStack>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+                <VetoTextBox TValue="string" Label="Soft" Variant="VetoVariant.Soft" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" Label="Underlined" Variant="VetoVariant.Underlined" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" Label="Ghost" Variant="VetoVariant.Ghost" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" Label="Elevated" Variant="VetoVariant.Elevated" @bind-Value="_scratch" />
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-corners"
+               Title="Corners"
+               Description="Radius rounds all four corners. RadiusTopLeft, RadiusTopRight, RadiusBottomRight and RadiusBottomLeft each override it for one corner."
+               Code="@CornersCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+            <VetoTextBox TValue="string" Label="Square" Radius="0" @bind-Value="_scratch" />
+            <VetoTextBox TValue="string" Label="Pill" Radius="999px" @bind-Value="_scratch" />
+            <VetoTextBox TValue="string" Label="One corner" Radius="0" RadiusTopLeft="1rem" @bind-Value="_scratch" />
         </VetoStack>
     </DemoBlock>
 
@@ -126,8 +145,10 @@
         new("Type", "string", "\"text\"", "The input's type: text, email, password, search, tel, url, number, date."),
         new("Immediate", "bool", "false", "Update the bound value on every keystroke instead of on blur."),
         new("Format", "string?", "null", "Format used to convert the value to and from its string form."),
-        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
-        new("Variant", "VetoVariant", "Outlined", "Outlined, Filled or Text."),
+        new("Size", "VetoSize", "Medium", "ExtraSmall, Small, Medium, Large or ExtraLarge."),
+        new("Variant", "VetoVariant", "Outlined", "Outlined, Filled, Text (borderless), Soft, Underlined (bottom line only), Ghost (border on hover) or Elevated."),
+        new("Radius", "string?", "null", "Rounds all four corners, as any CSS length. Null keeps the theme's radius."),
+        new("RadiusTopLeft / TopRight / BottomRight / BottomLeft", "string?", "null", "One corner's radius, overriding Radius for that corner."),
         new("Disabled", "bool", "false", "Cannot be focused or edited."),
         new("ReadOnly", "bool", "false", "Can be focused and copied from, but not edited."),
         new("Required", "bool", "false", "Renders the required marker and sets aria-required. Enforcement comes from the model."),
@@ -158,6 +179,16 @@
         <VetoTextBox TValue="string" Label="Small" Size="VetoSize.Small" @bind-Value="_v" />
         <VetoTextBox TValue="string" Label="Filled" Variant="VetoVariant.Filled" @bind-Value="_v" />
         <VetoTextBox TValue="string" Label="Text" Variant="VetoVariant.Text" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Soft" Variant="VetoVariant.Soft" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Underlined" Variant="VetoVariant.Underlined" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Ghost" Variant="VetoVariant.Ghost" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Elevated" Variant="VetoVariant.Elevated" @bind-Value="_v" />
+        """;
+
+    private const string CornersCode = """
+        <VetoTextBox TValue="string" Label="Square" Radius="0" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Pill" Radius="999px" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="One corner" Radius="0" RadiusTopLeft="1rem" @bind-Value="_v" />
         """;
 
     private const string StatesCode = """

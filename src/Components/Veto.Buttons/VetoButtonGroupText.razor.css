@@ -39,6 +39,18 @@
     font-size: var(--veto-font-size-lg);
 }
 
+.veto-button-group--xs .veto-button-group__text {
+    padding: var(--veto-space-1) var(--veto-space-2);
+    min-height: 1.75rem;
+    font-size: var(--veto-font-size-xs);
+}
+
+.veto-button-group--xl .veto-button-group__text {
+    padding: var(--veto-space-4) var(--veto-space-6);
+    min-height: 3.5rem;
+    font-size: var(--veto-font-size-xl);
+}
+
 /* Attached: joins the shared border and gives up its own corners, except at the ends. */
 
 .veto-button-group--attached .veto-button-group__text {

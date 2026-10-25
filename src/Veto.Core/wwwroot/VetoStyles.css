@@ -58,9 +58,11 @@
     /* Typography */
     --veto-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --veto-font-mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    --veto-font-size-xs: 0.75rem;
     --veto-font-size-sm: 0.8125rem;
     --veto-font-size-md: 0.9375rem;
     --veto-font-size-lg: 1.0625rem;
+    --veto-font-size-xl: 1.25rem;
     --veto-line-height: 1.5;
 
     /* Elevation and motion */

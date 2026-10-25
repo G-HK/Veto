@@ -232,16 +232,51 @@
     font-size: var(--veto-font-size-lg);
 }
 
-/* Variants. Filled sinks the empty rail into the surface; text strips its border. */
+.veto-slider--xs {
+    --veto-slider-thumb: 0.75rem;
+    --veto-slider-rail: 0.1875rem;
+    --veto-slider-mark: 0.25rem;
+    font-size: var(--veto-font-size-xs);
+}
+
+.veto-slider--xl {
+    --veto-slider-thumb: 1.875rem;
+    --veto-slider-rail: 0.5625rem;
+    --veto-slider-mark: 0.625rem;
+    font-size: var(--veto-font-size-xl);
+}
+
+/* Variants. Filled sinks the empty rail into the surface; text strips its fill. A rail is
+   already a line, so Underlined draws as Text. */
 
 .veto-slider--filled .veto-slider__rail {
     background-color: var(--veto-color-surface-disabled);
     border-color: transparent;
 }
 
-.veto-slider--text .veto-slider__rail {
+.veto-slider--text .veto-slider__rail,
+.veto-slider--underlined .veto-slider__rail {
     background-color: transparent;
     border-color: var(--veto-border-color, var(--veto-color-border));
+}
+
+.veto-slider--soft .veto-slider__rail {
+    background-color: color-mix(in srgb, var(--veto-slider-accent) 18%, var(--veto-color-surface));
+    border-color: transparent;
+}
+
+.veto-slider--ghost .veto-slider__rail {
+    border-color: transparent;
+}
+
+.veto-slider--ghost:hover .veto-slider__rail {
+    border-color: var(--veto-border-color, var(--veto-color-border));
+}
+
+.veto-slider--elevated .veto-slider__rail {
+    background-color: var(--veto-color-surface);
+    border-color: transparent;
+    box-shadow: var(--veto-shadow-sm);
 }
 
 /* Disabled, read-only and invalid */

@@ -21,10 +21,13 @@
     border-radius: var(--veto-radius-full);
 }
 
-/* Size - kept at or above 2rem so the target stays comfortably tappable. */
+/* Size - Small and up stay at or above 2rem so the target is comfortably tappable;
+   ExtraSmall gives that up for dense toolbars. */
 .veto-icon-button--sm { width: 2rem; height: 2rem; }
 .veto-icon-button--md { width: 2.5rem; height: 2.5rem; }
 .veto-icon-button--lg { width: 3rem; height: 3rem; }
+.veto-icon-button--xs { width: 1.75rem; height: 1.75rem; }
+.veto-icon-button--xl { width: 3.5rem; height: 3.5rem; }
 
 /* Colour roles */
 .veto-icon-button--primary { color: var(--veto-color-primary); }
@@ -52,6 +55,21 @@
     background-color: var(--veto-color-surface-raised);
 }
 
+/* Read off currentColor, so the colour roles above tint these without a rule each. An icon
+   has no label to underline, so Underlined draws as Text. */
+.veto-icon-button--soft {
+    background-color: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.veto-icon-button--ghost:not(:hover):not(:focus-visible):not([aria-pressed="true"]) {
+    color: var(--veto-color-text-muted);
+}
+
+.veto-icon-button--elevated {
+    background-color: var(--veto-color-surface);
+    box-shadow: var(--veto-shadow-sm), var(--veto-shadow-md);
+}
+
 /* States */
 .veto-icon-button:hover:not(:disabled):not(.veto-icon-button--disabled) {
     background-color: color-mix(in srgb, currentColor 12%, transparent);
@@ -59,6 +77,10 @@
 
 .veto-icon-button--filled:hover:not(:disabled) {
     background-color: var(--veto-color-primary-hover);
+}
+
+.veto-icon-button--soft:hover:not(:disabled):not(.veto-icon-button--disabled) {
+    background-color: color-mix(in srgb, currentColor 22%, transparent);
 }
 
 .veto-icon-button:focus-visible {

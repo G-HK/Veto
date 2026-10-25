@@ -78,8 +78,9 @@ public partial class VetoIconButton : VetoComponentBase
 
     private VetoIconSize IconSize => Size switch
     {
+        VetoSize.ExtraSmall => VetoIconSize.Small,
         VetoSize.Small => VetoIconSize.Medium,
-        VetoSize.Large => VetoIconSize.ExtraLarge,
+        VetoSize.Large or VetoSize.ExtraLarge => VetoIconSize.ExtraLarge,
         _ => VetoIconSize.Large
     };
 

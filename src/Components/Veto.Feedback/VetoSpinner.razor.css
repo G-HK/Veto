@@ -21,6 +21,8 @@
 .veto-spinner--sm { width: 0.875rem; height: 0.875rem; }
 .veto-spinner--md { width: 1.25rem; height: 1.25rem; }
 .veto-spinner--lg { width: 2rem; height: 2rem; }
+.veto-spinner--xs { width: 0.75rem; height: 0.75rem; }
+.veto-spinner--xl { width: 3rem; height: 3rem; }
 
 .veto-spinner--primary { color: var(--veto-color-primary); }
 .veto-spinner--secondary { color: var(--veto-color-secondary); }

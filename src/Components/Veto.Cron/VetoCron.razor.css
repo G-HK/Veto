@@ -198,6 +198,15 @@
     font-size: var(--veto-font-size-lg);
 }
 
+.veto-cron--xs {
+    font-size: var(--veto-font-size-xs);
+    gap: var(--veto-space-1);
+}
+
+.veto-cron--xl {
+    font-size: var(--veto-font-size-xl);
+}
+
 /* Disabled and read-only */
 
 .veto-cron--disabled {
