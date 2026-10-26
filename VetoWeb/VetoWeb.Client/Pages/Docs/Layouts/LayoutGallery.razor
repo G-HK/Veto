@@ -20,8 +20,8 @@
                         <h3 class="gallery__name">@entry.Name</h3>
                         <p class="gallery__summary">@entry.Summary</p>
                         <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
-                            <a class="gallery__open" href="@entry.Href" data-testid="@($"open-{entry.Slug}")">Open full screen</a>
-                            <a class="gallery__docs" href="@entry.DocsHref">Reference</a>
+                            <VetoLink class="gallery__open" href="@entry.Href" data-testid="@($"open-{entry.Slug}")">Open full screen</VetoLink>
+                            <VetoLink class="gallery__docs" href="@entry.DocsHref">Reference</VetoLink>
                         </VetoStack>
                     </VetoStack>
                 </VetoStack>
@@ -88,7 +88,8 @@
         </span>
     </div>;
 
-    private const string CompositionCode = """
+    private const string CompositionCode = 
+        """
         <!-- The preset -->
         <VetoDashboardLayout Title="Operations" Items="Nav">
             <VetoDashboard Columns="1" ColumnsLarge="4">…</VetoDashboard>

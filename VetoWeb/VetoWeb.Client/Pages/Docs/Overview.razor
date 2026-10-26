@@ -18,9 +18,9 @@
                 </VetoStack>
 
                 <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
-                    <a class="hero__cta" href="/docs/installation">Get started</a>
-                    <a class="hero__link" href="/docs/components/text-box">Browse components</a>
-                    <a class="hero__link" href="/docs/layouts">See the layouts</a>
+                    <VetoLink Class="hero__cta" Href="/docs/installation">Get started</VetoLink>
+                    <VetoLink Class="hero__link" Href="/docs/components/text-box">Browse components</VetoLink>
+                    <VetoLink Class="hero__link" Href="/docs/layouts">See the layouts</VetoLink>
                 </VetoStack>
 
                 <VetoCode Code="@InstallSnippet" Language="powershell" TestId="hero-install" />
@@ -46,7 +46,7 @@
                     </VetoCard>
                     <VetoCard Title="Tested in a browser" Padding="VetoSpacing.Large">
                         Every component ships with Playwright specs that drive this site in a real
-                        browser — keyboard, ARIA and computed layout, not just rendered markup.
+                        browser keyboard, ARIA and computed layout, not just rendered markup.
                     </VetoCard>
                 </VetoGrid>
             </VetoStack>
@@ -64,7 +64,7 @@
                 <VetoGrid Columns="1" ColumnsSmall="2" ColumnsLarge="4" Gap="VetoSpacing.Medium" TestId="component-grid">
                     @foreach (var entry in Catalogue)
                     {
-                        <a class="catalogue__link" href="@entry.Href">
+                        <VetoLink class="catalogue__link" href="@entry.Href">
                             <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.Large" Class="catalogue__card">
                                 <VetoStack Gap="VetoSpacing.Small">
                                     <VetoIcon Icon="@entry.Icon" Size="VetoIconSize.Large" Class="catalogue__icon" />
@@ -72,7 +72,7 @@
                                     <span class="catalogue__summary">@entry.Summary</span>
                                 </VetoStack>
                             </VetoCard>
-                        </a>
+                        </VetoLink>
                     }
                 </VetoGrid>
             </VetoStack>
@@ -84,7 +84,8 @@
 @code {
     private bool _interactive;
 
-    private const string InstallSnippet = """
+    private const string InstallSnippet = 
+        """
         dotnet add package Veto
         """;
 

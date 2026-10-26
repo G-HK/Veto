@@ -144,7 +144,8 @@
         new("OnItemClick", "EventCallback<VetoBreadcrumbItem>", "—", "Raised when a step is activated.")
     ];
 
-    private const string BasicCode = """
+    private const string BasicCode = 
+        """
         <VetoBreadcrumbs Items="Trail" />
 
         @code {
@@ -166,13 +167,15 @@
         </VetoBreadcrumbs>
         """;
 
-    private const string SeparatorsCode = """
+    private const string SeparatorsCode = 
+        """
         <VetoBreadcrumbs Items="Trail" SeparatorIcon="@VetoIcons.ChevronRight" />
         <VetoBreadcrumbs Items="Trail" Separator="›" />
         <VetoBreadcrumbs Items="Trail" Separator="•" />
         """;
 
-    private const string PlainCode = """
+    private const string PlainCode = 
+        """
         @* No Href on a step, so nothing here is a link. *@
         <VetoBreadcrumbs Items="Path" AriaLabel="File path" />
 
@@ -187,7 +190,8 @@
         }
         """;
 
-    private const string CollapseCode = """
+    private const string CollapseCode = 
+        """
         <VetoBreadcrumbs Items="DeepTrail"
                          MaxItems="4"
                          ItemsBeforeCollapse="1"
@@ -200,7 +204,8 @@
         <VetoBreadcrumbs Items="Trail" Size="VetoSize.Large" />
         """;
 
-    private const string ClickCode = """
+    private const string ClickCode = 
+        """
         <VetoBreadcrumbs Items="Steps" OnItemClick="OnStepClicked" LinkCurrent="true" />
 
         @code {

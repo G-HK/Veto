@@ -80,7 +80,8 @@
         new("Translucent", "bool", "false", "Lets content scroll under a blurred bar, with a solid fallback.")
     ];
 
-    private const string ShellCode = """
+    private const string ShellCode = 
+        """
         @inherits LayoutComponentBase
 
         <VetoThemeProvider />
@@ -105,7 +106,8 @@
         </VetoLayout>
         """;
 
-    private const string DrawerCode = """
+    private const string DrawerCode = 
+        """
         <!-- Full width, then a rail, then an overlay -->
         <VetoDrawer @bind-Open="_open"
                     Variant="VetoDrawerVariant.Responsive"
@@ -116,7 +118,8 @@
         <VetoDrawer @bind-Open="_open" Variant="VetoDrawerVariant.Temporary" Anchor="VetoAnchor.Right" />
         """;
 
-    private const string NavCode = """
+    private const string NavCode = 
+        """
         public static readonly IReadOnlyList<VetoNavEntry> Items =
         [
             new VetoNavEntry { Label = "Overview", Href = "/", Icon = VetoIcons.Home, MatchExact = true },

@@ -154,7 +154,8 @@
         new("ContextMenuLabel", "string?", "null", "The accessible name of the right-click menu.")
     ];
 
-    private const string VariantsCode = """
+    private const string VariantsCode = 
+        """
         <VetoButton Variant="VetoVariant.Filled">Save changes</VetoButton>
         <VetoButton Variant="VetoVariant.Outlined">Cancel</VetoButton>
         <VetoButton Variant="VetoVariant.Text">Learn more</VetoButton>
@@ -164,12 +165,14 @@
         <VetoButton Variant="VetoVariant.Elevated">Open</VetoButton>
         """;
 
-    private const string ColorsCode = """
+    private const string ColorsCode = 
+        """
         <VetoButton Color="VetoColor.Danger">Delete</VetoButton>
         <VetoButton Color="VetoColor.Danger" Variant="VetoVariant.Outlined">Delete</VetoButton>
         """;
 
-    private const string SizesCode = """
+    private const string SizesCode = 
+        """
         <VetoButton Size="VetoSize.ExtraSmall">Extra small</VetoButton>
         <VetoButton Size="VetoSize.Small">Small</VetoButton>
         <VetoButton Size="VetoSize.Large">Large</VetoButton>
@@ -178,12 +181,14 @@
         <VetoButton FullWidth="true">Full width</VetoButton>
         """;
 
-    private const string IconsCode = """
+    private const string IconsCode = 
+        """
         <VetoButton StartIcon="@VetoIcons.Check">Confirm</VetoButton>
         <VetoButton EndIcon="@VetoIcons.ChevronRight">Next</VetoButton>
         """;
 
-    private const string StatesCode = """
+    private const string StatesCode = 
+        """
         <VetoButton StartIcon="@VetoIcons.Check" Loading="_saving" OnClick="SaveAsync">
             Save changes
         </VetoButton>
@@ -200,13 +205,15 @@
         }
         """;
 
-    private const string LinkCode = """
+    private const string LinkCode = 
+        """
         <VetoButton Href="/docs/usage" EndIcon="@VetoIcons.ChevronRight">
             Read the usage guide
         </VetoButton>
         """;
 
-    private const string ContextMenuCode = """
+    private const string ContextMenuCode = 
+        """
         <VetoButton StartIcon="@VetoIcons.Document" ContextMenuLabel="Report actions" OnClick="Open">
             <ChildContent>Report.pdf</ChildContent>
             <ContextMenu>
