@@ -184,4 +184,22 @@ public class VetoThemingTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         await Expect(Component("swatches").Locator(".demo-swatch")).ToHaveCountAsync(8);
     }
+
+    [Fact]
+    public async Task A_choice_made_in_one_tab_is_followed_by_the_others ()
+    {
+        await GotoComponentAsync(Route);
+
+        var other = await Context.NewPageAsync();
+        await other.GotoAsync($"{App.BaseUrl}/{Route}");
+        await other.Locator("[data-testid='page'][data-ready='true']")
+            .WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 60_000 });
+
+        await Component("toggle").ClickAsync();
+        Assert.Equal("dark", await ThemeAttributeAsync());
+
+        // The other tab hears the storage event: its document and its components follow.
+        await Expect(other.Locator("html")).ToHaveAttributeAsync("data-veto-theme", "dark");
+        await Expect(other.GetByTestId("resolved")).ToHaveTextAsync("Dark");
+    }
 }
