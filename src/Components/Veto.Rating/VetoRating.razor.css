@@ -36,7 +36,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--veto-rating-gap);
-    border-radius: var(--veto-radius-md);
+    border-radius: var(--veto-field-radius-tl, var(--veto-radius-md)) var(--veto-field-radius-tr, var(--veto-radius-md)) var(--veto-field-radius-br, var(--veto-radius-md)) var(--veto-field-radius-bl, var(--veto-radius-md));
 }
 
 .veto-rating__items:focus {
@@ -159,6 +159,17 @@
     --veto-rating-icon: 2.25rem;
     --veto-rating-gap: var(--veto-space-2);
     font-size: var(--veto-font-size-lg);
+}
+
+.veto-rating--xs {
+    --veto-rating-icon: 0.875rem;
+    font-size: var(--veto-font-size-xs);
+}
+
+.veto-rating--xl {
+    --veto-rating-icon: 3rem;
+    --veto-rating-gap: var(--veto-space-3);
+    font-size: var(--veto-font-size-xl);
 }
 
 /* States */

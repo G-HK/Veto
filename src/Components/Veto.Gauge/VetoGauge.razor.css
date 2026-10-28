@@ -155,6 +155,22 @@
     font-size: var(--veto-gauge-value-size, 2.25rem);
 }
 
+.veto-gauge--xs {
+    --veto-gauge-size: 6rem;
+}
+
+.veto-gauge--xs .veto-gauge__number {
+    font-size: var(--veto-gauge-value-size, 0.875rem);
+}
+
+.veto-gauge--xl {
+    --veto-gauge-size: 22rem;
+}
+
+.veto-gauge--xl .veto-gauge__number {
+    font-size: var(--veto-gauge-value-size, 3rem);
+}
+
 @media (prefers-reduced-motion: reduce) {
     .veto-gauge__value,
     .veto-gauge__needle,

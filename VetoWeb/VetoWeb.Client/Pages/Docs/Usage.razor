@@ -156,7 +156,8 @@
         new("RootTooltip", "string?", "null", "The root's title attribute. Hover only, so never the only place something is said.")
     ];
 
-    private const string BoxCode = """
+    private const string BoxCode = 
+        """
         <VetoCard Title="Sized" RootWidth="18rem" RootMargin="VetoSpacing.Medium">
             Eighteen rem wide, with a margin of its own.
         </VetoCard>
@@ -164,7 +165,8 @@
         <VetoButton RootMinWidth="12rem">Wide enough</VetoButton>
         """;
 
-    private const string StackingCode = """
+    private const string StackingCode = 
+        """
         @* A card clips by default, so the menu's panel is cut off at its edge. *@
         <VetoCard Title="Clips" RootWidth="14rem">
             <VetoMenu Label="Cut off" Icon="@VetoIcons.MoreVertical">…</VetoMenu>
@@ -176,11 +178,13 @@
         </VetoCard>
         """;
 
-    private const string TooltipCode = """
+    private const string TooltipCode = 
+        """
         <VetoButton RootTooltip="Saves without leaving the page">Save</VetoButton>
         """;
 
-    private const string Splat = """
+    private const string Splat = 
+        """
         <VetoTextBox TValue="string"
                      Label="Email"
                      Class="my-field"
@@ -192,7 +196,8 @@
         <!-- renders: class="veto-textbox veto-textbox--md … my-field" -->
         """;
 
-    private const string Forms = """
+    private const string Forms = 
+        """
         <EditForm Model="_model" OnValidSubmit="Save">
             <DataAnnotationsValidator />
 
@@ -205,7 +210,8 @@
         </EditForm>
         """;
 
-    private const string Theming = """
+    private const string Theming = 
+        """
         <VetoThemeProvider Theme="AppTheme" />
 
         @code {
@@ -218,7 +224,8 @@
         }
         """;
 
-    private const string Testing = """
+    private const string Testing = 
+        """
         // Razor
         <VetoTextBox TestId="username" Label="Username" @bind-Value="_name" />
 

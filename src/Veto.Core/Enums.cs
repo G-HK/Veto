@@ -21,17 +21,21 @@ public enum VetoColorScheme
 public static class VetoColorSchemeExtensions
 {
     /// <summary>The value for <c>data-veto-theme</c>, or null for <see cref="VetoColorScheme.Inherit"/>.</summary>
-    public static string? ToThemeAttribute ( this VetoColorScheme scheme ) => scheme switch
-    {
-        VetoColorScheme.Light => "light",
-        VetoColorScheme.Dark => "dark",
-        _ => null
-    };
+    public static string? ToThemeAttribute ( this VetoColorScheme scheme ) =>
+        scheme switch
+        {
+            VetoColorScheme.Light => "light",
+            VetoColorScheme.Dark => "dark",
+            _ => null
+        };
 }
 
 /// <summary>Relative size of a component. Maps to a <c>--sm</c>/<c>--md</c>/<c>--lg</c> modifier class.</summary>
 public enum VetoSize
 {
+    /// <summary>Extra compact.</summary>
+    ExtraSmall,
+
     /// <summary>Compact.</summary>
     Small,
 
@@ -39,7 +43,10 @@ public enum VetoSize
     Medium,
 
     /// <summary>Roomy.</summary>
-    Large
+    Large,
+
+    /// <summary>Extra roomy.</summary>
+    ExtraLarge
 }
 
 /// <summary>Semantic color role of a component. Maps to a <c>--primary</c>-style modifier class.</summary>
@@ -61,7 +68,10 @@ public enum VetoColor
     Warning,
 
     /// <summary>Destructive or invalid.</summary>
-    Danger
+    Danger,
+
+    /// <summary>Informational, neutral.</summary>
+    Info,
 }
 
 /// <summary>Visual treatment of a component. Maps to a <c>--filled</c>-style modifier class.</summary>
@@ -74,7 +84,22 @@ public enum VetoVariant
     Outlined,
 
     /// <summary>No background and no border.</summary>
-    Text
+    Text,
+
+    /// <summary>A light tint of the colour, no border. Sits between Filled and Outlined.</summary>
+    Soft,
+
+    /// <summary>
+    /// A line under the content and nothing else. A field draws it as its bottom border; a
+    /// button underlines its label.
+    /// </summary>
+    Underlined,
+
+    /// <summary>Muted and borderless until hovered or focused.</summary>
+    Ghost,
+
+    /// <summary>The surface colour lifted by a shadow, no border.</summary>
+    Elevated
 }
 
 /// <summary>How a link draws its underline.</summary>
@@ -90,7 +115,20 @@ public enum VetoUnderline
     Reveal,
 
     /// <summary>Always drawn. For a link in the middle of a paragraph, where it has to be findable.</summary>
-    Always
+    Always,
+
+    /// <summary> 
+    /// Thicker underline, for a link that is the only thing in its area and needs to be obvious. A button
+    /// </summary>
+    Strong,
+
+    /// <summary> dot-dot-dash underline, for a link that is the only thing in its area and needs to be obvious. A button</summary>
+    Dotted,
+
+    /// <summary> dash-dash-dash underline, for a link that is the only thing in its area and needs to be obvious. A button</summary>
+    Dashed,
+
+
 }
 
 /// <summary>Extension helpers that turn enum values into CSS modifier class names.</summary>
@@ -99,8 +137,10 @@ public static class VetoEnumExtensions
     /// <summary>Returns the modifier suffix for a size, e.g. <c>sm</c>.</summary>
     public static string ToModifier ( this VetoSize size ) => size switch
     {
+        VetoSize.ExtraSmall => "xs",
         VetoSize.Small => "sm",
         VetoSize.Large => "lg",
+        VetoSize.ExtraLarge => "xl",
         _ => "md"
     };
 
@@ -116,6 +156,9 @@ public static class VetoEnumExtensions
         {
             VetoUnderline.Reveal => "veto-underline-reveal",
             VetoUnderline.Always => "veto-underline-reveal veto-underline-static",
+            VetoUnderline.Strong => "veto-underline-strong",
+            VetoUnderline.Dotted => "veto-underline-dotted",
+            VetoUnderline.Dashed => "veto-underline-dashed",
             _ => null
         };
 }

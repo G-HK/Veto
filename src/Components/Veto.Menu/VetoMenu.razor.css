@@ -126,6 +126,34 @@
     justify-content: center;
 }
 
+.veto-menu--xs { font-size: var(--veto-font-size-xs); }
+
+.veto-menu--xl { font-size: var(--veto-font-size-xl); }
+
+.veto-menu--xs .veto-menu__trigger {
+    padding: var(--veto-space-1) var(--veto-space-2);
+    min-height: 1.75rem;
+}
+
+.veto-menu--xl .veto-menu__trigger {
+    padding: var(--veto-space-4) var(--veto-space-6);
+    min-height: 3.5rem;
+}
+
+.veto-menu--icon-only.veto-menu--xs .veto-menu__trigger {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    justify-content: center;
+}
+
+.veto-menu--icon-only.veto-menu--xl .veto-menu__trigger {
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    justify-content: center;
+}
+
 .veto-menu--round .veto-menu__trigger {
     border-radius: var(--veto-radius-full);
 }
@@ -164,22 +192,84 @@
     background: var(--veto-color-surface-raised);
 }
 
+.veto-menu--soft .veto-menu__trigger,
+.veto-menu--underlined .veto-menu__trigger,
+.veto-menu--ghost .veto-menu__trigger,
+.veto-menu--elevated .veto-menu__trigger {
+    color: var(--veto-color-text);
+}
+
+.veto-menu--soft .veto-menu__trigger {
+    background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.veto-menu--soft .veto-menu__trigger:hover:not(:disabled),
+.veto-menu--soft.veto-menu--open .veto-menu__trigger:not(:disabled) {
+    background: color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.veto-menu--underlined .veto-menu__trigger {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.veto-menu--underlined .veto-menu__trigger:hover:not(:disabled),
+.veto-menu--underlined.veto-menu--open .veto-menu__trigger:not(:disabled),
+.veto-menu--ghost .veto-menu__trigger:hover:not(:disabled),
+.veto-menu--ghost.veto-menu--open .veto-menu__trigger:not(:disabled) {
+    background: var(--veto-color-surface-raised);
+}
+
+.veto-menu--elevated .veto-menu__trigger {
+    background: var(--veto-color-surface);
+}
+
+/* Not while focused, or the shadow would replace the focus ring. */
+.veto-menu--elevated .veto-menu__trigger:not(:focus-visible) {
+    box-shadow: var(--veto-shadow-sm), var(--veto-shadow-md);
+}
+
+.veto-menu--elevated .veto-menu__trigger:hover:not(:disabled),
+.veto-menu--elevated.veto-menu--open .veto-menu__trigger:not(:disabled) {
+    background: var(--veto-color-surface-raised);
+}
+
 /* Colour roles apply to the variant that shows them. */
 
 .veto-menu--primary.veto-menu--outlined .veto-menu__trigger,
-.veto-menu--primary.veto-menu--text .veto-menu__trigger { color: var(--veto-color-primary); }
+.veto-menu--primary.veto-menu--text .veto-menu__trigger,
+.veto-menu--primary.veto-menu--soft .veto-menu__trigger,
+.veto-menu--primary.veto-menu--underlined .veto-menu__trigger,
+.veto-menu--primary.veto-menu--ghost .veto-menu__trigger,
+.veto-menu--primary.veto-menu--elevated .veto-menu__trigger { color: var(--veto-color-primary); }
 
 .veto-menu--secondary.veto-menu--outlined .veto-menu__trigger,
-.veto-menu--secondary.veto-menu--text .veto-menu__trigger { color: var(--veto-color-secondary); }
+.veto-menu--secondary.veto-menu--text .veto-menu__trigger,
+.veto-menu--secondary.veto-menu--soft .veto-menu__trigger,
+.veto-menu--secondary.veto-menu--underlined .veto-menu__trigger,
+.veto-menu--secondary.veto-menu--ghost .veto-menu__trigger,
+.veto-menu--secondary.veto-menu--elevated .veto-menu__trigger { color: var(--veto-color-secondary); }
 
 .veto-menu--success.veto-menu--outlined .veto-menu__trigger,
-.veto-menu--success.veto-menu--text .veto-menu__trigger { color: var(--veto-color-success); }
+.veto-menu--success.veto-menu--text .veto-menu__trigger,
+.veto-menu--success.veto-menu--soft .veto-menu__trigger,
+.veto-menu--success.veto-menu--underlined .veto-menu__trigger,
+.veto-menu--success.veto-menu--ghost .veto-menu__trigger,
+.veto-menu--success.veto-menu--elevated .veto-menu__trigger { color: var(--veto-color-success); }
 
 .veto-menu--warning.veto-menu--outlined .veto-menu__trigger,
-.veto-menu--warning.veto-menu--text .veto-menu__trigger { color: var(--veto-color-warning); }
+.veto-menu--warning.veto-menu--text .veto-menu__trigger,
+.veto-menu--warning.veto-menu--soft .veto-menu__trigger,
+.veto-menu--warning.veto-menu--underlined .veto-menu__trigger,
+.veto-menu--warning.veto-menu--ghost .veto-menu__trigger,
+.veto-menu--warning.veto-menu--elevated .veto-menu__trigger { color: var(--veto-color-warning); }
 
 .veto-menu--danger.veto-menu--outlined .veto-menu__trigger,
-.veto-menu--danger.veto-menu--text .veto-menu__trigger { color: var(--veto-color-danger); }
+.veto-menu--danger.veto-menu--text .veto-menu__trigger,
+.veto-menu--danger.veto-menu--soft .veto-menu__trigger,
+.veto-menu--danger.veto-menu--underlined .veto-menu__trigger,
+.veto-menu--danger.veto-menu--ghost .veto-menu__trigger,
+.veto-menu--danger.veto-menu--elevated .veto-menu__trigger { color: var(--veto-color-danger); }
 
 .veto-menu--secondary.veto-menu--filled .veto-menu__trigger {
     background: var(--veto-color-secondary);
@@ -189,6 +279,11 @@
 .veto-menu--danger.veto-menu--filled .veto-menu__trigger {
     background: var(--veto-color-danger);
     border-color: var(--veto-color-danger);
+}
+
+/* Muted at rest whatever its colour role; the role shows once the pointer or focus arrives. */
+.veto-menu--ghost:not(.veto-menu--open) .veto-menu__trigger:not(:hover):not(:focus-visible) {
+    color: var(--veto-color-text-muted);
 }
 
 /* The panel. */

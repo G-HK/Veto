@@ -173,19 +173,54 @@
     font-size: var(--veto-font-size-lg);
 }
 
+.veto-switch--xs {
+    --veto-switch-track-width: 1.75rem;
+    --veto-switch-track-height: 1rem;
+    --veto-switch-pad: 0.125rem;
+    font-size: var(--veto-font-size-xs);
+}
+
+.veto-switch--xl {
+    --veto-switch-track-width: 4.25rem;
+    --veto-switch-track-height: 2.25rem;
+    --veto-switch-pad: 0.3125rem;
+    font-size: var(--veto-font-size-xl);
+}
+
 /* Variants. Outlined is the default look; filled sinks the off track into the surface and
-   text drops the chrome entirely, matching what the other Veto inputs do with the same enum. */
+   text drops the chrome entirely, matching what the other Veto inputs do with the same enum.
+   A track is not a line, so Underlined draws as Text. */
 
 .veto-switch--filled .veto-switch__track {
     background-color: var(--veto-color-surface-disabled);
     border-color: transparent;
 }
 
-.veto-switch--text .veto-switch__track {
+.veto-switch--text .veto-switch__track,
+.veto-switch--underlined .veto-switch__track {
     background-color: transparent;
 }
 
-.veto-switch--text.veto-switch--on .veto-switch__track {
+.veto-switch--soft .veto-switch__track {
+    background-color: color-mix(in srgb, var(--veto-switch-accent) 18%, var(--veto-color-surface));
+    border-color: transparent;
+}
+
+/* The hover rule above brings the border back. */
+.veto-switch--ghost .veto-switch__track {
+    border-color: transparent;
+}
+
+.veto-switch--elevated .veto-switch__track {
+    background-color: var(--veto-color-surface);
+    border-color: transparent;
+    box-shadow: var(--veto-shadow-sm), var(--veto-shadow-md);
+}
+
+.veto-switch--text.veto-switch--on .veto-switch__track,
+.veto-switch--underlined.veto-switch--on .veto-switch__track,
+.veto-switch--soft.veto-switch--on .veto-switch__track,
+.veto-switch--elevated.veto-switch--on .veto-switch__track {
     background-color: var(--veto-switch-accent);
 }
 

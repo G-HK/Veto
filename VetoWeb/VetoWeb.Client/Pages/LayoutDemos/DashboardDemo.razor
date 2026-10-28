@@ -16,7 +16,7 @@
         <ChildContent>
             <VetoStack Gap="VetoSpacing.Large">
                 <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center" Gap="VetoSpacing.Medium" Wrap="true">
-                    <a class="demo-back" href="/docs/layouts">&larr; Back to layouts</a>
+                    <VetoLink class="demo-back" href="/docs/layouts">&larr; Back to layouts</VetoLink>
                     <VetoSpacer />
                     <span class="demo-hint" data-testid="status">@(_note ?? "Resize the window: four columns, then two, then one.")</span>
                 </VetoStack>
@@ -97,7 +97,7 @@
                                 the way they would in a real app.
                             </p>
                             <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
-                                <a class="chip" href="/layouts/dashboard">Back to the overview</a>
+                                <VetoLink class="chip" href="/layouts/dashboard">Back to the overview</VetoLink>
                             </VetoStack>
                         </VetoStack>
                     </VetoCard>

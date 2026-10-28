@@ -183,7 +183,8 @@
         new("OnCompleted", "EventCallback", "—", "Raised once the whole text has been revealed.")
     ];
 
-    private const string BasicCode = """
+    private const string BasicCode = 
+        """
         <VetoBlinkText Text="Initialising the component library."
                        CharactersPerSecond="34"
                        OnCompleted="OnDone" />
@@ -201,7 +202,8 @@
         }
         """;
 
-    private const string ScrambleCode = """
+    private const string ScrambleCode = 
+        """
         <VetoBlinkText Text="Wake up, Neo... The Matrix has you."
                        CharactersPerSecond="16"
                        Scramble="true"
@@ -209,7 +211,8 @@
                        CursorCharacter="_" />
         """;
 
-    private const string StreamCode = """
+    private const string StreamCode = 
+        """
         <VetoBlinkText Stream="_stream" CharactersPerSecond="60" PreserveSpace="false" />
 
         <VetoButton OnClick="Start">Start streaming</VetoButton>
@@ -221,7 +224,8 @@
         }
         """;
 
-    private const string PauseCode = """
+    private const string PauseCode = 
+        """
         <VetoBlinkText Text="scanning | 12 hosts | 3 open ports | done"
                        CharactersPerSecond="70"
                        PauseOn="@(new Dictionary<char, int> { ['|'] = 600 })"

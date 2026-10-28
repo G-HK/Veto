@@ -56,12 +56,14 @@
 
     public void Dispose () => ThemeService.Changed -= OnThemeChangedAsync;
 
-    private const string ToggleCode = """
+    private const string ToggleCode = 
+        """
         <VetoThemeToggle />
         <VetoThemeToggle ShowSystemOption="true" />
         """;
 
-    private const string StateCode = """
+    private const string StateCode = 
+        """
         @inject IVetoThemeService ThemeService
 
         <span>Mode: @ThemeService.Mode</span>
@@ -73,11 +75,13 @@
         }
         """;
 
-    private const string BrandCode = """
+    private const string BrandCode = 
+        """
         <VetoThemeProvider Theme="AppTheme" />
         """;
 
-    private const string SiteTheme = """
+    private const string SiteTheme = 
+        """
         public static readonly VetoTheme Theme = new()
         {
             Light = new VetoPalette
@@ -98,7 +102,8 @@
         };
         """;
 
-    private const string BootScript = """
+    private const string BootScript = 
+        """
         <head>
             <script src="_content/Veto.Theming/veto-theme-init.js"></script>
             <link rel="stylesheet" href="_content/Veto.Core/VetoStyles.css" />
