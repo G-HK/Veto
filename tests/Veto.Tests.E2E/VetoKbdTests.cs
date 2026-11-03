@@ -229,4 +229,29 @@ public class VetoKbdTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         Assert.True(compact < roomy, $"The compact row should be shorter: {compact} vs {roomy}.");
     }
+
+    [Fact]
+    public async Task A_doubled_separator_is_the_separator_key_itself ()
+    {
+        await GotoComponentAsync(Route);
+
+        var keys = Component("sep-key").Locator(".veto-kbd__key");
+
+        await Expect(keys).ToHaveCountAsync(2);
+        await Expect(keys.Nth(0)).ToHaveTextAsync("Ctrl");
+        await Expect(keys.Nth(1)).ToHaveTextAsync("+");
+    }
+
+    [Fact]
+    public async Task Mod_is_ctrl_or_cmd_by_platform ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("mod-pc").Locator(".veto-kbd__key").First).ToHaveTextAsync("Ctrl");
+        await Expect(Component("mod-mac").Locator(".veto-kbd__key").First).ToHaveTextAsync("Cmd");
+
+        var glyph = Component("mod-mac-symbols").Locator(".veto-kbd__key").First;
+        await Expect(glyph).ToHaveTextAsync("⌘");
+        await Expect(glyph).ToHaveAttributeAsync("title", "Cmd");
+    }
 }
