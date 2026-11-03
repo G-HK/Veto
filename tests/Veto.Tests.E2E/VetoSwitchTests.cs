@@ -236,4 +236,65 @@ public class VetoSwitchTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         await Expect(Page.GetByTestId("submit-value")).ToHaveTextAsync("Saved");
     }
+
+    [Fact]
+    public async Task Before_change_can_refuse_and_the_switch_is_busy_meanwhile ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("server-ok").Locator("button").ClickAsync();
+        await Expect(Component("server-ok")).ToHaveAttributeAsync("data-state", "off");
+
+        var guarded = Component("guarded");
+        await guarded.Locator("button").ClickAsync();
+
+        await Expect(guarded.Locator("button")).ToHaveAttributeAsync("aria-busy", "true");
+        await Expect(guarded).ToHaveClassAsync(new Regex(@"\bveto-switch--busy\b"));
+
+        await Expect(guarded.Locator("button")).Not.ToHaveAttributeAsync("aria-busy", "true");
+        await Expect(guarded).ToHaveAttributeAsync("data-state", "off");
+    }
+
+    [Fact]
+    public async Task Before_change_lets_an_accepted_change_through ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("guarded").Locator("button").ClickAsync();
+
+        await Expect(Component("guarded")).ToHaveAttributeAsync("data-state", "on");
+    }
+
+    [Fact]
+    public async Task Loading_ignores_input ()
+    {
+        await GotoComponentAsync(Route);
+
+        var loading = Component("loading");
+        await Expect(loading.Locator("button")).ToHaveAttributeAsync("aria-busy", "true");
+
+        await loading.Locator("button").ClickAsync();
+        await Expect(loading).ToHaveAttributeAsync("data-state", "off");
+    }
+
+    [Fact]
+    public async Task Keys_that_set_the_state_do_not_scroll_the_page ()
+    {
+        // Every scroll container is summed, not just the window: the docs layout scrolls its
+        // main content area, and window.scrollY never moves there.
+        await Page.SetViewportSizeAsync(1200, 500);
+        await GotoComponentAsync(Route);
+
+        var button = Component("basic").Locator("button");
+        await button.ScrollIntoViewIfNeededAsync();
+        await button.FocusAsync();
+        var before = await Page.EvaluateAsync<double>("() => [document.scrollingElement, ...document.querySelectorAll('*')].reduce((a, e) => a + e.scrollTop, 0)");
+
+        await button.PressAsync("End");
+        await button.PressAsync("ArrowDown");
+
+        var after = await Page.EvaluateAsync<double>("() => [document.scrollingElement, ...document.querySelectorAll('*')].reduce((a, e) => a + e.scrollTop, 0)");
+        Assert.Equal(before, after);
+        await Expect(Component("basic")).ToHaveAttributeAsync("data-state", "on");
+    }
 }
