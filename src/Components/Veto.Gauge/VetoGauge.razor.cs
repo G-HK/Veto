@@ -51,6 +51,10 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
 
     private bool _hasPolled;
 
+    // What the running poll was started with. Polling restarts only when one of these changes -
+    // not on every render of the parent.
+    private (Func<Task<double>>? Provider, string? Url, string? Path, int Interval) _pollSource;
+
     /// <summary>The service provider, used to find an <see cref="HttpClient"/> only if <see cref="PollUrl"/> is set.</summary>
     [Inject]
     private IServiceProvider Services { get; set; } = default!;
@@ -101,6 +105,17 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     /// When true the reading takes the colour of the band it currently falls in, so the gauge
     /// turns red by itself. Falls back to <see cref="Color"/> outside every band.
     /// </summary>
+    /// <summary>
+    /// A goal or limit marked across the track - the target a sales dial is chasing, the
+    /// redline on a rev counter. Null draws none.
+    /// </summary>
+    [Parameter]
+    public double? Target { get; set; }
+
+    /// <summary>The target marker's colour. Defaults to the text colour.</summary>
+    [Parameter]
+    public string? TargetColor { get; set; }
+
     [Parameter]
     public bool FollowBands { get; set; }
 
@@ -279,7 +294,11 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     private bool IsPolling => PollInterval > 0 && (ValueProvider is not null || !string.IsNullOrWhiteSpace(PollUrl));
 
     /// <summary>What the dial is actually showing: the polled value once one has arrived, otherwise <see cref="Value"/>.</summary>
-    private double Reading => Math.Clamp(_hasPolled ? _polled : Value, Min, Max);
+    private double Reading => ClampToScale(_hasPolled ? _polled : Value);
+
+    // Math.Clamp throws when Min > Max, which a pair of bindings can briefly be while both
+    // change. The scale is read in whichever order it was given instead.
+    private double ClampToScale ( double value ) => Math.Clamp(value, Math.Min(Min, Max), Math.Max(Min, Max));
 
     private double Span => Max - Min is var s && s > 0 ? s : 1;
 
@@ -315,7 +334,7 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     /// <summary>True when there is anything to draw on the dial's face at all.</summary>
     private bool HasFace => Background is not null || FaceContent is not null;
 
-    private string ValueText => $"{FormatNumber(Reading)}{Unit}{(CurrentBand?.Label is { } l ? $", {l}" : string.Empty)}";
+    private string ValueText => $"{FormatNumber(Reading)}{Unit}{(CurrentBand?.Label is { } l ? $", {l}" : string.Empty)}{(Target is { } t ? $", target {FormatNumber(t)}{Unit}" : string.Empty)}";
 
     private double NeedleAngle => AngleFor(Reading);
 
@@ -340,7 +359,17 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     {
         base.OnParametersSet();
         _ticks = ShowTicks ? [.. BuildTicks()] : [];
-        RestartPolling();
+
+        // Restarting fetches at once, so doing it on every parameter set turned a parent that
+        // re-renders from OnValueChanged into a loop with no delay in it: poll, value changes,
+        // parent renders, restart, poll again - hammering the provider or the endpoint.
+        var source = (ValueProvider, PollUrl, PollJsonPath, PollInterval);
+
+        if (source != _pollSource || (_poll is null && IsPolling))
+        {
+            _pollSource = source;
+            RestartPolling();
+        }
     }
 
     /// <inheritdoc />
@@ -471,7 +500,7 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
 
     /// <summary>The angle, in degrees clockwise from the top, that a value sits at on the dial.</summary>
     private double AngleFor ( double value ) =>
-        StartAngle + (Math.Clamp(value, Min, Max) - Min) / Span * Sweep;
+        StartAngle + (ClampToScale(value) - Min) / Span * Sweep;
 
     /// <summary>A point on the dial, in the SVG's 200-unit box centred on (100, 100).</summary>
     private static (double X, double Y) Point ( double angleDegrees, double radius )
@@ -491,6 +520,18 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     }
 
     private string TrackPath => Arc(StartAngle, EndAngle, Radius);
+
+    /// <summary>The target marker: a short line straight across the track at the target's angle.</summary>
+    private (string X1, string Y1, string X2, string Y2) TargetLine
+    {
+        get
+        {
+            var angle = AngleFor(Target ?? Min);
+            var (x1, y1) = Point(angle, Radius - Thickness / 2 - 3);
+            var (x2, y2) = Point(angle, Math.Min(Radius + Thickness / 2 + 2, 99));
+            return (Css(x1), Css(y1), Css(x2), Css(y2));
+        }
+    }
 
     private string BandPath ( VetoGaugeBand band ) =>
         Arc(AngleFor(Math.Min(band.From, band.To)), AngleFor(Math.Max(band.From, band.To)), Radius);
