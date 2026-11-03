@@ -136,4 +136,35 @@ public class VetoHandbookPageTests ( BlazorAppFixture app ) : VetoPageTest(app)
         await Expect(Component("toc-parameters")).ToBeVisibleAsync();
         await Expect(Component("section-parameters")).ToBeVisibleAsync();
     }
+
+    [Fact]
+    public async Task Scroll_spy_marks_the_section_being_read ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("spy-page-spy-3").EvaluateAsync("el => el.scrollIntoView({ block: 'start' })");
+        await Expect(Component("spy-rail-spy-3")).ToHaveAttributeAsync("aria-current", "true");
+
+        await Component("spy-page-spy-1").EvaluateAsync("el => el.scrollIntoView({ block: 'start' })");
+        await Expect(Component("spy-rail-spy-1")).ToHaveAttributeAsync("aria-current", "true");
+        await Expect(Component("spy-rail-spy-3")).Not.ToHaveAttributeAsync("aria-current", "true");
+    }
+
+    [Fact]
+    public async Task Going_back_moves_the_current_mark_back_too ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Component("rail-install").ClickAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("#install$"));
+        await Component("rail-verify").ClickAsync();
+        await Expect(Component("rail-verify")).ToHaveAttributeAsync("aria-current", "true");
+
+        await Page.GoBackAsync();
+        await Expect(Page).ToHaveURLAsync(new Regex("#install$"));
+
+        // A click used to outrank the address for good, so the rail stayed on "verify".
+        await Expect(Component("rail-install")).ToHaveAttributeAsync("aria-current", "true");
+        await Expect(Component("rail-verify")).Not.ToHaveAttributeAsync("aria-current", "true");
+    }
 }
