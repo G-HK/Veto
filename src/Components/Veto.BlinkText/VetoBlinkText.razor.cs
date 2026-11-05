@@ -241,7 +241,7 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
         }
         catch (Exception)
         {
-            // ponytail: a failing stream ends the reveal with what arrived; surface the error
+            // a failing stream ends the reveal with what arrived, surface the error
             // through a callback if a consumer ever needs it.
         }
 
@@ -285,7 +285,7 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // Restarted or disposed; the newer run owns the text now.
+            // Restarted or disposed,; the newer run owns the text now.
         }
     }
 
@@ -295,7 +295,7 @@ public partial class VetoBlinkText : VetoComponentBase, IDisposable
         {
             if (_revealed.Length >= _target.Length)
             {
-                // Caught up. A live stream may still send more; a finished one - or plain
+                // Caught up. A live stream may still send more, a finished one - or plain
                 // text - is done.
                 if (_streamDone)
                 {
