@@ -33,7 +33,7 @@
             <VetoContainer Size="VetoContainerSize.Large" Padding="VetoSpacing.ExtraLarge" Class="demo-body">
                 <VetoStack Gap="VetoSpacing.ExtraLarge">
                     <VetoStack Gap="VetoSpacing.Small">
-                        <a class="demo-back" href="/docs/layouts">&larr; Back to layouts</a>
+                        <VetoLink class="demo-back" href="/docs/layouts">&larr; Back to layouts</VetoLink>
                         <h1 class="demo-title">Shell</h1>
                         <p class="demo-lead">
                             The frame every other layout is assembled from: an app bar, a drawer, a
@@ -87,7 +87,7 @@
         <VetoFooter TestId="footer">
             <span>Shell &middot; app bar, drawer, content, footer</span>
             <VetoSpacer />
-            <a class="footer__link" href="/docs/layouts/shell">Reference</a>
+            <VetoLink class="footer__link" href="/docs/layouts/shell">Reference</VetoLink>
         </VetoFooter>
     </VetoLayout>
 </div>
@@ -164,7 +164,8 @@
         _drawerOpen = variant != VetoDrawerVariant.Temporary;
     }
 
-    private const string ShellCode = """
+    private const string ShellCode = 
+        """
         <VetoLayout>
             <VetoAppBar>
                 <VetoIconButton Icon="@VetoIcons.Menu"
