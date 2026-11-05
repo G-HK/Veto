@@ -12,6 +12,20 @@ public class VetoButtonTests(BlazorAppFixture app) : VetoPageTest(app)
         => Component(testId).EvaluateAsync<string>("el => el.tagName.toLowerCase()");
 
     [Fact]
+    public async Task New_variants_render_their_modifier_and_look ()
+    {
+        await GotoComponentAsync(Route);
+
+        foreach (var variant in new[] { "soft", "underlined", "ghost", "elevated" })
+        {
+            await Expect(Component(variant)).ToHaveClassAsync(new Regex($@"\bveto-button--{variant}\b"));
+        }
+
+        await Expect(Component("underlined")).ToHaveCSSAsync("text-decoration-line", "underline");
+        await Expect(Component("elevated")).Not.ToHaveCSSAsync("box-shadow", "none");
+    }
+
+    [Fact]
     public async Task Renders_a_button_by_default()
     {
         await GotoComponentAsync(Route);
