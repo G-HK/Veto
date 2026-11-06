@@ -47,7 +47,7 @@
     /* Transparent rather than absent so turning the border on never shifts the text by a
        pixel, and so the focus and invalid states still have something to recolour. */
     border: 1px solid transparent;
-    border-radius: var(--veto-radius-md);
+    border-radius: var(--veto-field-radius-tl, var(--veto-radius-md)) var(--veto-field-radius-tr, var(--veto-radius-md)) var(--veto-field-radius-br, var(--veto-radius-md)) var(--veto-field-radius-bl, var(--veto-radius-md));
     padding: var(--veto-space-2) var(--veto-space-3);
     overflow-y: auto;
 
@@ -205,17 +205,52 @@
     padding: var(--veto-space-3) var(--veto-space-4);
 }
 
+.veto-magic-textbox--xs .veto-magic-textbox__input {
+    font-size: var(--veto-font-size-xs);
+    padding: 0.125rem var(--veto-space-1);
+}
+
+.veto-magic-textbox--xl .veto-magic-textbox__input {
+    font-size: var(--veto-font-size-xl);
+    padding: var(--veto-space-4) var(--veto-space-5);
+}
+
 /* Variant modifiers */
 .veto-magic-textbox--filled .veto-magic-textbox__input {
     background-color: var(--veto-color-surface-raised);
     border-color: transparent;
 }
 
-.veto-magic-textbox--text .veto-magic-textbox__input {
+.veto-magic-textbox--text .veto-magic-textbox__input,
+.veto-magic-textbox--ghost .veto-magic-textbox__input {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.veto-magic-textbox--ghost .veto-magic-textbox__input:hover:not(:disabled):not([readonly]) {
+    border-color: var(--veto-border-color, var(--veto-color-border));
+}
+
+.veto-magic-textbox--underlined .veto-magic-textbox__input {
     background-color: transparent;
     border-width: 0 0 1px 0;
+    border-bottom-color: var(--veto-border-color, var(--veto-color-border));
     border-radius: 0;
     padding-inline-start: 0;
+}
+
+.veto-magic-textbox--soft .veto-magic-textbox__input {
+    background-color: color-mix(in srgb, var(--veto-color-primary) 8%, var(--veto-color-surface));
+    border-color: transparent;
+}
+
+.veto-magic-textbox--elevated .veto-magic-textbox__input {
+    border-color: transparent;
+}
+
+/* Not while focused, or the shadow would replace the focus ring. */
+.veto-magic-textbox--elevated .veto-magic-textbox__input:not(:focus-visible) {
+    box-shadow: var(--veto-shadow-sm), var(--veto-shadow-md);
 }
 
 /* State modifiers */

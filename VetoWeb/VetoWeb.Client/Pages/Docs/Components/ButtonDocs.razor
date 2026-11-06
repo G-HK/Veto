@@ -9,12 +9,16 @@
 
     <DemoBlock TestId="demo-variants"
                Title="Variants"
-               Description="Filled for the one action you want taken, outlined for the alternatives, text for the ones that should stay out of the way."
+               Description="Filled for the one action you want taken, outlined for the alternatives, text for the ones that should stay out of the way. Soft sits between filled and outlined, underlined reads as a link, ghost stays muted until hovered, and elevated lifts off the page."
                Code="@VariantsCode">
         <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
             <VetoButton TestId="filled" Variant="VetoVariant.Filled">Save changes</VetoButton>
             <VetoButton TestId="outlined" Variant="VetoVariant.Outlined">Cancel</VetoButton>
             <VetoButton TestId="text" Variant="VetoVariant.Text">Learn more</VetoButton>
+            <VetoButton TestId="soft" Variant="VetoVariant.Soft">Draft</VetoButton>
+            <VetoButton TestId="underlined" Variant="VetoVariant.Underlined">Read the guide</VetoButton>
+            <VetoButton TestId="ghost" Variant="VetoVariant.Ghost">Share</VetoButton>
+            <VetoButton TestId="elevated" Variant="VetoVariant.Elevated">Open</VetoButton>
         </VetoStack>
     </DemoBlock>
 
@@ -44,9 +48,11 @@
                Code="@SizesCode">
         <VetoStack Gap="VetoSpacing.Medium">
             <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
+                <VetoButton TestId="extra-small" Size="VetoSize.ExtraSmall">Extra small</VetoButton>
                 <VetoButton TestId="small" Size="VetoSize.Small">Small</VetoButton>
                 <VetoButton Size="VetoSize.Medium">Medium</VetoButton>
                 <VetoButton TestId="large" Size="VetoSize.Large">Large</VetoButton>
+                <VetoButton TestId="extra-large" Size="VetoSize.ExtraLarge">Extra large</VetoButton>
                 <VetoButton Rounded="true" Variant="VetoVariant.Outlined">Rounded</VetoButton>
             </VetoStack>
             <VetoButton TestId="full-width" FullWidth="true" Variant="VetoVariant.Outlined">Full width</VetoButton>
@@ -133,8 +139,8 @@
         new("ChildContent", "RenderFragment?", "null", "The button's label."),
         new("StartIcon", "string?", "null", "An icon before the label."),
         new("EndIcon", "string?", "null", "An icon after the label."),
-        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
-        new("Variant", "VetoVariant", "Filled", "Filled, Outlined or Text."),
+        new("Size", "VetoSize", "Medium", "ExtraSmall, Small, Medium, Large or ExtraLarge."),
+        new("Variant", "VetoVariant", "Filled", "Filled, Outlined, Text, Soft, Underlined (underlines the label), Ghost or Elevated."),
         new("Color", "VetoColor", "Primary", "Primary, Secondary, Neutral, Success, Warning or Danger."),
         new("FullWidth", "bool", "false", "Stretches to the width of the container."),
         new("Rounded", "bool", "false", "Fully rounds the ends."),
@@ -148,30 +154,41 @@
         new("ContextMenuLabel", "string?", "null", "The accessible name of the right-click menu.")
     ];
 
-    private const string VariantsCode = """
+    private const string VariantsCode = 
+        """
         <VetoButton Variant="VetoVariant.Filled">Save changes</VetoButton>
         <VetoButton Variant="VetoVariant.Outlined">Cancel</VetoButton>
         <VetoButton Variant="VetoVariant.Text">Learn more</VetoButton>
+        <VetoButton Variant="VetoVariant.Soft">Draft</VetoButton>
+        <VetoButton Variant="VetoVariant.Underlined">Read the guide</VetoButton>
+        <VetoButton Variant="VetoVariant.Ghost">Share</VetoButton>
+        <VetoButton Variant="VetoVariant.Elevated">Open</VetoButton>
         """;
 
-    private const string ColorsCode = """
+    private const string ColorsCode = 
+        """
         <VetoButton Color="VetoColor.Danger">Delete</VetoButton>
         <VetoButton Color="VetoColor.Danger" Variant="VetoVariant.Outlined">Delete</VetoButton>
         """;
 
-    private const string SizesCode = """
+    private const string SizesCode = 
+        """
+        <VetoButton Size="VetoSize.ExtraSmall">Extra small</VetoButton>
         <VetoButton Size="VetoSize.Small">Small</VetoButton>
         <VetoButton Size="VetoSize.Large">Large</VetoButton>
+        <VetoButton Size="VetoSize.ExtraLarge">Extra large</VetoButton>
         <VetoButton Rounded="true">Rounded</VetoButton>
         <VetoButton FullWidth="true">Full width</VetoButton>
         """;
 
-    private const string IconsCode = """
+    private const string IconsCode = 
+        """
         <VetoButton StartIcon="@VetoIcons.Check">Confirm</VetoButton>
         <VetoButton EndIcon="@VetoIcons.ChevronRight">Next</VetoButton>
         """;
 
-    private const string StatesCode = """
+    private const string StatesCode = 
+        """
         <VetoButton StartIcon="@VetoIcons.Check" Loading="_saving" OnClick="SaveAsync">
             Save changes
         </VetoButton>
@@ -188,13 +205,15 @@
         }
         """;
 
-    private const string LinkCode = """
+    private const string LinkCode = 
+        """
         <VetoButton Href="/docs/usage" EndIcon="@VetoIcons.ChevronRight">
             Read the usage guide
         </VetoButton>
         """;
 
-    private const string ContextMenuCode = """
+    private const string ContextMenuCode = 
+        """
         <VetoButton StartIcon="@VetoIcons.Document" ContextMenuLabel="Report actions" OnClick="Open">
             <ChildContent>Report.pdf</ChildContent>
             <ContextMenu>
