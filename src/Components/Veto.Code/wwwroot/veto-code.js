@@ -1,4 +1,4 @@
-﻿// Clipboard interop for VetoCode.
+// Clipboard interop for VetoCode.
 
 /**
  * Copies text to the clipboard. Returns false rather than throwing when the browser refuses -
@@ -11,4 +11,9 @@ export async function copyText(text) {
     } catch {
         return false;
     }
+}
+
+/** Copies an element's rendered text - for code supplied as markup rather than a string. */
+export function copyElementText(element) {
+    return copyText(element?.textContent ?? "");
 }
