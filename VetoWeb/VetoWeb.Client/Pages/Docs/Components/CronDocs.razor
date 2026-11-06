@@ -203,17 +203,19 @@
         new("IncludeSeconds", "bool", "false", "Parse the expression as six fields, seconds first."),
         new("Label / HelperText", "string?", "null", "Text above and below the builder."),
         new("Disabled / ReadOnly", "bool", "false", "The usual states. Read-only still shows the description and the runs."),
-        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Size", "VetoSize", "Medium", "ExtraSmall, Small, Medium, Large or ExtraLarge."),
         new("Bordered", "bool", "true", "False drops every border - the builder's box and each control's - keeping the focus ring."),
         new("OnValidChanged", "EventCallback<VetoCronExpression>", "—", "Raised when the expression changes and parses."),
         new("IsValid / Expression", "bool / VetoCronExpression?", "—", "Read-only: whether the expression parses, and its parsed form."),
     ];
 
-    private const string BasicCode = """
+    private const string BasicCode = 
+        """
         <VetoCron @bind-Value="_schedule" />
         """;
 
-    private const string DescribeCode = """
+    private const string DescribeCode = 
+        """
         @* The describer is usable on its own, without the builder: *@
         @VetoCronDescriber.Describe("0 9 * * 1-5")
         @* "At 09:00, only on Monday, Tuesday, Wednesday, Thursday and Friday" *@
@@ -223,17 +225,20 @@
         var next = VetoCronSchedule.Next(cron, DateTime.Now, 5);
         """;
 
-    private const string WarningCode = """
+    private const string WarningCode = 
+        """
         @* Fires on the 1st AND on every Monday - not only on a Monday the 1st. *@
         <VetoCron Value="0 0 1 * MON" ShowModes="false" />
         """;
 
-    private const string InvalidCode = """
+    private const string InvalidCode = 
+        """
         <VetoCron Value="0 99 * * *" />
         @* "Hours: '99' is outside 0-23." *@
         """;
 
-    private const string LanguageCode = """
+    private const string LanguageCode = 
+        """
         @* In your project, not in Veto: *@
         @using CronExpressionDescriptor
 
@@ -268,7 +273,8 @@
         }
         """;
 
-    private const string ShapeCode = """
+    private const string ShapeCode = 
+        """
         <VetoCron @bind-Value="_backup"
                   Label="Backup schedule"
                   AllowedModes="[VetoCronMode.Daily, VetoCronMode.Weekly, VetoCronMode.Advanced]"
@@ -278,11 +284,13 @@
         <VetoCron Value="*/10 * * * *" ShowModes="false" ShowExpression="false" />
         """;
 
-    private const string BorderlessCode = """
+    private const string BorderlessCode = 
+        """
         <VetoCron @bind-Value="_schedule" Bordered="false" />
         """;
 
-    private const string StateCode = """
+    private const string StateCode = 
+        """
         <VetoCron Value="0 3 * * 0" ReadOnly="true" ShowModes="false" />
         <VetoCron Value="0 3 * * 0" Disabled="true" />
         """;
