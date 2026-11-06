@@ -228,6 +228,24 @@
     font-size: var(--veto-font-size-lg);
 }
 
+.veto-toast-stack--xs {
+    --veto-toast-width: 16rem;
+}
+
+.veto-toast--xs {
+    padding: var(--veto-space-1) var(--veto-space-2);
+    font-size: var(--veto-font-size-xs);
+}
+
+.veto-toast-stack--xl {
+    --veto-toast-width: 32rem;
+}
+
+.veto-toast--xl {
+    padding: var(--veto-space-5) var(--veto-space-6);
+    font-size: var(--veto-font-size-xl);
+}
+
 /* Animations.
    One rule pair per animation: the resting state is always "no transform, fully opaque", and
    both the arrival and the departure are the *same* displaced state. That is what guarantees a

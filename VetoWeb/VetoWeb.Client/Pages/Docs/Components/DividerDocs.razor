@@ -48,17 +48,20 @@
         new("ChildContent", "RenderFragment?", "null", "Content for the gap. Takes precedence over Label.")
     ];
 
-    private const string PlainCode = """
+    private const string PlainCode = 
+        """
         <span>Above</span>
         <VetoDivider />
         <span>Below</span>
         """;
 
-    private const string LabelledCode = """
+    private const string LabelledCode = 
+        """
         <VetoDivider Label="or" />
         """;
 
-    private const string VerticalCode = """
+    private const string VerticalCode = 
+        """
         <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center">
             <span>Left</span>
             <VetoDivider Orientation="VetoOrientation.Vertical" Class="rule" />

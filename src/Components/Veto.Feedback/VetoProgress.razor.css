@@ -124,6 +124,14 @@
 .veto-progress--md .veto-progress__ring { --veto-progress-ring-size: 6rem; }
 .veto-progress--lg .veto-progress__ring { --veto-progress-ring-size: 9rem; }
 
+.veto-progress--xs .veto-progress__track { height: 0.125rem; }
+
+.veto-progress--xl .veto-progress__track { height: 1rem; }
+
+.veto-progress--xs .veto-progress__ring { --veto-progress-ring-size: 2rem; }
+
+.veto-progress--xl .veto-progress__ring { --veto-progress-ring-size: 12rem; }
+
 .veto-progress__svg {
     width: 100%;
     height: 100%;
