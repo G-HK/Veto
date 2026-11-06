@@ -65,15 +65,15 @@ public partial class VetoGrid : VetoComponentBase
     public string? MinItemWidth { get; set; }
 
     /// <inheritdoc />
-    protected override CssBuilder StartCssClass ()
-        => base.StartCssClass()
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass()
             .AddClass(Modifier("auto"), MinItemWidth is not null)
             .AddClass(Modifier($"gap-{Gap.ToModifier()}"))
             .AddClass(Modifier($"align-{Align.ToModifier()}"));
 
     /// <inheritdoc />
-    protected override StyleBuilder StartStyle ()
-        => base.StartStyle()
+    protected override StyleBuilder StartStyle () =>
+        base.StartStyle()
             // At least one column: repeat(0, ...) is invalid, and the whole declaration drops.
             .AddStyle("--veto-grid-columns", Count(Columns))
             .AddStyle("--veto-grid-columns-sm", ColumnsSmall is { } sm ? Count(sm) : null)
@@ -81,6 +81,6 @@ public partial class VetoGrid : VetoComponentBase
             .AddStyle("--veto-grid-columns-lg", ColumnsLarge is { } lg ? Count(lg) : null)
             .AddStyle("--veto-grid-min-item-width", MinItemWidth, MinItemWidth is not null);
 
-    private static string Count ( int value )
-        => Math.Max(1, value).ToString(System.Globalization.CultureInfo.InvariantCulture);
+    private static string Count ( int value ) =>
+        Math.Max(1, value).ToString(System.Globalization.CultureInfo.InvariantCulture);
 }
