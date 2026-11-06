@@ -242,7 +242,7 @@ public partial class VetoCode : VetoComponentBase, IAsyncDisposable
     {
         _resetCopied?.Cancel();
         _resetCopied?.Dispose();
-
+        GC.SuppressFinalize(this);
         if (_module is not null)
         {
             try
