@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using System.Globalization;
-using System.Text;
-using System.Text.Json;
 using Veto.Components.Menu;
 using Veto.Core;
 
@@ -838,13 +836,12 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     {
         // A category's colour is taken from the rows in it rather than configured separately,
         // so the filter doubles as a colour key and the two can never disagree.
-        Categories = Items
+        Categories = [.. Items
             .Where(i => !string.IsNullOrWhiteSpace(i.Category))
             .GroupBy(i => i.Category!)
             .Select(g => new Category(
                 g.Key,
-                g.Select(i => i.Color).FirstOrDefault(c => c is not null) ?? BarColor))
-            .ToList();
+                g.Select(i => i.Color).FirstOrDefault(c => c is not null) ?? BarColor))];
 
         AllItems = WithGroups();
 
@@ -884,7 +881,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     {
         // An inline sub-item sits on its parent's line, in its own lane, so arrows to and from it
         // start and end there.
-        Dictionary<string, (VetoGanttItem Item, double Y)> index = new();
+        Dictionary<string, (VetoGanttItem Item, double Y)> index = [];
 
         for (var i = 0; i < Rows.Count; i++)
         {
@@ -941,8 +938,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     }
 
     /// <summary>The vertical centre of a lane within the chart, for the arrows.</summary>
-    private double LaneCentre ( int row, int lane )
-        => _rowTops[row] + (lane + 0.5) * LineHeight(Rows[row]);
+    private double LaneCentre ( int row, int lane ) =>
+        _rowTops[row] + (lane + 0.5) * LineHeight(Rows[row]);
 
     /// <summary>
     /// Builds the elbow path for one arrow, in the layer's own coordinates.
@@ -952,7 +949,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// and in. When it does not - an overlap, or a dependency that is already violated - the
     /// path routes back between the two rows instead of drawing a line straight through them.
     /// </remarks>
-    private string LinkPath ( Link link )
+    private static string LinkPath ( Link link )
     {
         const double stub = 10;
 
@@ -977,8 +974,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     }
 
     /// <summary>Whether an arrow touches the selected row, so it can be picked out.</summary>
-    private bool IsLinkActive ( Link link )
-        => SelectedId is not null && (link.FromId == SelectedId || link.ToId == SelectedId);
+    private bool IsLinkActive ( Link link ) =>
+        SelectedId is not null && (link.FromId == SelectedId || link.ToId == SelectedId);
 
     /// <summary>
     /// The items with a row added per <see cref="GroupBy"/> key, each group placed where its
@@ -996,8 +993,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         var ids = Items.Select(i => i.Id).ToHashSet();
         var members = new Dictionary<string, List<VetoGanttItem>>();
 
-        string? KeyOf ( VetoGanttItem item )
-            => item.ParentId is null || !ids.Contains(item.ParentId) ? GroupBy(item) : null;
+        string? KeyOf ( VetoGanttItem item ) =>
+            item.ParentId is null || !ids.Contains(item.ParentId) ? GroupBy(item) : null;
 
         foreach (var item in Items)
         {
@@ -1258,7 +1255,7 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             var lanes = 1;
             var lane = StackOverlaps && inline.Count > 1
                 ? AssignLanes(inline, out lanes)
-                : new Dictionary<string, int>();
+                : [];
 
             rows.Add(new Row(item, depth, hasChildren, inline, lanes, lane));
 
@@ -1307,8 +1304,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private bool IsCategoryOn ( string category ) => !_hiddenCategories.Contains(category);
 
     /// <summary>The inline style that gives a filter chip its category's colour.</summary>
-    private static string CategoryStyle ( Category category )
-        => $"--veto-gantt-chip-color: {category.Color}";
+    private static string CategoryStyle ( Category category ) =>
+        $"--veto-gantt-chip-color: {category.Color}";
 
     private void ToggleGroup ( string id )
     {
@@ -1329,11 +1326,11 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private bool IsFilterOn ( string id ) => _activeFilters.Contains(id);
 
     /// <summary>Tells the page about a filter change: the bound value that moved, then the whole picture.</summary>
-    private Task RaiseFilterChangedAsync ()
-        => OnFilterChanged.InvokeAsync(new VetoGanttFilterState(
+    private Task RaiseFilterChangedAsync () =>
+        OnFilterChanged.InvokeAsync(new VetoGanttFilterState(
             Search,
-            _hiddenCategories.ToArray(),
-            _activeFilters.ToArray(),
+            [.. _hiddenCategories],
+            [.. _activeFilters],
             Filter()));
 
     /// <summary>Sets the text filter, as typing in the toolbar does.</summary>
@@ -1346,14 +1343,16 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>Switches a category on or off, as its toolbar chip does.</summary>
     public async Task SetCategoryVisibleAsync ( string category, bool visible )
     {
-        var changed = visible ? _hiddenCategories.Remove(category) : _hiddenCategories.Add(category);
+        var changed = visible
+            ? _hiddenCategories.Remove(category)
+            : _hiddenCategories.Add(category);
 
         if (!changed)
         {
             return;
         }
 
-        _hiddenCategoriesParameter = _hiddenCategories.ToArray();
+        _hiddenCategoriesParameter = [.. _hiddenCategories];
         Rebuild();
         StateHasChanged();
 
@@ -1364,14 +1363,16 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     /// <summary>Switches one of the <see cref="Filters"/> on or off, as its toolbar toggle does.</summary>
     public async Task SetFilterActiveAsync ( string id, bool active )
     {
-        var changed = active ? _activeFilters.Add(id) : _activeFilters.Remove(id);
+        var changed = active
+            ? _activeFilters.Add(id)
+            : _activeFilters.Remove(id);
 
         if (!changed)
         {
             return;
         }
 
-        _activeFiltersParameter = _activeFilters.ToArray();
+        _activeFiltersParameter = [.. _activeFilters];
         Rebuild();
         StateHasChanged();
 
@@ -1528,8 +1529,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         StateHasChanged();
     }
 
-    private string CellStyle ( VetoGanttTimeline.Column column )
-        => string.Create(CultureInfo.InvariantCulture, $"left: {column.Offset:0.##}px; width: {column.Width:0.##}px");
+    private static string CellStyle ( VetoGanttTimeline.Column column ) =>
+        string.Create(CultureInfo.InvariantCulture, $"left: {column.Offset:0.##}px; width: {column.Width:0.##}px");
 
     private string BarStyle ( VetoGanttItem item ) => BarStyle(item, lane: 0, lanes: 1);
 
@@ -1670,16 +1671,15 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private ElementReference _tooltipCard;
 
     /// <summary>The card's own layer, when the app set one.</summary>
-    private string? TooltipLayerStyle
-        => TooltipZIndex is { } z ? $"--veto-gantt-tooltip-z: {z.ToString(CultureInfo.InvariantCulture)}" : null;
+    private string? TooltipLayerStyle =>
+        TooltipZIndex is { } z ? $"--veto-gantt-tooltip-z: {z.ToString(CultureInfo.InvariantCulture)}" : null;
 
     /// <summary>
     /// Places the open card against its bar, in window coordinates: below it, or above when
     /// there is no room below, and kept inside the window. Done by the page because only the
     /// page knows where the bar is on screen once the chart and the page have scrolled.
     /// </summary>
-    private Task PlaceTooltipAsync ()
-        => Hovered is { } hovered
+    private Task PlaceTooltipAsync () => Hovered is { } hovered
             ? InvokeModuleAsync("placeTooltip", _tooltipCard, RootElement, hovered.Item.Id)
             : Task.CompletedTask;
 
@@ -1696,8 +1696,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     }
 
     /// <summary>A test-safe id fragment, since names may contain spaces and punctuation.</summary>
-    private static string Slug ( string value )
-        => new(value.ToLowerInvariant().Select(c => char.IsLetterOrDigit(c) ? c : '-').ToArray());
+    private static string Slug ( string value ) =>
+        new(value.ToLowerInvariant().Select(c => char.IsLetterOrDigit(c) ? c : '-').ToArray());
 
     // ------------------------------------------------------------------ Scrolling
 
@@ -1851,7 +1851,11 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     {
         // A parent that takes each paged range back as its own Start and End leaves nothing
         // paged to undo, so a range without today on it is paged by whole steps until it has.
-        var back = _pagedDays != 0 ? -_pagedDays : PageBeyondRange ? DaysToToday() : 0;
+        var back = _pagedDays != 0
+            ? -_pagedDays
+            : PageBeyondRange
+                ? DaysToToday()
+                : 0;
 
         if (back != 0)
         {
@@ -1874,9 +1878,11 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
         var length = Timeline.End.DayNumber - Timeline.Start.DayNumber + 1;
         var step = Math.Min(length, EffectiveScale.StepDays());
 
-        return Today > Timeline.End ? (Today.DayNumber - Timeline.End.DayNumber + step - 1) / step * step
-            : Today < Timeline.Start ? -((Timeline.Start.DayNumber - Today.DayNumber + step - 1) / step * step)
-            : 0;
+        return Today > Timeline.End
+            ? (Today.DayNumber - Timeline.End.DayNumber + step - 1) / step * step
+            : Today < Timeline.Start
+                ? -((Timeline.Start.DayNumber - Today.DayNumber + step - 1) / step * step)
+                : 0;
     }
 
     /// <summary>
@@ -2246,8 +2252,8 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     private bool IsEditable ( VetoGanttItem item, bool isSummary ) => Editable && !isSummary && !item.IsMilestone;
 
     /// <summary>Whether a row is drawn as a summary: one with children of its own, or a group.</summary>
-    private bool IsSummary ( VetoGanttItem item )
-        => _groupIds.Contains(item.Id) || AllItems.Any(i => i.ParentId == item.Id);
+    private bool IsSummary ( VetoGanttItem item ) =>
+        _groupIds.Contains(item.Id) || AllItems.Any(i => i.ParentId == item.Id);
 
     /// <summary>
     /// Attaches the delegated drag handler to the grid. Re-attaching updates the measurements,
