@@ -34,3 +34,13 @@
     padding-block: var(--veto-space-3);
     font-size: var(--veto-font-size-lg);
 }
+
+.veto-shortcut-list--xs .veto-shortcut {
+    padding-block: 0.125rem;
+    font-size: var(--veto-font-size-xs);
+}
+
+.veto-shortcut-list--xl .veto-shortcut {
+    padding-block: var(--veto-space-4);
+    font-size: var(--veto-font-size-xl);
+}
