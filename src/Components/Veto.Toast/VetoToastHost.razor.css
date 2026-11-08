@@ -167,7 +167,7 @@
 }
 
 /* The countdown. Driven by a CSS animation rather than a re-render per frame, and paused by
-   the same hover that holds the timer in C#, so the bar never lies about the time left. */
+   the same hover or keyboard focus that holds the timer in C#, so the bar never lies about the time left. */
 
 .veto-toast__progress {
     position: absolute;
@@ -181,7 +181,8 @@
     animation-fill-mode: forwards;
 }
 
-.veto-toast--paused:hover .veto-toast__progress {
+.veto-toast--paused:hover .veto-toast__progress,
+.veto-toast--paused:focus-within .veto-toast__progress {
     animation-play-state: paused;
 }
 
@@ -226,6 +227,24 @@
 .veto-toast--lg {
     padding: var(--veto-space-4) var(--veto-space-5);
     font-size: var(--veto-font-size-lg);
+}
+
+.veto-toast-stack--xs {
+    --veto-toast-width: 16rem;
+}
+
+.veto-toast--xs {
+    padding: var(--veto-space-1) var(--veto-space-2);
+    font-size: var(--veto-font-size-xs);
+}
+
+.veto-toast-stack--xl {
+    --veto-toast-width: 32rem;
+}
+
+.veto-toast--xl {
+    padding: var(--veto-space-5) var(--veto-space-6);
+    font-size: var(--veto-font-size-xl);
 }
 
 /* Animations.
