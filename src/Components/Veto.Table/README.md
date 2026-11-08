@@ -4,6 +4,10 @@ A templated table: you supply the header, a row template and an optional footer.
 
 Part of [Veto](https://github.com/G-HK/Veto), a Blazor component library with no third-party dependencies. Install the `Veto` package instead to get every component at once.
 
+Try it live in the docs site: <https://veto.blackpanda.be/docs/components/table>
+
+![VetoTable](https://raw.githubusercontent.com/G-HK/Veto/main/assets/screenshots/table.png)
+
 ## Install
 
 ```powershell

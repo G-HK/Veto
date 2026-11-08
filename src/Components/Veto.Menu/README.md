@@ -4,6 +4,8 @@ A dropdown menu: `VetoMenu`, `VetoMenuItem` (icon, shortcut, destructive styling
 
 Part of [Veto](https://github.com/G-HK/Veto), a Blazor component library with no third-party dependencies. Install the `Veto` package instead to get every component at once.
 
+Try it live in the docs site: <https://veto.blackpanda.be/docs/components/menu>
+
 ## Install
 
 ```powershell

@@ -5,6 +5,21 @@ dependencies. Developed by G-HK.
 
 Targets .NET 10, and works in any Blazor project - WebAssembly, Server, or a Blazor Web App.
 
+Docs and live demos of every component: **<https://veto.blackpanda.be/>**
+
+![The Veto docs site](assets/screenshots/home.png)
+
+## A look at the components
+
+| | |
+| --- | --- |
+| **Gauge** - a car dashboard built from two `VetoGauge`s ([demo](https://veto.blackpanda.be/docs/components/gauge)) | **Gauge** - bands that colour the reading as it moves |
+| ![Car dashboard gauges](assets/screenshots/gauge-car.png) | ![Gauge with coloured bands](assets/screenshots/gauge-bands.png) |
+| **Gantt** - grouped tasks, dependencies, zoom and filters ([demo](https://veto.blackpanda.be/docs/components/gantt)) | **Table** - caption, footer and striped rows ([demo](https://veto.blackpanda.be/docs/components/table)) |
+| ![Gantt chart](assets/screenshots/gantt.png) | ![Table](assets/screenshots/table.png) |
+| **Terminal box** - typed-out commands with a copy button ([demo](https://veto.blackpanda.be/docs/components/terminal-box)) | **Buttons** - filled, outlined, text, soft, underlined, ghost and elevated ([demo](https://veto.blackpanda.be/docs/components/button)) |
+| ![Terminal box](assets/screenshots/terminal-box.png) | ![Button variants](assets/screenshots/buttons.png) |
+
 ## Install
 
 Take the whole library:
@@ -41,47 +56,49 @@ builder.Services.AddVetoToast();
 
 ## Packages
 
+Each package has its own README - follow the name for what it does, how to install it
+and how to use it.
+
 | Package | Contains |
 | --- | --- |
 | `Veto` | Meta package: depends on everything below |
-| `Veto.Core` | Base classes, builders, shared enums, design tokens |
-| `Veto.Theming` | Theme provider, theme service, theme toggle |
-| `Veto.BlinkText` | `VetoBlinkText` |
-| `Veto.Buttons` | `VetoButton`, `VetoIconButton`, `VetoButtonGroup`, `VetoButtonReveal` |
-| `Veto.Code` | `VetoCode` |
-| `Veto.Cron` | `VetoCron` and its parser, describer and scheduler |
-| `Veto.Feedback` | `VetoSpinner`, `VetoProgress`, `VetoSkeleton`, `VetoLoadingOverlay` |
-| `Veto.Gantt` | `VetoGantt` |
-| `Veto.Gauge` | `VetoGauge` |
-| `Veto.Handbook` | `VetoHandbookPage`, `VetoHandbookToc` |
-| `Veto.Icon` | `VetoIcon` and the built-in icon set |
-| `Veto.Kbd` | `VetoKbd`, `VetoShortcut`, `VetoShortcutList` |
-| `Veto.MagicTextBox` | `VetoMagicTextBox` - collapses when the text outruns its space |
-| `Veto.Menu` | `VetoMenu`, `VetoMenuItem`, `VetoMenuLabel`, `VetoMenuDivider` |
-| `Veto.Navigation` | `VetoLink`, `VetoNavMenu`, `VetoBreadcrumbs` |
-| `Veto.Rating` | `VetoRating` |
-| `Veto.Slider` | `VetoSlider` |
-| `Veto.Switch` | `VetoSwitch` |
-| `Veto.Table` | `VetoTable` |
-| `Veto.TerminalBox` | `VetoTerminalBox`, `VetoTerminalLine` |
-| `Veto.TextBox` | `VetoTextBox` |
-| `Veto.Tilt` | `VetoTilt3D` |
-| `Veto.Toast` | `VetoToastHost`, `IVetoToastService` |
-| `Veto.Layout.Card` | `VetoCard` and its composed sections |
-| `Veto.Layout.Container` | `VetoContainer` |
-| `Veto.Layout.Divider` | `VetoDivider` |
-| `Veto.Layout.Grid` | `VetoGrid`, `VetoGridItem` |
-| `Veto.Layout.Spacer` | `VetoSpacer` |
-| `Veto.Layout.Stack` | `VetoStack` |
-| `Veto.Layouts.Shell` | `VetoLayout`, `VetoAppBar`, `VetoDrawer`, `VetoMainContent`, `VetoFooter` |
-| `Veto.Layouts.Dashboard` | `VetoDashboard`, `VetoDashboardTile` |
-| `Veto.Layouts.DashboardLayout` | Ready-made dashboard page layout |
-| `Veto.Layouts.Dock` | `VetoDock`, `VetoDockItem` |
-| `Veto.Layouts.DockLayout` | Ready-made dock page layout |
-| `Veto.Layouts.DocsLayout` | Ready-made documentation page layout |
+| [`Veto.Core`](https://github.com/G-HK/Veto/blob/main/src/Veto.Core/README.md) | Base classes, builders, shared enums, design tokens |
+| [`Veto.Theming`](https://github.com/G-HK/Veto/blob/main/src/Veto.Theming/README.md) | Theme provider, theme service, theme toggle |
+| [`Veto.BlinkText`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.BlinkText/README.md) | `VetoBlinkText` |
+| [`Veto.Buttons`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Buttons/README.md) | `VetoButton`, `VetoIconButton`, `VetoButtonGroup`, `VetoButtonReveal` |
+| [`Veto.Code`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Code/README.md) | `VetoCode` |
+| [`Veto.Cron`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Cron/README.md) | `VetoCron` and its parser, describer and scheduler |
+| [`Veto.Feedback`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Feedback/README.md) | `VetoSpinner`, `VetoProgress`, `VetoSkeleton`, `VetoLoadingOverlay` |
+| [`Veto.Gantt`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Gantt/README.md) | `VetoGantt` |
+| [`Veto.Gauge`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Gauge/README.md) | `VetoGauge` |
+| [`Veto.Handbook`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Handbook/README.md) | `VetoHandbookPage`, `VetoHandbookToc` |
+| [`Veto.Icon`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Icon/README.md) | `VetoIcon` and the built-in icon set |
+| [`Veto.Kbd`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Kbd/README.md) | `VetoKbd`, `VetoShortcut`, `VetoShortcutList` |
+| [`Veto.MagicTextBox`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.MagicTextBox/README.md) | `VetoMagicTextBox` - collapses when the text outruns its space |
+| [`Veto.Menu`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Menu/README.md) | `VetoMenu`, `VetoMenuItem`, `VetoMenuLabel`, `VetoMenuDivider` |
+| [`Veto.Navigation`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Navigation/README.md) | `VetoLink`, `VetoNavMenu`, `VetoBreadcrumbs` |
+| [`Veto.Rating`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Rating/README.md) | `VetoRating` |
+| [`Veto.Slider`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Slider/README.md) | `VetoSlider` |
+| [`Veto.Switch`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Switch/README.md) | `VetoSwitch` |
+| [`Veto.Table`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Table/README.md) | `VetoTable` |
+| [`Veto.TerminalBox`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.TerminalBox/README.md) | `VetoTerminalBox`, `VetoTerminalLine` |
+| [`Veto.TextBox`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.TextBox/README.md) | `VetoTextBox` |
+| [`Veto.Tilt`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Tilt/README.md) | `VetoTilt3D` |
+| [`Veto.Toast`](https://github.com/G-HK/Veto/blob/main/src/Components/Veto.Toast/README.md) | `VetoToastHost`, `IVetoToastService` |
+| [`Veto.Layout.Card`](https://github.com/G-HK/Veto/blob/main/src/Components/Layout/Veto.Layout.Card/README.md) | `VetoCard` and its composed sections |
+| [`Veto.Layout.Container`](https://github.com/G-HK/Veto/blob/main/src/Components/Layout/Veto.Layout.Container/README.md) | `VetoContainer` |
+| [`Veto.Layout.Divider`](https://github.com/G-HK/Veto/blob/main/src/Components/Layout/Veto.Layout.Divider/README.md) | `VetoDivider` |
+| [`Veto.Layout.Grid`](https://github.com/G-HK/Veto/blob/main/src/Components/Layout/Veto.Layout.Grid/README.md) | `VetoGrid`, `VetoGridItem` |
+| [`Veto.Layout.Spacer`](https://github.com/G-HK/Veto/blob/main/src/Components/Layout/Veto.Layout.Spacer/README.md) | `VetoSpacer` |
+| [`Veto.Layout.Stack`](https://github.com/G-HK/Veto/blob/main/src/Components/Layout/Veto.Layout.Stack/README.md) | `VetoStack` |
+| [`Veto.Layouts.Shell`](https://github.com/G-HK/Veto/blob/main/src/Layouts/Veto.Layouts.Shell/README.md) | `VetoLayout`, `VetoAppBar`, `VetoDrawer`, `VetoMainContent`, `VetoFooter` |
+| [`Veto.Layouts.Dashboard`](https://github.com/G-HK/Veto/blob/main/src/Layouts/Veto.Layouts.Dashboard/README.md) | `VetoDashboard`, `VetoDashboardTile` |
+| [`Veto.Layouts.DashboardLayout`](https://github.com/G-HK/Veto/blob/main/src/Layouts/Veto.Layouts.DashboardLayout/README.md) | Ready-made dashboard page layout |
+| [`Veto.Layouts.Dock`](https://github.com/G-HK/Veto/blob/main/src/Layouts/Veto.Layouts.Dock/README.md) | `VetoDock`, `VetoDockItem` |
+| [`Veto.Layouts.DockLayout`](https://github.com/G-HK/Veto/blob/main/src/Layouts/Veto.Layouts.DockLayout/README.md) | Ready-made dock page layout |
+| [`Veto.Layouts.DocsLayout`](https://github.com/G-HK/Veto/blob/main/src/Layouts/Veto.Layouts.DocsLayout/README.md) | Ready-made documentation page layout |
 
-Every package ships at the same version, and the meta package pins its dependencies to that
-exact version, so a mixed set is not something you can end up with by accident.
+Each package has its own version and is released on its own (see [Releasing](#releasing)).
 
 ## Repository layout
 
@@ -96,7 +113,7 @@ src/
       Veto.Layout.Card/  Veto.Layout.Grid/  ...
   Layouts/
     Veto.Layouts.Shell/  Veto.Layouts.DocsLayout/  ...
-VetoWeb/                    the docs and demo site
+VetoWeb/                    the docs and demo site, live at https://veto.blackpanda.be/
 tests/Veto.Tests.E2E/       Playwright specs
 docs/                       concept, contributing, roadmap
 ```

@@ -4,6 +4,8 @@ A wrapper that tilts its content in 3D toward the pointer on hover.
 
 Part of [Veto](https://github.com/G-HK/Veto), a Blazor component library with no third-party dependencies. Install the `Veto` package instead to get every component at once.
 
+Try it live in the docs site: <https://veto.blackpanda.be/docs/components/tilt>
+
 ## Install
 
 ```powershell

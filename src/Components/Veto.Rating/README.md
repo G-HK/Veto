@@ -4,6 +4,8 @@ A star rating input that works with any icon, supports half values and binds to 
 
 Part of [Veto](https://github.com/G-HK/Veto), a Blazor component library with no third-party dependencies. Install the `Veto` package instead to get every component at once.
 
+Try it live in the docs site: <https://veto.blackpanda.be/docs/components/rating>
+
 ## Install
 
 ```powershell

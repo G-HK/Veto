@@ -4,6 +4,10 @@
 
 Part of [Veto](https://github.com/G-HK/Veto), a Blazor component library with no third-party dependencies. Install the `Veto` package instead to get every component at once.
 
+Try them live in the docs site: [Button](https://veto.blackpanda.be/docs/components/button) · [Icon button](https://veto.blackpanda.be/docs/components/icon-button) · [Button group](https://veto.blackpanda.be/docs/components/button-group) · [Button reveal](https://veto.blackpanda.be/docs/components/button-reveal)
+
+![VetoButton variants](https://raw.githubusercontent.com/G-HK/Veto/main/assets/screenshots/buttons.png)
+
 ## Install
 
 ```powershell

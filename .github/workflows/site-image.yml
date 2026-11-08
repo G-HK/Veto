@@ -18,7 +18,7 @@ jobs:
       github.actor == 'G-HK' &&
       github.triggering_actor == 'G-HK'
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     permissions:
@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/g-hk/veto-web
           tags: |

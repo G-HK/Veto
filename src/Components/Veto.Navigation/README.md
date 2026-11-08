@@ -4,6 +4,8 @@
 
 Part of [Veto](https://github.com/G-HK/Veto), a Blazor component library with no third-party dependencies. Install the `Veto` package instead to get every component at once.
 
+Try them live in the docs site: [Link](https://veto.blackpanda.be/docs/components/link) · [Breadcrumbs](https://veto.blackpanda.be/docs/components/breadcrumbs)
+
 ## Install
 
 ```powershell
