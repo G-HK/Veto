@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.TerminalBox</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>A terminal window for documentation and landing pages, with a typing animation and a copy button, for Veto.</Description>
     <RootNamespace>Veto.Components.TerminalBox</RootNamespace>
   </PropertyGroup>

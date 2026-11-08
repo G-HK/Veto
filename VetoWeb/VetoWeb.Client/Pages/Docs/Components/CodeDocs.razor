@@ -1,0 +1,104 @@
+@page "/docs/components/code"
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Code — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Code"
+          Lead="A block of source code: monospaced, scrollable inside its own box, with a language label and a copy button.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Basic"
+               Description="Code is rendered as text, never as markup, so a Razor snippet full of angle brackets displays rather than runs."
+               Code="@BasicCode">
+        <VetoCode TestId="basic" Language="razor" Code="@Sample" />
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-lines"
+               Title="Line numbers and highlighted lines"
+               Description="ShowLineNumbers adds a gutter the reader cannot accidentally copy. HighlightLines takes numbers and ranges. FirstLineNumber is for an excerpt from the middle of a file; highlights follow the numbers shown."
+               Code="@LinesCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoCode TestId="numbered" Language="csharp" Code="@Service" ShowLineNumbers="true" HighlightLines="3, 5-6" />
+            <VetoCode TestId="excerpt" Language="csharp" Code="@Service" ShowLineNumbers="true" FirstLineNumber="41" HighlightLines="43" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-wrap"
+               Title="Wrapping and a height cap"
+               Description="Long lines scroll sideways by default. Wrap folds them instead. MaxHeight caps a long listing and scrolls it."
+               Code="@WrapCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <VetoCode TestId="nowrap" Language="text" Code="@LongLine" />
+            <VetoCode TestId="wrap" Language="text" Code="@LongLine" Wrap="true" />
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-content"
+               Title="Code as content"
+               Description="The code can be the component's content instead of a string. The copy button copies what is shown."
+               Code="@ContentCode">
+        <VetoCode TestId="content" Language="bash">dotnet add package Veto</VetoCode>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private const string Sample = """
+        <VetoButton Variant="VetoVariant.Filled" OnClick="Save">
+            Save
+        </VetoButton>
+        """;
+
+    private const string Service = """
+        public sealed class GreetingService
+        {
+            public string Greet(string name)
+            {
+                ArgumentException.ThrowIfNullOrWhiteSpace(name);
+                return $"Hello, {name}!";
+            }
+        }
+        """;
+
+    private const string LongLine = "var message = \"This line is long enough that it runs past the edge of the listing on any normal screen, which is exactly the case wrapping exists for.\";";
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Code", "string?", "null", "The code to display, as text."),
+        new("ChildContent", "RenderFragment?", "null", "Code supplied as content instead of Code."),
+        new("Language", "string?", "null", "The label in the bar, e.g. razor. Null hides it."),
+        new("Copyable", "bool", "true", "Show a copy button."),
+        new("NotifyOnCopy", "bool", "true", "Raise a toast after copying, when toasts are registered."),
+        new("CopyToastMessage", "string", "\"Code copied to clipboard\"", "The toast after a successful copy."),
+        new("CopyFailedToastMessage", "string", "\"Could not copy to the clipboard\"", "The toast when the browser refused the write."),
+        new("ShowLineNumbers", "bool", "false", "Number each line in a gutter. Needs Code."),
+        new("FirstLineNumber", "int", "1", "The number of the first line."),
+        new("HighlightLines", "string?", "null", "Lines to highlight: \"2, 5-7\". Needs Code."),
+        new("Wrap", "bool", "false", "Wrap long lines instead of scrolling sideways."),
+        new("MaxHeight", "string?", "null", "Caps the height and scrolls, e.g. 20rem.")
+    ];
+
+    private const string BasicCode = """
+        <VetoCode Language="razor" Code="@_snippet" />
+        """;
+
+    private const string LinesCode = """
+        <VetoCode Language="csharp" Code="@_service"
+                  ShowLineNumbers="true" HighlightLines="3, 5-6" />
+
+        <VetoCode Language="csharp" Code="@_service"
+                  ShowLineNumbers="true" FirstLineNumber="41" HighlightLines="43" />
+        """;
+
+    private const string WrapCode = """
+        <VetoCode Language="text" Code="@_long" Wrap="true" />
+        <VetoCode Language="csharp" Code="@_file" MaxHeight="20rem" />
+        """;
+
+    private const string ContentCode = """
+        <VetoCode Language="bash">dotnet add package Veto</VetoCode>
+        """;
+}

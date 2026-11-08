@@ -13,13 +13,13 @@
         <VetoIconButton Icon="@VetoIcons.Menu" Label="Toggle navigation"
                         TestId="drawer-toggle" OnClick="ToggleDrawer" />
 
-        <a class="app-bar__brand" href="/">
+        <VetoLink class="app-bar__brand" href="/">
             <span class="app-bar__mark" aria-hidden="true">
                 <VetoIcon Icon="@VetoBrand.Mark" StrokeWidth="VetoBrand.MarkStrokeWidth"
                           Size="VetoIconSize.Inherit" Class="app-bar__mark-glyph" />
             </span>
             <span class="app-bar__name">Veto</span>
-        </a>
+        </VetoLink>
 
         <VetoSpacer />
 
@@ -48,19 +48,19 @@
                    Align="VetoAlign.Center"
                    Wrap="true"
                    Class="footer__row">
-            <span>Veto &middot; components for Blazor WebAssembly</span>
+            <span>Veto &middot; components for Blazor</span>
             <VetoSpacer />
-            <a class="footer__link" href="/docs/installation">Installation</a>
-            <a class="footer__link" href="/docs/usage">Usage</a>
-            <a class="footer__link" href="https://github.com" target="_blank" rel="noreferrer">Source</a>
+            <VetoLink Class="footer__link" Href="/docs/installation">Installation</VetoLink>
+            <VetoLink Class="footer__link" Href="/docs/usage">Usage</VetoLink>
+            <VetoLink Class="footer__link" Href="https://github.com" Target="_blank" Rel="noreferrer">Source</VetoLink>
         </VetoStack>
     </VetoFooter>
 </VetoLayout>
 
 <div id="blazor-error-ui">
     Something went wrong.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
+    <VetoLink href="" class="reload">Reload</VetoLink>
+    <VetoLink class="dismiss">🗙</VetoLink>
 </div>
 
 @code {

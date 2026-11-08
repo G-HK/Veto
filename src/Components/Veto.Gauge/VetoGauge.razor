@@ -37,6 +37,14 @@
                       stroke-linecap="butt" />
             }
 
+            @if (Target is not null)
+            {
+                var line = TargetLine;
+                <line class="veto-gauge__target" x1="@line.X1" y1="@line.Y1" x2="@line.X2" y2="@line.Y2"
+                      stroke="@(TargetColor ?? "currentColor")" stroke-width="3" stroke-linecap="round"
+                      data-testid="@(TestId is null ? null : $"{TestId}-target")" />
+            }
+
             @if (ShowTicks)
             {
                 @foreach (var tick in Ticks)

@@ -55,7 +55,7 @@
     overflow: hidden;
     vertical-align: bottom;
     white-space: pre;
-    width: calc(var(--veto-terminal-chars, 0) * 1ch);
+    width: calc(var(--veto-terminal-columns, 0) * 1ch);
     animation:
         veto-terminal-type
         var(--veto-terminal-typing-duration, 8s)
@@ -63,9 +63,15 @@
         infinite;
 }
 
+/* Typed once: its own keyframes, which end full rather than cleared. It used the looping ones
+   with fill-mode forwards, which held their final frame - width 0 - so the command vanished
+   the moment it finished typing. Backwards fill holds it empty until it starts; once done the
+   line drops back to its natural width, which is also right for glyphs wider than 1ch. */
 .veto-terminal-line--typed.veto-terminal-line--once .veto-terminal-line__text {
+    width: auto;
+    animation-name: veto-terminal-type-once;
     animation-iteration-count: 1;
-    animation-fill-mode: forwards;
+    animation-fill-mode: backwards;
 }
 
 /* The caret. Separate from the text so it does not scroll away with it. */
@@ -87,7 +93,17 @@
     /* Types in over the first quarter, sits complete for half the cycle, then clears - long
        enough to actually be read before it starts over. */
     25%, 75% {
-        width: calc(var(--veto-terminal-chars, 0) * 1ch);
+        width: calc(var(--veto-terminal-columns, 0) * 1ch);
+    }
+}
+
+@keyframes veto-terminal-type-once {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: calc(var(--veto-terminal-columns, 0) * 1ch);
     }
 }
 

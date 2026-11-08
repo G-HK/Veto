@@ -12,6 +12,12 @@ on:
 
 jobs:
   build:
+    # Only G-HK spends minutes: anyone else's run, or re-run, is skipped before a runner starts.
+    if: >
+      github.repository == 'G-HK/Veto' &&
+      github.actor == 'G-HK' &&
+      github.triggering_actor == 'G-HK'
+
     runs-on: ubuntu-latest
 
     steps:
