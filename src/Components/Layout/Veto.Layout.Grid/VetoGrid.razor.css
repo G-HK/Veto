@@ -4,9 +4,14 @@
  * below it, which is what makes the mobile-first cascade work with unset values.
  */
 
+/* --veto-grid-cols is the column count in force at the current width. The items read it to
+   clamp their span: a span wider than the grid makes CSS grid add implicit columns, and the
+   layout runs off the side - Span="2" in a grid that is one column on a phone did exactly
+   that. */
 .veto-grid {
+    --veto-grid-cols: var(--veto-grid-columns, 1);
     display: grid;
-    grid-template-columns: repeat(var(--veto-grid-columns, 1), minmax(0, 1fr));
+    grid-template-columns: repeat(var(--veto-grid-cols), minmax(0, 1fr));
     min-width: 0;
 }
 
@@ -26,24 +31,28 @@
 
 @media (min-width: 640px) {
     .veto-grid {
-        grid-template-columns: repeat(var(--veto-grid-columns-sm, var(--veto-grid-columns, 1)), minmax(0, 1fr));
+        --veto-grid-cols: var(--veto-grid-columns-sm, var(--veto-grid-columns, 1));
+        grid-template-columns: repeat(var(--veto-grid-cols), minmax(0, 1fr));
     }
 }
 
 @media (min-width: 960px) {
     .veto-grid {
-        grid-template-columns: repeat(
-            var(--veto-grid-columns-md, var(--veto-grid-columns-sm, var(--veto-grid-columns, 1))),
-            minmax(0, 1fr)
-        );
+        --veto-grid-cols: var(--veto-grid-columns-md, var(--veto-grid-columns-sm, var(--veto-grid-columns, 1)));
+        grid-template-columns: repeat(var(--veto-grid-cols), minmax(0, 1fr));
     }
 }
 
 @media (min-width: 1280px) {
     .veto-grid {
-        grid-template-columns: repeat(
-            var(--veto-grid-columns-lg, var(--veto-grid-columns-md, var(--veto-grid-columns-sm, var(--veto-grid-columns, 1)))),
-            minmax(0, 1fr)
-        );
+        --veto-grid-cols: var(--veto-grid-columns-lg, var(--veto-grid-columns-md, var(--veto-grid-columns-sm, var(--veto-grid-columns, 1))));
+        grid-template-columns: repeat(var(--veto-grid-cols), minmax(0, 1fr));
     }
+}
+
+/* MinItemWidth: as many columns as fit, none narrower than the minimum. Last, so it wins over
+   every breakpoint above. The count is unknown here, so spans are left unclamped (999). */
+.veto-grid.veto-grid--auto {
+    --veto-grid-cols: 999;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--veto-grid-min-item-width)), 1fr));
 }
