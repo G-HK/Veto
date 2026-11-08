@@ -235,6 +235,17 @@
         </VetoButton>
         """;
 
+    private const string BusyCode = 
+        """
+        <VetoButton StartIcon="@VetoIcons.Check" LoadingOnClick="true" OnClick="SubmitAsync">
+            Submit
+        </VetoButton>
+
+        @code {
+            private async Task SubmitAsync () => await Task.Delay(1200);
+        }
+        """;
+
     private const string ContextMenuCode = 
         """
         <VetoButton StartIcon="@VetoIcons.Document" ContextMenuLabel="Report actions" OnClick="Open">
