@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Slider</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>Range slider component with marks for Veto.</Description>
     <RootNamespace>Veto.Components.Slider</RootNamespace>
   </PropertyGroup>
