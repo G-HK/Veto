@@ -65,7 +65,7 @@
 
     <DemoBlock TestId="demo-timing"
                Title="Timing, the progress bar, and toasts that stay"
-               Description="Duration is per toast. The progress bar counts the remaining time down and holds while the pointer is over the toast, so a message is never snatched away mid-read. Sticky drops the timer entirely - the toast stays until somebody dismisses it, which is what you want for anything the user must actually see."
+               Description="Duration is per toast. The progress bar counts the remaining time down and holds while the pointer is over the toast or keyboard focus is inside it, so a message is never snatched away mid-read. Sticky drops the timer entirely - the toast stays until somebody dismisses it, which is what you want for anything the user must actually see."
                Code="@TimingCode">
         <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
             <VetoButton TestId="raise-quick" Size="VetoSize.Small" OnClick="RaiseQuick">1 second</VetoButton>
@@ -88,6 +88,16 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-track"
+               Title="Following a task"
+               Description="TrackAsync shows a sticky toast while a task runs and swaps it for a success or an error toast when the task finishes. The exception still reaches your code. The generic overload builds the success message from the task's result."
+               Code="@TrackCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Wrap="true">
+            <VetoButton TestId="track-ok" Size="VetoSize.Small" OnClick="() => TrackAsync(fail: false)">Save (succeeds)</VetoButton>
+            <VetoButton TestId="track-fail" Size="VetoSize.Small" Variant="VetoVariant.Outlined" OnClick="() => TrackAsync(fail: true)">Save (fails)</VetoButton>
+        </VetoStack>
+    </DemoBlock>
+
     <ParameterTable TestId="host-parameters" Title="VetoToastHost parameters" Rows="HostParameters" />
 
     <ParameterTable TestId="option-parameters" Title="VetoToastOptions" Rows="OptionParameters" />
@@ -100,6 +110,30 @@
     private static readonly VetoToastPosition[] Positions = Enum.GetValues<VetoToastPosition>();
 
     private static readonly VetoToastAnimation[] Animations = Enum.GetValues<VetoToastAnimation>();
+
+    private async Task TrackAsync ( bool fail )
+    {
+        try
+        {
+            await Toasts.TrackAsync(
+                SaveAsync(fail), "Saving…", "Saved", "Could not save",
+                new VetoToastOptions { TestId = "track-toast" });
+        }
+        catch (InvalidOperationException)
+        {
+            // Already shown as the error toast.
+        }
+
+        static async Task SaveAsync ( bool fail )
+        {
+            await Task.Delay(800);
+
+            if (fail)
+            {
+                throw new InvalidOperationException("The server said no.");
+            }
+        }
+    }
 
     private void RaiseInfo () => Toasts.Info("Six files were indexed", new VetoToastOptions { TestId = "info-toast" });
 
@@ -296,6 +330,13 @@
                     Sticky = true,
                 });
         }
+        """;
+
+    private const string TrackCode = """
+        await Toasts.TrackAsync(SaveAsync(), "Saving…", "Saved", "Could not save");
+
+        var order = await Toasts.TrackAsync(
+            PlaceOrderAsync(), "Placing order…", o => $"Order {o.Number} placed", "Order failed");
         """;
 
     private const string DuplicateCode = """
