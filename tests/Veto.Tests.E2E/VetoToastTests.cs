@@ -215,4 +215,46 @@ public class VetoToastTests ( BlazorAppFixture app ) : VetoPageTest(app)
         // Even the sticky one: Clear is explicit, and explicit beats "never hides itself".
         await Expect(Toasts()).ToHaveCountAsync(0);
     }
+
+    [Fact]
+    public async Task Keyboard_focus_inside_a_toast_holds_its_countdown ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Page.GetByTestId("raise-quick").ClickAsync();
+        await Page.GetByTestId("quick-toast-close").FocusAsync();
+
+        // Duration is one second; with focus on its close button it must outlast that.
+        await Page.WaitForTimeoutAsync(2500);
+        await Expect(Page.GetByTestId("quick-toast")).ToBeVisibleAsync();
+
+        await Page.GetByTestId("quick-toast-close").BlurAsync();
+        await Expect(Page.GetByTestId("quick-toast")).ToHaveCountAsync(0, new() { Timeout = 10_000 });
+    }
+
+    [Fact]
+    public async Task A_tracked_task_shows_working_then_success ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Page.GetByTestId("track-ok").ClickAsync();
+
+        var toast = Page.GetByTestId("track-toast");
+        await Expect(toast).ToContainTextAsync("Saving…");
+        await Expect(toast).ToHaveAttributeAsync("data-sticky", "true");
+
+        await Expect(toast.Filter(new() { HasText = "Saved" })).ToHaveAttributeAsync("data-type", "success");
+        await Expect(toast.Filter(new() { HasText = "Saving…" })).ToHaveCountAsync(0);
+    }
+
+    [Fact]
+    public async Task A_tracked_task_that_fails_ends_in_an_error ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Page.GetByTestId("track-fail").ClickAsync();
+
+        await Expect(Page.GetByTestId("track-toast").Filter(new() { HasText = "Could not save" }))
+            .ToHaveAttributeAsync("data-type", "error");
+    }
 }
