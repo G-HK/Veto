@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Icon</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>Icon component and the built-in Veto icon set.</Description>
     <RootNamespace>Veto.Components.Icon</RootNamespace>
   </PropertyGroup>
