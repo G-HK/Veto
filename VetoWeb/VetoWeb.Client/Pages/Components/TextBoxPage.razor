@@ -33,9 +33,11 @@
     <section class="demo-section">
         <h2>Sizes</h2>
         <div class="demo-row">
+            <VetoTextBox TValue="string" TestId="size-xs" Label="Extra small" Size="VetoSize.ExtraSmall" @bind-Value="_size" />
             <VetoTextBox TValue="string" TestId="size-sm" Label="Small" Size="VetoSize.Small" @bind-Value="_size" />
             <VetoTextBox TValue="string" TestId="size-md" Label="Medium" Size="VetoSize.Medium" @bind-Value="_size" />
             <VetoTextBox TValue="string" TestId="size-lg" Label="Large" Size="VetoSize.Large" @bind-Value="_size" />
+            <VetoTextBox TValue="string" TestId="size-xl" Label="Extra large" Size="VetoSize.ExtraLarge" @bind-Value="_size" />
         </div>
     </section>
 
@@ -45,6 +47,16 @@
             <VetoTextBox TValue="string" TestId="variant-outlined" Label="Outlined" Variant="VetoVariant.Outlined" @bind-Value="_variant" />
             <VetoTextBox TValue="string" TestId="variant-filled" Label="Filled" Variant="VetoVariant.Filled" @bind-Value="_variant" />
             <VetoTextBox TValue="string" TestId="variant-text" Label="Text" Variant="VetoVariant.Text" @bind-Value="_variant" />
+            <VetoTextBox TValue="string" TestId="variant-underlined" Label="Underlined" Variant="VetoVariant.Underlined" @bind-Value="_variant" />
+            <VetoTextBox TValue="string" TestId="variant-elevated" Label="Elevated" Variant="VetoVariant.Elevated" @bind-Value="_variant" />
+        </div>
+    </section>
+
+    <section class="demo-section">
+        <h2>Corners</h2>
+        <div class="demo-row">
+            <VetoTextBox TValue="string" TestId="radius-all" Label="Square" Radius="0" @bind-Value="_variant" />
+            <VetoTextBox TValue="string" TestId="radius-corner" Label="One corner" Radius="0" RadiusTopLeft="1rem" @bind-Value="_variant" />
         </div>
     </section>
 
