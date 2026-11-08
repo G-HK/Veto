@@ -153,6 +153,53 @@ public class VetoTextBoxTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
+    public async Task Extra_sizes_sit_outside_small_and_large ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Component("size-xs")).ToHaveClassAsync(new Regex(@"\bveto-textbox--xs\b"));
+        await Expect(Component("size-xl")).ToHaveClassAsync(new Regex(@"\bveto-textbox--xl\b"));
+
+        async Task<double> FontSize ( string id ) =>
+            await Input(id).EvaluateAsync<double>("el => parseFloat(getComputedStyle(el).fontSize)");
+
+        Assert.True(await FontSize("size-xs") < await FontSize("size-sm"));
+        Assert.True(await FontSize("size-xl") > await FontSize("size-lg"));
+    }
+
+    [Fact]
+    public async Task Text_is_borderless_and_underlined_keeps_only_the_bottom_line ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Input("variant-text")).ToHaveCSSAsync("border-bottom-color", "rgba(0, 0, 0, 0)");
+        await Expect(Input("variant-underlined")).ToHaveCSSAsync("border-top-width", "0px");
+        await Expect(Input("variant-underlined")).ToHaveCSSAsync("border-bottom-width", "1px");
+    }
+
+    [Fact]
+    public async Task Elevated_gives_up_its_shadow_to_the_focus_ring ()
+    {
+        await GotoComponentAsync(Route);
+
+        var input = Input("variant-elevated");
+        var resting = await input.EvaluateAsync<string>("el => getComputedStyle(el).boxShadow");
+
+        await input.FocusAsync();
+        await Expect(input).Not.ToHaveCSSAsync("box-shadow", resting);
+    }
+
+    [Fact]
+    public async Task Radius_sets_all_corners_and_a_corner_overrides_it ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Input("radius-all")).ToHaveCSSAsync("border-radius", "0px");
+        await Expect(Input("radius-corner")).ToHaveCSSAsync("border-top-left-radius", "16px");
+        await Expect(Input("radius-corner")).ToHaveCSSAsync("border-bottom-right-radius", "0px");
+    }
+
+    [Fact]
     public async Task Consumer_class_and_style_are_appended_not_replaced ()
     {
         await GotoComponentAsync(Route);
