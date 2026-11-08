@@ -102,10 +102,6 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     public IReadOnlyList<VetoGaugeBand>? Bands { get; set; }
 
     /// <summary>
-    /// When true the reading takes the colour of the band it currently falls in, so the gauge
-    /// turns red by itself. Falls back to <see cref="Color"/> outside every band.
-    /// </summary>
-    /// <summary>
     /// A goal or limit marked across the track - the target a sales dial is chasing, the
     /// redline on a rev counter. Null draws none.
     /// </summary>
@@ -116,6 +112,10 @@ public partial class VetoGauge : VetoComponentBase, IAsyncDisposable
     [Parameter]
     public string? TargetColor { get; set; }
 
+    /// <summary>
+    /// When true the reading takes the colour of the band it currently falls in, so the gauge
+    /// turns red by itself. Falls back to <see cref="Color"/> outside every band.
+    /// </summary>
     [Parameter]
     public bool FollowBands { get; set; }
 

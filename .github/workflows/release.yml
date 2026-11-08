@@ -238,7 +238,7 @@ jobs:
           $released | ForEach-Object { "- $($_.Id) $($_.Version)" } >> $env:GITHUB_STEP_SUMMARY
 
       - name: Upload packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nupkgs-${{ github.run_number }}
           path: ${{ runner.temp }}/nupkgs/*
