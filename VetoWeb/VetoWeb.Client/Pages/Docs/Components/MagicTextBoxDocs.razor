@@ -97,6 +97,15 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-counter"
+               Title="A length limit"
+               Description="MaxLength caps what can be typed and ShowCounter counts it as the user types, before the value is bound."
+               Code="@CounterCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoMagicTextBox TValue="string" TestId="counter" Label="Post" MaxLength="280" ShowCounter="true" @bind-Value="_post" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-bound"
                Title="Bound open state"
                Description="Expanded is two-way bindable, so the page can open the field itself - to reveal the one that failed validation, say - and stays told when the reader closes it again."
@@ -164,6 +173,7 @@
 @code {
     private bool _expanded;
 
+    private string? _post = "Shipping Veto 1.0 today.";
     private string _short = "Fixes the drawer closing on its own scrim.";
 
     private string _token = "veto_sk_9f2a4c7e1b8d6350a1c4e9f7b2d8a6c3";
@@ -204,6 +214,11 @@
                                 OnClick='() => _message = string.Empty' />
             </TrailingContent>
         </VetoMagicTextBox>
+        """;
+
+    private const string CounterCode = """
+        <VetoMagicTextBox TValue="string" Label="Post"
+                          MaxLength="280" ShowCounter="true" @bind-Value="_post" />
         """;
 
     private const string LinesCode = """

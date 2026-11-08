@@ -16,7 +16,10 @@ namespace Veto.Components.Navigation;
 /// </remarks>
 public partial class VetoNavMenu : VetoComponentBase, IDisposable
 {
-    private readonly HashSet<string> _collapsed = [];
+    // Groups the reader has opened or closed, by tree position. Absent means "as the entry
+    // says" (VetoNavEntry.Collapsed). Keyed by label before, so two groups sharing a label -
+    // the docs site has two called Feedback - opened and closed together.
+    private readonly Dictionary<string, bool> _expanded = [];
     private string _currentPath = string.Empty;
 
     /// <inheritdoc />
@@ -58,6 +61,13 @@ public partial class VetoNavMenu : VetoComponentBase, IDisposable
     public string? UnderlineColor { get; set; }
 
     /// <summary>The effect class for the label, or null when the underline is off.</summary>
+    /// <summary>
+    /// When true, opening a group closes the other groups at the same level, so only one branch
+    /// of the tree is open at a time. A group holding the current page stays open regardless.
+    /// </summary>
+    [Parameter]
+    public bool Accordion { get; set; }
+
     private string? UnderlineClass => Underline.ToUnderlineClass();
 
     /// <summary>
@@ -100,17 +110,32 @@ public partial class VetoNavMenu : VetoComponentBase, IDisposable
     /// cannot be collapsed by accident of navigation - it re-opens so the current page is
     /// always visible in the tree.
     /// </summary>
-    private bool IsExpanded ( VetoNavEntry entry )
-        => ContainsActive(entry) || !_collapsed.Contains(entry.Label);
+    private bool IsExpanded ( VetoNavEntry entry, string key )
+        => ContainsActive(entry) || (_expanded.TryGetValue(key, out var open) ? open : !entry.Collapsed);
 
     private bool ContainsActive ( VetoNavEntry entry )
         => entry.Children.Any(child => IsActive(child) || ContainsActive(child));
 
-    private void ToggleGroup ( VetoNavEntry entry )
+    private void ToggleGroup ( VetoNavEntry entry, string key, IReadOnlyList<VetoNavEntry> siblings )
     {
-        if (!_collapsed.Remove(entry.Label))
+        var open = !IsExpanded(entry, key);
+        _expanded[key] = open;
+
+        if (!open || !Accordion)
         {
-            _collapsed.Add(entry.Label);
+            return;
+        }
+
+        var parent = key.Contains('.') ? key[..(key.LastIndexOf('.') + 1)] : string.Empty;
+
+        for (var i = 0; i < siblings.Count; i++)
+        {
+            var sibling = $"{parent}{i}";
+
+            if (sibling != key && siblings[i].IsGroup)
+            {
+                _expanded[sibling] = false;
+            }
         }
     }
 

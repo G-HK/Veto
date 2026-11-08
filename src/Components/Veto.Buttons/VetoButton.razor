@@ -7,7 +7,9 @@
     @if (Href is not null && !Disabled)
     {
         <a @ref="RootElement" @attributes="InnerAttributes" id="@ElementId" class="@CssClass"
-           style="@CssStyle" data-testid="@TestId" href="@Href" target="@Target" rel="@Rel"
+           style="@CssStyle" data-testid="@TestId" href="@Href" target="@Target" rel="@ResolvedRel"
+           aria-busy="@(IsLoading ? "true" : null)"
+           @onclick="OnClickAsync"
            @oncontextmenu="OpenContextMenu" @oncontextmenu:preventDefault="HasContextMenu">
             @RenderContents()
         </a>
@@ -15,8 +17,8 @@
     else
     {
         <button @ref="RootElement" @attributes="InnerAttributes"  id="@ElementId" class="@CssClass"
-                style="@CssStyle" data-testid="@TestId" type="@Type" disabled="@(Disabled || Loading)"
-                aria-busy="@(Loading ? "true" : null)"
+                style="@CssStyle" data-testid="@TestId" type="@Type" disabled="@(Disabled || IsLoading)"
+                aria-busy="@(IsLoading ? "true" : null)"
                 @onclick="OnClickAsync"
                 @oncontextmenu="OpenContextMenu" @oncontextmenu:preventDefault="HasContextMenu">
             @RenderContents()
@@ -35,7 +37,7 @@
 @code {
     private RenderFragment RenderContents () =>
         @<text>
-            @if (Loading)
+            @if (IsLoading)
             {
                 <VetoIcon Icon="@VetoIcons.Settings" Spin="true" Size="VetoIconSize.Inherit" Class="veto-button__spinner" />
             }
@@ -46,7 +48,7 @@
 
             <span class="veto-button__label">@ChildContent</span>
 
-            @if (!Loading && EndIcon is not null)
+            @if (!IsLoading && EndIcon is not null)
             {
                 <VetoIcon Icon="@EndIcon" Size="VetoIconSize.Inherit" Class="veto-button__icon" />
             }
