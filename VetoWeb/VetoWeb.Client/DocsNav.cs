@@ -87,6 +87,7 @@ public static class DocsNav
                     Children =
                     [
                         new VetoNavEntry { Label = "Icon", Href = "/docs/components/icon" },
+                        new VetoNavEntry { Label = "Code", Href = "/docs/components/code" },
                         new VetoNavEntry { Label = "Keyboard key", Href = "/docs/components/kbd" },
                         new VetoNavEntry { Label = "Handbook page", Href = "/docs/components/handbook-page" }
                     ]

@@ -66,30 +66,35 @@
 @code {
     private string? _smoke;
 
-    private const string AddPackage = """
+    private const string AddPackage = 
+        """
         dotnet add package Veto
         """;
 
-    private const string AddIndividualPackages = """
+    private const string AddIndividualPackages = 
+        """
         dotnet add package Veto.Buttons
         dotnet add package Veto.Layout.Card
         dotnet add package Veto.Theming
         """;
 
-    private const string Registration = """
+    private const string Registration = 
+        """
         // Program.cs
         using Veto;
 
         builder.Services.AddVeto();
         """;
 
-    private const string Stylesheet = """
+    private const string Stylesheet = 
+        """
         <!-- App.razor or index.html, inside <head> -->
         <script src="_content/Veto.Theming/veto-theme-init.js"></script>
         <link rel="stylesheet" href="_content/Veto.Core/VetoStyles.css" />
         """;
 
-    private const string Imports = """
+    private const string Imports = 
+        """
         @using Veto.Core
         @using Veto.Theming
         @using Veto.Components.Icon
@@ -101,8 +106,9 @@
         @using Veto.Layouts.Shell
         """;
 
-    private const string Smoke = """
+    private const string Smoke = 
+        """
         <VetoTextBox TValue="string" Label="Project name" @bind-Value="_name" />
         <VetoThemeToggle />
         """;
-}
+}s

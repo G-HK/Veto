@@ -24,7 +24,7 @@
             <textarea @ref="InputElement" @attributes="InnerAttributes"
                       id="@ElementId" name="@NameAttributeValue"
                       class="veto-magic-textbox__input @FieldValidationClass"
-                      placeholder="@Placeholder" disabled="@Disabled" readonly="@ReadOnly" 
+                      placeholder="@Placeholder" disabled="@Disabled" readonly="@ReadOnly" maxlength="@MaxLength"
                       aria-required="@(Required ? "true" : null)"
                       aria-invalid="@(HasErrors ? "true" : null)"
                       aria-describedby="@DescribedBy"
@@ -79,6 +79,12 @@
         else if (!string.IsNullOrWhiteSpace(HelperText))
         {
             <p class="veto-magic-textbox__message" id="@HelperId">@HelperText</p>
+        }
+
+        @if (ShowCounter && MaxLength is not null)
+        {
+            <p class="veto-magic-textbox__counter" aria-live="polite"
+               data-testid="@(TestId is null ? null : $"{TestId}-counter")">@TextLength / @MaxLength</p>
         }
     </div>
 }

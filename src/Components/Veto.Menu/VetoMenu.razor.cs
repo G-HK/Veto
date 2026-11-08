@@ -329,6 +329,10 @@ public partial class VetoMenu : VetoComponentBase, IDisposable
                 RequestFocus(FocusLastItem);
                 break;
 
+            case { Length: 1 } key when Open && char.IsLetterOrDigit(key[0]):
+                FocusByLetter(key[0]);
+                break;
+
         }
     }
 
@@ -368,6 +372,28 @@ public partial class VetoMenu : VetoComponentBase, IDisposable
     /// already-open menu goes the same way rather than taking a shortcut, so there is one path
     /// to get wrong instead of two.
     /// </remarks>
+    /// <summary>
+    /// Type-ahead: moves to the next item, after the current one and wrapping, whose text starts
+    /// with the letter typed - the menu keyboard pattern the WAI-ARIA practices describe.
+    /// Items are matched on <c>Text</c>, or <c>Label</c> when there is no text.
+    /// </summary>
+    private void FocusByLetter ( char letter )
+    {
+        var items = FocusableItems;
+
+        for (var step = 1; step <= items.Count; step++)
+        {
+            var index = (_activeIndex + step + items.Count) % items.Count;
+            var name = items[index].Text ?? items[index].Label;
+
+            if (name?.TrimStart().StartsWith(letter.ToString(), StringComparison.CurrentCultureIgnoreCase) == true)
+            {
+                RequestFocus(index);
+                return;
+            }
+        }
+    }
+
     private void RequestFocus ( int target )
     {
         _focusRequest = target;
