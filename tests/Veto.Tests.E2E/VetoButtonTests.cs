@@ -12,6 +12,20 @@ public class VetoButtonTests(BlazorAppFixture app) : VetoPageTest(app)
         => Component(testId).EvaluateAsync<string>("el => el.tagName.toLowerCase()");
 
     [Fact]
+    public async Task New_variants_render_their_modifier_and_look ()
+    {
+        await GotoComponentAsync(Route);
+
+        foreach (var variant in new[] { "soft", "underlined", "ghost", "elevated" })
+        {
+            await Expect(Component(variant)).ToHaveClassAsync(new Regex($@"\bveto-button--{variant}\b"));
+        }
+
+        await Expect(Component("underlined")).ToHaveCSSAsync("text-decoration-line", "underline");
+        await Expect(Component("elevated")).Not.ToHaveCSSAsync("box-shadow", "none");
+    }
+
+    [Fact]
     public async Task Renders_a_button_by_default()
     {
         await GotoComponentAsync(Route);
@@ -195,5 +209,47 @@ public class VetoButtonTests(BlazorAppFixture app) : VetoPageTest(app)
             "el => !el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
 
         Assert.False(prevented);
+    }
+
+    [Fact]
+    public async Task A_link_button_still_runs_its_click_handler_and_opens_new_tabs_safely ()
+    {
+        await GotoComponentAsync(Route);
+
+        var link = Component("tab-link");
+        await Expect(link).ToHaveAttributeAsync("rel", "noopener noreferrer");
+
+        // Stop the navigation itself; only the handler is under test.
+        await link.EvaluateAsync("el => el.addEventListener('click', e => e.preventDefault())");
+        await link.ClickAsync();
+
+        await Expect(Page.GetByTestId("link-clicks")).ToHaveTextAsync("1");
+    }
+
+    [Fact]
+    public async Task Loading_on_click_holds_while_the_handler_runs_and_blocks_a_second_click ()
+    {
+        await GotoComponentAsync(Route);
+
+        var busy = Component("busy");
+        await busy.ClickAsync();
+
+        await Expect(busy).ToHaveAttributeAsync("aria-busy", "true");
+        await Expect(busy).ToBeDisabledAsync();
+        await busy.ClickAsync(new() { Force = true });
+
+        await Expect(busy).Not.ToHaveAttributeAsync("aria-busy", "true");
+        await Expect(Page.GetByTestId("busy-count")).ToHaveTextAsync("1");
+    }
+
+    [Fact]
+    public async Task A_disabled_icon_link_does_not_navigate ()
+    {
+        await GotoComponentAsync("docs/components/icon-button");
+
+        var link = Component("link-disabled");
+        Assert.Equal("button", await link.EvaluateAsync<string>("el => el.tagName.toLowerCase()"));
+        await Expect(link).ToBeDisabledAsync();
+        await Expect(Component("link")).ToHaveAttributeAsync("href", "/docs/usage");
     }
 }

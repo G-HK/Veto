@@ -56,6 +56,18 @@
     min-height: 3rem;
 }
 
+.veto-button--xs {
+    font-size: var(--veto-font-size-xs);
+    padding: var(--veto-space-1) var(--veto-space-2);
+    min-height: 1.75rem;
+}
+
+.veto-button--xl {
+    font-size: var(--veto-font-size-xl);
+    padding: var(--veto-space-4) var(--veto-space-6);
+    min-height: 3.5rem;
+}
+
 /*
  * Colour. Each role sets one custom property and the variants below read it, so a new role
  * needs one rule rather than one per variant.
@@ -91,9 +103,35 @@
     border-color: var(--veto-border-color, var(--veto-color-border));
 }
 
-.veto-button--text {
+.veto-button--text,
+.veto-button--underlined,
+.veto-button--ghost {
     color: var(--veto-button-color);
     background-color: transparent;
+}
+
+.veto-button--underlined {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.veto-button--ghost {
+    color: var(--veto-color-text-muted);
+}
+
+.veto-button--soft {
+    color: var(--veto-button-color);
+    background-color: color-mix(in srgb, var(--veto-button-color) 14%, transparent);
+}
+
+.veto-button--soft.veto-button--neutral {
+    background-color: color-mix(in srgb, var(--veto-button-color) 8%, transparent);
+}
+
+.veto-button--elevated {
+    color: var(--veto-button-color);
+    background-color: var(--veto-color-surface);
+    box-shadow: var(--veto-shadow-sm), var(--veto-shadow-md);
 }
 
 /* States */
@@ -109,8 +147,19 @@
     background-color: color-mix(in srgb, var(--veto-button-color) 8%, transparent);
 }
 
-.veto-button--text:hover:not(:disabled) {
+.veto-button--text:hover:not(:disabled),
+.veto-button--underlined:hover:not(:disabled),
+.veto-button--ghost:hover:not(:disabled) {
+    color: var(--veto-button-color);
     background-color: color-mix(in srgb, var(--veto-button-color) 10%, transparent);
+}
+
+.veto-button--soft:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--veto-button-color) 22%, transparent);
+}
+
+.veto-button--elevated:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--veto-button-color) 6%, var(--veto-color-surface));
 }
 
 .veto-button:focus-visible {
@@ -144,9 +193,21 @@
 }
 
 .veto-button--loading.veto-button--outlined,
-.veto-button--loading.veto-button--text {
+.veto-button--loading.veto-button--text,
+.veto-button--loading.veto-button--underlined,
+.veto-button--loading.veto-button--ghost {
     color: var(--veto-button-color);
     background-color: transparent;
+}
+
+.veto-button--loading.veto-button--soft {
+    color: var(--veto-button-color);
+    background-color: color-mix(in srgb, var(--veto-button-color) 14%, transparent);
+}
+
+.veto-button--loading.veto-button--elevated {
+    color: var(--veto-button-color);
+    background-color: var(--veto-color-surface);
 }
 
 .veto-button__label {
