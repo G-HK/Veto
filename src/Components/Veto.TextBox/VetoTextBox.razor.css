@@ -58,6 +58,88 @@
     cursor: default;
 }
 
+.veto-textbox__field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.veto-textbox__affix {
+    position: absolute;
+    inset-block: 0;
+    display: flex;
+    align-items: center;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    pointer-events: none;
+}
+
+.veto-textbox__affix--prefix {
+    inset-inline-start: var(--veto-space-3);
+}
+
+.veto-textbox__affix--suffix {
+    inset-inline-end: var(--veto-space-3);
+}
+
+/* The input keeps its own padding; the affixes and the clear button borrow from it. */
+.veto-textbox__field:has(.veto-textbox__affix--prefix) .veto-textbox__input {
+    padding-inline-start: calc(var(--veto-space-3) + var(--veto-textbox-prefix-width, 2ch));
+}
+
+.veto-textbox__field:has(.veto-textbox__clear) .veto-textbox__input {
+    padding-inline-end: calc(var(--veto-space-3) + 1.5em);
+}
+
+.veto-textbox__field:has(.veto-textbox__affix--suffix) .veto-textbox__input {
+    padding-inline-end: calc(var(--veto-space-3) + var(--veto-textbox-suffix-width, 3ch));
+}
+
+.veto-textbox__field:has(.veto-textbox__clear):has(.veto-textbox__affix--suffix) .veto-textbox__input {
+    padding-inline-end: calc(var(--veto-space-3) + var(--veto-textbox-suffix-width, 3ch) + 1.5em);
+}
+
+.veto-textbox__clear {
+    position: absolute;
+    inset-inline-end: var(--veto-space-2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5em;
+    height: 1.5em;
+    padding: 0;
+    border: 0;
+    border-radius: var(--veto-radius-sm, 4px);
+    background: transparent;
+    color: var(--veto-color-text-muted);
+    font: inherit;
+    font-size: var(--veto-font-size-md);
+    line-height: 1;
+    cursor: pointer;
+}
+
+.veto-textbox__clear:has(~ .veto-textbox__affix--suffix) {
+    inset-inline-end: calc(var(--veto-space-3) + var(--veto-textbox-suffix-width, 3ch));
+}
+
+.veto-textbox__clear:hover {
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface-raised);
+}
+
+.veto-textbox__clear:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-textbox__counter {
+    margin: 0;
+    align-self: flex-end;
+    font-size: var(--veto-font-size-sm);
+    color: var(--veto-color-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
 .veto-textbox__message {
     margin: 0;
     font-size: var(--veto-font-size-sm);
