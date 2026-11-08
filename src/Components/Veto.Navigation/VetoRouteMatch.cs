@@ -37,10 +37,17 @@ internal static class VetoRouteMatch
             return false;
         }
 
-        var path = "/" + href.TrimStart('/').TrimEnd('/');
+        // The query and fragment say nothing about which page it is.
+        var path = "/" + href.Split('?')[0].Split('#')[0].TrimStart('/').TrimEnd('/');
 
-        return exact || path == "/"
-            ? string.Equals(currentPath, path, StringComparison.OrdinalIgnoreCase)
-            : currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+        if (exact || path == "/")
+        {
+            return string.Equals(currentPath, path, StringComparison.OrdinalIgnoreCase);
+        }
+
+        // A prefix only counts at a segment boundary: /docs/button is not an ancestor of
+        // /docs/button-group, which a bare StartsWith said it was - both lit up in the nav.
+        return string.Equals(currentPath, path, StringComparison.OrdinalIgnoreCase)
+            || currentPath.StartsWith(path + "/", StringComparison.OrdinalIgnoreCase);
     }
 }

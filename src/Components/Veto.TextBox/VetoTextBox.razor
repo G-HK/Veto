@@ -16,21 +16,44 @@
             </label>
         }
 
-        <input @ref="InputElement"
-               @attributes="InnerAttributes"
-               id="@ElementId"
-               name="@NameAttributeValue"
-               class="veto-textbox__input @FieldValidationClass"
-               type="@Type"
-               value="@CurrentValueAsString"
-               placeholder="@Placeholder"
-               disabled="@Disabled"
-               readonly="@ReadOnly"
-               aria-required="@(Required ? "true" : null)"
-               aria-invalid="@(HasErrors ? "true" : null)"
-               aria-describedby="@DescribedBy"
-               @oninput="OnInputAsync"
-               @onchange="OnChangeAsync" />
+        <div class="veto-textbox__field">
+            @if (!string.IsNullOrEmpty(Prefix))
+            {
+                <span class="veto-textbox__affix veto-textbox__affix--prefix" aria-hidden="true">@Prefix</span>
+            }
+
+            <input @ref="InputElement"
+                   @attributes="InnerAttributes"
+                   id="@ElementId"
+                   name="@NameAttributeValue"
+                   class="veto-textbox__input @FieldValidationClass"
+                   type="@Type"
+                   value="@CurrentValueAsString"
+                   placeholder="@Placeholder"
+                   maxlength="@MaxLength"
+                   disabled="@Disabled"
+                   readonly="@ReadOnly"
+                   aria-required="@(Required ? "true" : null)"
+                   aria-invalid="@(HasErrors ? "true" : null)"
+                   aria-describedby="@DescribedBy"
+                   @oninput="OnInputAsync"
+                   @onchange="OnChangeAsync" />
+
+            @if (ShowClearButton)
+            {
+                <button type="button"
+                        class="veto-textbox__clear"
+                        aria-label="@ClearLabel"
+                        title="@ClearLabel"
+                        data-testid="@(TestId is null ? null : $"{TestId}-clear")"
+                        @onclick="ClearAsync">&times;</button>
+            }
+
+            @if (!string.IsNullOrEmpty(Suffix))
+            {
+                <span class="veto-textbox__affix veto-textbox__affix--suffix" aria-hidden="true">@Suffix</span>
+            }
+        </div>
 
         @if (HasErrors)
         {
@@ -41,6 +64,13 @@
         else if (!string.IsNullOrWhiteSpace(HelperText))
         {
             <p class="veto-textbox__message" id="@HelperId">@HelperText</p>
+        }
+
+        @if (ShowCounter && MaxLength is not null)
+        {
+            <p class="veto-textbox__counter" data-testid="@(TestId is null ? null : $"{TestId}-counter")" aria-live="polite">
+                @TextLength / @MaxLength
+            </p>
         }
     </div>
 }

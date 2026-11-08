@@ -62,6 +62,16 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-spy"
+               Title="Following the reader"
+               Description="ScrollSpy marks the section being read, not only the one last clicked, as the reader scrolls. ScrollSpyOffset is how far below the top of the viewport a heading counts as reached - the height of a fixed app bar, plus a little. The rail only hears from the page when the section changes, never per scroll event."
+               Code="@SpyCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Align="VetoAlign.Start" Wrap="true">
+            <VetoHandbookToc Sections="Spy" ScrollSpy="true" TestId="spy-rail" Style="position: sticky; top: 5rem" />
+            <VetoHandbookPage TestId="spy-page" Title="A longer page" Sections="Spy" Class="docs-demo__narrow" />
+        </VetoStack>
+    </DemoBlock>
+
     <VetoStack Gap="VetoSpacing.Medium">
         <h2 class="docs-heading">Why the anchors are path-qualified</h2>
         <p class="docs-prose">
@@ -118,6 +128,16 @@
         }
     ];
 
+    private static readonly IReadOnlyList<VetoHandbookSection> Spy =
+    [
+        .. new[] { "Plan", "Build", "Test", "Ship" }.Select(( title, i ) => new VetoHandbookSection
+        {
+            Id = $"spy-{i + 1}",
+            Title = title,
+            Content = @<div style="min-height: 22rem"><p class="veto-handbook-page__body">Scroll through this page and watch the rail keep up. Section @(i + 1) of four.</p></div>
+        })
+    ];
+
     private static readonly ParameterTable.Row[] PageRows =
     [
         new("Sections", "IReadOnlyList<VetoHandbookSection>", "[]", "The page's sections, in order."),
@@ -136,7 +156,9 @@
         new("Sections", "IReadOnlyList<VetoHandbookSection>", "[]", "The same list the page was given."),
         new("Title", "string?", "\"On this page\"", "The heading above the list. Null renders none."),
         new("Label", "string", "\"On this page\"", "The navigation landmark's accessible name."),
-        new("State", "VetoHandbookState?", "null", "Share one instance with the page to enable the landing highlight.")
+        new("State", "VetoHandbookState?", "null", "Share one instance with the page to enable the landing highlight."),
+        new("ScrollSpy", "bool", "false", "Mark the section the reader has scrolled to as current, not only the one last clicked."),
+        new("ScrollSpyOffset", "int", "96", "Pixels below the top of the viewport at which a heading counts as reached.")
     ];
 
     private static readonly ParameterTable.Row[] SectionRows =
@@ -184,5 +206,10 @@
         @code {
             private readonly VetoHandbookState _state = new();
         }
+        """;
+
+    private const string SpyCode = """
+        <VetoHandbookToc Sections="_sections" ScrollSpy="true" ScrollSpyOffset="96" />
+        <VetoHandbookPage Title="A longer page" Sections="_sections" />
         """;
 }
