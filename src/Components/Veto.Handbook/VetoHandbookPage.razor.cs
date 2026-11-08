@@ -28,7 +28,9 @@ public partial class VetoHandbookPage : VetoComponentBase, IDisposable
 {
     private CancellationTokenSource? _fadeHighlight;
     private string? _highlighted;
-    private bool _subscribed;
+    // The instance actually subscribed to, which is not necessarily the current State: when
+    // the parameter changes, the old one has to be let go and the new one taken up.
+    private VetoHandbookState? _subscribed;
 
     /// <inheritdoc />
     protected override string RootClass => "veto-handbook-page";
@@ -90,10 +92,19 @@ public partial class VetoHandbookPage : VetoComponentBase, IDisposable
     {
         base.OnParametersSet();
 
-        if (State is not null && !_subscribed)
+        if (!ReferenceEquals(State, _subscribed))
         {
-            State.SectionSelected += OnSectionSelected;
-            _subscribed = true;
+            if (_subscribed is not null)
+            {
+                _subscribed.SectionSelected -= OnSectionSelected;
+            }
+
+            if (State is not null)
+            {
+                State.SectionSelected += OnSectionSelected;
+            }
+
+            _subscribed = State;
         }
     }
 
@@ -137,9 +148,9 @@ public partial class VetoHandbookPage : VetoComponentBase, IDisposable
     /// <inheritdoc />
     public void Dispose ()
     {
-        if (_subscribed && State is not null)
+        if (_subscribed is not null)
         {
-            State.SectionSelected -= OnSectionSelected;
+            _subscribed.SectionSelected -= OnSectionSelected;
         }
 
         _fadeHighlight?.Cancel();
