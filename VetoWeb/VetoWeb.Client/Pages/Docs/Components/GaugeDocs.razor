@@ -82,6 +82,17 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-target"
+               Title="A target on the dial"
+               Description="Target marks a goal or a limit straight across the track - the number a sales dial is chasing, the redline on a rev counter. It is read out with the value, so a screen reader hears how far off it is too."
+               Code="@TargetCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoGauge TestId="target" Label="Quarterly sales" Value="64" Target="80" Unit="%" />
+            <VetoGauge TestId="target-needle" Label="RPM ×1000" Min="0" Max="8" Value="5.2" Target="6.5" TargetColor="var(--veto-color-danger)"
+                       Needle="true" ShowTicks="true" TickEvery="1" MajorTickEvery="1" ShowTickLabels="true" Format="0.0" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-live"
                Title="Live values"
                Description="Two ways in, and they layer. ValueProvider is a function the gauge calls every PollInterval - use it when the number comes from a hub, a counter, or an endpoint that needs your own headers. PollUrl is the shortcut for the common case: the gauge GETs that URL with the app's HttpClient and reads a number out of it, optionally at PollJsonPath. Neither polls at all until PollInterval is positive. The gauge below is driven by a provider that makes up a plausible CPU trace."
@@ -266,6 +277,8 @@
         new("FaceContent", "RenderFragment?", "null", "Markup in the middle of the dial - a badge, a model name. Decorative, and hidden from assistive technology."),
         new("FlickerFrom", "double?", "null", "The reading at or above which the dial flickers like a neon tube. Held steady under prefers-reduced-motion."),
         new("TransitionDuration", "int?", "null", "How long the needle takes to reach a new reading, in ms. Set it to the interval between updates - or 0 - for a dial driven continuously, or it trails its input."),
+        new("Target", "double?", "null", "A goal or limit marked across the track. Included in the announced value."),
+        new("TargetColor", "string?", "null", "The target marker's colour. Defaults to the text colour."),
         new("ValueProvider", "Func<Task<double>>?", "null", "Called every PollInterval for the current value. The general way in."),
         new("PollUrl / PollJsonPath", "string?", "null", "GET this URL and read the number at this dotted path. Needs an HttpClient registered."),
         new("PollInterval", "int", "0", "How often to poll, in milliseconds. Zero never polls."),
@@ -472,5 +485,12 @@
         <VetoGauge Size="VetoSize.Small" Value="34" Label="Small" Unit="%" />
         <VetoGauge Value="61" StartAngle="-90" EndAngle="90" Label="Half circle" />
         <VetoGauge Value="45" StartAngle="0" EndAngle="360" RoundCaps="false" Label="Full circle" />
+        """;
+
+    private const string TargetCode = """
+        <VetoGauge Label="Quarterly sales" Value="64" Target="80" Unit="%" />
+
+        <VetoGauge Label="RPM ×1000" Min="0" Max="8" Value="5.2"
+                   Target="6.5" TargetColor="var(--veto-color-danger)" Needle="true" />
         """;
 }
