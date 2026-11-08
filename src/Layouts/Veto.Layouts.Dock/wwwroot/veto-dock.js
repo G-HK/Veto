@@ -16,7 +16,7 @@ function prefersReducedMotion() {
  * @param {HTMLElement} dock the dock element
  * @param {{magnification: number, range: number, vertical: boolean}} options
  */
-export function attach(dock, options) {
+export function attach(dock, initial) {
     if (!dock || handles.has(dock)) {
         return;
     }
@@ -27,6 +27,10 @@ export function attach(dock, options) {
         return;
     }
 
+    // One options object per dock, changed in place by update(): the handler reads it on every
+    // move. Captured in the closure as before, a dock moved from the bottom edge to a side kept
+    // measuring along x, so every item in the column magnified at once.
+    const options = { ...initial };
     const items = () => Array.from(dock.querySelectorAll('.veto-dock__item'));
 
     const onMove = event => {
@@ -59,7 +63,17 @@ export function attach(dock, options) {
     dock.addEventListener('pointermove', onMove);
     dock.addEventListener('pointerleave', onLeave);
 
-    handles.set(dock, { onMove, onLeave });
+    handles.set(dock, { onMove, onLeave, options });
+}
+
+/** Applies changed options to an attached dock without re-attaching it. */
+export function update(dock, changed) {
+    const handle = dock && handles.get(dock);
+
+    if (handle) {
+        Object.assign(handle.options, changed);
+        handle.onLeave();
+    }
 }
 
 /** Stops magnifying and clears what was set. */
