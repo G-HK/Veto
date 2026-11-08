@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layouts.DockLayout</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>Ready-made dock page layout for Veto.</Description>
     <RootNamespace>Veto.Layouts.DockLayout</RootNamespace>
   </PropertyGroup>
