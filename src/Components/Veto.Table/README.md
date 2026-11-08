@@ -1,4 +1,4 @@
-# Veto.Table
+﻿# Veto.Table
 
 A templated table: you supply the header, a row template and an optional footer.
 
@@ -28,7 +28,8 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
 ## Usage
 
 ```razor
-<Table TItem="Person" Items="People">
+<Table TItem="Person" Items="People" Caption="Team" EmptyText="Nobody here yet."
+       OnRowClick="Open" StickyHeader="true" RootMaxHeight="20rem">
     <HeaderTemplate>
         <th>Name</th>
         <th>Role</th>
@@ -42,4 +43,4 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
 
 ## Documentation
 
-Every parameter, with a live demo, is documented on the Veto docs site. Source and issues: https://github.com/G-HK/Veto
+Every parameter, with a live demo, is documented on the Veto docs site at `/docs/components/table`. Source and issues: https://github.com/G-HK/Veto
