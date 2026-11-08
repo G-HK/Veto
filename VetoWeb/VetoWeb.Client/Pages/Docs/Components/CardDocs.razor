@@ -9,7 +9,7 @@
 
     <DemoBlock TestId="demo-composed"
                Title="Header, content, footer"
-               Description="The composed form. VetoCardHeader holds a VetoCardTitle and a VetoCardDescription for structured metadata; VetoCardContent holds the body; VetoCardFooter holds the actions. Each section pads itself, so the card needs no padding of its own and the sections never double up."
+               Description="The composed form. VetoCardHeader holds a VetoCardTitle and a VetoCardDescription for structured metadata, VetoCardContent holds the body, VetoCardFooter holds the actions. Each section pads itself, so the card needs no padding of its own and the sections never double up."
                Code="@ComposedCode">
         <div class="demo-card-row">
             <VetoCard TestId="composed" Padding="VetoSpacing.None" Elevation="VetoElevation.Outlined">
@@ -141,7 +141,8 @@
         new("Disabled", "bool", "false", "Disables an interactive card."),
     ];
 
-    private const string ComposedCode = """
+    private const string ComposedCode = 
+        """
         <VetoCard Padding="VetoSpacing.None">
             <VetoCardHeader>
                 <VetoCardTitle>Deploy to production</VetoCardTitle>
@@ -159,7 +160,8 @@
         </VetoCard>
         """;
 
-    private const string MediaCode = """
+    private const string MediaCode = 
+        """
         @* The image goes before the header. The card clips to its own corners already,
            so nothing has to ask for the rounded top. *@
         <VetoCard Padding="VetoSpacing.None" Elevation="VetoElevation.Raised">
@@ -176,7 +178,8 @@
         </VetoCard>
         """;
 
-    private const string StatsCode = """
+    private const string StatsCode = 
+        """
         <VetoGrid Columns="1" ColumnsMedium="2" ColumnsLarge="4" Gap="VetoSpacing.Medium">
             <VetoGridItem>
                 <VetoCard Padding="VetoSpacing.None">
@@ -191,13 +194,15 @@
         </VetoGrid>
         """;
 
-    private const string SlotCode = """
+    private const string SlotCode = 
+        """
         <VetoCard Title="Storage">
             <p>41.2 GB of 100 GB used.</p>
         </VetoCard>
         """;
 
-    private const string ElevationCode = """
+    private const string ElevationCode = 
+        """
         <VetoCard Elevation="VetoElevation.Flat" Title="Flat">Sits on the background.</VetoCard>
         <VetoCard Elevation="VetoElevation.Raised" Title="Raised">A soft shadow.</VetoCard>
         <VetoCard Title="Clickable" OnClick="Activate">Renders as a button.</VetoCard>

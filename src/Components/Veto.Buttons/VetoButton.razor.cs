@@ -106,9 +106,23 @@ public partial class VetoButton : VetoComponentBase
     [Parameter]
     public string? ContextMenuLabel { get; set; }
 
-    private VetoContextMenu? _contextMenu;
+    /// <summary>
+    /// When true the button shows its loading state for as long as its <c>OnClick</c> handler
+    /// runs, and ignores clicks until it finishes - no double submit, without the page keeping
+    /// a flag for it. <c>Loading</c> still works alongside.
+    /// </summary>
+    [Parameter]
+    public bool LoadingOnClick { get; set; }
 
-    private bool HasContextMenu => ContextMenu is not null && !Disabled && !Loading;
+    private VetoContextMenu? _contextMenu;
+    private bool _running;
+
+    private bool IsLoading => Loading || _running;
+
+    // A new tab gets the safe rel VetoLink gives it, unless one was asked for.
+    private string? ResolvedRel => Rel ?? (Target == "_blank" ? "noopener noreferrer" : null);
+
+    private bool HasContextMenu => ContextMenu is not null && !Disabled && !IsLoading;
 
     /// <inheritdoc />
     protected override CssBuilder StartCssClass () =>
@@ -118,19 +132,35 @@ public partial class VetoButton : VetoComponentBase
             .AddClass(Modifier(Color.ToModifier()))
             .AddClass(Modifier("full-width"), FullWidth)
             .AddClass(Modifier("rounded"), Rounded)
-            .AddClass(Modifier("loading"), Loading)
+            .AddClass(Modifier("loading"), IsLoading)
             .AddClass(Modifier("disabled"), Disabled);
 
     private async Task OnClickAsync ( MouseEventArgs args )
     {
         // Guarded as well as disabled: a click can still arrive from code, and the work behind a
         // loading button should not be started twice.
-        if (Disabled || Loading)
+        if (Disabled || IsLoading)
         {
             return;
         }
 
-        await OnClick.InvokeAsync(args);
+        if (!LoadingOnClick)
+        {
+            await OnClick.InvokeAsync(args);
+            return;
+        }
+
+        _running = true;
+        StateHasChanged();
+
+        try
+        {
+            await OnClick.InvokeAsync(args);
+        }
+        finally
+        {
+            _running = false;
+        }
     }
 
     private void OpenContextMenu ( MouseEventArgs args )
