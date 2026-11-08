@@ -66,6 +66,29 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-direction"
+               Title="Direction, axis and live changes"
+               Description="Reverse makes the surface lean towards the pointer, as if pulled. Axis limits the tilt to left-right or up-down. Every parameter can change while the tilt is live - the next pointer move uses the new values."
+               Code="@DirectionCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Start">
+            <VetoTilt3D Reverse="true" TestId="reverse">
+                <VetoCard Title="Reverse" Padding="VetoSpacing.Large" Class="tilt-card tilt-card--small">Leans towards you</VetoCard>
+            </VetoTilt3D>
+            <VetoTilt3D Axis="VetoTiltAxis.Horizontal" TestId="axis">
+                <VetoCard Title="Horizontal" Padding="VetoSpacing.Large" Class="tilt-card tilt-card--small">Left-right only</VetoCard>
+            </VetoTilt3D>
+            <VetoStack Gap="VetoSpacing.Small" Align="VetoAlign.Start">
+                <VetoTilt3D MaxTilt="_liveTilt" TestId="live">
+                    <VetoCard Title="Live" Padding="VetoSpacing.Large" Class="tilt-card tilt-card--small">MaxTilt @_liveTilt</VetoCard>
+                </VetoTilt3D>
+                <VetoButton Size="VetoSize.Small" Variant="VetoVariant.Outlined" Color="VetoColor.Neutral"
+                            TestId="live-toggle" OnClick="() => _liveTilt = _liveTilt == 4 ? 30 : 4">
+                    Toggle MaxTilt
+                </VetoButton>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
     <VetoStack Gap="VetoSpacing.Medium">
         <h2 class="docs-heading">When it does nothing</h2>
         <p class="docs-prose">
@@ -86,6 +109,8 @@
 </DocsPage>
 
 @code {
+    private double _liveTilt = 4;
+
     private static readonly ParameterTable.Row[] Parameters =
     [
         new("MaxTilt", "double", "12", "Tilt at the edges, in degrees."),
@@ -94,6 +119,8 @@
         new("Glare", "bool", "false", "Adds a highlight that follows the pointer."),
         new("Reset", "bool", "true", "Returns the surface to flat when the pointer leaves."),
         new("ResetDuration", "int", "400", "How long the settle takes, in milliseconds."),
+        new("Reverse", "bool", "false", "Lean towards the pointer instead of away from it."),
+        new("Axis", "VetoTiltAxis", "Both", "Both, Horizontal (left-right only) or Vertical (up-down only)."),
         new("Disabled", "bool", "false", "Turns the effect off without changing the content or layout.")
     ];
 
@@ -120,5 +147,11 @@
         <VetoTilt3D ResetDuration="900">…</VetoTilt3D>
         <VetoTilt3D Reset="false">…</VetoTilt3D>
         <VetoTilt3D Disabled="true">…</VetoTilt3D>
+        """;
+
+    private const string DirectionCode = """
+        <VetoTilt3D Reverse="true">…</VetoTilt3D>
+        <VetoTilt3D Axis="VetoTiltAxis.Horizontal">…</VetoTilt3D>
+        <VetoTilt3D MaxTilt="_tilt">…</VetoTilt3D>   @* changes apply live *@
         """;
 }

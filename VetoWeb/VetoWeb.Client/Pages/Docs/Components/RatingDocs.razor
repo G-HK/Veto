@@ -161,7 +161,9 @@
         new("ShowItemLabel", "bool", "false", "Print the ItemLabels name for the score after the row; it follows the pointer while previewing."),
         new("ItemLabels", "IReadOnlyList<string>?", "null", "A name per score, used for tooltips and for what is announced."),
         new("Color", "VetoColor", "Warning", "The colour the earned icons take."),
-        new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
+        new("Size", "VetoSize", "Medium", "ExtraSmall, Small, Medium, Large or ExtraLarge."),
+        new("Radius", "string?", "null", "Rounds the focus outline's corners, as any CSS length. Null keeps the theme's radius."),
+        new("RadiusTopLeft / TopRight / BottomRight / BottomLeft", "string?", "null", "One corner's radius, overriding Radius for that corner."),
         new("Disabled / ReadOnly / Required", "bool", "false", "The usual input states."),
         new("OnValueChanged", "EventCallback<TValue>", "—", "Raised after the score changes."),
         new("SetValueAsync(double)", "Task", "—", "Set the score from code; respects Disabled and ReadOnly.")

@@ -81,7 +81,8 @@
         new("--veto-transition", "duration", "150ms ease", "Set to 0ms automatically under prefers-reduced-motion.")
     ];
 
-    private const string ColourCode = """
+    private const string ColourCode = 
+        """
         /* Components only ever reference tokens */
         .my-panel {
             color: var(--veto-color-text);
@@ -91,7 +92,8 @@
         }
         """;
 
-    private const string SpacingCode = """
+    private const string SpacingCode = 
+        """
         <VetoStack Gap="VetoSpacing.Medium">   <!-- --veto-space-3 -->
         <VetoCard Padding="VetoSpacing.Large"> <!-- --veto-space-4 -->
         """;
