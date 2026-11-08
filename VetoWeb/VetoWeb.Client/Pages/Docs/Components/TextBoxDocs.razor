@@ -48,21 +48,51 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-extras"
+               Title="Clear button, counter, prefix and suffix"
+               Description="Clearable adds a button that empties the field. MaxLength caps the input and ShowCounter shows how much is left. Prefix and Suffix put a unit or a scheme inside the field."
+               Code="@ExtrasCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Large" Wrap="true" Align="VetoAlign.Start">
+            <VetoTextBox TValue="string" TestId="clearable" Label="Title" Clearable="true" MaxLength="40" ShowCounter="true" @bind-Value="_title" />
+            <VetoTextBox TValue="decimal?" TestId="affix" Label="Price" Prefix="$" Suffix="USD" @bind-Value="_price" />
+            <VetoTextBox TValue="string" Label="Website" Prefix="https://" Clearable="true" Style="--veto-textbox-prefix-width: 7ch" @bind-Value="_site" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-sizes"
                Title="Sizes and variants"
-               Description="Three sizes and three visual treatments, all driven by modifier classes rather than inline styles."
+               Description="Five sizes and seven visual treatments, all driven by modifier classes rather than inline styles."
                Code="@SizesCode">
         <VetoStack Gap="VetoSpacing.Large">
             <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+                <VetoTextBox TValue="string" Label="Extra small" Size="VetoSize.ExtraSmall" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" TestId="size-sm" Label="Small" Size="VetoSize.Small" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" Label="Medium" Size="VetoSize.Medium" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" TestId="size-lg" Label="Large" Size="VetoSize.Large" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" Label="Extra large" Size="VetoSize.ExtraLarge" @bind-Value="_scratch" />
             </VetoStack>
             <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
                 <VetoTextBox TValue="string" Label="Outlined" Variant="VetoVariant.Outlined" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" TestId="variant-filled" Label="Filled" Variant="VetoVariant.Filled" @bind-Value="_scratch" />
                 <VetoTextBox TValue="string" TestId="variant-text" Label="Text" Variant="VetoVariant.Text" @bind-Value="_scratch" />
             </VetoStack>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+                <VetoTextBox TValue="string" Label="Soft" Variant="VetoVariant.Soft" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" Label="Underlined" Variant="VetoVariant.Underlined" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" Label="Ghost" Variant="VetoVariant.Ghost" @bind-Value="_scratch" />
+                <VetoTextBox TValue="string" Label="Elevated" Variant="VetoVariant.Elevated" @bind-Value="_scratch" />
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-corners"
+               Title="Corners"
+               Description="Radius rounds all four corners. RadiusTopLeft, RadiusTopRight, RadiusBottomRight and RadiusBottomLeft each override it for one corner."
+               Code="@CornersCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true">
+            <VetoTextBox TValue="string" Label="Square" Radius="0" @bind-Value="_scratch" />
+            <VetoTextBox TValue="string" Label="Pill" Radius="999px" @bind-Value="_scratch" />
+            <VetoTextBox TValue="string" Label="One corner" Radius="0" RadiusTopLeft="1rem" @bind-Value="_scratch" />
         </VetoStack>
     </DemoBlock>
 
@@ -104,6 +134,9 @@
     private string? _scratch;
     private string _fixed = "Cannot edit this";
     private int? _quantity = 1;
+    private string? _title = "Quarterly report";
+    private decimal? _price = 9.99m;
+    private string? _site = "veto.dev";
     private DateOnly? _due = new(2026, 9, 30);
     private readonly FormModel _form = new();
     private string? _submitted;
@@ -125,9 +158,17 @@
         new("Placeholder", "string?", "null", "Shown while the field is empty."),
         new("Type", "string", "\"text\"", "The input's type: text, email, password, search, tel, url, number, date."),
         new("Immediate", "bool", "false", "Update the bound value on every keystroke instead of on blur."),
-        new("Format", "string?", "null", "Format used to convert the value to and from its string form."),
+        new("Format", "string?", "null", "Format used to convert the value to and from its string form, e.g. dd/MM/yyyy. Dates and times are parsed back with the same format."),
+        new("Clearable", "bool", "false", "Shows a button that empties the field while it has a value and can be edited."),
+        new("ClearLabel", "string", "\"Clear\"", "The clear button's accessible name."),
+        new("MaxLength", "int?", "null", "The most characters the browser lets the user type."),
+        new("ShowCounter", "bool", "false", "Shows a length / MaxLength counter under the field."),
+        new("Prefix", "string?", "null", "Text inside the field before the value. Widen its slot with --veto-textbox-prefix-width."),
+        new("Suffix", "string?", "null", "Text inside the field after the value. Widen its slot with --veto-textbox-suffix-width."),
         new("Size", "VetoSize", "Medium", "Small, Medium or Large."),
         new("Variant", "VetoVariant", "Outlined", "Outlined, Filled or Text."),
+        new("Radius", "string?", "null", "Rounds all four corners, as any CSS length. Null keeps the theme's radius."),
+        new("RadiusTopLeft / TopRight / BottomRight / BottomLeft", "string?", "null", "One corner's radius, overriding Radius for that corner."),
         new("Disabled", "bool", "false", "Cannot be focused or edited."),
         new("ReadOnly", "bool", "false", "Can be focused and copied from, but not edited."),
         new("Required", "bool", "false", "Renders the required marker and sets aria-required. Enforcement comes from the model."),
@@ -154,10 +195,28 @@
         <VetoTextBox TValue="DateOnly?" Label="Due" Type="date" @bind-Value="_due" />
         """;
 
+    private const string ExtrasCode = """
+        <VetoTextBox TValue="string" Label="Title" Clearable="true"
+                     MaxLength="40" ShowCounter="true" @bind-Value="_title" />
+        <VetoTextBox TValue="decimal?" Label="Price" Prefix="$" Suffix="USD" @bind-Value="_price" />
+        <VetoTextBox TValue="string" Label="Website" Prefix="https://"
+                     Style="--veto-textbox-prefix-width: 7ch" @bind-Value="_site" />
+        """;
+
     private const string SizesCode = """
         <VetoTextBox TValue="string" Label="Small" Size="VetoSize.Small" @bind-Value="_v" />
         <VetoTextBox TValue="string" Label="Filled" Variant="VetoVariant.Filled" @bind-Value="_v" />
         <VetoTextBox TValue="string" Label="Text" Variant="VetoVariant.Text" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Soft" Variant="VetoVariant.Soft" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Underlined" Variant="VetoVariant.Underlined" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Ghost" Variant="VetoVariant.Ghost" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Elevated" Variant="VetoVariant.Elevated" @bind-Value="_v" />
+        """;
+
+    private const string CornersCode = """
+        <VetoTextBox TValue="string" Label="Square" Radius="0" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="Pill" Radius="999px" @bind-Value="_v" />
+        <VetoTextBox TValue="string" Label="One corner" Radius="0" RadiusTopLeft="1rem" @bind-Value="_v" />
         """;
 
     private const string StatesCode = """

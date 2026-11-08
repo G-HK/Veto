@@ -24,7 +24,20 @@
             <VetoTerminalBox TestId="typed-loop" Title="Looping" Command="npx create-veto-app@latest" Typed="true" />
             <VetoTerminalBox TestId="typed-once" Title="Types once, then stays" Command="dotnet new blazorwasm -o MyApp" 
                              Typed="true" Loop="false" TypingDuration="3s" />
+            <VetoTerminalBox TestId="typed-wide" Title="Wide characters" Command="echo こんにちは 🚀" 
+                             Typed="true" Loop="false" TypingDuration="0.6s" />
         </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-long" Title="A long session"
+               Description="MaxHeight caps the window's body; the lines scroll inside it rather than stretching the page."
+               Code="@LongCode">
+        <VetoTerminalBox TestId="long" Title="build" MaxHeight="10rem">
+            @for (var i = 1; i <= 12; i++)
+            {
+                <VetoTerminalLine Prompt="@null" Output="@($"[{i:00}/12] Compiling Veto.Component{i}...")" />
+            }
+        </VetoTerminalBox>
     </DemoBlock>
 
     <DemoBlock TestId="demo-session" Title="A session" 
@@ -108,6 +121,15 @@
     private const string BasicCode = 
         """
         <VetoTerminalBox Command="dotnet add package Veto" />
+        """;
+
+    private const string LongCode = """
+        <VetoTerminalBox Title="build" MaxHeight="10rem">
+            @foreach (var line in _log)
+            {
+                <VetoTerminalLine Prompt="@null" Output="@line" />
+            }
+        </VetoTerminalBox>
         """;
 
     private const string TypedCode = 
