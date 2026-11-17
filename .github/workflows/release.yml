@@ -63,7 +63,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '11.0.x'
 
       # Turns the typed list into projects and versions, and stops before anything is built if
       # a name is wrong or a version is already on nuget.org - nuget.org never lets a version be
@@ -131,7 +131,7 @@ jobs:
 
       - name: Install Playwright browsers
         if: ${{ inputs.run_tests }}
-        run: pwsh tests/Veto.Tests.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+        run: pwsh tests/Veto.Tests.E2E/bin/Release/net11.0/playwright.ps1 install --with-deps chromium
 
       - name: Test
         if: ${{ inputs.run_tests }}
