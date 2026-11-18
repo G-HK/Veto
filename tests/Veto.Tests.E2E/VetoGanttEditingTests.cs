@@ -105,6 +105,57 @@ public class VetoGanttEditingTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
+    public async Task Clicking_an_editable_bar_selects_it ()
+    {
+        await Page.SetViewportSizeAsync(1500, 1200);
+        await GotoComponentAsync(Route);
+        await ReadyToEditAsync();
+        await ResetChartAsync();
+
+        var before = await BarLeftAsync("wiring");
+
+        // A click, not a drag: the pointer goes down and up without moving.
+        await Component("editable-bar-wiring").ClickAsync();
+
+        await Expect(Component("editable-row-wiring")).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("veto-gantt__row--selected"));
+        Assert.Equal(before, await BarLeftAsync("wiring"), 1);
+    }
+
+    [Fact]
+    public async Task A_press_released_outside_the_chart_does_not_leave_a_drag_behind ()
+    {
+        await Page.SetViewportSizeAsync(1500, 1200);
+        await GotoComponentAsync(Route);
+        await ReadyToEditAsync();
+        await ResetChartAsync();
+
+        var bar = Component("editable-bar-wiring");
+
+        await bar.ScrollIntoViewIfNeededAsync();
+
+        var box = await bar.BoundingBoxAsync() ?? throw new InvalidOperationException("'wiring' has no box.");
+        var chart = await Page.Locator(".veto-gantt[data-testid='editable']").BoundingBoxAsync()
+            ?? throw new InvalidOperationException("The chart has no box.");
+
+        var x = box.X + box.Width / 2;
+        var y = box.Y + box.Height / 2;
+
+        // Pressed on the bar, then straight up and out of the chart without moving sideways, and
+        // released there - the chart never sees the release.
+        await Page.Mouse.MoveAsync((float) x, (float) y);
+        await Page.Mouse.DownAsync();
+        await Page.Mouse.MoveAsync((float) x, (float) Math.Max(2, chart.Y - 10), new() { Steps = 8 });
+        await Page.Mouse.UpAsync();
+
+        // Back over the chart with no button held: the bar must not follow the pointer.
+        await Page.Mouse.MoveAsync((float) x, (float) y, new() { Steps = 8 });
+        await Page.Mouse.MoveAsync((float) (x + 120), (float) y, new() { Steps = 8 });
+
+        Assert.Equal("", await bar.EvaluateAsync<string>("el => el.style.transform"));
+        Assert.False(await bar.EvaluateAsync<bool>("el => 'dragging' in el.dataset"), "The bar should not still be marked as dragging.");
+    }
+
+    [Fact]
     public async Task Arrow_keys_move_a_bar_without_a_mouse ()
     {
         await Page.SetViewportSizeAsync(1500, 1200);
