@@ -113,12 +113,85 @@ public class VetoGanttEditingTests ( BlazorAppFixture app ) : VetoPageTest(app)
         await ResetChartAsync();
 
         var before = await BarLeftAsync("wiring");
+        var width = await BarWidthAsync("wiring");
 
         // A click, not a drag: the pointer goes down and up without moving.
         await Component("editable-bar-wiring").ClickAsync();
 
         await Expect(Component("editable-row-wiring")).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("veto-gantt__row--selected"));
         Assert.Equal(before, await BarLeftAsync("wiring"), 1);
+
+        // The bar is as wide as it was: nothing was dragged, so nothing rewrites its style.
+        Assert.Equal(width, await BarWidthAsync("wiring"), 1);
+    }
+
+    [Fact]
+    public async Task A_drag_that_starts_slowly_still_moves_the_bar ()
+    {
+        await Page.SetViewportSizeAsync(1500, 1200);
+        await GotoComponentAsync(Route);
+        await ReadyToEditAsync();
+        await ResetChartAsync();
+
+        var bar = Component("editable-bar-wiring");
+
+        await bar.ScrollIntoViewIfNeededAsync();
+
+        var box = await bar.BoundingBoxAsync() ?? throw new InvalidOperationException("'wiring' has no box.");
+        var before = await BarLeftAsync("wiring");
+
+        var x = box.X + box.Width / 2;
+        var y = box.Y + box.Height / 2;
+
+        // The way a hand moves a mouse: a pixel at a time at first, so the first few moves are
+        // still inside the distance that counts as a click.
+        await Page.Mouse.MoveAsync((float) x, (float) y);
+        await Page.Mouse.DownAsync();
+
+        for (var step = 1; step <= 8; step++)
+        {
+            await Page.Mouse.MoveAsync((float) (x + step), (float) y);
+        }
+
+        await Page.Mouse.MoveAsync((float) (x + 120), (float) y, new() { Steps = 8 });
+        await Page.Mouse.UpAsync();
+
+        await Expect(Page.GetByTestId("change-note")).ToContainTextAsync("Moved by 3 days");
+        Assert.True(await BarLeftAsync("wiring") > before, "The bar should have moved right.");
+    }
+
+    [Fact]
+    public async Task A_drag_too_short_to_change_anything_leaves_the_bar_as_it_was ()
+    {
+        await Page.SetViewportSizeAsync(1500, 1200);
+        await GotoComponentAsync(Route);
+        await ReadyToEditAsync();
+        await ResetChartAsync();
+
+        var bar = Component("editable-bar-wiring");
+
+        await bar.ScrollIntoViewIfNeededAsync();
+
+        var box = await bar.BoundingBoxAsync() ?? throw new InvalidOperationException("'wiring' has no box.");
+        var left = await BarLeftAsync("wiring");
+        var width = await BarWidthAsync("wiring");
+
+        // Grabbed by the end grip and pulled a quarter of a day: far enough to be a drag, not far
+        // enough to snap to the next day.
+        var x = box.X + box.Width - 3;
+        var y = box.Y + box.Height / 2;
+
+        await Page.Mouse.MoveAsync((float) x, (float) y);
+        await Page.Mouse.DownAsync();
+        await Page.Mouse.MoveAsync((float) (x + 10), (float) y, new() { Steps = 5 });
+
+        // It is a resize that is under way, not a click and not a move.
+        await Expect(bar).ToHaveAttributeAsync("data-dragging", "end");
+
+        await Page.Mouse.UpAsync();
+
+        Assert.Equal(left, await BarLeftAsync("wiring"), 1);
+        Assert.Equal(width, await BarWidthAsync("wiring"), 1);
     }
 
     [Fact]

@@ -34,7 +34,7 @@ export function attach(grid, dotNet, options) {
         return;
     }
 
-    const state = { options, mode: null, bar: null, startX: 0, startWidth: 0, captured: false };
+    const state = { options, mode: null, bar: null, startX: 0, startWidth: 0, inlineWidth: null, captured: false };
 
     const barFrom = event => {
         const bar = event.target.closest('.veto-gantt__bar[data-editable="true"]');
@@ -67,6 +67,29 @@ export function attach(grid, dotNet, options) {
         return Math.round(raw / state.options.snapDays) * state.options.snapDays;
     };
 
+    // Previews a resize. The width is the component's own inline style, so what it rendered is
+    // kept to put back afterwards.
+    const previewWidth = width => {
+        if (state.inlineWidth === null) {
+            state.inlineWidth = state.bar.style.width;
+        }
+
+        state.bar.style.width = `${width}px`;
+    };
+
+    // Takes the preview off a bar. The transform goes; a width the preview changed goes back to
+    // what the component rendered - emptying it would leave the bar as wide as its label until
+    // the next render that changes its dates, and a release that moves nothing causes no such
+    // render. A width the preview never touched is left alone.
+    const endPreview = bar => {
+        bar.style.transform = '';
+
+        if (state.inlineWidth !== null) {
+            bar.style.width = state.inlineWidth;
+            state.inlineWidth = null;
+        }
+    };
+
     const onPointerDown = event => {
         // Primary button only: a right-click should open a menu, not start a drag.
         if (event.button !== 0) {
@@ -83,6 +106,7 @@ export function attach(grid, dotNet, options) {
         state.mode = modeFor(bar, event);
         state.startX = event.clientX;
         state.startWidth = bar.getBoundingClientRect().width;
+        state.inlineWidth = null;
         state.captured = false;
 
         bar.dataset.dragging = state.mode;
@@ -133,9 +157,9 @@ export function attach(grid, dotNet, options) {
             state.bar.style.transform = `translate(${offset}px, -50%)`;
         } else if (state.mode === 'start') {
             state.bar.style.transform = `translate(${offset}px, -50%)`;
-            state.bar.style.width = `${Math.max(minimum, state.startWidth - offset)}px`;
+            previewWidth(Math.max(minimum, state.startWidth - offset));
         } else {
-            state.bar.style.width = `${Math.max(minimum, state.startWidth + offset)}px`;
+            previewWidth(Math.max(minimum, state.startWidth + offset));
         }
     };
 
@@ -154,10 +178,9 @@ export function attach(grid, dotNet, options) {
 
         delete bar.dataset.dragging;
 
-        // Cleared before .NET re-renders, so the component's own left and width take over
+        // Taken off before .NET re-renders, so the component's own left and width take over
         // cleanly rather than fighting an inline transform.
-        bar.style.transform = '';
-        bar.style.width = '';
+        endPreview(bar);
 
         if (state.captured) {
             state.captured = false;
@@ -177,8 +200,7 @@ export function attach(grid, dotNet, options) {
     const onCancel = () => {
         if (state.bar) {
             delete state.bar.dataset.dragging;
-            state.bar.style.transform = '';
-            state.bar.style.width = '';
+            endPreview(state.bar);
         }
 
         state.mode = null;
@@ -186,21 +208,12 @@ export function attach(grid, dotNet, options) {
         state.captured = false;
     };
 
-    // A captured pointer keeps reporting to the grid wherever it goes. One that is not captured
-    // yet is simply gone, and so is the press it started.
-    const onPointerLeave = () => {
-        if (state.mode && !state.captured) {
-            onCancel();
-        }
-    };
-
     grid.addEventListener('pointerdown', onPointerDown);
     grid.addEventListener('pointermove', onPointerMove);
     grid.addEventListener('pointerup', finish);
     grid.addEventListener('pointercancel', onCancel);
-    grid.addEventListener('pointerleave', onPointerLeave);
 
-    handles.set(grid, { state, onPointerDown, onPointerMove, finish, onCancel, onPointerLeave, options });
+    handles.set(grid, { state, onPointerDown, onPointerMove, finish, onCancel, options });
 }
 
 /** Stops dragging inside a grid. */
@@ -215,7 +228,6 @@ export function detach(grid) {
     grid.removeEventListener('pointermove', handle.onPointerMove);
     grid.removeEventListener('pointerup', handle.finish);
     grid.removeEventListener('pointercancel', handle.onCancel);
-    grid.removeEventListener('pointerleave', handle.onPointerLeave);
 
     handles.delete(grid);
     grid.style.cursor = '';
