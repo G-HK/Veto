@@ -14,6 +14,9 @@ const handles = new WeakMap();
 // How close to an edge counts as a resize rather than a move.
 const EDGE = 6;
 
+// How far the pointer has to travel before a press counts as a drag rather than a click.
+const SLOP = 3;
+
 /**
  * Makes every editable bar inside a grid draggable.
  * @param {HTMLElement} grid the element containing the bars
@@ -31,7 +34,7 @@ export function attach(grid, dotNet, options) {
         return;
     }
 
-    const state = { options, mode: null, bar: null, startX: 0, startWidth: 0 };
+    const state = { options, mode: null, bar: null, startX: 0, startWidth: 0, inlineWidth: null, captured: false };
 
     const barFrom = event => {
         const bar = event.target.closest('.veto-gantt__bar[data-editable="true"]');
@@ -64,6 +67,29 @@ export function attach(grid, dotNet, options) {
         return Math.round(raw / state.options.snapDays) * state.options.snapDays;
     };
 
+    // Previews a resize. The width is the component's own inline style, so what it rendered is
+    // kept to put back afterwards.
+    const previewWidth = width => {
+        if (state.inlineWidth === null) {
+            state.inlineWidth = state.bar.style.width;
+        }
+
+        state.bar.style.width = `${width}px`;
+    };
+
+    // Takes the preview off a bar. The transform goes; a width the preview changed goes back to
+    // what the component rendered - emptying it would leave the bar as wide as its label until
+    // the next render that changes its dates, and a release that moves nothing causes no such
+    // render. A width the preview never touched is left alone.
+    const endPreview = bar => {
+        bar.style.transform = '';
+
+        if (state.inlineWidth !== null) {
+            bar.style.width = state.inlineWidth;
+            state.inlineWidth = null;
+        }
+    };
+
     const onPointerDown = event => {
         // Primary button only: a right-click should open a menu, not start a drag.
         if (event.button !== 0) {
@@ -80,10 +106,23 @@ export function attach(grid, dotNet, options) {
         state.mode = modeFor(bar, event);
         state.startX = event.clientX;
         state.startWidth = bar.getBoundingClientRect().width;
+        state.inlineWidth = null;
+        state.captured = false;
 
         bar.dataset.dragging = state.mode;
-        grid.setPointerCapture(event.pointerId);
         event.preventDefault();
+    };
+
+    // The pointer is captured once it has travelled, not on the press. A press only becomes a
+    // drag when it moves; until then it is a click, and capturing the pointer would hand that
+    // click to the grid instead of the bar, which is what selects a row.
+    const captureOnceMoving = event => {
+        if (state.captured || Math.abs(event.clientX - state.startX) <= SLOP) {
+            return;
+        }
+
+        grid.setPointerCapture(event.pointerId);
+        state.captured = true;
     };
 
     const onPointerMove = event => {
@@ -92,6 +131,20 @@ export function attach(grid, dotNet, options) {
             grid.style.cursor = bar
                 ? (modeFor(bar, event) === 'move' ? 'grab' : 'ew-resize')
                 : '';
+            return;
+        }
+
+        // The button was let go somewhere the grid could not see - only possible before the
+        // pointer is captured. Without this the bar would follow a pointer nobody is holding.
+        if (!(event.buttons & 1)) {
+            onCancel();
+            return;
+        }
+
+        captureOnceMoving(event);
+
+        // Still a click as far as anyone can tell, so nothing is previewed.
+        if (!state.captured) {
             return;
         }
 
@@ -104,9 +157,9 @@ export function attach(grid, dotNet, options) {
             state.bar.style.transform = `translate(${offset}px, -50%)`;
         } else if (state.mode === 'start') {
             state.bar.style.transform = `translate(${offset}px, -50%)`;
-            state.bar.style.width = `${Math.max(minimum, state.startWidth - offset)}px`;
+            previewWidth(Math.max(minimum, state.startWidth - offset));
         } else {
-            state.bar.style.width = `${Math.max(minimum, state.startWidth + offset)}px`;
+            previewWidth(Math.max(minimum, state.startWidth + offset));
         }
     };
 
@@ -115,7 +168,8 @@ export function attach(grid, dotNet, options) {
             return;
         }
 
-        const days = daysMoved(event);
+        // A press that never became a drag moves nothing, however few pixels a day is at this zoom.
+        const days = state.captured ? daysMoved(event) : 0;
         const mode = state.mode;
         const bar = state.bar;
 
@@ -124,15 +178,18 @@ export function attach(grid, dotNet, options) {
 
         delete bar.dataset.dragging;
 
-        // Cleared before .NET re-renders, so the component's own left and width take over
+        // Taken off before .NET re-renders, so the component's own left and width take over
         // cleanly rather than fighting an inline transform.
-        bar.style.transform = '';
-        bar.style.width = '';
+        endPreview(bar);
 
-        try {
-            grid.releasePointerCapture(event.pointerId);
-        } catch {
-            // The capture may already be gone if the pointer left the window.
+        if (state.captured) {
+            state.captured = false;
+
+            try {
+                grid.releasePointerCapture(event.pointerId);
+            } catch {
+                // The capture may already be gone if the pointer left the window.
+            }
         }
 
         if (days !== 0) {
@@ -143,12 +200,12 @@ export function attach(grid, dotNet, options) {
     const onCancel = () => {
         if (state.bar) {
             delete state.bar.dataset.dragging;
-            state.bar.style.transform = '';
-            state.bar.style.width = '';
+            endPreview(state.bar);
         }
 
         state.mode = null;
         state.bar = null;
+        state.captured = false;
     };
 
     grid.addEventListener('pointerdown', onPointerDown);
