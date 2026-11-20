@@ -20,7 +20,7 @@
                         <h3 class="gallery__name">@entry.Name</h3>
                         <p class="gallery__summary">@entry.Summary</p>
                         <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Align="VetoAlign.Center">
-                            <VetoLink class="gallery__open" href="@entry.Href" data-testid="@($"open-{entry.Slug}")">Open full screen</VetoLink>
+                            <VetoLink class="gallery__open" href="@entry.Href" TestId="@($"open-{entry.Slug}")">Open full screen</VetoLink>
                             <VetoLink class="gallery__docs" href="@entry.DocsHref">Reference</VetoLink>
                         </VetoStack>
                     </VetoStack>
