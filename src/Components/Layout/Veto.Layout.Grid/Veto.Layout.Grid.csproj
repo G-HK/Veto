@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Layout.Grid</PackageId>
-    <Version>1.0.2</Version>
+    <Version>2.0.0</Version>
     <Description>Grid and GridItem layout primitives for Veto.</Description>
     <RootNamespace>Veto.Components.Layout</RootNamespace>
   </PropertyGroup>

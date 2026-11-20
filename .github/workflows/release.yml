@@ -222,7 +222,7 @@ jobs:
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
 
-      # One tag per package, since each has its own version: Veto.Gantt-v1.0.2.
+      # One tag per package, since each has its own version: Veto.Gantt-v2.0.0.
       - name: Tag released packages
         shell: pwsh
         run: |

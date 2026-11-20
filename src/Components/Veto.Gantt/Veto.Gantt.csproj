@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Gantt</PackageId>
-    <Version>1.0.7</Version>
+    <Version>2.0.0</Version>
     <Description>Interactive Gantt chart component with drag, zoom and export for Veto.</Description>
     <RootNamespace>Veto.Components.Gantt</RootNamespace>
   </PropertyGroup>

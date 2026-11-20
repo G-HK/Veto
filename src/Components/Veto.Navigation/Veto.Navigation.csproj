@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Navigation</PackageId>
-    <Version>1.0.2</Version>
+    <Version>2.0.0</Version>
     <Description>Link, NavMenu and Breadcrumbs components for Veto.</Description>
     <RootNamespace>Veto.Components.Navigation</RootNamespace>
   </PropertyGroup>

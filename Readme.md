@@ -3,7 +3,7 @@
 Veto is an open source component library for Blazor projects, with no third-party package
 dependencies. Developed by G-HK.
 
-Targets .NET 10, and works in any Blazor project - WebAssembly, Server, or a Blazor Web App.
+Targets .NET 11, and works in any Blazor project - WebAssembly, Server, or a Blazor Web App.
 
 Docs and live demos of every component: **<https://veto.blackpanda.be/>**
 
@@ -134,7 +134,7 @@ Every package carries its own `<Version>` in its `.csproj` and is released on it
 Only the packages named are built and packed. The workflow stops before building if a name is
 wrong or a version is already on nuget.org, and before publishing if a package depends on a Veto
 package version that is neither on nuget.org nor in the same release. It then pushes to
-nuget.org via Trusted Publishing and tags each package, e.g. `Veto.Gantt-v1.0.2`.
+nuget.org via Trusted Publishing and tags each package, e.g. `Veto.Gantt-v2.0.0`.
 
 A package's dependencies on other Veto packages are "this version or newer", so one package can
 move ahead of the rest. Release `Veto` as well when everyone installing the whole library
