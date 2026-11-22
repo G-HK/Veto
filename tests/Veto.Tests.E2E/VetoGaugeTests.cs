@@ -600,4 +600,30 @@ public class VetoGaugeTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         Assert.True(full > half * 1.5, $"A full circle should be much longer than a half: {half} vs {full}.");
     }
+
+    [Fact]
+    public async Task A_parent_that_rerenders_on_each_sample_does_not_speed_up_polling ()
+    {
+        await GotoComponentAsync(Route);
+
+        // The demo's OnValueChanged re-renders the page on every sample. That used to restart
+        // polling, which fetches at once - a loop with no delay in it, thousands of samples a
+        // second. At PollInterval="1000" three seconds is three or four samples.
+        await Expect(Page.GetByTestId("live-samples")).ToHaveTextAsync(new Regex(@"^[1-9]\d* samples$"),
+            new() { Timeout = 15_000 });
+        await Page.WaitForTimeoutAsync(3000);
+
+        var text = await Page.GetByTestId("live-samples").TextContentAsync();
+        var samples = int.Parse(text!.Split(' ')[0], System.Globalization.CultureInfo.InvariantCulture);
+        Assert.InRange(samples, 1, 8);
+    }
+
+    [Fact]
+    public async Task A_target_is_marked_and_announced ()
+    {
+        await GotoComponentAsync(Route);
+
+        await Expect(Page.GetByTestId("target-target")).ToHaveCountAsync(1);
+        await Expect(Component("target").Locator("svg")).ToHaveAttributeAsync("aria-valuetext", "64%, target 80%");
+    }
 }

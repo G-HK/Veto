@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Veto.Kbd</PackageId>
-    <Version>1.0.1</Version>
+    <Version>2.0.0</Version>
     <Description>Keyboard key, shortcut and shortcut list components for Veto.</Description>
     <RootNamespace>Veto.Components.Kbd</RootNamespace>
   </PropertyGroup>

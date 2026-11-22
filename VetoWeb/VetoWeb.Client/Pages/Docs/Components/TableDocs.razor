@@ -1,0 +1,156 @@
+@page "/docs/components/table"
+@rendermode InteractiveWebAssembly
+@using Veto.Components.Table
+
+<PageTitle>Table — Veto</PageTitle>
+
+<DocsPage Eyebrow="Components"
+          Title="Table"
+          Lead="A templated table: you write the header cells and one row template, the table draws every row, the empty state, stripes and hover.">
+
+    <DemoBlock TestId="demo-basic"
+               Title="Basic"
+               Description="HeaderTemplate holds the header cells, RowTemplate one row's cells with the item as context, and FooterTemplate an optional totals row."
+               Code="@BasicCode">
+        <Table TItem="Order" TestId="basic" Items="_orders" Caption="Recent orders">
+            <HeaderTemplate>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Total</th>
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.Number</td>
+                <td>@context.Customer</td>
+                <td>@context.Total.ToString("0.00")</td>
+            </RowTemplate>
+            <FooterTemplate>
+                <td colspan="2">Total</td>
+                <td data-testid="basic-total">@(_orders.Sum(o => o.Total).ToString("0.00"))</td>
+            </FooterTemplate>
+        </Table>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-empty"
+               Title="Empty state"
+               Description="With no items - or a null list - the body says so instead of collapsing to nothing. EmptyText for a sentence, EmptyContent for markup."
+               Code="@EmptyCode">
+        <VetoStack Gap="VetoSpacing.Medium">
+            <Table TItem="Order" TestId="empty" Items="null">
+                <HeaderTemplate><th>Order</th><th>Customer</th></HeaderTemplate>
+                <RowTemplate><td>@context.Number</td><td>@context.Customer</td></RowTemplate>
+            </Table>
+            <Table TItem="Order" TestId="empty-custom" Items="Array.Empty<Order>()">
+                <HeaderTemplate><th>Order</th><th>Customer</th></HeaderTemplate>
+                <RowTemplate><td>@context.Number</td><td>@context.Customer</td></RowTemplate>
+                <EmptyContent><strong>No orders yet.</strong> They show up here as they come in.</EmptyContent>
+            </Table>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-options"
+               Title="Look"
+               Description="Striped, Bordered and Hover are on by default and can each be turned off. Dense tightens the cells."
+               Code="@OptionsCode">
+        <Table TItem="Order" TestId="plain" Items="_orders" Striped="false" Bordered="false" Hover="false" Dense="true">
+            <HeaderTemplate><th>Order</th><th>Customer</th><th>Total</th></HeaderTemplate>
+            <RowTemplate><td>@context.Number</td><td>@context.Customer</td><td>@context.Total.ToString("0.00")</td></RowTemplate>
+        </Table>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-interactive"
+               Title="Clickable rows, row classes and a sticky header"
+               Description="OnRowClick makes every row focusable and raises the item on click, Enter or Space. RowClass adds classes worked out from the item. StickyHeader keeps the header in view while the rows scroll inside RootMaxHeight."
+               Code="@InteractiveCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <Table TItem="Order" TestId="clickable" Items="_manyOrders" StickyHeader="true" RootMaxHeight="12rem"
+                   OnRowClick="o => _picked = o.Number" RowClass='o => o.Total > 100 ? "demo-large-order" : null'>
+                <HeaderTemplate><th>Order</th><th>Customer</th><th>Total</th></HeaderTemplate>
+                <RowTemplate><td>@context.Number</td><td>@context.Customer</td><td>@context.Total.ToString("0.00")</td></RowTemplate>
+            </Table>
+            <span class="demo-value" data-testid="clickable-value">@(_picked ?? "none")</span>
+        </VetoStack>
+    </DemoBlock>
+
+    <ParameterTable TestId="parameters" Rows="Parameters" />
+
+</DocsPage>
+
+@code {
+    private sealed record Order ( string Number, string Customer, decimal Total );
+
+    private readonly Order[] _orders =
+    [
+        new("#1001", "Ada Lovelace", 42.50m),
+        new("#1002", "Alan Turing", 120.00m),
+        new("#1003", "Grace Hopper", 18.75m)
+    ];
+
+    private readonly Order[] _manyOrders =
+        [.. Enumerable.Range(1, 20).Select(i => new Order($"#{2000 + i}", $"Customer {i}", i * 11.5m))];
+
+    private string? _picked;
+
+    private static readonly ParameterTable.Row[] Parameters =
+    [
+        new("Items", "IEnumerable<TItem>?", "null", "The items, one row each. Null is shown as empty."),
+        new("HeaderTemplate", "RenderFragment?", "null", "The header row's cells. No header without it."),
+        new("RowTemplate", "RenderFragment<TItem>", "—", "One row's cells; the item is context."),
+        new("FooterTemplate", "RenderFragment?", "null", "The footer row's cells. No footer without it."),
+        new("EmptyText", "string", "\"No data to show.\"", "What the body says with no items."),
+        new("EmptyContent", "RenderFragment?", "null", "The empty state as markup, instead of EmptyText."),
+        new("Caption", "string?", "null", "A caption naming the table."),
+        new("Striped", "bool", "true", "Shade every other row."),
+        new("Bordered", "bool", "true", "Border every cell; off leaves only the lines between rows."),
+        new("Hover", "bool", "true", "Highlight the row under the pointer."),
+        new("Dense", "bool", "false", "Tighter cell padding."),
+        new("StickyHeader", "bool", "false", "Keep the header in view while rows scroll. Pair with RootMaxHeight."),
+        new("OnRowClick", "EventCallback<TItem>", "—", "Raised on click, Enter or Space. Makes rows focusable."),
+        new("RowClass", "Func<TItem, string?>?", "null", "Extra classes for a row, from its item."),
+        new("ItemKey", "Func<TItem, object?>?", "null", "A unique key per item, so rows keep their DOM when re-ordered.")
+    ];
+
+    private const string BasicCode = """
+        <Table TItem="Order" Items="_orders" Caption="Recent orders">
+            <HeaderTemplate>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Total</th>
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.Number</td>
+                <td>@context.Customer</td>
+                <td>@context.Total.ToString("0.00")</td>
+            </RowTemplate>
+            <FooterTemplate>
+                <td colspan="2">Total</td>
+                <td>@_orders.Sum(o => o.Total).ToString("0.00")</td>
+            </FooterTemplate>
+        </Table>
+        """;
+
+    private const string EmptyCode = """
+        <Table TItem="Order" Items="_orders" EmptyText="No orders yet." ... />
+
+        <Table TItem="Order" Items="_orders">
+            ...
+            <EmptyContent><strong>No orders yet.</strong> They show up here as they come in.</EmptyContent>
+        </Table>
+        """;
+
+    private const string OptionsCode = """
+        <Table TItem="Order" Items="_orders"
+               Striped="false" Bordered="false" Hover="false" Dense="true">
+            ...
+        </Table>
+        """;
+
+    private const string InteractiveCode = """
+        <Table TItem="Order" Items="_orders"
+               StickyHeader="true" RootMaxHeight="12rem"
+               OnRowClick="o => _picked = o.Number"
+               RowClass='o => o.Total > 100 ? "large-order" : null'
+               ItemKey="o => o.Number">
+            ...
+        </Table>
+        """;
+}

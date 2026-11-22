@@ -224,4 +224,37 @@ public class VetoCronExpressionTests
     {
         Assert.Equal("Minutes: '99' is outside 0-59.", VetoCronDescriber.Describe("99 * * * *"));
     }
+
+    [Fact]
+    public void A_day_range_can_end_on_sunday_written_as_seven ()
+    {
+        // 5-7 is Friday to Sunday. It used to be read as 5-0 and rejected as running backwards.
+        Assert.True(VetoCronExpression.TryParse("0 9 * * 5-7", out var expression, out var error), error);
+
+        Assert.Equal([0, 5, 6], expression!.DaysOfWeek.Values.Order());
+        Assert.Contains("Sunday", VetoCronDescriber.Describe(expression));
+    }
+
+    [Theory]
+    [InlineData("@yearly", "0 0 1 1 *")]
+    [InlineData("@annually", "0 0 1 1 *")]
+    [InlineData("@monthly", "0 0 1 * *")]
+    [InlineData("@weekly", "0 0 * * 0")]
+    [InlineData("@daily", "0 0 * * *")]
+    [InlineData("@midnight", "0 0 * * *")]
+    [InlineData("@HOURLY", "0 * * * *")]
+    public void Nicknames_expand_to_their_five_fields ( string nickname, string expected )
+    {
+        Assert.True(VetoCronExpression.TryParse(nickname, out var expression, out var error), error);
+
+        Assert.Equal(expected, expression!.Text);
+    }
+
+    [Fact]
+    public void An_unknown_nickname_says_which_ones_exist ()
+    {
+        Assert.False(VetoCronExpression.TryParse("@fortnightly", out _, out var error));
+
+        Assert.Contains("@daily", error);
+    }
 }

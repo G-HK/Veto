@@ -3,8 +3,8 @@
 
 <PageTitle>Veto — components for Blazor WebAssembly</PageTitle>
 
-<VetoContainer Size="VetoContainerSize.Large" Padding="VetoSpacing.ExtraLarge" Class="home">
-    <div data-testid="page" data-ready="@(_interactive ? "true" : null)">
+<VetoContainer Size="VetoContainerSize.Large" Padding="VetoSpacing.ExtraLarge">
+    <div class="home" data-testid="page" data-ready="@(_interactive ? "true" : null)">
 
         <section class="hero">
             <VetoStack Gap="VetoSpacing.ExtraLarge">
@@ -18,9 +18,9 @@
                 </VetoStack>
 
                 <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium" Wrap="true" Align="VetoAlign.Center">
-                    <a class="hero__cta" href="/docs/installation">Get started</a>
-                    <a class="hero__link" href="/docs/components/text-box">Browse components</a>
-                    <a class="hero__link" href="/docs/layouts">See the layouts</a>
+                    <VetoLink Class="hero__cta" Href="/docs/installation">Get started</VetoLink>
+                    <VetoLink Class="hero__link" Href="#components" TestId="hero-browse">Browse components</VetoLink>
+                    <VetoLink Class="hero__link" Href="/docs/layouts">See the layouts</VetoLink>
                 </VetoStack>
 
                 <VetoCode Code="@InstallSnippet" Language="powershell" TestId="hero-install" />
@@ -46,7 +46,7 @@
                     </VetoCard>
                     <VetoCard Title="Tested in a browser" Padding="VetoSpacing.Large">
                         Every component ships with Playwright specs that drive this site in a real
-                        browser — keyboard, ARIA and computed layout, not just rendered markup.
+                        browser: keyboard, ARIA and computed layout, not just rendered markup.
                     </VetoCard>
                 </VetoGrid>
             </VetoStack>
@@ -54,7 +54,7 @@
 
         <VetoDivider Class="home__rule" />
 
-        <section>
+        <section id="components">
             <VetoStack Gap="VetoSpacing.ExtraLarge">
                 <VetoStack Gap="VetoSpacing.ExtraSmall">
                     <h2 class="home__heading">Components</h2>
@@ -64,7 +64,7 @@
                 <VetoGrid Columns="1" ColumnsSmall="2" ColumnsLarge="4" Gap="VetoSpacing.Medium" TestId="component-grid">
                     @foreach (var entry in Catalogue)
                     {
-                        <a class="catalogue__link" href="@entry.Href">
+                        <VetoLink class="catalogue__link" href="@entry.Href">
                             <VetoCard Elevation="VetoElevation.Outlined" Padding="VetoSpacing.Large" Class="catalogue__card">
                                 <VetoStack Gap="VetoSpacing.Small">
                                     <VetoIcon Icon="@entry.Icon" Size="VetoIconSize.Large" Class="catalogue__icon" />
@@ -72,7 +72,7 @@
                                     <span class="catalogue__summary">@entry.Summary</span>
                                 </VetoStack>
                             </VetoCard>
-                        </a>
+                        </VetoLink>
                     }
                 </VetoGrid>
             </VetoStack>
@@ -84,7 +84,8 @@
 @code {
     private bool _interactive;
 
-    private const string InstallSnippet = """
+    private const string InstallSnippet = 
+        """
         dotnet add package Veto
         """;
 
@@ -93,28 +94,28 @@
     private static readonly CatalogueEntry[] Catalogue =
     [
         new("Text box", "Labelled input with validation", "/docs/components/text-box", VetoIcons.Edit),
-        new("Switch", "On/off, or three-state with null", "/docs/components/switch", VetoIcons.Settings),
-        new("Slider", "One value or a span, with marks", "/docs/components/slider", VetoIcons.Minus),
+        new("Switch", "On/off, or three-state with null", "/docs/components/switch", VetoIcons.Circle),
+        new("Slider", "One value or a span, with marks", "/docs/components/slider", VetoIcons.Volume),
         new("Rating", "Score out of any icon, halves included", "/docs/components/rating", VetoIcons.Star),
         new("Breadcrumbs", "Where you are, collapsing when long", "/docs/components/breadcrumbs", VetoIcons.ChevronRight),
         new("Toast", "Notifications, six corners, eleven animations", "/docs/components/toast", VetoIcons.Bell),
-        new("Button group", "Clustered actions and toolbars", "/docs/components/button-group", VetoIcons.Grid),
-        new("Gauge", "A dial for one live number", "/docs/components/gauge", VetoIcons.Settings),
+        new("Button group", "Clustered actions and toolbars", "/docs/components/button-group", VetoIcons.MoreHorizontal),
+        new("Gauge", "A dial for one live number", "/docs/components/gauge", VetoIcons.Timer),
         new("Keyboard key", "Key caps and shortcut lists", "/docs/components/kbd", VetoIcons.Terminal),
-        new("Cron", "Build a schedule, read it back in words", "/docs/components/cron", VetoIcons.Bell),
+        new("Cron", "Build a schedule, read it back in words", "/docs/components/cron", VetoIcons.Clock),
         new("Icon", "SVG icons, no font required", "/docs/components/icon", VetoIcons.Palette),
         new("Button", "Labelled action, optionally a link", "/docs/components/button", VetoIcons.Check),
         new("Icon button", "Icon-only action", "/docs/components/icon-button", VetoIcons.Plus),
-        new("Card", "Grouping surface", "/docs/components/card", VetoIcons.Document),
+        new("Card", "Grouping surface", "/docs/components/card", VetoIcons.Folder),
         new("Stack", "Row and column layout", "/docs/components/stack", VetoIcons.Sidebar),
         new("Grid", "Responsive grid", "/docs/components/grid", VetoIcons.Grid),
-        new("Container", "Reading-width wrapper", "/docs/components/container", VetoIcons.Document),
+        new("Container", "Reading-width wrapper", "/docs/components/container", VetoIcons.Maximize),
         new("Divider", "Rule with an optional label", "/docs/components/divider", VetoIcons.Minus),
-        new("Tilt 3D", "Pointer-tracking 3D tilt", "/docs/components/tilt", VetoIcons.Grid),
+        new("Tilt 3D", "Pointer-tracking 3D tilt", "/docs/components/tilt", VetoIcons.Bolt),
         new("Handbook page", "Documentation article and contents rail", "/docs/components/handbook-page", VetoIcons.Document),
-        new("Gantt", "Today's work to the minute, or the whole plan", "/docs/components/gantt", VetoIcons.Grid),
-        new("Loading", "Spinners, progress, skeletons", "/docs/components/loading", VetoIcons.Settings),
-        new("Blink text", "Typewriter reveal, streaming", "/docs/components/blink-text", VetoIcons.Terminal)
+        new("Gantt", "Today's work to the minute, or the whole plan", "/docs/components/gantt", VetoIcons.Calendar),
+        new("Loading", "Spinners, progress, skeletons", "/docs/components/loading", VetoIcons.Refresh),
+        new("Blink text", "Typewriter reveal, streaming", "/docs/components/blink-text", VetoIcons.AlignLeft)
     ];
 
     protected override void OnAfterRender ( bool firstRender )

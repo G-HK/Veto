@@ -49,6 +49,18 @@ public partial class VetoShortcut : VetoComponentBase
     [Parameter]
     public bool Symbols { get; set; }
 
+    /// <summary>When false the keys sit side by side with no character between them.</summary>
+    [Parameter]
+    public bool ShowSeparator { get; set; } = true;
+
+    /// <summary>Whether <c>Mod</c> is drawn as Cmd (true) or Ctrl (false).</summary>
+    [Parameter]
+    public bool Mac { get; set; }
+
+    /// <summary>When false the key caps lose their border and raised edge.</summary>
+    [Parameter]
+    public bool Bordered { get; set; } = true;
+
     /// <summary>The size of the key caps in this row.</summary>
     [Parameter]
     public VetoSize Size { get; set; } = VetoSize.Small;

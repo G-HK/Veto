@@ -47,14 +47,26 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-mod"
+               Title="One string for both platforms"
+               Description="Mod is the platform's main modifier: Ctrl by default, Cmd when Mac is set. Write Mod+S once and flip Mac from whatever you already know about the user's machine."
+               Code="@ModCode">
+        <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
+            <VetoKbd TestId="mod-pc" Keys="Mod+S" />
+            <VetoKbd TestId="mod-mac" Keys="Mod+S" Mac="true" />
+            <VetoKbd TestId="mod-mac-symbols" Keys="Mod+Shift+S" Mac="true" Symbols="true" />
+        </VetoStack>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-separator"
                Title="Separators"
-               Description="The separator is both what the string is split on and what is drawn between the caps, so a combination written with a different character still parses. Turn it off entirely for keys that simply sit next to each other - the vim-style two-key sequence, where no key is held."
+               Description="The separator is both what the string is split on and what is drawn between the caps, so a combination written with a different character still parses. Doubled, it is the key itself: Ctrl++ is Ctrl and Plus. Turn it off entirely for keys that simply sit next to each other - the vim-style two-key sequence, where no key is held."
                Code="@SeparatorCode">
         <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.ExtraLarge" Wrap="true" Align="VetoAlign.Center">
             <VetoKbd TestId="sep-plus" Keys="Ctrl+Alt+Del" />
             <VetoKbd TestId="sep-dash" Keys="Ctrl-Alt-Del" Separator="-" />
             <VetoKbd TestId="sep-none" Keys="g+g" ShowSeparator="false" />
+            <VetoKbd TestId="sep-key" Keys="Ctrl++" />
         </VetoStack>
     </DemoBlock>
 
@@ -119,9 +131,10 @@
         new("Separator", "string", "\"+\"", "What Keys is split on, and what is drawn between the caps."),
         new("ShowSeparator", "bool", "true", "Draw the separator character. Off for keys pressed in sequence."),
         new("Symbols", "bool", "false", "Draw modifiers as their conventional glyphs (⌘, ⇧, ⌥)."),
+        new("Mac", "bool", "false", "Draw the Mod key as Cmd rather than Ctrl."),
         new("Size", "VetoSize", "Medium", "Small for running inline in body text."),
         new("Bordered", "bool", "true", "False drops the border and the raised edge, leaving the key as tinted text."),
-        new("VetoShortcut", "component", "—", "One row: Description (or ChildContent) left, Keys (or KeysContent) right."),
+        new("VetoShortcut", "component", "—", "One row: Description (or ChildContent) left, Keys (or KeysContent) right. Passes Separator, ShowSeparator, Symbols, Mac, Bordered and Size to its keys."),
         new("VetoShortcutList", "component", "—", "The rows. Divided draws a hairline between them; Size sets the row height."),
     ];
 
@@ -141,9 +154,16 @@
         <VetoKbd Keys="Cmd+Shift+Enter" Symbols="true" />
         """;
 
+    private const string ModCode = """
+        <VetoKbd Keys="Mod+S" />                              @* Ctrl + S *@
+        <VetoKbd Keys="Mod+S" Mac="true" />                   @* Cmd + S *@
+        <VetoKbd Keys="Mod+Shift+S" Mac="true" Symbols="true" /> @* ⌘ + ⇧ + S *@
+        """;
+
     private const string SeparatorCode = """
         <VetoKbd Keys="Ctrl+Alt+Del" />
         <VetoKbd Keys="Ctrl-Alt-Del" Separator="-" />
+        <VetoKbd Keys="Ctrl++" />  @* the plus key itself *@
 
         @* Pressed one after the other, not held together: *@
         <VetoKbd Keys="g+g" ShowSeparator="false" />

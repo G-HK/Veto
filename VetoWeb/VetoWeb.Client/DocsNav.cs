@@ -66,7 +66,9 @@ public static class DocsNav
                     [
                         new VetoNavEntry { Label = "Toast", Href = "/docs/components/toast" },
                         new VetoNavEntry { Label = "Terminal box", Href = "/docs/components/terminal-box" },
-                        new VetoNavEntry { Label = "Gauge", Href = "/docs/components/gauge" }
+                        new VetoNavEntry { Label = "Gauge", Href = "/docs/components/gauge" },
+                        new VetoNavEntry { Label = "Loading", Href = "/docs/components/loading" },
+                        new VetoNavEntry { Label = "Blink text", Href = "/docs/components/blink-text" }
                     ]
                 },
                 new VetoNavEntry
@@ -87,6 +89,7 @@ public static class DocsNav
                     Children =
                     [
                         new VetoNavEntry { Label = "Icon", Href = "/docs/components/icon" },
+                        new VetoNavEntry { Label = "Code", Href = "/docs/components/code" },
                         new VetoNavEntry { Label = "Keyboard key", Href = "/docs/components/kbd" },
                         new VetoNavEntry { Label = "Handbook page", Href = "/docs/components/handbook-page" }
                     ]
@@ -96,17 +99,9 @@ public static class DocsNav
                     Label = "Data",
                     Children =
                     [
+                        new VetoNavEntry { Label = "Table", Href = "/docs/components/table" },
                         new VetoNavEntry { Label = "Gantt", Href = "/docs/components/gantt" },
                         new VetoNavEntry { Label = "Cron", Href = "/docs/components/cron" }
-                    ]
-                },
-                new VetoNavEntry
-                {
-                    Label = "Feedback",
-                    Children =
-                    [
-                        new VetoNavEntry { Label = "Loading", Href = "/docs/components/loading" },
-                        new VetoNavEntry { Label = "Blink text", Href = "/docs/components/blink-text" }
                     ]
                 },
                 new VetoNavEntry

@@ -214,7 +214,7 @@ internal sealed class VetoGanttTimeline
     /// </summary>
     private List<Column> Clip ( List<Column> columns )
     {
-        var clipped = new List<Column>(columns.Count);
+        List<Column> clipped = new(columns.Count);
 
         foreach (var column in columns)
         {
@@ -230,22 +230,22 @@ internal sealed class VetoGanttTimeline
         return clipped;
     }
 
-    private Column Cell ( string label, DateTime from, DateTime to, bool isWeekend = false )
-        => new(label, OffsetAt(from), OffsetAt(to) - OffsetAt(from), isWeekend);
+    private Column Cell ( string label, DateTime from, DateTime to, bool isWeekend = false ) =>
+        new(label, OffsetAt(from), OffsetAt(to) - OffsetAt(from), isWeekend);
 
     /// <summary>A lower-row cell: the app's format when it gave one, the scale's own otherwise.</summary>
-    private Column ColumnCell ( string label, DateTime from, DateTime to, bool isWeekend = false )
-        => Cell(_columnFormat is null ? label : from.ToString(_columnFormat), from, to, isWeekend);
+    private Column ColumnCell ( string label, DateTime from, DateTime to, bool isWeekend = false ) =>
+        Cell(_columnFormat is null ? label : from.ToString(_columnFormat), from, to, isWeekend);
 
     /// <summary>An upper-row cell, likewise.</summary>
-    private Column GroupCell ( string label, DateTime from, DateTime to )
-        => Cell(_groupFormat is null ? label : from.ToString(_groupFormat), from, to);
+    private Column GroupCell ( string label, DateTime from, DateTime to ) =>
+        Cell(_groupFormat is null ? label : from.ToString(_groupFormat), from, to);
 
     private static DateTime Midnight ( DateOnly day ) => day.ToDateTime(TimeOnly.MinValue);
 
     private List<Column> BuildColumns ()
     {
-        var columns = new List<Column>();
+        List<Column> columns = [];
 
         switch (Scale)
         {
@@ -314,7 +314,7 @@ internal sealed class VetoGanttTimeline
     /// </summary>
     private List<Column> BuildGroups ()
     {
-        var groups = new List<Column>();
+        List<Column> groups = [];
 
         if (Scale == VetoGanttScale.QuarterHour)
         {

@@ -1,6 +1,7 @@
 /* VetoBlinkText - text printed a character at a time. */
 
 .veto-blink-text {
+    position: relative;
     display: inline;
     white-space: pre-wrap;
     /* Long streamed text should wrap rather than push the layout wider. */
@@ -72,4 +73,7 @@
     .veto-blink-text__scramble {
         display: none;
     }
+}
+.veto-blink-text--skippable {
+    cursor: pointer;
 }

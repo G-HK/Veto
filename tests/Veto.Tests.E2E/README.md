@@ -8,7 +8,7 @@ Build once, then install the browsers Playwright drives:
 
 ```powershell
 dotnet build tests/Veto.Tests.E2E
-pwsh tests/Veto.Tests.E2E/bin/Debug/net10.0/playwright.ps1 install
+pwsh tests/Veto.Tests.E2E/bin/Debug/net11.0/playwright.ps1 install
 ```
 
 ## Running

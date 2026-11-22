@@ -54,6 +54,22 @@
     font-size: var(--veto-font-size-md);
 }
 
+.veto-kbd--xs .veto-kbd__key {
+    min-width: 1.25em;
+    padding: 0.1em 0.3em;
+    font-size: 0.65em;
+}
+
+.veto-kbd--xs .veto-kbd__separator {
+    font-size: 0.65em;
+}
+
+.veto-kbd--xl .veto-kbd__key {
+    min-width: 2.25em;
+    padding: 0.45em 0.8em;
+    font-size: var(--veto-font-size-lg);
+}
+
 /* Borderless: the cap becomes tinted text. The background stays, because without it and
    without the border there would be nothing left to say this is a key at all. */
 

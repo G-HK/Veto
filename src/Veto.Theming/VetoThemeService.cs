@@ -40,16 +40,18 @@ public sealed class VetoThemeService : IVetoThemeService, IAsyncDisposable
             return;
         }
 
-        _initialized = true;
-
         // Every JS call is guarded: during prerendering there is no browser to talk to, and
         // the theme simply stays at its default until the component renders interactively.
+        // Only a successful import counts as initialised - marked up front, one attempt made
+        // while prerendering would have blocked the real one for good.
         _module = await ImportModuleAsync();
 
         if (_module is null)
         {
             return;
         }
+
+        _initialized = true;
 
         _selfRef = DotNetObjectReference.Create(this);
         var state = await _module.InvokeAsync<ThemeState>("initialize", _selfRef);
@@ -145,7 +147,36 @@ public sealed class VetoThemeService : IVetoThemeService, IAsyncDisposable
         }
     }
 
-    private Task NotifyAsync () => Changed?.Invoke() ?? Task.CompletedTask;
+    /// <summary>Called when another tab of the same site changes the stored mode.</summary>
+    [JSInvokable]
+    public async Task OnStoredModeChanged ( string mode )
+    {
+        var next = Enum.TryParse<VetoThemeMode>(mode, out var parsed) ? parsed : VetoThemeMode.System;
+
+        if (next == Mode)
+        {
+            return;
+        }
+
+        Mode = next;
+        await NotifyAsync();
+    }
+
+    // Each subscriber awaited in turn. Invoking a multicast Func<Task> directly returns only
+    // the last handler's task, so every other handler ran unobserved and its exceptions were
+    // lost.
+    private async Task NotifyAsync ()
+    {
+        if (Changed is null)
+        {
+            return;
+        }
+
+        foreach (var handler in Changed.GetInvocationList().Cast<Func<Task>>())
+        {
+            await handler();
+        }
+    }
 
     private sealed record ThemeState ( string Mode, bool PrefersDark );
 }

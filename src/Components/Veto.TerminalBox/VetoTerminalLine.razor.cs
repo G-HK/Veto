@@ -125,9 +125,53 @@ public partial class VetoTerminalLine : VetoComponentBase
         base.StartStyle()
             // The animation steps once per character and the width is measured in ch, so the
             // caret lands exactly on each character boundary of the monospaced text.
+            // Steps are characters as the reader sees them (graphemes, so an emoji is one), and
+            // the width is terminal columns (a CJK character or an emoji takes two). Command.Length
+            // was used for both: it counts UTF-16 units, and at 1ch per unit a line in Japanese
+            // finished typing with its end still clipped off.
             .AddStyle(
                 "--veto-terminal-chars",
-                (Command?.Length ?? 0).ToString(CultureInfo.InvariantCulture),
+                CountCharacters(Command).ToString(CultureInfo.InvariantCulture),
+                Command is { Length: > 0 })
+            .AddStyle(
+                "--veto-terminal-columns",
+                CountColumns(Command).ToString(CultureInfo.InvariantCulture),
                 Command is { Length: > 0 })
             .AddStyle("--veto-terminal-typing-duration", TypingDuration, Typed);
+
+    private static int CountCharacters ( string? text )
+        => string.IsNullOrEmpty(text) ? 0 : new StringInfo(text).LengthInTextElements;
+
+    /// <summary>How many monospace columns the text takes: two for wide characters, one otherwise.</summary>
+    private static int CountColumns ( string? text )
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return 0;
+        }
+
+        var columns = 0;
+        var elements = StringInfo.GetTextElementEnumerator(text);
+
+        while (elements.MoveNext())
+        {
+            var first = System.Text.Rune.GetRuneAt((string)elements.Current, 0).Value;
+            columns += IsWide(first) ? 2 : 1;
+        }
+
+        return columns;
+    }
+
+    // ponytail: the East Asian Wide/Fullwidth blocks and the emoji planes, not the full Unicode
+    // width table; good enough for commands, which are almost all ASCII.
+    private static bool IsWide ( int c ) =>
+        c is (>= 0x1100 and <= 0x115F)
+            or (>= 0x2E80 and <= 0xA4CF)
+            or (>= 0xAC00 and <= 0xD7A3)
+            or (>= 0xF900 and <= 0xFAFF)
+            or (>= 0xFE30 and <= 0xFE4F)
+            or (>= 0xFF00 and <= 0xFF60)
+            or (>= 0xFFE0 and <= 0xFFE6)
+            or (>= 0x1F300 and <= 0x1FAFF)
+            or (>= 0x20000 and <= 0x3FFFD);
 }

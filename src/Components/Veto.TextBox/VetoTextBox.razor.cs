@@ -46,11 +46,71 @@ public partial class VetoTextBox<TValue> : VetoInputBase<TValue>
     [Parameter]
     public EventCallback<TValue?> OnValueChanged { get; set; }
 
+    /// <summary>The input's <c>maxlength</c>: the most characters the browser lets the user type.</summary>
+    [Parameter]
+    public int? MaxLength { get; set; }
+
+    /// <summary>Shows a "length / MaxLength" counter under the field. Needs <see cref="MaxLength"/>.</summary>
+    [Parameter]
+    public bool ShowCounter { get; set; }
+
+    /// <summary>Shows a button that clears the field while it has a value and can be edited.</summary>
+    [Parameter]
+    public bool Clearable { get; set; }
+
+    /// <summary>The clear button's accessible name.</summary>
+    [Parameter]
+    public string ClearLabel { get; set; } = "Clear";
+
+    /// <summary>Text shown inside the field before the value, e.g. <c>$</c> or <c>https://</c>.</summary>
+    [Parameter]
+    public string? Prefix { get; set; }
+
+    /// <summary>Text shown inside the field after the value, e.g. <c>kg</c> or <c>.com</c>.</summary>
+    [Parameter]
+    public string? Suffix { get; set; }
+
+    // What is in the box right now. Differs from CurrentValueAsString while the user types
+    // without Immediate, which is exactly when the counter and clear button still need it.
+    private string? _typed;
+
+    private string? DisplayText => _typed ?? CurrentValueAsString;
+
+    private int TextLength => DisplayText?.Length ?? 0;
+
+    private bool ShowClearButton => Clearable && !Disabled && !ReadOnly && !string.IsNullOrEmpty(DisplayText);
+
+    /// <inheritdoc />
+    protected override void OnParametersSet ()
+    {
+        base.OnParametersSet();
+        _typed = null;
+    }
+
     private Task OnInputAsync ( ChangeEventArgs args )
-        => Immediate ? SetCurrentValueAsync(args.Value?.ToString()) : Task.CompletedTask;
+    {
+        _typed = args.Value?.ToString();
+        return Immediate ? SetCurrentValueAsync(_typed) : Task.CompletedTask;
+    }
 
     private Task OnChangeAsync ( ChangeEventArgs args )
-        => Immediate ? Task.CompletedTask : SetCurrentValueAsync(args.Value?.ToString());
+    {
+        _typed = null;
+        return Immediate ? Task.CompletedTask : SetCurrentValueAsync(args.Value?.ToString());
+    }
+
+    private async Task ClearAsync ()
+    {
+        _typed = null;
+        CurrentValue = default;
+
+        if (OnValueChanged.HasDelegate)
+        {
+            await OnValueChanged.InvokeAsync(CurrentValue);
+        }
+
+        await FocusAsync();
+    }
 
     private async Task SetCurrentValueAsync ( string? value )
     {
@@ -78,7 +138,7 @@ public partial class VetoTextBox<TValue> : VetoInputBase<TValue>
     {
         var parsed = Format is null
             ? BindConverter.TryConvertTo<TValue>(value, CultureInfo.CurrentCulture, out var converted)
-            : BindConverter.TryConvertTo<TValue>(value, CultureInfo.InvariantCulture, out converted);
+            : TryParseFormatted(value, Format, out converted);
 
         if (parsed)
         {
@@ -90,5 +150,51 @@ public partial class VetoTextBox<TValue> : VetoInputBase<TValue>
         result = default;
         validationErrorMessage = $"The {DisplayName ?? FieldIdentifier.FieldName} field is not valid.";
         return false;
+    }
+
+    // BindConverter.TryConvertTo<T> has no format argument, so a date shown as "dd/MM/yyyy"
+    // could be displayed but never read back. The date and time types have format-aware
+    // overloads; everything else parses as before.
+    private static bool TryParseFormatted ( string? value, string format, out TValue? result )
+    {
+        var type = Nullable.GetUnderlyingType(typeof(TValue)) ?? typeof(TValue);
+        var culture = CultureInfo.InvariantCulture;
+        object? parsed;
+        bool ok;
+
+        if (type == typeof(DateTime))
+        {
+            ok = BindConverter.TryConvertToNullableDateTime(value, culture, format, out var v);
+            parsed = v;
+        }
+        else if (type == typeof(DateTimeOffset))
+        {
+            ok = BindConverter.TryConvertToNullableDateTimeOffset(value, culture, format, out var v);
+            parsed = v;
+        }
+        else if (type == typeof(DateOnly))
+        {
+            ok = BindConverter.TryConvertToNullableDateOnly(value, culture, format, out var v);
+            parsed = v;
+        }
+        else if (type == typeof(TimeOnly))
+        {
+            ok = BindConverter.TryConvertToNullableTimeOnly(value, culture, format, out var v);
+            parsed = v;
+        }
+        else
+        {
+            return BindConverter.TryConvertTo(value, culture, out result);
+        }
+
+        // An empty box is null: fine for DateTime?, a parse failure for DateTime.
+        if (!ok || (parsed is null && type == typeof(TValue)))
+        {
+            result = default;
+            return false;
+        }
+
+        result = (TValue?)parsed;
+        return true;
     }
 }

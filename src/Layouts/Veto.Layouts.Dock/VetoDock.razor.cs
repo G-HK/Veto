@@ -37,6 +37,10 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
 
     private IJSObjectReference? _module;
     private bool _attached;
+    private object? _sentOptions;
+
+    // An anonymous type compares by value, so a changed option is spotted without bookkeeping.
+    private object Options => new { magnification = Magnification, range = Range, vertical = IsVertical };
     private int _focusedIndex;
 
     /// <inheritdoc />
@@ -167,6 +171,19 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
         {
             await DetachAsync();
         }
+        else if (_attached && !Equals(Options, _sentOptions))
+        {
+            try
+            {
+                var options = Options;
+                await _module!.InvokeVoidAsync("update", RootElement, options);
+                _sentOptions = options;
+            }
+            catch (Exception ex) when (ex is JSException or JSDisconnectedException)
+            {
+                // The page is going away.
+            }
+        }
     }
 
     private async Task OnKeyDownAsync ( KeyboardEventArgs args )
@@ -205,14 +222,11 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
         try
         {
             _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Layouts.Dock/veto-dock.js");
-            await _module.InvokeVoidAsync("attach", RootElement, new
-            {
-                magnification = Magnification,
-                range = Range,
-                vertical = IsVertical
-            });
+            var options = Options;
+            await _module.InvokeVoidAsync("attach", RootElement, options);
 
             _attached = true;
+            _sentOptions = options;
         }
         catch (Exception ex) when (ex is JSException or InvalidOperationException or JSDisconnectedException)
         {

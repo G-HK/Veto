@@ -36,6 +36,22 @@
         <VetoCode Code="@SiteTheme" Language="csharp" TestId="site-theme" />
     </DemoBlock>
 
+    <DemoBlock TestId="demo-custom"
+               Title="Custom theme"
+               Description="Pick one and the whole site changes with it - the app bar, the navigation, this page. It all happens in the browser: SetThemeAsync swaps the token overrides and every component follows, with no request to the server. The choice lasts until you reload."
+               Code="@CustomCode">
+        <VetoButtonGroup TestId="custom-themes" Label="Custom theme">
+            @foreach (var (name, theme) in VetoDocsTheme.Presets)
+            {
+                var active = ReferenceEquals(ThemeService.Theme, theme);
+                <VetoButton Variant="@(active ? VetoVariant.Filled : VetoVariant.Outlined)"
+                            aria-pressed="@(active ? "true" : "false")"
+                            TestId="@($"custom-{name.Split(' ')[0].ToLowerInvariant()}")"
+                            OnClick="() => ThemeService.SetThemeAsync(theme)">@name</VetoButton>
+            }
+        </VetoButtonGroup>
+    </DemoBlock>
+
     <VetoStack Gap="VetoSpacing.Medium">
         <h2 class="docs-heading">Avoiding the flash</h2>
         <p class="docs-prose">
@@ -56,12 +72,14 @@
 
     public void Dispose () => ThemeService.Changed -= OnThemeChangedAsync;
 
-    private const string ToggleCode = """
+    private const string ToggleCode = 
+        """
         <VetoThemeToggle />
         <VetoThemeToggle ShowSystemOption="true" />
         """;
 
-    private const string StateCode = """
+    private const string StateCode = 
+        """
         @inject IVetoThemeService ThemeService
 
         <span>Mode: @ThemeService.Mode</span>
@@ -73,11 +91,13 @@
         }
         """;
 
-    private const string BrandCode = """
+    private const string BrandCode = 
+        """
         <VetoThemeProvider Theme="AppTheme" />
         """;
 
-    private const string SiteTheme = """
+    private const string SiteTheme = 
+        """
         public static readonly VetoTheme Theme = new()
         {
             Light = new VetoPalette
@@ -98,7 +118,25 @@
         };
         """;
 
-    private const string BootScript = """
+    private const string CustomCode =
+        """
+        @inject IVetoThemeService ThemeService
+
+        <VetoButton OnClick="() => ThemeService.SetThemeAsync(Ocean)">Ocean</VetoButton>
+
+        @code {
+            // Only the accent is set; every token left null falls back to the built-in value.
+            private static readonly VetoTheme Ocean = new()
+            {
+                Light = new VetoPalette { Primary = "#1D4ED8", PrimaryHover = "#1E40AF" },
+                Dark  = new VetoPalette { Primary = "#60A5FA", PrimaryHover = "#93C5FD",
+                                          PrimaryContrast = "#0B1220" }
+            };
+        }
+        """;
+
+    private const string BootScript =
+        """
         <head>
             <script src="_content/Veto.Theming/veto-theme-init.js"></script>
             <link rel="stylesheet" href="_content/Veto.Core/VetoStyles.css" />

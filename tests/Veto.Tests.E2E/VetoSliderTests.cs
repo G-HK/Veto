@@ -233,4 +233,64 @@ public class VetoSliderTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         await Expect(Page.GetByTestId("submit-value")).ToHaveTextAsync("Saved: 5");
     }
+
+    [Fact]
+    public async Task Input_attributes_ignore_the_display_format ()
+    {
+        await GotoComponentAsync(Route);
+
+        // Format="N0" prints "5,000"; the attribute must stay a number the browser can read,
+        // or it falls back to max=100 and the thumb pins to the end.
+        await Expect(Lower("bubble")).ToHaveAttributeAsync("max", "5000");
+        await Expect(Lower("bubble")).ToHaveAttributeAsync("step", "250");
+        await Expect(Lower("bubble")).ToHaveValueAsync("1500");
+    }
+
+    [Fact]
+    public async Task Always_on_bubble_shows_the_formatted_value ()
+    {
+        await GotoComponentAsync(Route);
+
+        var bubble = Page.GetByTestId("bubble-bubble");
+        await Expect(bubble).ToHaveTextAsync("$1,500");
+        await Expect(bubble).ToHaveCSSAsync("opacity", "1");
+
+        await Lower("bubble").FocusAsync();
+        await Lower("bubble").PressAsync("ArrowRight");
+        await Expect(bubble).ToHaveTextAsync("$1,750");
+    }
+
+    [Fact]
+    public async Task Active_bubble_shows_only_while_its_thumb_is_in_use ()
+    {
+        await GotoComponentAsync(Route);
+
+        var bubble = Page.GetByTestId("bubble-range-bubble");
+        await Expect(bubble).ToHaveCSSAsync("opacity", "0");
+
+        await Lower("bubble-range").FocusAsync();
+        await Expect(bubble).ToHaveCSSAsync("opacity", "1");
+    }
+
+    [Fact]
+    public async Task Thumbs_that_meet_at_the_top_can_still_be_pulled_apart ()
+    {
+        await GotoComponentAsync(Route);
+
+        var root = Component("bubble-range");
+        await Expect(root).ToHaveClassAsync(new Regex(@"\bveto-slider--lower-on-top\b"));
+
+        // Both thumbs sit at 99. Drag from there to the left: the pointer must find the low thumb.
+        await Upper("bubble-range").ScrollIntoViewIfNeededAsync();
+        var box = await Upper("bubble-range").BoundingBoxAsync();
+        Assert.NotNull(box);
+        var y = box!.Y + box.Height / 2;
+        await Page.Mouse.MoveAsync(box.X + box.Width - 4, y);
+        await Page.Mouse.DownAsync();
+        await Page.Mouse.MoveAsync(box.X + box.Width / 2, y, new() { Steps = 8 });
+        await Page.Mouse.UpAsync();
+
+        await Expect(root).Not.ToHaveAttributeAsync("data-value", "99");
+        await Expect(root).ToHaveAttributeAsync("data-upper-value", "99");
+    }
 }

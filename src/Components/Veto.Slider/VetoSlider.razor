@@ -7,8 +7,8 @@
     <div class="@RootCssClass"
          style="@RootCssStyle"
          data-testid="@TestId"
-         data-value="@FormatNumber(LowerNumber)"
-         data-upper-value="@(Range ? FormatNumber(UpperNumber) : null)">
+         data-value="@AttrNumber(LowerNumber)"
+         data-upper-value="@(Range ? AttrNumber(UpperNumber) : null)">
 
         @if (HasLabel || ShowValue)
         {
@@ -48,8 +48,8 @@
                    name="@NameAttributeValue"
                    class="veto-slider__input veto-slider__input--lower @FieldValidationClass"
                    type="range"
-                   min="@FormatNumber(MinNumber)"
-                   max="@FormatNumber(MaxNumber)"
+                   min="@AttrNumber(MinNumber)"
+                   max="@AttrNumber(MaxNumber)"
                    step="@StepAttribute"
                    value="@ValueAttribute(LowerNumber)"
                    disabled="@Disabled"
@@ -67,8 +67,8 @@
                 <input class="veto-slider__input veto-slider__input--upper"
                        id="@UpperElementId"
                        type="range"
-                       min="@FormatNumber(MinNumber)"
-                       max="@FormatNumber(MaxNumber)"
+                       min="@AttrNumber(MinNumber)"
+                       max="@AttrNumber(MaxNumber)"
                        step="@StepAttribute"
                        value="@ValueAttribute(UpperNumber)"
                        disabled="@Disabled"
@@ -77,6 +77,22 @@
                        aria-readonly="@(ReadOnly ? "true" : null)"
                        @oninput="OnUpperInputAsync"
                        @onchange="OnUpperChangeAsync" />
+            }
+
+            @if (ThumbValue != VetoSliderThumbValue.Never)
+            {
+                @* After the inputs, so CSS can show each bubble from its own input's state. *@
+                <output class="veto-slider__bubble veto-slider__bubble--lower"
+                        style="--veto-slider-at:@(PercentCss(LowerNumber))"
+                        aria-hidden="true"
+                        data-testid="@(TestId is null ? null : $"{TestId}-bubble")">@TextFor(LowerNumber)</output>
+                @if (Range)
+                {
+                    <output class="veto-slider__bubble veto-slider__bubble--upper"
+                            style="--veto-slider-at:@(PercentCss(UpperNumber))"
+                            aria-hidden="true"
+                            data-testid="@(TestId is null ? null : $"{TestId}-bubble-upper")">@TextFor(UpperNumber)</output>
+                }
             }
 
             @if (ShowMarkLabels && HasMarkLabels)

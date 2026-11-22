@@ -96,6 +96,13 @@ public partial class VetoRating<TValue> : VetoInputBase<TValue>
     [Parameter]
     public IReadOnlyList<string>? ItemLabels { get; set; }
 
+    /// <summary>
+    /// When true the name from <see cref="ItemLabels"/> for the score is printed after the row,
+    /// and follows the pointer while it previews - "Poor", "Good", "Excellent".
+    /// </summary>
+    [Parameter]
+    public bool ShowItemLabel { get; set; }
+
     /// <summary>The colour the earned icons take.</summary>
     [Parameter]
     public VetoColor Color { get; set; } = VetoColor.Warning;
@@ -116,6 +123,17 @@ public partial class VetoRating<TValue> : VetoInputBase<TValue>
     private bool Interactive => !Disabled && !ReadOnly;
 
     private bool HasLabel => !string.IsNullOrWhiteSpace(Label);
+
+    private string LabelId => $"{ElementId}-label";
+
+    // What a <label for> would have done, had the row been an element it can point at.
+    private async Task OnLabelClickAsync ()
+    {
+        if (!Disabled)
+        {
+            await FocusAsync();
+        }
+    }
 
     private string AccessibleName => Label ?? "Rating";
 
@@ -253,8 +271,18 @@ public partial class VetoRating<TValue> : VetoInputBase<TValue>
 
     private Task OnKeyDownAsync ( KeyboardEventArgs args )
     {
-        // Only keys the browser does not already spend on scrolling or focus are bound, so the
-        // row never has to swallow a keystroke it does not own - no preventDefault, no Tab trap.
+        // The arrows, Home and End have their scrolling default prevented by the row in the
+        // markup; Tab is never touched, so there is no focus trap.
+        if (args.Key is "Home")
+        {
+            return SetValueAsync(0);
+        }
+
+        if (args.Key is "End")
+        {
+            return SetValueAsync(Max);
+        }
+
         if (args.Key is "ArrowRight" or "ArrowUp")
         {
             return SetValueAsync(ToNumber(CurrentValue) + StepSize);

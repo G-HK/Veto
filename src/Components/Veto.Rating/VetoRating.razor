@@ -13,7 +13,9 @@
 
         @if (HasLabel)
         {
-            <label class="veto-rating__label" for="@ElementId">
+            @* The row is a div with role="slider", which a <label for> cannot name, so the
+               label is tied to it through aria-labelledby instead; clicking it still focuses. *@
+            <label class="veto-rating__label" id="@LabelId" @onclick="OnLabelClickAsync">
                 @Label
                 @if (Required)
                 {
@@ -22,7 +24,9 @@
             </label>
         }
 
-        <div class="veto-rating__row">
+        @* Arrows, Home and End move the score; they must not scroll the page as well. *@
+        <div class="veto-rating__row"
+             onkeydown="if(event.target.classList.contains('veto-rating__items')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))event.preventDefault()">
             @* One focusable element for the whole rating: a screen reader hears a single
                "3 of 6" control rather than six unrelated buttons, and the arrow keys walk
                the scale a half step at a time when halves are allowed. *@
@@ -37,6 +41,7 @@
                  aria-valuenow="@FormatNumber(Score)"
                  aria-valuetext="@ValueText"
                  aria-label="@(HasLabel ? null : AccessibleName)"
+                 aria-labelledby="@(HasLabel ? LabelId : null)"
                  aria-orientation="horizontal"
                  aria-required="@(Required ? "true" : null)"
                  aria-readonly="@(Interactive ? null : "true")"
@@ -93,6 +98,11 @@
             @if (ShowValue)
             {
                 <span class="veto-rating__value" data-testid="@(TestId is null ? null : $"{TestId}-value")">@ValueText</span>
+            }
+
+            @if (ShowItemLabel && ItemLabels is not null)
+            {
+                <span class="veto-rating__item-label" data-testid="@(TestId is null ? null : $"{TestId}-item-label")" aria-hidden="true">@NameFor(Number)</span>
             }
         </div>
 

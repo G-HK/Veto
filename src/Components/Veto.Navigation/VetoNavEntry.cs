@@ -33,6 +33,12 @@ public sealed record VetoNavEntry
     /// <summary>Whether the entry is shown but not activatable.</summary>
     public bool Disabled { get; init; }
 
+    /// <summary>
+    /// For a group: whether it starts closed. The reader can still open it, and a group holding
+    /// the current page is always open.
+    /// </summary>
+    public bool Collapsed { get; init; }
+
     /// <summary>True when this entry has children and therefore renders as a group.</summary>
     public bool IsGroup => Children.Count > 0;
 }

@@ -102,6 +102,22 @@
     padding-inline: var(--veto-space-5);
 }
 
+.veto-button-reveal--xs { font-size: var(--veto-font-size-xs); }
+
+.veto-button-reveal--xl { font-size: var(--veto-font-size-xl); }
+
+.veto-button-reveal--xs .veto-button-reveal__trigger { width: 1.75rem; height: 1.75rem; }
+
+.veto-button-reveal--xl .veto-button-reveal__trigger { width: 3.5rem; height: 3.5rem; }
+
+.veto-button-reveal--labelled.veto-button-reveal--xs .veto-button-reveal__trigger {
+    padding-inline: var(--veto-space-2);
+}
+
+.veto-button-reveal--labelled.veto-button-reveal--xl .veto-button-reveal__trigger {
+    padding-inline: var(--veto-space-6);
+}
+
 .veto-button-reveal--round .veto-button-reveal__trigger {
     border-radius: var(--veto-radius-full);
 }
@@ -154,14 +170,65 @@
     background: var(--veto-color-surface-raised);
 }
 
+.veto-button-reveal--soft .veto-button-reveal__trigger,
+.veto-button-reveal--underlined .veto-button-reveal__trigger,
+.veto-button-reveal--ghost .veto-button-reveal__trigger,
+.veto-button-reveal--elevated .veto-button-reveal__trigger {
+    color: var(--veto-color-text);
+}
+
+.veto-button-reveal--soft .veto-button-reveal__trigger {
+    background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.veto-button-reveal--soft .veto-button-reveal__trigger:hover:not(:disabled) {
+    background: color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.veto-button-reveal--underlined .veto-button-reveal__trigger {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.veto-button-reveal--underlined .veto-button-reveal__trigger:hover:not(:disabled),
+.veto-button-reveal--ghost .veto-button-reveal__trigger:hover:not(:disabled) {
+    background: var(--veto-color-surface-raised);
+}
+
+.veto-button-reveal--elevated .veto-button-reveal__trigger {
+    background: var(--veto-color-surface);
+}
+
+/* Not while focused, or the shadow would replace the focus ring. */
+.veto-button-reveal--elevated .veto-button-reveal__trigger:not(:focus-visible) {
+    box-shadow: var(--veto-shadow-sm), var(--veto-shadow-md);
+}
+
+.veto-button-reveal--elevated .veto-button-reveal__trigger:hover:not(:disabled) {
+    background: var(--veto-color-surface-raised);
+}
+
 .veto-button-reveal--outlined.veto-button-reveal--primary .veto-button-reveal__trigger,
-.veto-button-reveal--text.veto-button-reveal--primary .veto-button-reveal__trigger {
+.veto-button-reveal--text.veto-button-reveal--primary .veto-button-reveal__trigger,
+.veto-button-reveal--soft.veto-button-reveal--primary .veto-button-reveal__trigger,
+.veto-button-reveal--underlined.veto-button-reveal--primary .veto-button-reveal__trigger,
+.veto-button-reveal--ghost.veto-button-reveal--primary .veto-button-reveal__trigger,
+.veto-button-reveal--elevated.veto-button-reveal--primary .veto-button-reveal__trigger {
     color: var(--veto-color-primary);
 }
 
 .veto-button-reveal--outlined.veto-button-reveal--danger .veto-button-reveal__trigger,
-.veto-button-reveal--text.veto-button-reveal--danger .veto-button-reveal__trigger {
+.veto-button-reveal--text.veto-button-reveal--danger .veto-button-reveal__trigger,
+.veto-button-reveal--soft.veto-button-reveal--danger .veto-button-reveal__trigger,
+.veto-button-reveal--underlined.veto-button-reveal--danger .veto-button-reveal__trigger,
+.veto-button-reveal--ghost.veto-button-reveal--danger .veto-button-reveal__trigger,
+.veto-button-reveal--elevated.veto-button-reveal--danger .veto-button-reveal__trigger {
     color: var(--veto-color-danger);
+}
+
+/* Muted at rest whatever its colour role; the role shows once the pointer or focus arrives. */
+.veto-button-reveal--ghost:not(.veto-button-reveal--open) .veto-button-reveal__trigger:not(:hover):not(:focus-visible) {
+    color: var(--veto-color-text-muted);
 }
 
 /* The strip the actions unfold into. */

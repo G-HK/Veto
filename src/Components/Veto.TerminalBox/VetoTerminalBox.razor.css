@@ -65,6 +65,8 @@
     gap: var(--veto-space-1);
     padding: var(--veto-space-4);
     overflow-x: auto;
+    max-height: var(--veto-terminal-max-height, none);
+    overflow-y: auto;
     font-size: var(--veto-font-size-md);
     line-height: var(--veto-line-height);
     color: var(--veto-color-terminal-text);

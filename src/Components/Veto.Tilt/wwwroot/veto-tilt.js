@@ -14,9 +14,9 @@ function prefersReducedMotion() {
 /**
  * Starts tracking the pointer over an element.
  * @param {HTMLElement} element the tilt surface
- * @param {{maxTilt: number, scale: number, glare: boolean, reset: boolean}} options
+ * @param {{maxTilt: number, scale: number, glare: boolean, reset: boolean, reverse: boolean, axis: string}} options
  */
-export function attach(element, options) {
+export function attach(element, initial) {
     if (!element || handles.has(element)) {
         return;
     }
@@ -26,6 +26,10 @@ export function attach(element, options) {
     if (prefersReducedMotion() || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
         return;
     }
+
+    // One options object for the element's lifetime, mutated by update() - the handlers read
+    // it on every event, so a changed parameter takes effect on the next pointer move.
+    const options = { ...initial };
 
     const onMove = event => {
         const rect = element.getBoundingClientRect();
@@ -39,9 +43,13 @@ export function attach(element, options) {
         const py = (event.clientY - rect.top) / rect.height - 0.5;
 
         // Y tilt follows horizontal movement and X tilt follows vertical, which is what makes
-        // the surface look like it is being pushed rather than dragged.
-        element.style.setProperty('--veto-tilt-y', `${px * options.maxTilt * 2}deg`);
-        element.style.setProperty('--veto-tilt-x', `${-py * options.maxTilt * 2}deg`);
+        // the surface look like it is being pushed rather than dragged. Reverse makes it lean
+        // towards the pointer instead; an axis lock zeroes the other one.
+        const sign = options.reverse ? -1 : 1;
+        const y = options.axis === 'vertical' ? 0 : sign * px * options.maxTilt * 2;
+        const x = options.axis === 'horizontal' ? 0 : sign * -py * options.maxTilt * 2;
+        element.style.setProperty('--veto-tilt-y', `${y}deg`);
+        element.style.setProperty('--veto-tilt-x', `${x}deg`);
 
         if (options.glare) {
             element.style.setProperty('--veto-tilt-glare-x', `${(px + 0.5) * 100}%`);
@@ -70,7 +78,26 @@ export function attach(element, options) {
     element.addEventListener('pointermove', onMove);
     element.addEventListener('pointerleave', onLeave);
 
-    handles.set(element, { onEnter, onMove, onLeave });
+    handles.set(element, { onEnter, onMove, onLeave, options });
+}
+
+/** Applies changed parameters to an attached element without re-attaching it. */
+export function update(element, changed) {
+    const handle = element && handles.get(element);
+
+    if (!handle) {
+        return;
+    }
+
+    Object.assign(handle.options, changed);
+
+    if (element.dataset.tilting) {
+        element.style.setProperty('--veto-tilt-scale', String(handle.options.scale));
+    }
+
+    if (!handle.options.glare) {
+        element.style.setProperty('--veto-tilt-glare-opacity', '0');
+    }
 }
 
 /** Stops tracking and clears everything the tilt set. */

@@ -4,6 +4,8 @@ A text input with a label, helper text and validation, bound to any type that ca
 
 Part of [Veto](https://github.com/G-HK/Veto), a Blazor component library with no third-party dependencies. Install the `Veto` package instead to get every component at once.
 
+Try it live in the docs site: <https://veto.blackpanda.be/docs/components/text-box>
+
 ## Install
 
 ```powershell
@@ -33,6 +35,11 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
              Placeholder="e.g. Veto"
              HelperText="Shown until the field becomes invalid."
              @bind-Value="_name" />
+
+<VetoTextBox TValue="string" Label="Title" Clearable="true"
+             MaxLength="40" ShowCounter="true" @bind-Value="_title" />
+
+<VetoTextBox TValue="decimal?" Label="Price" Prefix="$" Suffix="USD" @bind-Value="_price" />
 ```
 
 ## Documentation

@@ -133,7 +133,7 @@ validation for free.
 
 | Component | Status | Notes |
 |---|---|---|
-| `VetoTable<TItem>` | stub | Has `Items` plus header/row/footer templates today. Needs sorting, paging, selection, virtualization, empty state. |
+| `VetoTable<TItem>` | partial | `Table<TItem>`: header/row/footer templates on the component contract, null-safe `Items`, empty state, caption, striped/bordered/hover/dense, sticky header, clickable rows, `RowClass`, `ItemKey`. Still needs sorting, paging, selection and virtualization - those need a column model. |
 | `VetoList<TItem>` | idea | Simpler than a table; rows with leading/trailing slots. |
 | `VetoTree<TItem>` | idea | Expand/collapse, lazy children, keyboard navigation. |
 | `VetoGantt` | **done** | Project/task tree, day/week/month zoom, text and category filters, today marker and navigation, milestones, per-row colours, CSV + JSON export with an `OnExport` hook, and dependency arrows between chained rows. |

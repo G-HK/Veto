@@ -39,7 +39,7 @@
     --veto-color-text-muted: #6b7280;
     --veto-color-text-disabled: #9ca3af;
     --veto-color-border: #d1d5db;
-    --veto-color-border-strong: #9ca3af;
+    --veto-color-border-strong: #8b929d;
 
     /* Shape */
     --veto-radius-sm: 4px;
@@ -58,16 +58,16 @@
     /* Typography */
     --veto-font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --veto-font-mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    --veto-font-size-xs: 0.75rem;
     --veto-font-size-sm: 0.8125rem;
     --veto-font-size-md: 0.9375rem;
     --veto-font-size-lg: 1.0625rem;
+    --veto-font-size-xl: 1.25rem;
     --veto-line-height: 1.5;
 
     /* Elevation and motion */
     --veto-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.08);
     --veto-shadow-md: 0 4px 12px rgb(15 23 42 / 0.12);
-    --veto-focus-ring: 0 0 0 3px rgb(79 70 229 / 0.35);
-    --veto-focus-ring-danger: 0 0 0 3px rgb(220 38 38 / 0.3);
     --veto-transition: 150ms ease;
 
     /* Layering. Tooltips sit above page content, sticky bars and each other's components;
@@ -113,8 +113,6 @@
 
     --veto-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
     --veto-shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
-    --veto-focus-ring: 0 0 0 3px rgb(129 140 248 / 0.4);
-    --veto-focus-ring-danger: 0 0 0 3px rgb(248 113 113 / 0.35);
 }
 
 /* OS preference, unless the app explicitly asked for light */
@@ -141,8 +139,28 @@
 
         --veto-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
         --veto-shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
-        --veto-focus-ring: 0 0 0 3px rgb(129 140 248 / 0.4);
-        --veto-focus-ring-danger: 0 0 0 3px rgb(248 113 113 / 0.35);
+    }
+}
+
+/*
+ * Focus rings. Built from the palette rather than written as literals, so a theme that changes
+ * the accent changes the ring with it. A 2px gap in the surface colour, then a solid 2px ring
+ * in the accent - solid because the indicator has to reach 3:1 against what it sits on, which
+ * a translucent halo never does. Declared on every themed element, not just :root, so the
+ * colours resolve again inside a component pinned to the other palette.
+ */
+:root,
+[data-veto-theme] {
+    --veto-focus-ring: 0 0 0 2px var(--veto-color-surface), 0 0 0 4px var(--veto-color-primary);
+    --veto-focus-ring-danger: 0 0 0 2px var(--veto-color-surface), 0 0 0 4px var(--veto-color-danger);
+}
+
+/* Forced colours (Windows High Contrast) throw every box-shadow away, and with it every focus
+   ring in the library. An outline survives, so draw one in the system's highlight colour. */
+@media (forced-colors: active) {
+    :focus-visible {
+        outline: 2px solid Highlight !important;
+        outline-offset: 2px;
     }
 }
 

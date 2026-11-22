@@ -4,6 +4,8 @@ The foundation every Veto component is built on: `VetoComponentBase` and `VetoIn
 CSS and style builders, the shared enums (`VetoColor`, `VetoVariant`, `VetoSpacing`, …) and the
 design tokens stylesheet.
 
+See the design tokens in the docs site: <https://veto.blackpanda.be/docs/theming/tokens>
+
 You rarely install this directly. Every Veto component package depends on it, and the `Veto`
 package brings in everything. Install it on its own to build your own components on the same
 contract and tokens.

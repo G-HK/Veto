@@ -97,6 +97,26 @@ public partial class VetoSwitch<TValue> : VetoInputBase<TValue>
     [Parameter]
     public string? IndeterminateIcon { get; set; } = VetoIcons.Minus;
 
+    /// <summary>
+    /// Asked before every change, with the state the switch is about to take. Return false to
+    /// keep the current state - after a confirmation the user declined, or a save that failed.
+    /// While it runs the switch is busy: it ignores further input and shows a spinner in the
+    /// thumb.
+    /// </summary>
+    [Parameter]
+    public Func<bool?, Task<bool>>? BeforeChange { get; set; }
+
+    /// <summary>
+    /// Shows the busy state without a <see cref="BeforeChange"/> - for a switch whose value is
+    /// being loaded or saved elsewhere. Input is ignored while it is set.
+    /// </summary>
+    [Parameter]
+    public bool Loading { get; set; }
+
+    private bool _busy;
+
+    private bool IsBusy => _busy || Loading;
+
     /// <summary>Raised after the bound value changes, with the new value.</summary>
     [Parameter]
     public EventCallback<TValue?> OnValueChanged { get; set; }
@@ -163,6 +183,7 @@ public partial class VetoSwitch<TValue> : VetoInputBase<TValue>
             .AddClass(Modifier(Color.ToModifier()))
             .AddClass(Modifier(StateName))
             .AddClass(Modifier("three-state"), ThreeState)
+            .AddClass(Modifier("busy"), IsBusy)
             .AddClass(Modifier($"label-{LabelPlacement.ToString().ToLowerInvariant()}"));
 
     /// <summary>Moves to the next state, as if the user had activated the switch.</summary>
@@ -172,9 +193,27 @@ public partial class VetoSwitch<TValue> : VetoInputBase<TValue>
     /// <param name="state">True for on, false for off, null for indeterminate.</param>
     public async Task SetStateAsync ( bool? state )
     {
-        if (Disabled || ReadOnly || state == State)
+        if (Disabled || ReadOnly || IsBusy || state == State)
         {
             return;
+        }
+
+        if (BeforeChange is not null)
+        {
+            _busy = true;
+            StateHasChanged();
+
+            try
+            {
+                if (!await BeforeChange(state))
+                {
+                    return;
+                }
+            }
+            finally
+            {
+                _busy = false;
+            }
         }
 
         // CurrentValue runs InputBase's change pipeline, so @bind-Value, the EditContext and

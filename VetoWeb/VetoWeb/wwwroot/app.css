@@ -16,10 +16,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-*:focus-visible {
-    outline: none;
-}
-
 a {
     color: var(--veto-color-primary);
 }
@@ -67,17 +63,27 @@ a {
     line-height: 1.1;
 }
 
+/* The app bar's brand lockup. Global because the class sits on VetoLink's own root, and
+   MainLayout has no element of its own around it for ::deep to reach through. */
+a.veto-link.app-bar__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-2);
+    text-decoration: none;
+    color: var(--veto-color-text);
+}
+
 /* Footer content, global because these sit inside a child component's slot. */
 .footer__row {
     width: 100%;
 }
 
-.footer__link {
+a.veto-link.footer__link {
     color: var(--veto-color-text-muted);
     text-decoration: none;
 }
 
-.footer__link:hover {
+a.veto-link.footer__link:hover {
     color: var(--veto-color-primary);
 }
 

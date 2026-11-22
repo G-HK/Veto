@@ -1,13 +1,5 @@
 /* The docs site's own chrome. Everything else on the site is a Veto component. */
 
-.app-bar__brand {
-    display: flex;
-    align-items: center;
-    gap: var(--veto-space-2);
-    text-decoration: none;
-    color: var(--veto-color-text);
-}
-
 /* The brand tile. The radius is a quarter of the tile rather than a token step, which is what
    keeps it the same shape as the favicon - that one is drawn on a 24-unit grid with a radius
    of 6, and a token would drift away from it the next time the scale moved. */
@@ -56,5 +48,10 @@
     position: absolute;
     top: 0.5rem;
     right: 0.75rem;
+    padding: var(--veto-space-1);
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
     cursor: pointer;
 }

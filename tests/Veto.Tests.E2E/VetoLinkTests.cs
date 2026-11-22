@@ -169,6 +169,17 @@ public class VetoLinkTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
+    public async Task An_in_page_anchor_is_never_the_current_page ()
+    {
+        // On "/" a bare "#components" stripped of its fragment used to read as "/" itself.
+        await GotoComponentAsync("");
+
+        var anchor = Component("hero-browse");
+        await Expect(anchor).Not.ToHaveAttributeAsync("aria-current", "page");
+        await Expect(anchor).Not.ToHaveClassAsync(new Regex(@"\bveto-link--active\b"));
+    }
+
+    [Fact]
     public async Task A_navigation_row_reveals_its_label_from_anywhere_in_the_row ()
     {
         await Page.SetViewportSizeAsync(1400, 1000);
@@ -199,5 +210,50 @@ public class VetoLinkTests ( BlazorAppFixture app ) : VetoPageTest(app)
         // The underline is decoration added on top; it must not have replaced what was there.
         await Expect(Component("link-menu-overview")).Not.ToHaveAttributeAsync("aria-current", "page");
         await Expect(Component("link-menu-installation")).ToBeVisibleAsync();
+    }
+
+    [Fact]
+    public async Task A_link_is_not_active_on_a_page_that_merely_shares_its_prefix ()
+    {
+        await GotoComponentAsync("docs/components/button-group");
+
+        // "/docs/components/button" used to match "/docs/components/button-group" too.
+        await Expect(Page.GetByTestId("nav-button-group")).ToHaveAttributeAsync("aria-current", "page");
+        await Expect(Page.GetByTestId("nav-button")).Not.ToHaveAttributeAsync("aria-current", "page");
+    }
+
+    [Fact]
+    public async Task Groups_with_the_same_label_open_and_close_on_their_own ()
+    {
+        await GotoComponentAsync(Route);
+
+        // Two groups called Guides; groups with the same label used to share one state.
+        var groups = Page.GetByTestId("twins-guides");
+        await Expect(groups).ToHaveCountAsync(2);
+        await Expect(groups.Nth(0)).ToHaveAttributeAsync("aria-expanded", "true");
+        await Expect(groups.Nth(1)).ToHaveAttributeAsync("aria-expanded", "true");
+
+        await groups.Nth(0).ClickAsync();
+
+        await Expect(groups.Nth(0)).ToHaveAttributeAsync("aria-expanded", "false");
+        await Expect(groups.Nth(1)).ToHaveAttributeAsync("aria-expanded", "true");
+    }
+
+    [Fact]
+    public async Task An_accordion_opens_one_group_at_a_time ()
+    {
+        await GotoComponentAsync(Route);
+
+        var inputs = Page.GetByTestId("accordion-inputs");
+        var data = Page.GetByTestId("accordion-data");
+
+        // Collapsed starts Data closed.
+        await Expect(inputs).ToHaveAttributeAsync("aria-expanded", "true");
+        await Expect(data).ToHaveAttributeAsync("aria-expanded", "false");
+
+        await data.ClickAsync();
+
+        await Expect(data).ToHaveAttributeAsync("aria-expanded", "true");
+        await Expect(inputs).ToHaveAttributeAsync("aria-expanded", "false");
     }
 }

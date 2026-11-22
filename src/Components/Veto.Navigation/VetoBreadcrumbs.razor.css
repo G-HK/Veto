@@ -123,3 +123,19 @@
 .veto-breadcrumbs--lg .veto-breadcrumbs__list {
     gap: var(--veto-space-3);
 }
+
+.veto-breadcrumbs--xs {
+    font-size: var(--veto-font-size-xs);
+}
+
+.veto-breadcrumbs--xs .veto-breadcrumbs__list {
+    gap: 0.125rem;
+}
+
+.veto-breadcrumbs--xl {
+    font-size: var(--veto-font-size-xl);
+}
+
+.veto-breadcrumbs--xl .veto-breadcrumbs__list {
+    gap: var(--veto-space-4);
+}

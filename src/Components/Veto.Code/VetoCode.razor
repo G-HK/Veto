@@ -27,6 +27,7 @@
                 </div>
             }
 
-        <pre class="veto-code__pre"><code class="veto-code__code">@Code@ChildContent</code></pre>
+        @* Kept on one line: inside <pre> any whitespace between the line spans would draw. *@
+        <pre class="veto-code__pre"><code @ref="_codeElement" class="veto-code__code">@if (UsesLines){foreach (var (text, number) in _lines){<span class="@LineClass(number)" data-line="@number">@text</span>}}else{@Code@ChildContent}</code></pre>
     </div>
 }

@@ -10,8 +10,7 @@
 
 const STORAGE_KEY = 'veto-theme-mode';
 
-let query = null;
-let listener = null;
+let query, listener, storageListener = null;
 
 function apply(mode) {
     const root = document.documentElement;
@@ -26,7 +25,8 @@ function apply(mode) {
 }
 
 function store(mode) {
-    try {
+    try
+    {
         if (mode === 'System') {
             localStorage.removeItem(STORAGE_KEY);
         }
@@ -34,7 +34,8 @@ function store(mode) {
         {
             localStorage.setItem(STORAGE_KEY, mode);
         }
-    } catch {
+    }
+    catch {
         // Private windows and blocked site data throw on access. Theme still applies for
         // this page; it just will not be remembered.
     }
@@ -69,6 +70,19 @@ export function initialize(dotNetRef) {
         query.addEventListener('change', listener);
     }
 
+    // Another tab changed the theme: follow it, so two tabs of one site never disagree. The
+    // storage event only fires in the other tabs, never in the one that wrote.
+    if (!storageListener) {
+        storageListener = e => {
+            if (e.key === STORAGE_KEY || e.key === null) {
+                const next = storedMode();
+                apply(next);
+                dotNetRef.invokeMethodAsync('OnStoredModeChanged', next);
+            }
+        };
+        window.addEventListener('storage', storageListener);
+    }
+
     return { mode, prefersDark: prefersDark() };
 }
 
@@ -81,10 +95,15 @@ export function setMode(mode) {
 
 /** Drops the OS preference subscription. */
 export function dispose() {
-    if (query && listener) {
+    if (query && listener)
+    {
         query.removeEventListener('change', listener);
     }
 
-    query = null;
-    listener = null;
+    if (storageListener)
+    {
+        window.removeEventListener('storage', storageListener);
+    }
+
+    query, listener, storageListener = null;
 }

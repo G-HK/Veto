@@ -31,16 +31,25 @@ internal static class VetoRouteMatch
             return false;
         }
 
-        // An absolute URL leaves the app, so it is never the page being shown.
-        if (href.Contains("://", StringComparison.Ordinal))
+        // An absolute URL leaves the app, and a bare "#section" jumps within the page rather
+        // than naming one - stripped of its fragment it would read as "/" and light up on the
+        // home page. Neither is the page being shown.
+        if (href.StartsWith('#') || href.Contains("://", StringComparison.Ordinal))
         {
             return false;
         }
 
-        var path = "/" + href.TrimStart('/').TrimEnd('/');
+        // The query and fragment say nothing about which page it is.
+        var path = "/" + href.Split('?')[0].Split('#')[0].TrimStart('/').TrimEnd('/');
 
-        return exact || path == "/"
-            ? string.Equals(currentPath, path, StringComparison.OrdinalIgnoreCase)
-            : currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+        if (exact || path == "/")
+        {
+            return string.Equals(currentPath, path, StringComparison.OrdinalIgnoreCase);
+        }
+
+        // A prefix only counts at a segment boundary: /docs/button is not an ancestor of
+        // /docs/button-group, which a bare StartsWith said it was - both lit up in the nav.
+        return string.Equals(currentPath, path, StringComparison.OrdinalIgnoreCase)
+            || currentPath.StartsWith(path + "/", StringComparison.OrdinalIgnoreCase);
     }
 }

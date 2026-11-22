@@ -144,7 +144,8 @@
         new("RootBordered", "bool?", "null", "False makes the component's border transparent. Null leaves its own stylesheet in charge.")
     ];
 
-    private const string ExtrudeCode = """
+    private const string ExtrudeCode = 
+        """
         <VetoButton Extrude="true">Raised</VetoButton>
         <VetoButton Extrude="true" ExtrudeDepth="1.5rem">Further out</VetoButton>
 
@@ -153,28 +154,33 @@
         </VetoCard>
         """;
 
-    private const string BorderedCode = """
+    private const string BorderedCode = 
+        """
         @* Works on anything - the border colour is inherited from the root. *@
         <VetoTextBox TValue="string" @bind-Value="_name" RootBordered="false" />
         <VetoButton Variant="VetoVariant.Outlined" RootBordered="false">Borderless</VetoButton>
         <VetoKbd Keys="Ctrl+K" RootBordered="false" />
         """;
 
-    private const string GlowCode = """
+    private const string GlowCode = 
+        """
         <VetoButton Glow="true">Primary</VetoButton>
         <VetoButton Glow="true" Color="VetoColor.Danger">Danger</VetoButton>
         """;
 
-    private const string GlowColorCode = """
+    private const string GlowColorCode = 
+        """
         <VetoButton Glow="true" GlowColor="#22d3ee" Variant="VetoVariant.Outlined">Cyan</VetoButton>
         """;
 
-    private const string PingCode = """
+    private const string PingCode = 
+        """
         <VetoButton Ping="true">Inbox (3)</VetoButton>
         <VetoIconButton Icon="@VetoIcons.Bell" Ping="true" PingColor="#f43f5e" Label="Notifications" />
         """;
 
-    private const string InputsCode = """
+    private const string InputsCode = 
+        """
         <VetoTextBox TValue="string" @bind-Value="_name" Label="Your name" Glow="true" />
 
         <VetoCard Title="Something changed" Ping="true" PingColor="#22c55e">

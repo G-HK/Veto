@@ -163,7 +163,8 @@
         new("VetoButtonGroupText", "component", "—", "A non-interactive label inside the group, on a muted background."),
     ];
 
-    private const string BasicCode = """
+    private const string BasicCode = 
+        """
         <VetoButtonGroup Label="View mode">
             <VetoButton Variant="VetoVariant.Outlined">Day</VetoButton>
             <VetoButton Variant="VetoVariant.Outlined">Week</VetoButton>
@@ -171,7 +172,8 @@
         </VetoButtonGroup>
         """;
 
-    private const string SizeCode = """
+    private const string SizeCode = 
+        """
         @* Set once on the group - every button in it takes the same height. *@
         <VetoButtonGroup Size="VetoSize.Small" Label="Small">
             <VetoButton Variant="VetoVariant.Outlined">Cut</VetoButton>
@@ -179,7 +181,8 @@
         </VetoButtonGroup>
         """;
 
-    private const string SeparatorCode = """
+    private const string SeparatorCode = 
+        """
         @* Between every button: *@
         <VetoButtonGroup Separators="true">
             <VetoButton Variant="VetoVariant.Outlined">One</VetoButton>
@@ -195,7 +198,8 @@
         </VetoButtonGroup>
         """;
 
-    private const string TextCode = """
+    private const string TextCode = 
+        """
         <VetoButtonGroup Label="Zoom">
             <VetoButtonGroupText>Zoom</VetoButtonGroupText>
             <VetoButton Variant="VetoVariant.Outlined">50%</VetoButton>
@@ -203,7 +207,8 @@
         </VetoButtonGroup>
         """;
 
-    private const string ToolbarCode = """
+    private const string ToolbarCode = 
+        """
         <VetoButtonGroup IsToolbar="true" Attached="false" Label="Formatting">
 
             <VetoButtonGroup Size="VetoSize.Small" Label="History">
@@ -221,7 +226,8 @@
         </VetoButtonGroup>
         """;
 
-    private const string LayoutCode = """
+    private const string LayoutCode = 
+        """
         <VetoButtonGroup Attached="false">...</VetoButtonGroup>
         <VetoButtonGroup Orientation="VetoOrientation.Vertical">...</VetoButtonGroup>
         <VetoButtonGroup FullWidth="true">...</VetoButtonGroup>

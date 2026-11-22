@@ -3,6 +3,7 @@
   <Folder Name="/.github/workflows/">
     <File Path=".github/workflows/ci.yml" />
     <File Path=".github/workflows/release.yml" />
+    <File Path=".github/workflows/site-image.yml" />
   </Folder>
   <Folder Name="/.root/">
     <File Path="Directory.Packages.props" />
@@ -13,6 +14,18 @@
     <File Path="docs/Contributing.md" />
     <File Path="docs/Roadmap.md" />
     <File Path="Readme.md" />
+  </Folder>
+  <Folder Name="/docs/images/">
+    <File Path="assets/screenshots/buttons.png" />
+    <File Path="assets/screenshots/gantt.png" />
+    <File Path="assets/screenshots/gauge-bands.png" />
+    <File Path="assets/screenshots/gauge-car.png" />
+    <File Path="assets/screenshots/home.png" />
+    <File Path="assets/screenshots/table.png" />
+    <File Path="assets/screenshots/terminal-box.png" />
+    <File Path="assets/veto-icon-512.png" />
+    <File Path="assets/veto-icon-mono.svg" />
+    <File Path="assets/veto-icon.svg" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Veto.Core/Veto.Core.csproj" />

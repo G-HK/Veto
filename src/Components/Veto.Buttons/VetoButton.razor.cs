@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Veto.Components.Icon;
+using Veto.Components.Menu;
 using Veto.Core;
 
 namespace Veto.Components.Buttons;
@@ -93,6 +94,36 @@ public partial class VetoButton : VetoComponentBase
     [Parameter]
     public EventCallback<MouseEventArgs> OnClick { get; set; }
 
+    /// <summary>
+    /// A menu opened at the pointer on right-click. Fill it with <c>VetoMenuItem</c>s: each does
+    /// what its <c>OnClick</c> says, and choosing one closes the menu. Null leaves right-click to
+    /// the browser, as does a disabled or loading button.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ContextMenu { get; set; }
+
+    /// <summary>The accessible name of <see cref="ContextMenu"/>.</summary>
+    [Parameter]
+    public string? ContextMenuLabel { get; set; }
+
+    /// <summary>
+    /// When true the button shows its loading state for as long as its <c>OnClick</c> handler
+    /// runs, and ignores clicks until it finishes - no double submit, without the page keeping
+    /// a flag for it. <c>Loading</c> still works alongside.
+    /// </summary>
+    [Parameter]
+    public bool LoadingOnClick { get; set; }
+
+    private VetoContextMenu? _contextMenu;
+    private bool _running;
+
+    private bool IsLoading => Loading || _running;
+
+    // A new tab gets the safe rel VetoLink gives it, unless one was asked for.
+    private string? ResolvedRel => Rel ?? (Target == "_blank" ? "noopener noreferrer" : null);
+
+    private bool HasContextMenu => ContextMenu is not null && !Disabled && !IsLoading;
+
     /// <inheritdoc />
     protected override CssBuilder StartCssClass () =>
         base.StartCssClass()
@@ -101,18 +132,42 @@ public partial class VetoButton : VetoComponentBase
             .AddClass(Modifier(Color.ToModifier()))
             .AddClass(Modifier("full-width"), FullWidth)
             .AddClass(Modifier("rounded"), Rounded)
-            .AddClass(Modifier("loading"), Loading)
+            .AddClass(Modifier("loading"), IsLoading)
             .AddClass(Modifier("disabled"), Disabled);
 
     private async Task OnClickAsync ( MouseEventArgs args )
     {
         // Guarded as well as disabled: a click can still arrive from code, and the work behind a
         // loading button should not be started twice.
-        if (Disabled || Loading)
+        if (Disabled || IsLoading)
         {
             return;
         }
 
-        await OnClick.InvokeAsync(args);
+        if (!LoadingOnClick)
+        {
+            await OnClick.InvokeAsync(args);
+            return;
+        }
+
+        _running = true;
+        StateHasChanged();
+
+        try
+        {
+            await OnClick.InvokeAsync(args);
+        }
+        finally
+        {
+            _running = false;
+        }
+    }
+
+    private void OpenContextMenu ( MouseEventArgs args )
+    {
+        if (HasContextMenu)
+        {
+            _contextMenu?.Open(args);
+        }
     }
 }

@@ -185,6 +185,30 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     public VetoVariant Variant { get; set; } = VetoVariant.Outlined;
 
     /// <summary>
+    /// Rounds all four corners of the field, as any CSS length (<c>0</c>, <c>8px</c>, <c>1rem</c>).
+    /// Null keeps the theme's radius. A per-corner parameter wins over this for its corner.
+    /// The Text variant stays square, and a switch or slider keeps its pill shape.
+    /// </summary>
+    [Parameter]
+    public string? Radius { get; set; }
+
+    /// <summary>The top-left corner's radius. Overrides <see cref="Radius"/> for that corner.</summary>
+    [Parameter]
+    public string? RadiusTopLeft { get; set; }
+
+    /// <summary>The top-right corner's radius. Overrides <see cref="Radius"/> for that corner.</summary>
+    [Parameter]
+    public string? RadiusTopRight { get; set; }
+
+    /// <summary>The bottom-right corner's radius. Overrides <see cref="Radius"/> for that corner.</summary>
+    [Parameter]
+    public string? RadiusBottomRight { get; set; }
+
+    /// <summary>The bottom-left corner's radius. Overrides <see cref="Radius"/> for that corner.</summary>
+    [Parameter]
+    public string? RadiusBottomLeft { get; set; }
+
+    /// <summary>
     /// The component's own base class name, e.g. <c>veto-textbox</c>. Modifier classes are
     /// built from it, so keep it lowercase and hyphenated.
     /// </summary>
@@ -275,8 +299,19 @@ public abstract class VetoInputBase<TValue> : InputBase<TValue>, IVetoComponent
     protected virtual bool PositionsItself => false;
 
     /// <summary>Builds the root style list, appending the consumer's style last.</summary>
+    /// <remarks>
+    /// The corners go out as custom properties rather than a <c>border-radius</c> because the
+    /// rounded element is inside the component, and custom properties inherit down to it - the
+    /// same trick <see cref="RootBordered"/> uses for the border colour.
+    /// </remarks>
     protected virtual StyleBuilder BuildStyle () =>
-        Core.BuildStyle(StartStyle(), Style, AdditionalAttributes, Effects, Box);
+        Core.BuildStyle(
+            StartStyle()
+                .AddStyle("--veto-field-radius-tl", VetoEffects.SafeColor(RadiusTopLeft ?? Radius))
+                .AddStyle("--veto-field-radius-tr", VetoEffects.SafeColor(RadiusTopRight ?? Radius))
+                .AddStyle("--veto-field-radius-br", VetoEffects.SafeColor(RadiusBottomRight ?? Radius))
+                .AddStyle("--veto-field-radius-bl", VetoEffects.SafeColor(RadiusBottomLeft ?? Radius)),
+            Style, AdditionalAttributes, Effects, Box);
 
     /// <summary>
     /// The component's own inline declarations, before the consumer's are appended. Override

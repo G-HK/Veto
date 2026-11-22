@@ -184,4 +184,47 @@ public class VetoThemingTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         await Expect(Component("swatches").Locator(".demo-swatch")).ToHaveCountAsync(8);
     }
+
+    [Fact]
+    public async Task A_choice_made_in_one_tab_is_followed_by_the_others ()
+    {
+        await GotoComponentAsync(Route);
+
+        var other = await Context.NewPageAsync();
+        await other.GotoAsync($"{App.BaseUrl}/{Route}");
+        await other.Locator("[data-testid='page'][data-ready='true']")
+            .WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 60_000 });
+
+        await Component("toggle").ClickAsync();
+        Assert.Equal("dark", await ThemeAttributeAsync());
+
+        // The other tab hears the storage event: its document and its components follow.
+        await Expect(other.Locator("html")).ToHaveAttributeAsync("data-veto-theme", "dark");
+        await Expect(other.GetByTestId("resolved")).ToHaveTextAsync("Dark");
+    }
+
+    [Fact]
+    public async Task A_custom_theme_rethemes_the_site_and_survives_navigation ()
+    {
+        await GotoComponentAsync("docs/theming/provider");
+        var original = await ResolvedColorAsync("--veto-color-primary");
+
+        await Page.GetByTestId("custom-ocean").ClickAsync();
+
+        await Expect(Page.GetByTestId("custom-ocean")).ToHaveAttributeAsync("aria-pressed", "true");
+        await Expect(Page.GetByTestId("custom-veto")).ToHaveAttributeAsync("aria-pressed", "false");
+        var ocean = await ResolvedColorAsync("--veto-color-primary");
+        Assert.NotEqual(original, ocean);
+
+        // The layout re-renders its provider on every navigation; it used to put its own
+        // theme straight back.
+        await Page.Locator("a.app-bar__brand").ClickAsync();
+        await Expect(Page.GetByTestId("component-grid")).ToBeVisibleAsync();
+        Assert.Equal(ocean, await ResolvedColorAsync("--veto-color-primary"));
+
+        await Page.GoBackAsync();
+        await Page.GetByTestId("custom-veto").ClickAsync();
+        await Expect(Page.GetByTestId("custom-veto")).ToHaveAttributeAsync("aria-pressed", "true");
+        Assert.Equal(original, await ResolvedColorAsync("--veto-color-primary"));
+    }
 }

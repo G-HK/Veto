@@ -4,6 +4,8 @@ A ready-made dashboard page: an app bar, a navigation drawer and a content area 
 
 Part of [Veto](https://github.com/G-HK/Veto), a Blazor component library with no third-party dependencies. Install the `Veto` package instead to get every component at once.
 
+Try it live in the docs site: <https://veto.blackpanda.be/layouts/dashboard>
+
 ## Install
 
 ```powershell

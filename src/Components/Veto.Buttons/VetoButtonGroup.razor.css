@@ -139,6 +139,34 @@
     padding: 0;
 }
 
+.veto-button-group--xs ::deep .veto-button {
+    font-size: var(--veto-font-size-xs);
+    padding: var(--veto-space-1) var(--veto-space-2);
+    min-height: 1.75rem;
+}
+
+.veto-button-group--xl ::deep .veto-button {
+    font-size: var(--veto-font-size-xl);
+    padding: var(--veto-space-4) var(--veto-space-6);
+    min-height: 3.5rem;
+}
+
+.veto-button-group--xs ::deep .veto-icon-button {
+    width: 1.75rem;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    min-height: 1.75rem;
+    padding: 0;
+}
+
+.veto-button-group--xl ::deep .veto-icon-button {
+    width: 3.5rem;
+    min-width: 3.5rem;
+    height: 3.5rem;
+    min-height: 3.5rem;
+    padding: 0;
+}
+
 /* Separators="true" draws a line between every child. Done as a border on the following
    neighbour so it works whether or not the group is attached, and so it never needs an
    element of its own. */
