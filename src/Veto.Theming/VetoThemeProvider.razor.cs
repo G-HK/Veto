@@ -17,6 +17,7 @@ public partial class VetoThemeProvider : IDisposable
 {
     private string? _css;
     private bool _subscribed;
+    private VetoTheme? _appliedTheme;
 
     /// <summary>The app's content.</summary>
     [Parameter]
@@ -39,8 +40,12 @@ public partial class VetoThemeProvider : IDisposable
     /// <inheritdoc />
     protected override async Task OnParametersSetAsync ()
     {
-        if (Theme is not null && !ReferenceEquals(Theme, ThemeService.Theme))
+        // Only when the parameter itself changes. A layout re-renders its provider on every
+        // navigation, and comparing against the service instead would put the layout's theme
+        // back over one the app chose at runtime through SetThemeAsync.
+        if (Theme is not null && !ReferenceEquals(Theme, _appliedTheme))
         {
+            _appliedTheme = Theme;
             await ThemeService.SetThemeAsync(Theme);
         }
 

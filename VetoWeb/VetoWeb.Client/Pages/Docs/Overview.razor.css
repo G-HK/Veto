@@ -2,7 +2,7 @@
     padding-block: var(--veto-space-6) 6rem;
 }
 
-.home__rule {
+::deep .home__rule {
     margin-block: 4rem;
 }
 
@@ -17,6 +17,10 @@
     margin: 0;
     color: var(--veto-color-text-muted);
 }
+
+/* The classes below sit on child components' roots (VetoLink, VetoCard, VetoIcon,
+   VetoDivider), which never carry this page's scope - hence ::deep, reached through the
+   page's own <div>. Without it every one of these rules silently matched nothing. */
 
 /* Hero */
 
@@ -40,7 +44,7 @@
     color: var(--veto-color-text-muted);
 }
 
-.hero__cta {
+::deep .veto-link.hero__cta {
     display: inline-flex;
     align-items: center;
     padding: var(--veto-space-3) var(--veto-space-5);
@@ -53,15 +57,15 @@
     transition: background-color var(--veto-transition);
 }
 
-.hero__cta:hover {
+::deep .veto-link.hero__cta:hover {
     background-color: var(--veto-color-primary-hover);
 }
 
-.hero__cta:focus-visible {
+::deep .veto-link.hero__cta:focus-visible {
     box-shadow: var(--veto-focus-ring);
 }
 
-.hero__link {
+::deep .veto-link.hero__link {
     font-size: var(--veto-font-size-md);
     font-weight: 500;
     color: var(--veto-color-text-muted);
@@ -69,36 +73,36 @@
     border-bottom: 1px solid var(--veto-color-border);
 }
 
-.hero__link:hover {
+::deep .veto-link.hero__link:hover {
     color: var(--veto-color-text);
     border-bottom-color: currentColor;
 }
 
 /* Catalogue */
 
-.catalogue__link {
+::deep .veto-link.catalogue__link {
     display: block;
     height: 100%;
     text-decoration: none;
     color: inherit;
 }
 
-.catalogue__link:focus-visible {
+::deep .veto-link.catalogue__link:focus-visible {
     outline: none;
     border-radius: var(--veto-radius-lg);
     box-shadow: var(--veto-focus-ring);
 }
 
-.catalogue__card {
+::deep .catalogue__card {
     height: 100%;
     transition: border-color var(--veto-transition);
 }
 
-.catalogue__link:hover .catalogue__card {
+::deep .veto-link.catalogue__link:hover .catalogue__card {
     border-color: var(--veto-color-primary);
 }
 
-.catalogue__icon {
+::deep .catalogue__icon {
     color: var(--veto-color-primary);
 }
 

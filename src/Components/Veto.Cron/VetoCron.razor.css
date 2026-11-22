@@ -50,7 +50,7 @@
     font-size: var(--veto-font-size-md);
     color: var(--veto-color-text);
     background-color: var(--veto-color-surface);
-    border: 1px solid var(--veto-border-color, var(--veto-color-border));
+    border: 1px solid var(--veto-border-color, var(--veto-color-border-strong));
     border-radius: var(--veto-radius-sm);
 }
 
@@ -84,7 +84,7 @@
     font-weight: 600;
     color: var(--veto-color-text-muted);
     background-color: var(--veto-color-surface);
-    border: 1px solid var(--veto-border-color, var(--veto-color-border));
+    border: 1px solid var(--veto-border-color, var(--veto-color-border-strong));
     border-radius: var(--veto-radius-sm);
     cursor: pointer;
     transition: color var(--veto-transition), background-color var(--veto-transition),
@@ -92,7 +92,7 @@
 }
 
 .veto-cron__day:hover:not(:disabled) {
-    border-color: var(--veto-color-border-strong);
+    border-color: var(--veto-color-text-muted);
 }
 
 .veto-cron__day[aria-pressed="true"] {
@@ -118,7 +118,7 @@
     letter-spacing: 0.08em;
     color: var(--veto-color-text);
     background-color: var(--veto-color-surface);
-    border: 1px solid var(--veto-border-color, var(--veto-color-border));
+    border: 1px solid var(--veto-border-color, var(--veto-color-border-strong));
     border-radius: var(--veto-radius-md);
 }
 

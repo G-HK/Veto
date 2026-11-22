@@ -74,6 +74,14 @@
         </div>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-twins"
+               Title="Two groups, one name"
+               Description="A group's open state belongs to the entry, not to its label, so two groups that happen to share a name still open and close on their own.">
+        <div class="link-nav">
+            <VetoNavMenu Items="TwinItems" Label="Same-name example" TestId="twins" />
+        </div>
+    </DemoBlock>
+
     <DemoBlock TestId="demo-current"
                Title="Knowing where it is"
                Description="The first of these points at the page you are reading. It carries aria-current and sets itself in a heavier weight, without anything on this page telling it to."
@@ -109,6 +117,12 @@
         new VetoNavEntry { Label = "Overview", Href = "/", Icon = VetoIcons.Home, MatchExact = true },
         new VetoNavEntry { Label = "Installation", Href = "/docs/installation", Icon = VetoIcons.Document },
         new VetoNavEntry { Label = "Usage", Href = "/docs/usage", Icon = VetoIcons.Terminal }
+    ];
+
+    private static readonly IReadOnlyList<VetoNavEntry> TwinItems =
+    [
+        new VetoNavEntry { Label = "Guides", Children = [new VetoNavEntry { Label = "Installation", Href = "/docs/installation" }] },
+        new VetoNavEntry { Label = "Guides", Children = [new VetoNavEntry { Label = "Usage", Href = "/docs/usage" }] }
     ];
 
     private static readonly IReadOnlyList<VetoNavEntry> GroupItems =

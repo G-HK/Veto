@@ -67,11 +67,11 @@
 }
 
 .veto-magic-textbox--bordered .veto-magic-textbox__input {
-    border-color: var(--veto-border-color, var(--veto-color-border));
+    border-color: var(--veto-border-color, var(--veto-color-border-strong));
 }
 
 .veto-magic-textbox--bordered .veto-magic-textbox__input:hover:not(:disabled):not([readonly]) {
-    border-color: var(--veto-color-border-strong);
+    border-color: var(--veto-color-text-muted);
 }
 
 /* Open to a fixed number of lines. With no line count the script sets an inline height
@@ -228,13 +228,13 @@
 }
 
 .veto-magic-textbox--ghost .veto-magic-textbox__input:hover:not(:disabled):not([readonly]) {
-    border-color: var(--veto-border-color, var(--veto-color-border));
+    border-color: var(--veto-border-color, var(--veto-color-border-strong));
 }
 
 .veto-magic-textbox--underlined .veto-magic-textbox__input {
     background-color: transparent;
     border-width: 0 0 1px 0;
-    border-bottom-color: var(--veto-border-color, var(--veto-color-border));
+    border-bottom-color: var(--veto-border-color, var(--veto-color-border-strong));
     border-radius: 0;
     padding-inline-start: 0;
 }

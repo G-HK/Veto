@@ -84,7 +84,8 @@
 
 .veto-table--clickable ::deep tbody tr.veto-table__row:focus-visible {
     outline: none;
-    box-shadow: inset var(--veto-focus-ring);
+    /* Not the shared ring: that is two shadows, and `inset` would only reach the first. */
+    box-shadow: inset 0 0 0 2px var(--veto-color-primary);
 }
 
 .veto-table ::deep .veto-table__empty {

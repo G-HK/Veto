@@ -17,7 +17,7 @@ public static class VetoDocsTheme
     {
         Light = new VetoPalette
         {
-            // 6.9:1 on white, so it is legible as body-weight text and not only as a fill.
+            // 6.2:1 on white, so it is legible as body-weight text and not only as a fill.
             Primary = "#C2121F",
             PrimaryHover = "#9C0D18",
             PrimaryContrast = "#FFFFFF",
@@ -28,6 +28,8 @@ public static class VetoDocsTheme
             Text = "#1A1517",
             TextMuted = "#6B5F61",
             Border = "#E7DDDE",
+            // Field and switch edges: 3.8:1 on white, where the divider colour above is 1.3:1.
+            BorderStrong = "#8F7F81",
 
             // Danger stays distinctly darker and cooler than the brand red, so an error is not
             // mistaken for an accent. Colour alone never carries the meaning - error states
@@ -49,6 +51,7 @@ public static class VetoDocsTheme
             Text = "#F4EFEF",
             TextMuted = "#A29698",
             Border = "#2E2729",
+            BorderStrong = "#76696B",
 
             Danger = "#FF8A8A",
             Warning = "#FBBF24",
@@ -59,4 +62,26 @@ public static class VetoDocsTheme
         FontSans = "\"Space Grotesk\", system-ui, -apple-system, sans-serif",
         FontMono = "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Consolas, monospace"
     };
+
+    /// <summary>
+    /// The custom themes offered on the theme provider page, the site's own red first. Each
+    /// changes only the accent and keeps the site's type and radius; the neutrals fall back to
+    /// the library's. No green, amber or red: those already mean success, warning and danger.
+    /// Every accent is at least 5.4:1 against its surface and against the text drawn on it.
+    /// </summary>
+    public static readonly IReadOnlyList<(string Name, VetoTheme Theme)> Presets =
+    [
+        ("Veto red", Theme),
+        ("Ocean", Accent("#1D4ED8", "#1E40AF", "#60A5FA", "#93C5FD", "#0B1220")),
+        ("Teal", Accent("#0F766E", "#115E59", "#2DD4BF", "#5EEAD4", "#042F2E")),
+        ("Violet", Accent("#6D28D9", "#5B21B6", "#A78BFA", "#C4B5FD", "#1E1038")),
+        ("Fuchsia", Accent("#A21CAF", "#86198F", "#E879F9", "#F0ABFC", "#2A0730"))
+    ];
+
+    private static VetoTheme Accent ( string light, string lightHover, string dark, string darkHover, string darkContrast )
+        => Theme with
+        {
+            Light = new VetoPalette { Primary = light, PrimaryHover = lightHover, PrimaryContrast = "#FFFFFF" },
+            Dark = new VetoPalette { Primary = dark, PrimaryHover = darkHover, PrimaryContrast = darkContrast }
+        };
 }

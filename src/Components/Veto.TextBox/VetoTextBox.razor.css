@@ -27,7 +27,7 @@
     font-size: var(--veto-font-size-md);
     color: var(--veto-color-text);
     background-color: var(--veto-color-surface);
-    border: 1px solid var(--veto-border-color, var(--veto-color-border));
+    border: 1px solid var(--veto-border-color, var(--veto-color-border-strong));
     border-radius: var(--veto-field-radius-tl, var(--veto-radius-md)) var(--veto-field-radius-tr, var(--veto-radius-md)) var(--veto-field-radius-br, var(--veto-radius-md)) var(--veto-field-radius-bl, var(--veto-radius-md));
     padding: var(--veto-space-2) var(--veto-space-3);
     transition: border-color var(--veto-transition), box-shadow var(--veto-transition), background-color var(--veto-transition);
@@ -38,7 +38,7 @@
 }
 
 .veto-textbox__input:hover:not(:disabled):not([readonly]) {
-    border-color: var(--veto-color-border-strong);
+    border-color: var(--veto-color-text-muted);
 }
 
 .veto-textbox__input:focus-visible {

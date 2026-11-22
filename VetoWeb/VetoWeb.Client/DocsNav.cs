@@ -66,7 +66,9 @@ public static class DocsNav
                     [
                         new VetoNavEntry { Label = "Toast", Href = "/docs/components/toast" },
                         new VetoNavEntry { Label = "Terminal box", Href = "/docs/components/terminal-box" },
-                        new VetoNavEntry { Label = "Gauge", Href = "/docs/components/gauge" }
+                        new VetoNavEntry { Label = "Gauge", Href = "/docs/components/gauge" },
+                        new VetoNavEntry { Label = "Loading", Href = "/docs/components/loading" },
+                        new VetoNavEntry { Label = "Blink text", Href = "/docs/components/blink-text" }
                     ]
                 },
                 new VetoNavEntry
@@ -100,15 +102,6 @@ public static class DocsNav
                         new VetoNavEntry { Label = "Table", Href = "/docs/components/table" },
                         new VetoNavEntry { Label = "Gantt", Href = "/docs/components/gantt" },
                         new VetoNavEntry { Label = "Cron", Href = "/docs/components/cron" }
-                    ]
-                },
-                new VetoNavEntry
-                {
-                    Label = "Feedback",
-                    Children =
-                    [
-                        new VetoNavEntry { Label = "Loading", Href = "/docs/components/loading" },
-                        new VetoNavEntry { Label = "Blink text", Href = "/docs/components/blink-text" }
                     ]
                 },
                 new VetoNavEntry

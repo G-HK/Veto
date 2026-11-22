@@ -86,6 +86,7 @@ public sealed partial record VetoTheme
         Append(builder, "--veto-color-text", palette.Text);
         Append(builder, "--veto-color-text-muted", palette.TextMuted);
         Append(builder, "--veto-color-border", palette.Border);
+        Append(builder, "--veto-color-border-strong", palette.BorderStrong);
     }
 
     private static void Append ( StringBuilder builder, string name, string? value )
@@ -150,10 +151,17 @@ public sealed record VetoPalette
     /// <summary>Borders and dividers.</summary>
     public string? Border { get; init; }
 
+    /// <summary>
+    /// The edge of a control - a text field, an off switch - as opposed to a divider. Keep it at
+    /// 3:1 or more against the surface: a field whose boundary cannot be seen cannot be found.
+    /// </summary>
+    public string? BorderStrong { get; init; }
+
     /// <summary>True when at least one colour in this palette is set.</summary>
     public bool HasOverrides =>
         Primary is not null || PrimaryHover is not null || PrimaryContrast is not null
            || Secondary is not null || Success is not null || Warning is not null
            || Danger is not null || Surface is not null || SurfaceRaised is not null
-           || Text is not null || TextMuted is not null || Border is not null;
+           || Text is not null || TextMuted is not null || Border is not null
+           || BorderStrong is not null;
 }

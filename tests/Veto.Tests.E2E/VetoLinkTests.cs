@@ -169,6 +169,17 @@ public class VetoLinkTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
+    public async Task An_in_page_anchor_is_never_the_current_page ()
+    {
+        // On "/" a bare "#components" stripped of its fragment used to read as "/" itself.
+        await GotoComponentAsync("");
+
+        var anchor = Component("hero-browse");
+        await Expect(anchor).Not.ToHaveAttributeAsync("aria-current", "page");
+        await Expect(anchor).Not.ToHaveClassAsync(new Regex(@"\bveto-link--active\b"));
+    }
+
+    [Fact]
     public async Task A_navigation_row_reveals_its_label_from_anywhere_in_the_row ()
     {
         await Page.SetViewportSizeAsync(1400, 1000);
@@ -216,8 +227,8 @@ public class VetoLinkTests ( BlazorAppFixture app ) : VetoPageTest(app)
     {
         await GotoComponentAsync(Route);
 
-        // The docs navigation has two groups called Feedback; they used to share one state.
-        var groups = Page.GetByTestId("nav-feedback");
+        // Two groups called Guides; groups with the same label used to share one state.
+        var groups = Page.GetByTestId("twins-guides");
         await Expect(groups).ToHaveCountAsync(2);
         await Expect(groups.Nth(0)).ToHaveAttributeAsync("aria-expanded", "true");
         await Expect(groups.Nth(1)).ToHaveAttributeAsync("aria-expanded", "true");
