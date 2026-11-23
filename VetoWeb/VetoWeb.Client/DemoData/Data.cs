@@ -1,24 +1,57 @@
 ﻿using System.Text.Json;
-using VetoWeb.DemoData.Models;
+using System.Text.Json.Serialization;
+using VetoWeb.Client.DemoData.Models;
 
-namespace VetoWeb.DemoData;
+namespace VetoWeb.Client.DemoData;
 
-public sealed class Data
+public static class Data
 {
-    private static readonly Lazy<Db> Db = new(() =>
+    private const string ResourceName = "db.json";
+    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
     {
-        using var stream = typeof(Data).Assembly.GetManifestResourceStream("db.json")!;
-        return JsonSerializer.Deserialize<Db>(stream, JsonSerializerOptions.Web)!;
-    });
+        Converters = { new JsonStringEnumConverter() }
+    };
 
-    public static Db Get() => Db.Value;
+    private static readonly Lazy<Db> Instance = new(Load);
+
+    public static Db Get() => Instance.Value;
+
+    private static Db Load()
+    {
+        using var stream = typeof(Data).Assembly.GetManifestResourceStream(ResourceName)
+            ?? throw new InvalidOperationException(
+                $"The embedded resource '{ResourceName}' is missing. Check the EmbeddedResource item in VetoWeb.Client.csproj.");
+
+        var db = JsonSerializer.Deserialize<Db>(stream, Options)
+            ?? throw new InvalidOperationException($"'{ResourceName}' is empty.");
+
+        return Link(db);
+    }
+
+    private static Db Link(Db db)
+    {
+        foreach (var dealer in db.Dealers)
+        {
+            foreach (var car in dealer.Cars) { car.Dealer = dealer; car.DealerID = dealer.ID; }
+            foreach (var employee in dealer.Employees) { employee.Dealer = dealer; employee.DealerID = dealer.ID; }
+            foreach (var customer in dealer.Customers) { customer.Dealer = dealer; customer.DealerID = dealer.ID; }
+        }
+
+        db.Cars = [.. db.Dealers.SelectMany(d => d.Cars)];
+        db.Employees = [.. db.Dealers.SelectMany(d => d.Employees)];
+        db.Customers = [.. db.Dealers.SelectMany(d => d.Customers)];
+        return db;
+    }
 }
-
 
 public sealed class Db
 {
-    public List<Dealer> Dealers { get; set; } = [];
-    public List<Car> Cars { get; set; } = [];
-    public List<Customer> Customers { get; set; } = [];
-    public List<Employee> Employees { get; set; } = [];
+    public IReadOnlyList<Dealer> Dealers { get; init; } = [];
+
+    [JsonIgnore]
+    public IReadOnlyList<Car> Cars { get; internal set; } = [];
+    [JsonIgnore]
+    public IReadOnlyList<Employee> Employees { get; internal set; } = [];
+    [JsonIgnore]
+    public IReadOnlyList<Customer> Customers { get; internal set; } = [];
 }

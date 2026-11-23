@@ -1,4 +1,6 @@
-namespace VetoWeb.DemoData.Models;
+using System.Text.Json.Serialization;
+
+namespace VetoWeb.Client.DemoData.Models;
 
 public class Car : IEntity
 {
@@ -64,6 +66,7 @@ public class Car : IEntity
     public List<string> Features { get; set; } = [];   // e.g. "Sunroof", "Heated Seats"
     public string? ImageUrl { get; set; }
     public int DealerID { get; set; }
+    [JsonIgnore] public Dealer Dealer { get; set; } = default!;
 }
 
 public enum FuelType { Petrol, Diesel, Hybrid, Electric }

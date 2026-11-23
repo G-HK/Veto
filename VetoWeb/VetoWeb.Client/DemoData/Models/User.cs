@@ -1,4 +1,4 @@
-namespace VetoWeb.DemoData.Models;
+namespace VetoWeb.Client.DemoData.Models;
 
 /// <summary>Anyone with an account. <see cref="Customer"/> and <see cref="Employee"/> derive from it.</summary>
 public class User : IEntity

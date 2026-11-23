@@ -1,4 +1,6 @@
-namespace VetoWeb.DemoData.Models;
+using System.Text.Json.Serialization;
+
+namespace VetoWeb.Client.DemoData.Models;
 
 public class Employee : User
 {
@@ -7,6 +9,8 @@ public class Employee : User
     public DateOnly HireDate { get; set; }
     public decimal Salary { get; set; }
     public int DealerID { get; set; }
+    [JsonIgnore]
+    public Dealer Dealer { get; set; } = default!;
     public int? ManagerID { get; set; }
     public int DistanceToWork { get; set; }
 }

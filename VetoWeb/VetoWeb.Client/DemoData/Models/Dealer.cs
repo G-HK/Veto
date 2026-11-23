@@ -1,4 +1,4 @@
-namespace VetoWeb.DemoData.Models;
+namespace VetoWeb.Client.DemoData.Models;
 
 public class Dealer : IEntity
 {
@@ -15,4 +15,8 @@ public class Dealer : IEntity
     public DateOnly OpenedOn { get; set; }
     public bool IsActive { get; set; }
     public Location Location { get; set; } = new();
+
+    public IReadOnlyList<Car> Cars { get; init; } = [];
+    public IReadOnlyList<Employee> Employees { get; init; } = [];
+    public IReadOnlyList<Customer> Customers { get; init; } = [];
 }

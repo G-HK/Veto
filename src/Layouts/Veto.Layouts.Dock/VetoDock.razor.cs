@@ -155,7 +155,7 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
     internal bool IsTabStop ( VetoDockItem item )
     {
         var index = _items.IndexOf(item);
-        return index < 0 ? false : index == Math.Clamp(_focusedIndex, 0, _items.Count - 1);
+        return index >= 0 && index == Math.Clamp(_focusedIndex, 0, _items.Count - 1);
     }
 
     /// <inheritdoc />
@@ -213,7 +213,6 @@ public partial class VetoDock : VetoComponentBase, IAsyncDisposable
         // Wraps, so holding an arrow key cycles rather than stopping dead at the end.
         _focusedIndex = (target + _items.Count) % _items.Count;
 
-        StateHasChanged();
         await _items[_focusedIndex].FocusAsync();
     }
 

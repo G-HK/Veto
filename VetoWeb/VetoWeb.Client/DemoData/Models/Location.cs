@@ -1,4 +1,4 @@
-namespace VetoWeb.DemoData.Models;
+namespace VetoWeb.Client.DemoData.Models;
 
 public class Location
 {
