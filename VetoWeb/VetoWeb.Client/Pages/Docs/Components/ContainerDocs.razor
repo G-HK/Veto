@@ -9,13 +9,14 @@
 
     <DemoBlock TestId="demo-sizes"
                Title="Sizes"
-               Description="Five widths. Medium is around 48rem, which keeps a line of prose near the 70-character mark that is comfortable to read."
+               Description="Six widths. Medium is around 48rem, which keeps a line of prose near the 70-character mark that is comfortable to read."
                Code="@SizesCode">
         <VetoStack Gap="VetoSpacing.Medium">
             <VetoContainer Size="VetoContainerSize.Small" TestId="small" Class="container-demo">Small · 30rem</VetoContainer>
             <VetoContainer Size="VetoContainerSize.Medium" TestId="medium" Class="container-demo">Medium · 48rem</VetoContainer>
             <VetoContainer Size="VetoContainerSize.Large" TestId="large" Class="container-demo">Large · 64rem</VetoContainer>
             <VetoContainer Size="VetoContainerSize.ExtraLarge" Class="container-demo">Extra large · 80rem</VetoContainer>
+            <VetoContainer Size="VetoContainerSize.ExtraExtraLarge" TestId="xxl" Class="container-demo">Extra extra large · 120rem</VetoContainer>
             <VetoContainer Size="VetoContainerSize.Full" Class="container-demo">Full · no limit</VetoContainer>
         </VetoStack>
     </DemoBlock>
@@ -36,7 +37,7 @@
 @code {
     private static readonly ParameterTable.Row[] Parameters =
     [
-        new("Size", "VetoContainerSize", "Medium", "Small 30rem, Medium 48rem, Large 64rem, ExtraLarge 80rem, or Full."),
+        new("Size", "VetoContainerSize", "Medium", "Small 30rem, Medium 48rem, Large 64rem, ExtraLarge 80rem, ExtraExtraLarge 120rem, or Full."),
         new("Padding", "VetoSpacing", "Large", "Horizontal padding, from the spacing scale."),
         new("Centered", "bool", "true", "Whether the container is centred in the space available.")
     ];
@@ -45,6 +46,7 @@
         """
         <VetoContainer Size="VetoContainerSize.Small">30rem</VetoContainer>
         <VetoContainer Size="VetoContainerSize.Large">64rem</VetoContainer>
+        <VetoContainer Size="VetoContainerSize.ExtraExtraLarge">120rem</VetoContainer>
         <VetoContainer Size="VetoContainerSize.Full">No limit</VetoContainer>
         """;
 

@@ -53,5 +53,8 @@ public enum VetoContainerSize
     ExtraLarge,
 
     /// <summary>No limit; padding still applies.</summary>
-    Full
+    Full,
+
+    /// <summary>120rem (1920px) - wall displays and very wide dashboards.</summary>
+    ExtraExtraLarge
 }
