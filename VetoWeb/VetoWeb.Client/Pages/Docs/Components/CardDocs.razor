@@ -105,6 +105,8 @@
             <VetoCard TestId="flat" Elevation="VetoElevation.Flat" Title="Flat">Sits on the background.</VetoCard>
             <VetoCard TestId="outlined" Elevation="VetoElevation.Outlined" Title="Outlined">A hairline border.</VetoCard>
             <VetoCard TestId="raised" Elevation="VetoElevation.Raised" Title="Raised">A soft shadow.</VetoCard>
+            <VetoCard TestId="elevated" Elevation="VetoElevation.Elevated" Title="Elevated">A deeper shadow.</VetoCard>
+            <VetoCard TestId="floating" Elevation="VetoElevation.Floating" Title="Floating">The deepest shadow.</VetoCard>
             <VetoCard TestId="clickable" Title="Clickable" OnClick="() => _clicks++">Activated @_clicks times.</VetoCard>
         </VetoStack>
     </DemoBlock>
@@ -135,7 +137,7 @@
         new("VetoCardFooter", "component", "—", "The actions. Justify distributes them; Bordered draws a hairline above."),
         new("Title / Header / Footer", "string? / RenderFragment?", "null", "The plain form, unchanged."),
         new("ChildContent", "RenderFragment?", "null", "The card's content."),
-        new("Elevation", "VetoElevation", "Outlined", "Flat, Outlined or Raised."),
+        new("Elevation", "VetoElevation", "Outlined", "Flat, Outlined, Raised, Elevated or Floating."),
         new("Padding", "VetoSpacing", "Large", "Padding inside each region. Use None with the composed sections, which pad themselves."),
         new("OnClick", "EventCallback<MouseEventArgs>", "—", "Makes the whole card activate, and renders it as a button."),
         new("Disabled", "bool", "false", "Disables an interactive card."),

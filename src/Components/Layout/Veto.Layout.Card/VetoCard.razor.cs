@@ -71,5 +71,11 @@ public enum VetoElevation
     Outlined,
 
     /// <summary>A soft shadow, no border.</summary>
-    Raised
+    Raised,
+
+    /// <summary>A deeper shadow - a panel lifted clear of the page, such as a featured card.</summary>
+    Elevated,
+
+    /// <summary>The deepest shadow - a surface floating over everything, like a dialog.</summary>
+    Floating
 }
