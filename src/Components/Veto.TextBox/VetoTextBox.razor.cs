@@ -28,6 +28,18 @@ public partial class VetoTextBox<TValue> : VetoInputBase<TValue>
     [Parameter]
     public string Type { get; set; } = "text";
 
+    /// <summary>Renders a <c>&lt;textarea&gt;</c> instead of an <c>&lt;input&gt;</c>. <see cref="Type"/> is ignored.</summary>
+    [Parameter]
+    public bool Multiline { get; set; }
+
+    /// <summary>The textarea's visible line count when <see cref="Multiline"/> is on.</summary>
+    [Parameter]
+    public int Rows { get; set; } = 3;
+
+    /// <inheritdoc />
+    protected override CssBuilder StartCssClass () =>
+        base.StartCssClass().AddClass(Modifier("multiline"), Multiline);
+
     /// <summary>
     /// When true the bound value updates on every keystroke; when false (the default)
     /// it updates when the field loses focus, matching plain <c>@bind-Value</c>.

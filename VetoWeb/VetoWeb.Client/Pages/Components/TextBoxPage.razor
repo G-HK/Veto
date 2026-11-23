@@ -97,6 +97,12 @@
     </section>
 
     <section class="demo-section">
+        <h2>Multiline</h2>
+        <VetoTextBox TValue="string" TestId="multiline" Label="Notes" Multiline="true" Rows="4" @bind-Value="_notes" />
+        <p class="demo-output" data-testid="multiline-output">@_notes</p>
+    </section>
+
+    <section class="demo-section">
         <h2>Formatted date</h2>
         <VetoTextBox TValue="DateTime?" TestId="formatted" Label="Day" Format="dd/MM/yyyy" @bind-Value="_day" />
         <p class="demo-output" data-testid="formatted-output">@(_day?.ToString("yyyy-MM-dd") ?? "null")</p>
@@ -132,6 +138,7 @@
 @code {
     private bool _interactive;
     private string? _basic;
+    private string? _notes;
     private string? _immediate;
     private string? _size;
     private string? _variant;
