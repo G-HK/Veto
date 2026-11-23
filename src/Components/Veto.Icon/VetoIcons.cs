@@ -475,4 +475,168 @@ public static class VetoIcons
 
     /// <summary>Magnifier with a minus - zoom out.</summary>
     public const string ZoomOut = "<circle cx=\"11\" cy=\"11\" r=\"7\" /><path d=\"m16 16 5 5\" /><path d=\"M8 11h6\" />";
+
+    // ---------------------------------------------------------------- Industry, energy and work
+    // From Lucide (lucide-static 1.78.0, ISC licence, https://lucide.dev).
+
+    /// <summary>Arrow pointing right - next, continue.</summary>
+    public const string ArrowRight = "<path d=\"M5 12h14\" /><path d=\"m12 5 7 7-7 7\" />";
+
+    /// <summary>Arrow pointing left - back.</summary>
+    public const string ArrowLeft = "<path d=\"m12 19-7-7 7-7\" /><path d=\"M19 12H5\" />";
+
+    /// <summary>Factory with chimneys - manufacturing, industry.</summary>
+    public const string Factory =
+        "<path d=\"M12 16h.01\" />" +
+        "<path d=\"M16 16h.01\" />" +
+        "<path d=\"M3 19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a.5.5 0 0 0-.769-.422l-4.462 2.844A.5.5 0 0 1 15 10.5v-2a.5.5 0 0 0-.769-.422L9.77 10.922A.5.5 0 0 1 9 10.5V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z\" />" +
+        "<path d=\"M8 16h.01\" />";
+
+    /// <summary>Electric-vehicle charging station.</summary>
+    public const string EvCharger =
+        "<path d=\"M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5\" />" +
+        "<path d=\"M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16\" />" +
+        "<path d=\"M2 21h13\" />" +
+        "<path d=\"M3 7h11\" />" +
+        "<path d=\"m9 11-2 3h3l-2 3\" />";
+
+    /// <summary>Plug with a spark - electrical services, power on.</summary>
+    public const string PlugZap =
+        "<path d=\"M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z\" />" +
+        "<path d=\"m2 22 3-3\" />" +
+        "<path d=\"M7.5 13.5 10 11\" />" +
+        "<path d=\"M10.5 16.5 13 14\" />" +
+        "<path d=\"m18 3-4 4h6l-4 4\" />";
+
+    /// <summary>Electrical plug.</summary>
+    public const string Plug =
+        "<path d=\"M12 22v-5\" />" +
+        "<path d=\"M15 8V2\" />" +
+        "<path d=\"M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z\" />" +
+        "<path d=\"M9 8V2\" />";
+
+    /// <summary>Pulled plug - power off, disconnected.</summary>
+    public const string Unplug =
+        "<path d=\"m19 5 3-3\" />" +
+        "<path d=\"m2 22 3-3\" />" +
+        "<path d=\"M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z\" />" +
+        "<path d=\"M7.5 13.5 10 11\" />" +
+        "<path d=\"M10.5 16.5 13 14\" />" +
+        "<path d=\"m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z\" />";
+
+    /// <summary>Wrench - build, maintenance, tools.</summary>
+    public const string Wrench =
+        "<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\" />";
+
+    /// <summary>Hard hat - engineering, site safety.</summary>
+    public const string HardHat =
+        "<path d=\"M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5\" />" +
+        "<path d=\"M14 6a6 6 0 0 1 6 6v3\" />" +
+        "<path d=\"M4 15v-3a6 6 0 0 1 6-6\" />" +
+        "<rect x=\"2\" y=\"15\" width=\"20\" height=\"4\" rx=\"1\" />";
+
+    /// <summary>Roadworks barrier - under construction.</summary>
+    public const string Construction =
+        "<rect x=\"2\" y=\"6\" width=\"20\" height=\"8\" rx=\"1\" />" +
+        "<path d=\"M17 14v7\" />" +
+        "<path d=\"M7 14v7\" />" +
+        "<path d=\"M17 3v3\" />" +
+        "<path d=\"M7 3v3\" />" +
+        "<path d=\"M10 14 2.3 6.3\" />" +
+        "<path d=\"m14 6 7.7 7.7\" />" +
+        "<path d=\"m8 6 8 8\" />";
+
+    /// <summary>Connected nodes - a network or hub.</summary>
+    public const string Network =
+        "<rect x=\"16\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\" />" +
+        "<rect x=\"2\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\" />" +
+        "<rect x=\"9\" y=\"2\" width=\"6\" height=\"6\" rx=\"1\" />" +
+        "<path d=\"M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3\" />" +
+        "<path d=\"M12 12V8\" />";
+
+    /// <summary>Solar panel.</summary>
+    public const string SolarPanel =
+        "<path d=\"M11 2h2\" />" +
+        "<path d=\"m14.28 14-4.56 8\" />" +
+        "<path d=\"m21 22-1.558-4H4.558\" />" +
+        "<path d=\"M3 10v2\" />" +
+        "<path d=\"M6.245 15.04A2 2 0 0 1 8 14h12a1 1 0 0 1 .864 1.505l-3.11 5.457A2 2 0 0 1 16 22H4a1 1 0 0 1-.863-1.506z\" />" +
+        "<path d=\"M7 2a4 4 0 0 1-4 4\" />" +
+        "<path d=\"m8.66 7.66 1.41 1.41\" />";
+
+    /// <summary>Battery with a charging bolt.</summary>
+    public const string BatteryCharging =
+        "<path d=\"m11 7-3 5h4l-3 5\" />" +
+        "<path d=\"M14.856 6H16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.935\" />" +
+        "<path d=\"M22 14v-4\" />" +
+        "<path d=\"M5.14 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2.936\" />";
+
+    /// <summary>Headset - support agent, help desk.</summary>
+    public const string Headset =
+        "<path d=\"M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z\" />" +
+        "<path d=\"M21 16v2a4 4 0 0 1-4 4h-5\" />";
+
+    /// <summary>Briefcase - work, jobs, business.</summary>
+    public const string Briefcase =
+        "<path d=\"M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\" />" +
+        "<rect width=\"20\" height=\"14\" x=\"2\" y=\"6\" rx=\"2\" />";
+
+    /// <summary>Office building - company, business.</summary>
+    public const string Building =
+        "<path d=\"M10 12h4\" />" +
+        "<path d=\"M10 8h4\" />" +
+        "<path d=\"M14 21v-3a2 2 0 0 0-4 0v3\" />" +
+        "<path d=\"M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2\" />" +
+        "<path d=\"M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16\" />";
+
+    /// <summary>Rocket - launch, getting started.</summary>
+    public const string Rocket =
+        "<path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\" />" +
+        "<path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\" />" +
+        "<path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\" />" +
+        "<path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\" />";
+
+    /// <summary>Receipt - invoice, billing.</summary>
+    public const string Receipt =
+        "<path d=\"M12 17V7\" />" +
+        "<path d=\"M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8\" />" +
+        "<path d=\"M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z\" />";
+
+    /// <summary>Light bulb - tips, ideas.</summary>
+    public const string Lightbulb =
+        "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" />" +
+        "<path d=\"M9 18h6\" />" +
+        "<path d=\"M10 22h4\" />";
+
+    /// <summary>Badge with a checkmark - verified.</summary>
+    public const string BadgeCheck =
+        "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" />" +
+        "<path d=\"m16 9-5.5 5.5L8 12\" />";
+
+    /// <summary>Clipboard with a checkmark - fact check, done list.</summary>
+    public const string ClipboardCheck =
+        "<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\" />" +
+        "<path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\" />" +
+        "<path d=\"m9 14 2 2 4-4\" />";
+
+    /// <summary>Ruler - measurement, architecture.</summary>
+    public const string Ruler =
+        "<path d=\"M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z\" />" +
+        "<path d=\"m14.5 12.5 2-2\" />" +
+        "<path d=\"m11.5 9.5 2-2\" />" +
+        "<path d=\"m8.5 6.5 2-2\" />" +
+        "<path d=\"m17.5 15.5 2-2\" />";
+
+    /// <summary>Magnifier with a cross - no results, not found.</summary>
+    public const string SearchX =
+        "<path d=\"m13.5 8.5-5 5\" />" +
+        "<path d=\"m8.5 8.5 5 5\" />" +
+        "<circle cx=\"11\" cy=\"11\" r=\"8\" />" +
+        "<path d=\"m21 21-4.3-4.3\" />";
+
+    /// <summary>Clock with a turning arrow - history, recent activity.</summary>
+    public const string History =
+        "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" />" +
+        "<path d=\"M3 3v5h5\" />" +
+        "<path d=\"M12 7v5l4 2\" />";
 }
