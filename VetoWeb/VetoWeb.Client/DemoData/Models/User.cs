@@ -1,6 +1,7 @@
 namespace VetoWeb.DemoData.Models;
 
-public class Dealer : IEntity
+/// <summary>Anyone with an account. <see cref="Customer"/> and <see cref="Employee"/> derive from it.</summary>
+public class User : IEntity
 {
     public int ID { get; set; }
     public string Name { get; set; } = default!;
@@ -8,11 +9,19 @@ public class Dealer : IEntity
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }
-    public string Phone { get; set; } = default!;
+    public string UserName { get; set; } = default!;
     public string Email { get; set; } = default!;
-    public string? Website { get; set; }
-    public double Rating { get; set; }
-    public DateOnly OpenedOn { get; set; }
+    public string? Phone { get; set; }
+    public string? AvatarUrl { get; set; }
+    public UserRole Role { get; set; }
+    public DateTime? LastLoginAt { get; set; }
     public bool IsActive { get; set; }
     public Location Location { get; set; } = new();
+}
+
+public enum UserRole
+{
+    Viewer,
+    Editor,
+    Admin
 }
