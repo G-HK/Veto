@@ -3,14 +3,24 @@
 
 .veto-table {
     --veto-table-cell-padding: var(--veto-space-2) var(--veto-space-3);
+    display: flex;
+    flex-direction: column;
     max-width: 100%;
-    overflow: auto;
+    overflow: hidden;
     font-family: var(--veto-font-sans);
     font-size: var(--veto-font-size-sm);
     color: var(--veto-color-text);
     background-color: var(--veto-color-surface);
     border: 1px solid var(--veto-border-color, var(--veto-color-border));
     border-radius: var(--veto-radius-md);
+}
+
+/* Where the rows scroll. It takes whatever height the root has left once the pager is placed, so
+   RootMaxHeight caps the whole table and the pager is never pushed out or laid over a row. */
+.veto-table__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
 }
 
 .veto-table__table {
@@ -91,5 +101,244 @@
 .veto-table ::deep .veto-table__empty {
     padding: var(--veto-space-6, 1.5rem) var(--veto-space-3);
     text-align: center;
+    color: var(--veto-color-text-muted);
+}
+
+/* As specific as the empty-cell rule above, and later, so an error is never muted. */
+.veto-table .veto-table__error {
+    color: var(--veto-color-danger);
+}
+
+/* Paging. The pager and the Load more bar sit under the scroll box: always in view, never over
+   a row, and they stay put when a wide table scrolls sideways. */
+
+.veto-table__pager,
+.veto-table__more {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--veto-space-3);
+    padding: var(--veto-space-2) var(--veto-space-3);
+    background-color: var(--veto-color-surface);
+    border-top: 1px solid var(--veto-border-color, var(--veto-color-border));
+}
+
+.veto-table__pager {
+    /* Positioned so the screen-reader status inside - absolutely positioned, like every
+       visually hidden element - is contained and clipped here. Unpositioned, it escaped every
+       scroll box on the way up and stretched the whole page to wherever it sat. */
+    position: relative;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    row-gap: var(--veto-space-2);
+    font-size: var(--veto-font-size-sm);
+}
+
+/* Left: rows per page and the range. Right: where to go. Each wraps on its own. */
+.veto-table__pager-info,
+.veto-table__pages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.veto-table__pager-info {
+    gap: var(--veto-space-4);
+    color: var(--veto-color-text-muted);
+}
+
+.veto-table__pages {
+    gap: var(--veto-space-1);
+}
+
+.veto-table__range {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Page numbers and the arrow buttons: quiet squares that light up under the pointer, the current
+   page filled in the accent. 2rem square is the desktop comfortable target; the gap keeps
+   neighbours apart. */
+.veto-table__page,
+.veto-table__icon-button {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 var(--veto-space-2);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    color: var(--veto-color-text);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--veto-radius-md);
+    cursor: pointer;
+    transition: background-color var(--veto-transition), border-color var(--veto-transition), color var(--veto-transition);
+}
+
+.veto-table__page:hover:not(:disabled),
+.veto-table__icon-button:hover:not(:disabled) {
+    background-color: var(--veto-color-surface-raised);
+    border-color: var(--veto-color-border-strong);
+}
+
+.veto-table__page--current,
+.veto-table__page--current:hover:not(:disabled) {
+    font-weight: 600;
+    color: var(--veto-color-primary-contrast);
+    background-color: var(--veto-color-primary);
+    border-color: var(--veto-color-primary);
+    cursor: default;
+}
+
+.veto-table__page:focus-visible,
+.veto-table__icon-button:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-table__page:disabled:not(.veto-table__page--current),
+.veto-table__icon-button:disabled {
+    color: var(--veto-color-text-disabled);
+    cursor: not-allowed;
+}
+
+.veto-table__icon-button svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.veto-table__gap {
+    min-width: 1.25rem;
+    text-align: center;
+    color: var(--veto-color-text-muted);
+}
+
+/* The rows-per-page picker and the go-to box: a label beside a small field. */
+.veto-table__field {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--veto-space-2);
+    white-space: nowrap;
+    color: var(--veto-color-text-muted);
+}
+
+.veto-table__jump {
+    margin-inline-start: var(--veto-space-3);
+}
+
+.veto-table__select,
+.veto-table__input {
+    height: 2rem;
+    padding: 0 var(--veto-space-2);
+    font: inherit;
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border-strong);
+    border-radius: var(--veto-radius-md);
+    transition: border-color var(--veto-transition), box-shadow var(--veto-transition);
+}
+
+.veto-table__input {
+    width: 4rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* A phone has no room for a run of page numbers: keep the arrows, the current page and the
+   go-to box, which between them still reach every page. */
+@media (max-width: 639.98px) {
+    .veto-table__page:not(.veto-table__page--current),
+    .veto-table__gap {
+        display: none;
+    }
+
+    /* The labels go quiet on a phone - still read out, since each wraps its control - so the
+       pager fits on two lines and leaves the rows their room. */
+    .veto-table__field-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    .veto-table__pager-info {
+        gap: var(--veto-space-3);
+    }
+
+    /* With its label hidden, a field's gap would only push the box onto a line of its own. */
+    .veto-table__field {
+        gap: 0;
+    }
+
+    .veto-table__jump {
+        margin-inline-start: var(--veto-space-2);
+    }
+}
+
+.veto-table__select:hover:not(:disabled),
+.veto-table__input:hover:not(:disabled) {
+    border-color: var(--veto-color-text-muted);
+}
+
+.veto-table__select:focus-visible,
+.veto-table__input:focus-visible {
+    outline: none;
+    border-color: var(--veto-color-primary);
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-table__more {
+    justify-content: center;
+}
+
+.veto-table__status {
+    color: var(--veto-color-text-muted);
+}
+
+.veto-table__button {
+    min-height: 2rem;
+    padding: var(--veto-space-1) var(--veto-space-3);
+    font: inherit;
+    font-weight: 600;
+    color: var(--veto-color-text);
+    background-color: var(--veto-color-surface);
+    border: 1px solid var(--veto-color-border-strong);
+    border-radius: var(--veto-radius-md);
+    cursor: pointer;
+    transition: border-color var(--veto-transition), background-color var(--veto-transition);
+}
+
+.veto-table__button:hover:not(:disabled) {
+    border-color: var(--veto-color-primary);
+    background-color: color-mix(in srgb, var(--veto-color-primary) 8%, transparent);
+}
+
+.veto-table__button:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-table__button:disabled {
+    color: var(--veto-color-text-disabled);
+    background-color: var(--veto-color-surface-disabled);
+    border-color: var(--veto-color-border);
+    cursor: not-allowed;
+}
+
+/* One pixel is enough for the observer to see; it takes no room in the layout. */
+.veto-table__sentinel {
+    height: 1px;
+    margin-top: -1px;
+}
+
+/* A virtualized row still on its way from ItemsProvider. Same cell padding as a real row, so the
+   height Virtualize was told about holds while it loads. */
+.veto-table__placeholder td {
     color: var(--veto-color-text-muted);
 }

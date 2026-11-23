@@ -95,3 +95,12 @@ a.veto-link.footer__link:hover {
     flex: 1 1 22rem;
     max-width: 34rem;
 }
+
+/*
+ * The Table demo's RowClass: orders over 100. Global because the class lands on a row the Table
+ * renders, which never carries the docs page's CSS-isolation scope.
+ */
+.demo-large-order > td {
+    font-weight: 600;
+    color: var(--veto-color-primary);
+}

@@ -37,9 +37,10 @@ public static class Data
             foreach (var customer in dealer.Customers) { customer.Dealer = dealer; customer.DealerID = dealer.ID; }
         }
 
-        db.Cars = [.. db.Dealers.SelectMany(d => d.Cars)];
-        db.Employees = [.. db.Dealers.SelectMany(d => d.Employees)];
-        db.Customers = [.. db.Dealers.SelectMany(d => d.Customers)];
+        // The all-dealer lists in ID order, not dealer by dealer - car 1 first, car 1000 last.
+        db.Cars = [.. db.Dealers.SelectMany(d => d.Cars).OrderBy(c => c.ID)];
+        db.Employees = [.. db.Dealers.SelectMany(d => d.Employees).OrderBy(e => e.ID)];
+        db.Customers = [.. db.Dealers.SelectMany(d => d.Customers).OrderBy(c => c.ID)];
         return db;
     }
 }
