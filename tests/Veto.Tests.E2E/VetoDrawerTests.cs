@@ -102,6 +102,40 @@ public class VetoDrawerTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
+    public async Task Following_a_link_closes_an_overlay_drawer ()
+    {
+        await Page.SetViewportSizeAsync(420, 900);
+        await GotoComponentAsync(Route);
+
+        await Toggle.ClickAsync();
+        await Expect(Drawer).ToHaveAttributeAsync("data-open", "true");
+
+        // From the keyboard: the app bar sits over the drawer's first links and would take a click.
+        var link = Drawer.Locator("a[href]:not([aria-current='page']):visible").First;
+        await link.FocusAsync();
+        await link.PressAsync("Enter");
+
+        await Expect(Drawer).ToHaveAttributeAsync("data-open", "false");
+    }
+
+    [Fact]
+    public async Task Following_a_link_leaves_a_docked_drawer_open ()
+    {
+        await Page.SetViewportSizeAsync(1440, 900);
+        await GotoComponentAsync(Route);
+        await Expect(Drawer).ToHaveAttributeAsync("data-open", "true");
+
+        // From the keyboard, as above.
+        var start = Page.Url;
+        var link = Drawer.Locator("a[href]:not([aria-current='page']):visible").First;
+        await link.FocusAsync();
+        await link.PressAsync("Enter");
+        await Page.WaitForURLAsync(url => url != start);
+
+        await Expect(Drawer).ToHaveAttributeAsync("data-open", "true");
+    }
+
+    [Fact]
     public async Task Escape_closes_an_overlay_drawer ()
     {
         await Page.SetViewportSizeAsync(420, 900);
