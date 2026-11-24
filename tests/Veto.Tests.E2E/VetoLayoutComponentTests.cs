@@ -150,6 +150,15 @@ public class VetoLayoutComponentTests ( BlazorAppFixture app ) : VetoPageTest(ap
     }
 
     [Fact]
+    public async Task ExtraExtraLarge_container_caps_at_1920px ()
+    {
+        await GotoComponentAsync("docs/components/container");
+
+        await Expect(Component("xxl")).ToHaveClassAsync(new Regex(@"\bveto-container--extraextralarge\b"));
+        Assert.Equal("1920px", await Component("xxl").EvaluateAsync<string>("el => getComputedStyle(el).maxWidth"));
+    }
+
+    [Fact]
     public async Task Decorative_icons_are_hidden_from_assistive_technology ()
     {
         await GotoComponentAsync(Route);
