@@ -1,4 +1,4 @@
-/* VetoCard - a grouping surface, flat, outlined or raised. */
+/* VetoCard - a grouping surface, flat, outlined, or raised to one of three shadow depths. */
 
 .veto-card {
     display: flex;
@@ -28,6 +28,15 @@
 
 .veto-card--raised {
     box-shadow: var(--veto-shadow-md);
+}
+
+/* Fallbacks for a Veto.Core that predates the lg/xl tokens. */
+.veto-card--elevated {
+    box-shadow: var(--veto-shadow-lg, 0 8px 24px rgb(15 23 42 / 0.14), 0 2px 6px rgb(15 23 42 / 0.08));
+}
+
+.veto-card--floating {
+    box-shadow: var(--veto-shadow-xl, 0 20px 48px rgb(15 23 42 / 0.18), 0 6px 14px rgb(15 23 42 / 0.10));
 }
 
 /* Regions */
