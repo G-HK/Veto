@@ -25,6 +25,19 @@ reads its colours, spacing and radii from the tokens defined in it:
 <link rel="stylesheet" href="_content/Veto.Core/VetoStyles.css" />
 ```
 
+Two optional sheets, linked after it. Veto components need neither:
+
+```html
+<!-- A small reset (box-sizing, margins, media, form fonts). Focus outlines are left alone. -->
+<link rel="stylesheet" href="_content/Veto.Core/veto-reset.css" />
+<!-- Layout helpers: veto-d-flex, veto-items-center, veto-gap-4, veto-mb-6, veto-px-3, veto-w-100... -->
+<link rel="stylesheet" href="_content/Veto.Core/veto-utilities.css" />
+```
+
+Spacing utilities use steps 0-6 of the `--veto-space-*` scale. Breakpoint hiding
+(`veto-hide-below-md`, `veto-hide-from-lg`, ...) is already in `VetoStyles.css`.
+Shadow tokens run `--veto-shadow-sm`, `-md`, `-lg`, `-xl`.
+
 ## Usage
 
 Style your own markup with the same tokens, so it follows the theme:

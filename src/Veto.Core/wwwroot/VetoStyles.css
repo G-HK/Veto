@@ -68,6 +68,8 @@
     /* Elevation and motion */
     --veto-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.08);
     --veto-shadow-md: 0 4px 12px rgb(15 23 42 / 0.12);
+    --veto-shadow-lg: 0 8px 24px rgb(15 23 42 / 0.14), 0 2px 6px rgb(15 23 42 / 0.08);
+    --veto-shadow-xl: 0 20px 48px rgb(15 23 42 / 0.18), 0 6px 14px rgb(15 23 42 / 0.10);
     --veto-transition: 150ms ease;
 
     /* Layering. Tooltips sit above page content, sticky bars and each other's components;
@@ -113,6 +115,8 @@
 
     --veto-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
     --veto-shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
+    --veto-shadow-lg: 0 8px 24px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.4);
+    --veto-shadow-xl: 0 20px 48px rgb(0 0 0 / 0.65), 0 6px 14px rgb(0 0 0 / 0.45);
 }
 
 /* OS preference, unless the app explicitly asked for light */
@@ -139,6 +143,8 @@
 
         --veto-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
         --veto-shadow-md: 0 4px 12px rgb(0 0 0 / 0.5);
+        --veto-shadow-lg: 0 8px 24px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.4);
+        --veto-shadow-xl: 0 20px 48px rgb(0 0 0 / 0.65), 0 6px 14px rgb(0 0 0 / 0.45);
     }
 }
 
