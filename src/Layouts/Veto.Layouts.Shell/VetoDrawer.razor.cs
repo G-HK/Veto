@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using Veto.Core;
@@ -102,6 +103,14 @@ public partial class VetoDrawer : VetoComponentBase, IAsyncDisposable
     public bool CloseOnNarrowStart { get; set; } = true;
 
     /// <summary>
+    /// Whether the drawer closes itself after navigation while it is overlaying the content: a
+    /// temporary drawer always, a responsive one below <see cref="Breakpoint"/>. A docked drawer
+    /// stays as it is. True by default - a tapped link should not leave the page covered.
+    /// </summary>
+    [Parameter]
+    public bool CloseOnNavigate { get; set; } = true;
+
+    /// <summary>
     /// True when the drawer is currently overlaying content rather than sitting beside it.
     /// Temporary always overlays; responsive does so below its breakpoint, which only CSS can
     /// know - so the scrim is rendered for both and CSS decides whether it is visible.
@@ -113,6 +122,13 @@ public partial class VetoDrawer : VetoComponentBase, IAsyncDisposable
     /// in the accessibility tree because they remain on screen in some form.
     /// </summary>
     private bool IsHiddenFromAssistiveTech => Variant == VetoDrawerVariant.Temporary && !Open;
+
+    /// <inheritdoc />
+    protected override void OnInitialized ()
+    {
+        base.OnInitialized();
+        Navigation.LocationChanged += OnLocationChanged;
+    }
 
     /// <inheritdoc />
     protected override void OnParametersSet ()
@@ -222,6 +238,41 @@ public partial class VetoDrawer : VetoComponentBase, IAsyncDisposable
         }
     }
 
+    private void OnLocationChanged ( object? sender, LocationChangedEventArgs args )
+        => _ = InvokeAsync(CloseIfOverlayingAsync);
+
+    private async Task CloseIfOverlayingAsync ()
+    {
+        if (!CloseOnNavigate || !Open)
+        {
+            return;
+        }
+
+        if (Variant == VetoDrawerVariant.Responsive)
+        {
+            try
+            {
+                _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Layouts.Shell/veto-layout.js");
+
+                if (await _module.InvokeAsync<bool>("matchesMinWidth", BreakpointPixels))
+                {
+                    return; // Docked: navigating does not cover anything.
+                }
+            }
+            catch (Exception ex) when (ex is JSException or InvalidOperationException or JSDisconnectedException)
+            {
+                return;
+            }
+        }
+        else if (Variant != VetoDrawerVariant.Temporary)
+        {
+            return;
+        }
+
+        await CloseAsync();
+        StateHasChanged();
+    }
+
     private int BreakpointPixels => Breakpoint switch
     {
         VetoBreakpoint.Small => 640,
@@ -246,6 +297,8 @@ public partial class VetoDrawer : VetoComponentBase, IAsyncDisposable
     /// <inheritdoc />
     public async ValueTask DisposeAsync ()
     {
+        Navigation.LocationChanged -= OnLocationChanged;
+
         if (_module is not null)
         {
             try
