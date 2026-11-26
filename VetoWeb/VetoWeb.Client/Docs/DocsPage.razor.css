@@ -23,3 +23,32 @@
     line-height: 1.65;
     color: var(--veto-color-text-muted);
 }
+
+
+/* Content beside a sticky "On this page" rail; the rail drops away on narrow screens. */
+.docs-page__frame {
+    display: flex;
+    align-items: flex-start;
+}
+
+.docs-page__frame > ::deep .docs-page {
+    flex: 1;
+    min-width: 0;
+}
+
+.docs-page__rail {
+    position: sticky;
+    top: calc(var(--veto-appbar-height, 0px) + var(--veto-space-6));
+    flex: none;
+    width: 13rem;
+    max-height: calc(100vh - var(--veto-appbar-height, 0px) - 2 * var(--veto-space-6));
+    margin-top: 8rem;
+    padding-right: var(--veto-space-5);
+    overflow-y: auto;
+}
+
+@media (max-width: 1200px) {
+    .docs-page__rail {
+        display: none;
+    }
+}

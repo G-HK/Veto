@@ -52,6 +52,36 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-dividers"
+               Title="Dividers"
+               Description="Dividers draws a line between each pair of children, centred in the gap, so changing the gap keeps the line in the middle. It follows the orientation, and the colour, thickness, style and inset are all yours to set."
+               Code="@DividersCode">
+        <VetoStack Gap="VetoSpacing.Large">
+            <VetoStack Dividers="true" Gap="VetoSpacing.Medium" TestId="divided-column">
+                <span>Profile</span>
+                <span>Notifications</span>
+                <span>Billing</span>
+            </VetoStack>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Dividers Gap="VetoSpacing.Medium"
+                       DividerStyle="VetoLineStyle.Dashed" DividerThickness="2px"
+                       DividerColor="var(--veto-color-primary)" TestId="divided-row">
+                <span>Docs</span>
+                <span>Blog</span>
+                <span>Changelog</span>
+            </VetoStack>
+            <VetoStack Dividers="true" DividerInset="15%" Gap="VetoSpacing.Medium" TestId="divided-inset">
+                <span>Inset</span>
+                <span>Shorter lines</span>
+                <span>Centred on the axis</span>
+            </VetoStack>
+            <VetoStack Dividers="true" DividerInset="15%" DividerAlign="VetoLineAlign.Start" Gap="VetoSpacing.Medium" TestId="divided-start">
+                <span>Aligned to the start</span>
+                <span>Same length, moved left</span>
+                <span>Like a list with icons</span>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
     <ParameterTable TestId="parameters" Rows="Parameters" />
 
 </DocsPage>
@@ -65,17 +95,25 @@
         new("Justify", "VetoJustify", "Start", "Along the layout axis, including SpaceBetween and SpaceEvenly."),
         new("Wrap", "bool", "false", "Whether children wrap onto further lines."),
         new("Reverse", "bool", "false", "Reverses visual order without reordering the markup."),
-        new("FullHeight", "bool", "false", "Fills the height available.")
+        new("FullHeight", "bool", "false", "Fills the height available."),
+        new("Dividers", "bool", "false", "Draws a line between each pair of children, centred in the gap."),
+        new("DividerColor", "string?", "null", "Any CSS colour. The theme's border colour when null."),
+        new("DividerThickness", "string?", "null", "A CSS length. 1px when null."),
+        new("DividerStyle", "VetoLineStyle", "Solid", "Solid, Dashed or Dotted."),
+        new("DividerInset", "string?", "null", "How far each line stops short of both ends - \"1rem\", \"15%\". Inset lines are solid."),
+        new("DividerAlign", "VetoLineAlign", "Center", "Start, Center or End: where an inset line sits. Same length, moved.")
     ];
 
-    private const string OrientationCode = """
+    private const string OrientationCode = 
+        """
         <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Medium">
             <VetoCard>One</VetoCard>
             <VetoCard>Two</VetoCard>
         </VetoStack>
         """;
 
-    private const string AlignmentCode = """
+    private const string AlignmentCode = 
+        """
         <VetoStack Orientation="VetoOrientation.Horizontal"
                    Justify="VetoJustify.SpaceBetween"
                    Align="VetoAlign.Center">
@@ -85,7 +123,39 @@
         </VetoStack>
         """;
 
-    private const string SpacerCode = """
+    private const string DividersCode = 
+        """
+        <VetoStack Dividers="true">
+            <span>Profile</span>
+            <span>Notifications</span>
+            <span>Billing</span>
+        </VetoStack>
+
+        <VetoStack Orientation="VetoOrientation.Horizontal"
+                   Dividers="true"
+                   DividerStyle="VetoLineStyle.Dashed"
+                   DividerThickness="2px"
+                   DividerColor="var(--veto-color-primary)">
+            <span>Docs</span>
+            <span>Blog</span>
+            <span>Changelog</span>
+        </VetoStack>
+
+        <VetoStack Dividers="true" DividerInset="15%">
+            <span>Inset</span>
+            <span>Shorter lines</span>
+            <span>Centred on the axis</span>
+        </VetoStack>
+
+        <VetoStack Dividers="true" DividerInset="15%" DividerAlign="VetoLineAlign.Start">
+            <span>Aligned to the start</span>
+            <span>Same length, moved left</span>
+            <span>Like a list with icons</span>
+        </VetoStack>
+        """;
+
+    private const string SpacerCode = 
+        """
         <VetoStack Orientation="VetoOrientation.Horizontal" Align="VetoAlign.Center">
             <VetoIcon Icon="@VetoIcons.Folder" />
             <span>Project files</span>

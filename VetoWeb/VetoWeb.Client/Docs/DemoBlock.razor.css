@@ -1,4 +1,5 @@
 .demo-block__title {
+    position: relative;
     margin: 0;
     font-size: 1.125rem;
     font-weight: 600;
@@ -15,3 +16,18 @@
 
 /* .demo-block__stage lives in app.css: it is applied to a child component's root element,
    which never receives this component's CSS-isolation scope attribute. */
+
+
+.demo-block__anchor {
+    position: absolute;
+    right: calc(100% + var(--veto-space-2));
+    color: var(--veto-color-text-muted);
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity var(--veto-transition);
+}
+
+.demo-block__title:hover .demo-block__anchor,
+.demo-block__anchor:focus-visible {
+    opacity: 1;
+}
