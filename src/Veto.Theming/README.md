@@ -61,6 +61,12 @@ await Theme.SetThemeAsync(new VetoTheme
 });
 ```
 
+A theme set this way stays applied as people move around the app. The layout's
+`<VetoThemeProvider Theme="…">` only applies its own theme again when that parameter changes.
+
+`BorderStrong` colours the edges of controls such as text fields and switches. Keep it at 3:1
+or better against `Surface`, so the field can be seen.
+
 ## Documentation
 
 The provider and the tokens are documented on the Veto docs site at `/docs/theming/provider`.

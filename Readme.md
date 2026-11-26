@@ -3,20 +3,25 @@
 Veto is an open source component library for Blazor projects, with no third-party package
 dependencies. Developed by G-HK.
 
-Targets .NET 11, and works in any Blazor project - WebAssembly, Server, or a Blazor Web App.
+Works in any Blazor project - WebAssembly, Server, or a Blazor Web App.
 
 Docs and live demos of every component: **<https://veto.blackpanda.be/>**
+
+## The Meaning of the Name
+
+A **veto** is an official power or right to reject, block, or forbid a decision, law, or
+proposal and also the act of using that power.
 
 ![The Veto docs site](assets/screenshots/home.png)
 
 ## A look at the components
 
-| | |
-| --- | --- |
-| **Gauge** - a car dashboard built from two `VetoGauge`s ([demo](https://veto.blackpanda.be/docs/components/gauge)) | **Gauge** - bands that colour the reading as it moves |
-| ![Car dashboard gauges](assets/screenshots/gauge-car.png) | ![Gauge with coloured bands](assets/screenshots/gauge-bands.png) |
-| **Gantt** - grouped tasks, dependencies, zoom and filters ([demo](https://veto.blackpanda.be/docs/components/gantt)) | **Table** - caption, footer and striped rows ([demo](https://veto.blackpanda.be/docs/components/table)) |
-| ![Gantt chart](assets/screenshots/gantt.png) | ![Table](assets/screenshots/table.png) |
+|                                                                                                                            |                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Gauge** - a car dashboard built from two `VetoGauge`s ([demo](https://veto.blackpanda.be/docs/components/gauge))         | **Gauge** - bands that colour the reading as it moves                                                                                  |
+| ![Car dashboard gauges](assets/screenshots/gauge-car.png)                                                                  | ![Gauge with coloured bands](assets/screenshots/gauge-bands.png)                                                                       |
+| **Gantt** - grouped tasks, dependencies, zoom and filters ([demo](https://veto.blackpanda.be/docs/components/gantt))       | **Table** - caption, footer and striped rows ([demo](https://veto.blackpanda.be/docs/components/table))                                |
+| ![Gantt chart](assets/screenshots/gantt.png)                                                                               | ![Table](assets/screenshots/table.png)                                                                                                 |
 | **Terminal box** - typed-out commands with a copy button ([demo](https://veto.blackpanda.be/docs/components/terminal-box)) | **Buttons** - filled, outlined, text, soft, underlined, ghost and elevated ([demo](https://veto.blackpanda.be/docs/components/button)) |
 | ![Terminal box](assets/screenshots/terminal-box.png) | ![Button variants](assets/screenshots/buttons.png) |
 
@@ -29,7 +34,7 @@ dotnet add package Veto
 ```
 
 `Veto` is a meta package - it has no components of its own, it just depends on every component
-package below. Take individual packages instead if you only want a few; each pulls in
+package below. Take individual packages instead if you only want a few, each pulls in
 `Veto.Core` and whatever else it genuinely uses, and nothing more:
 
 ```powershell
@@ -53,6 +58,33 @@ builder.Services.AddVetoToast();
 <script src="_content/Veto.Theming/veto-theme-init.js"></script>
 <link rel="stylesheet" href="_content/Veto.Core/VetoStyles.css" />
 ```
+
+## Theming
+
+Every component styles itself from `--veto-*` CSS custom properties, so one theme changes all of
+them, in light and dark. Override only the tokens you care about:
+
+```razor
+@* Once, in the layout *@
+<VetoThemeProvider Theme="AppTheme" />
+```
+
+```csharp
+public static readonly VetoTheme AppTheme = new()
+{
+    Light = new VetoPalette { Primary = "#1D4ED8", PrimaryHover = "#1E40AF" },
+    Dark  = new VetoPalette { Primary = "#60A5FA", PrimaryHover = "#93C5FD", PrimaryContrast = "#0B1220" }
+};
+```
+
+Themes can also change at runtime from anywhere through `IVetoThemeService.SetThemeAsync`. It all
+runs in the browser, with no request to the server. The docs site's
+[theme provider page](https://veto.blackpanda.be/docs/theming/provider) lets you try four custom
+themes on the whole site.
+
+Focus rings are built from the palette - a gap in the surface colour, then a solid ring in the
+accent - so they follow your theme and stay at 3:1 or better. Set `BorderStrong` for the edges
+of text fields and switches, and keep it at 3:1 against the surface too.
 
 ## Packages
 

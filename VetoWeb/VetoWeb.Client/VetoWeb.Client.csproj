@@ -23,4 +23,10 @@
     <ProjectReference Include="..\..\src\Veto\Veto.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Demo data, compiled into this assembly so prerender and the browser read the same file. -->
+    <EmbeddedResource Include="DemoData\db.json" LogicalName="db.json" />
+    <Content Remove="DemoData\db.json" />
+  </ItemGroup>
+
 </Project>

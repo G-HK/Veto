@@ -1,5 +1,4 @@
 using Veto;
-using VetoWeb.Client.Pages;
 using VetoWeb.Components;
 
 var builder = WebApplication.CreateBuilder(args);

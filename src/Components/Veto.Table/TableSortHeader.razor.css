@@ -1,0 +1,60 @@
+/* The sortable header: a button filling the cell, the label and a pair of arrows. The cell's own
+   padding, background and border come from the table's th rule. */
+
+.veto-table__sort-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--veto-space-1);
+    margin: calc(var(--veto-space-1) * -1);
+    padding: var(--veto-space-1);
+    font: inherit;
+    font-weight: inherit;
+    color: inherit;
+    text-align: inherit;
+    background: none;
+    border: 0;
+    border-radius: var(--veto-radius-sm);
+    cursor: pointer;
+}
+
+.veto-table__sort-button:hover {
+    color: var(--veto-color-primary);
+}
+
+.veto-table__sort-button:focus-visible {
+    outline: none;
+    box-shadow: var(--veto-focus-ring);
+}
+
+.veto-table__sort-icon {
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Both arrows faint while unsorted - a hint that the column sorts at all. Sorted, the arrow for
+   the direction is drawn in the accent and the other drops away, so the state never rests on
+   colour alone. */
+.veto-table__sort-up,
+.veto-table__sort-down {
+    stroke: currentColor;
+    color: var(--veto-color-text-muted);
+    opacity: 0.55;
+    transition: opacity var(--veto-transition), color var(--veto-transition);
+}
+
+.veto-table__sort-header--ascending .veto-table__sort-up,
+.veto-table__sort-header--descending .veto-table__sort-down {
+    color: var(--veto-color-primary);
+    opacity: 1;
+}
+
+.veto-table__sort-header--ascending .veto-table__sort-down,
+.veto-table__sort-header--descending .veto-table__sort-up {
+    opacity: 0;
+}

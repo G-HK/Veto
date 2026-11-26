@@ -1,81 +1,227 @@
 @namespace Veto.Components.Table
 @typeparam TItem
-@inherits Veto.Core.VetoComponentBase
+@inherits Veto.Core.VetoDataComponentBase<TItem>
+@* Lets a TableSortHeader in HeaderTemplate take TItem from the table, without spelling it out. *@
+@attribute [CascadingTypeParameter(nameof(TItem))]
 
 @if (Visible)
 {
-    @* The wrapper is what scrolls: a wide table scrolls sideways inside it, and with
-       RootMaxHeight set a sticky header stays put while the rows scroll under it. *@
+    @* The root holds two parts: the scroll box, where the rows scroll - sideways when the
+       table is wide, and under a sticky header within RootMaxHeight - and below it the pager or
+       Load more bar, which never scroll and never cover a row. *@
     <div @ref="RootElement"
          @attributes="InnerAttributes"
          id="@ElementId"
          class="@CssClass"
          style="@CssStyle"
          data-testid="@TestId">
-        <table class="veto-table__table">
-            @if (!string.IsNullOrEmpty(Caption))
-            {
-                <caption class="veto-table__caption">@Caption</caption>
-            }
-
-            @if (HeaderTemplate is not null)
-            {
-                <thead class="veto-table__head">
-                    <tr>@HeaderTemplate</tr>
-                </thead>
-            }
-
-            <tbody class="veto-table__body">
-                @if (_items.Count == 0)
+        <div @ref="_scroller" class="veto-table__scroll" data-testid="@Part("scroll")">
+            <table class="veto-table__table">
+                @if (!string.IsNullOrEmpty(Caption))
                 {
-                    <tr class="veto-table__empty-row">
-                        @* colspan is clamped by the browser to the real column count. *@
-                        <td class="veto-table__empty" colspan="1000" data-testid="@(TestId is null ? null : $"{TestId}-empty")">
-                            @if (EmptyContent is not null)
-                            {
-                                @EmptyContent
-                            }
-                            else
-                            {
-                                @EmptyText
-                            }
-                        </td>
-                    </tr>
+                    <caption class="veto-table__caption">@Caption</caption>
                 }
-                else
-                {
-                    @for (var i = 0; i < _items.Count; i++)
-                    {
-                        var item = _items[i];
-                        var index = i;
 
-                        @if (OnRowClick.HasDelegate)
+                @if (HeaderTemplate is not null)
+                {
+                    @* The table is handed down so a TableSortHeader can register its column and read the sort. *@
+                    <CascadingValue Value="this" IsFixed="true">
+                        <thead class="veto-table__head">
+                            <tr>@HeaderTemplate</tr>
+                        </thead>
+                    </CascadingValue>
+                }
+
+                <tbody class="veto-table__body">
+                    @if (IsVirtual)
+                    {
+                        @* Only the rows in view are rendered; Virtualize stands spacer rows in for the
+                           rest, and asks ItemsProvider for each range as it scrolls into view. *@
+                        <Virtualize @ref="_virtualize" TItem="TItem" Context="item"
+                                    Items="VirtualItems" ItemsProvider="ItemsProvider" ItemComparer="_itemComparer"
+                                    ItemSize="RowHeight" OverscanCount="OverscanCount" SpacerElement="tr">
+                            <ItemContent>@Row(item, null)</ItemContent>
+                            <Placeholder>
+                                <tr class="veto-table__placeholder"><td colspan="1000">@LoadingText</td></tr>
+                            </Placeholder>
+                            <EmptyContent>@EmptyRow</EmptyContent>
+                        </Virtualize>
+                    }
+                    else if (VisibleCount <= 0)
+                    {
+                        @EmptyRow
+                    }
+                    else
+                    {
+                        @for (var i = VisibleStart; i < VisibleStart + VisibleCount; i++)
                         {
-                            <tr @key="KeyOf(item)"
-                                class="@RowCss(item)"
-                                tabindex="0"
-                                data-index="@index"
-                                @onclick="() => OnRowClick.InvokeAsync(item)"
-                                @onkeydown="e => OnRowKeyDownAsync(e, item)">
-                                @RowTemplate(item)
-                            </tr>
+                            @Row(Rows[i], i)
+                        }
+                    }
+                </tbody>
+
+                @if (FooterTemplate is not null)
+                {
+                    <tfoot class="veto-table__foot">
+                        <tr>@FooterTemplate</tr>
+                    </tfoot>
+                }
+            </table>
+
+            @if (SentinelRendered)
+            {
+                @* What the scroll observer watches: when it comes into view, the next batch loads. *@
+                <div @ref="_sentinel" class="veto-table__sentinel" aria-hidden="true" data-testid="@Part("sentinel")"></div>
+            }
+        </div>
+
+        @if (Paging == VetoTablePaging.Pages && (Rows.Count > 0 || HasMoreItems))
+        {
+            @* Two groups: what is shown on the left, where to go on the right; they stack on a
+               narrow table, and on a phone the numbers give way to the arrows and the go-to box. *@
+            <nav class="veto-table__pager" aria-label="@PagerLabel" data-testid="@Part("pager")">
+                <div class="veto-table__pager-info">
+                    @if (ShowsPageSizePicker)
+                    {
+                        <label class="veto-table__field">
+                            <span class="veto-table__field-label">@RowsPerPageText</span>
+                            <select class="veto-table__select" value="@_pageSize" @onchange="ChangePageSizeAsync"
+                                    disabled="@IsLoadingItems" data-testid="@Part("page-size")">
+                                @foreach (var size in PageSizeChoices)
+                                {
+                                    <option value="@size">@size</option>
+                                }
+                            </select>
+                        </label>
+                    }
+                    <span class="veto-table__range" data-testid="@Part("range")">@RangeLine</span>
+                </div>
+
+                <div class="veto-table__pages">
+                    <button type="button" class="veto-table__icon-button" disabled="@(!HasPreviousPage || IsLoadingItems)"
+                            aria-label="@FirstText" title="@FirstText" @onclick="() => GoToPageAsync(0)" data-testid="@Part("first")">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m11 17-5-5 5-5" /><path d="m18 17-5-5 5-5" /></svg>
+                    </button>
+                    <button type="button" class="veto-table__icon-button" disabled="@(!HasPreviousPage || IsLoadingItems)"
+                            aria-label="@PreviousText" title="@PreviousText" @onclick="() => GoToPageAsync(_page - 1)" data-testid="@Part("previous")">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m15 18-6-6 6-6" /></svg>
+                    </button>
+
+                    @foreach (var number in PageWindow)
+                    {
+                        if (number is { } page)
+                        {
+                            var current = page == _page;
+                            <button type="button" class="@(current ? "veto-table__page veto-table__page--current" : "veto-table__page")"
+                                    aria-label="@($"{PageText} {page + 1}")" aria-current="@(current ? "page" : null)"
+                                    disabled="@(IsLoadingItems && !current)"
+                                    @onclick="() => GoToPageAsync(page)" data-testid="@Part($"page-{page + 1}")">@(page + 1)</button>
                         }
                         else
                         {
-                            <tr @key="KeyOf(item)" class="@RowCss(item)" data-index="@index">
-                                @RowTemplate(item)
-                            </tr>
+                            <span class="veto-table__gap" aria-hidden="true">…</span>
                         }
                     }
-                }
-            </tbody>
 
-            @if (FooterTemplate is not null)
+                    <button type="button" class="veto-table__icon-button" disabled="@(!HasNextPage || IsLoadingItems)"
+                            aria-label="@NextText" title="@NextText" @onclick="() => GoToPageAsync(_page + 1)" data-testid="@Part("next")">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg>
+                    </button>
+                    @* Last needs the page count, which a stream only has once it ends. *@
+                    <button type="button" class="veto-table__icon-button" disabled="@(PageCount is null || !HasNextPage || IsLoadingItems)"
+                            aria-label="@LastText" title="@LastText" @onclick="() => GoToPageAsync((PageCount ?? 1) - 1)" data-testid="@Part("last")">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m13 17 5-5-5-5" /><path d="m6 17 5-5-5-5" /></svg>
+                    </button>
+
+                    <label class="veto-table__field veto-table__jump">
+                        <span class="veto-table__field-label">@GoToPageText</span>
+                        @* Keyed, so after a jump it shows the page actually reached - 100, not the 500 typed. *@
+                        <input @key="_jumpVersion" type="number" class="veto-table__input" inputmode="numeric"
+                               min="1" max="@PageCount" value="@(_page + 1)" @onchange="JumpAsync"
+                               disabled="@IsLoadingItems" data-testid="@Part("jump")" />
+                    </label>
+                </div>
+
+                @* The page, said aloud: the numbers above are seen, this is what a screen reader announces. *@
+                <span class="veto-visually-hidden" role="status" data-testid="@Part("page")">
+                    @(IsLoadingItems ? LoadingText : PageStatusText)
+                </span>
+            </nav>
+        }
+        else if (Paging == VetoTablePaging.Scroll && VisibleCount > 0)
+        {
+            @if (ItemsError is not null || IsLoadingItems || HasMoreRows)
             {
-                <tfoot class="veto-table__foot">
-                    <tr>@FooterTemplate</tr>
-                </tfoot>
+                <div class="veto-table__more" data-testid="@Part("more-bar")">
+                    @if (ItemsError is not null)
+                    {
+                        <span class="veto-table__status veto-table__error" role="alert" data-testid="@Part("error")">@ErrorText</span>
+                    }
+                    else if (IsLoadingItems)
+                    {
+                        <span class="veto-table__status" role="status" data-testid="@Part("loading")">@LoadingText</span>
+                    }
+                    else if (HasMoreRows)
+                    {
+                        <button type="button" class="veto-table__button" @onclick="LoadMoreAsync"
+                                data-testid="@Part("more")">@LoadMoreText</button>
+                    }
+                </div>
             }
-        </table>
+        }
     </div>
+}
+
+@code {
+    // One row, shared by the plain and the virtualized body. index is the row's position in the
+    // whole list; virtualized rows go without it.
+    private RenderFragment Row ( TItem item, int? index ) =>
+        @<text>
+            @if (OnRowClick.HasDelegate)
+            {
+                <tr @key="KeyOf(item)"
+                    class="@RowCss(item)"
+                    tabindex="0"
+                    data-index="@index"
+                    @onclick="() => OnRowClick.InvokeAsync(item)"
+                    @onkeydown="e => OnRowKeyDownAsync(e, item)">
+                    @RowTemplate(item)
+                </tr>
+            }
+            else
+            {
+                <tr @key="KeyOf(item)" class="@RowCss(item)" data-index="@index">
+                    @RowTemplate(item)
+                </tr>
+            }
+        </text>;
+
+    // The body when there is nothing to show yet - loading, failed, or simply empty.
+    // colspan is clamped by the browser to the real column count.
+    private RenderFragment EmptyRow =>
+        @<text>
+            <tr class="veto-table__empty-row">
+                @if (IsLoadingItems)
+                {
+                    <td class="veto-table__empty" colspan="1000" role="status" data-testid="@Part("loading")">@LoadingText</td>
+                }
+                else if (ItemsError is not null)
+                {
+                    <td class="veto-table__empty veto-table__error" colspan="1000" role="alert" data-testid="@Part("error")">@ErrorText</td>
+                }
+                else
+                {
+                    <td class="veto-table__empty" colspan="1000" data-testid="@Part("empty")">
+                        @if (EmptyContent is not null)
+                        {
+                            @EmptyContent
+                        }
+                        else
+                        {
+                            @EmptyText
+                        }
+                    </td>
+                }
+            </tr>
+        </text>;
 }

@@ -1,6 +1,9 @@
 @page "/docs/components/table"
 @rendermode InteractiveWebAssembly
+@using System.Runtime.CompilerServices
 @using Veto.Components.Table
+@using VetoWeb.Client.DemoData
+@using VetoWeb.Client.DemoData.Models
 
 <PageTitle>Table — Veto</PageTitle>
 
@@ -71,6 +74,77 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-pages" Title="Pages"
+               Description="Paging=&quot;Pages&quot; over all 1,000 demo cars. The pager has first, previous, the page numbers, next and last, a box to go straight to a page, and a rows-per-page picker - 5, 10, 25, 50 or 100 unless you set PageSizeOptions. Click a column header to sort: with Items the table sorts by the header's By itself. Bind PageIndex to follow or set the page from outside."
+               Code="@PagesCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <Table TItem="Car" TestId="paged" Items="Data.Get().Cars" Paging="VetoTablePaging.Pages" PageSize="10"
+                   @bind-PageIndex="_page" StickyHeader="true" RootMaxHeight="16rem" ItemKey="c => c.ID">
+                <HeaderTemplate>
+                    <TableSortHeader Title="Car" By="c => c.Name" TestId="paged-sort-car" />
+                    <TableSortHeader Title="Fuel" By="c => c.FuelType.ToString()" />
+                    <TableSortHeader Title="Power" By="c => c.HorsePower" TestId="paged-sort-power" />
+                    <TableSortHeader Title="Price" By="c => c.Price" TestId="paged-sort-price" />
+                    <TableSortHeader Title="Dealer" By="c => c.Dealer.Name" />
+                </HeaderTemplate>
+                <RowTemplate>@CarCells(context)</RowTemplate>
+            </Table>
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small" Align="VetoAlign.Center">
+                <VetoButton Variant="VetoVariant.Outlined" Size="VetoSize.Small" TestId="paged-set-first" OnClick="() => _page = 0">Set PageIndex to 0</VetoButton>
+                <VetoButton Variant="VetoVariant.Outlined" Size="VetoSize.Small" TestId="paged-set-last"
+                            OnClick="() => _page = 99">Set PageIndex to 99</VetoButton>
+                <span class="demo-value">PageIndex: <strong data-testid="paged-index">@_page</strong></span>
+            </VetoStack>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-stream-pages" Title="Pages from a stream"
+               Description="Give AsyncItems an IAsyncEnumerable instead and each page is read only when it is asked for - one row further, so Next knows whether there is another page. The page count, and the Last button, arrive once the stream runs out. Here: one dealer's stock, with the developer's own page sizes - PageSizeOptions=&quot;[5, 15, 30]&quot;."
+               Code="@StreamPagesCode">
+        <Table TItem="Car" TestId="stream-paged" AsyncItems="_pagedStream" Paging="VetoTablePaging.Pages" PageSize="5"
+               PageSizeOptions="[5, 15, 30]" ItemKey="c => c.ID">
+            <HeaderTemplate><th>Car</th><th>Fuel</th><th>Power</th><th>Price</th><th>Dealer</th></HeaderTemplate>
+            <RowTemplate>@CarCells(context)</RowTemplate>
+        </Table>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-scroll" Title="Infinite scroll"
+               Description="Paging=&quot;Scroll&quot; reads the next PageSize rows as the end of the table comes into view - here inside RootMaxHeight, with a sticky header. Load more does the same from the keyboard. Passing a new stream starts over: try a filter."
+               Code="@ScrollCode">
+        <VetoStack Gap="VetoSpacing.Small">
+            <VetoStack Orientation="VetoOrientation.Horizontal" Gap="VetoSpacing.Small">
+                <VetoButton Variant="@(_electricOnly ? VetoVariant.Outlined : VetoVariant.Filled)" Size="VetoSize.Small"
+                            aria-pressed="@(_electricOnly ? "false" : "true")" TestId="feed-all"
+                            OnClick="() => Filter(false)">All cars</VetoButton>
+                <VetoButton Variant="@(_electricOnly ? VetoVariant.Filled : VetoVariant.Outlined)" Size="VetoSize.Small"
+                            aria-pressed="@(_electricOnly ? "true" : "false")" TestId="feed-electric"
+                            OnClick="() => Filter(true)">Electric only</VetoButton>
+            </VetoStack>
+            <Table TItem="Car" TestId="feed" AsyncItems="_feed" Paging="VetoTablePaging.Scroll" PageSize="10"
+                   StickyHeader="true" RootMaxHeight="18rem" ItemKey="c => c.ID">
+                <HeaderTemplate><th>Car</th><th>Fuel</th><th>Power</th><th>Price</th><th>Dealer</th></HeaderTemplate>
+                <RowTemplate>@CarCells(context)</RowTemplate>
+            </Table>
+        </VetoStack>
+    </DemoBlock>
+
+    <DemoBlock TestId="demo-virtual" Title="Virtualized: a thousand rows"
+               Description="ItemsProvider fetches rows a range at a time - a start and a count in, those rows and the total out. Only the rows in view are in the page; Virtualize sizes the space for the rest from RowHeight, and asks for each range as it scrolls into view. The table cannot reorder rows it does not hold, so sorting here is the provider's job: it reads the bound Sort, and the table asks again when a header is clicked."
+               Code="@VirtualCode">
+        <Table TItem="Car" TestId="virtual" ItemsProvider="LoadCarsAsync" @bind-Sort="_virtualSort"
+               StickyHeader="true" RootMaxHeight="20rem" ItemKey="c => c.ID">
+            <HeaderTemplate>
+                <TableSortHeader Title="#" SortKey="ID" />
+                <TableSortHeader Title="Car" />
+                <TableSortHeader Title="Fuel" />
+                <TableSortHeader Title="Power" TestId="virtual-sort-power" />
+                <TableSortHeader Title="Price" />
+                <TableSortHeader Title="Dealer" />
+            </HeaderTemplate>
+            <RowTemplate><td>@context.ID</td>@CarCells(context)</RowTemplate>
+        </Table>
+    </DemoBlock>
+
     <ParameterTable TestId="parameters" Rows="Parameters" />
 
 </DocsPage>
@@ -90,6 +164,97 @@
 
     private string? _picked;
 
+    // Fields, not inline calls: a new stream is how the table knows to start over.
+    private IAsyncEnumerable<Car> _pagedStream = StreamCars(c => c.DealerID == 1);
+    private int _page;
+    private VetoTableSort? _virtualSort;
+    private (VetoTableSort? By, IReadOnlyList<Car> Cars)? _virtualOrder;
+    private IAsyncEnumerable<Car> _feed = StreamCars();
+    private bool _electricOnly;
+
+    private void Filter ( bool electricOnly )
+    {
+        if (electricOnly == _electricOnly)
+        {
+            return;
+        }
+
+        _electricOnly = electricOnly;
+        _feed = StreamCars(electricOnly ? c => c.FuelType == FuelType.Electric : null);
+    }
+
+    /// <summary>
+    /// The demo cars as a stream, with a pretend network: every ten rows take a moment to arrive.
+    /// Only in the browser - the server's prerender should not wait on a pretend delay.
+    /// </summary>
+    private static async IAsyncEnumerable<Car> StreamCars (
+        Func<Car, bool>? filter = null, [EnumeratorCancellation] CancellationToken cancellationToken = default )
+    {
+        var index = 0;
+
+        foreach (var car in Data.Get().Cars.Where(filter ?? (_ => true)))
+        {
+            if (index++ % 10 == 0 && OperatingSystem.IsBrowser())
+            {
+                await Task.Delay(350, cancellationToken);
+            }
+
+            yield return car;
+        }
+    }
+
+    /// <summary>
+    /// What an API endpoint would do for the virtualized demo: one range of the cars, in the order
+    /// the bound Sort asks for, and how many there are in all. The pretend latency is
+    /// browser-only, like the stream's.
+    /// </summary>
+    private async ValueTask<ItemsProviderResult<Car>> LoadCarsAsync ( ItemsProviderRequest request )
+    {
+        if (OperatingSystem.IsBrowser())
+        {
+            await Task.Delay(120, request.CancellationToken);
+        }
+
+        var cars = OrderedCars(_virtualSort);
+        return new ItemsProviderResult<Car>(cars.Skip(request.StartIndex).Take(request.Count), cars.Count);
+    }
+
+    /// <summary>The server's ORDER BY: sorted once per sort, not once per range.</summary>
+    private IReadOnlyList<Car> OrderedCars ( VetoTableSort? sort )
+    {
+        if (_virtualOrder is { } cached && cached.By == sort)
+        {
+            return cached.Cars;
+        }
+
+        var all = Data.Get().Cars;
+        Func<Car, object> key = sort?.Key switch
+        {
+            "Car" => c => c.Name,
+            "Fuel" => c => c.FuelType.ToString(),
+            "Power" => c => c.HorsePower,
+            "Price" => c => c.Price,
+            "Dealer" => c => c.Dealer.Name,
+            _ => c => c.ID
+        };
+
+        IReadOnlyList<Car> ordered = sort?.Direction == VetoSortDirection.Descending
+            ? [.. all.OrderByDescending(key)]
+            : [.. all.OrderBy(key)];
+
+        _virtualOrder = (sort, ordered);
+        return ordered;
+    }
+
+    private static RenderFragment CarCells ( Car car ) =>
+        @<text>
+            <td>@car.Name</td>
+            <td>@car.FuelType</td>
+            <td>@car.HorsePower hp</td>
+            <td>@car.Price.ToString("N0")</td>
+            <td>@car.Dealer.Name</td>
+        </text>;
+
     private static readonly ParameterTable.Row[] Parameters =
     [
         new("Items", "IEnumerable<TItem>?", "null", "The items, one row each. Null is shown as empty."),
@@ -106,10 +271,43 @@
         new("StickyHeader", "bool", "false", "Keep the header in view while rows scroll. Pair with RootMaxHeight."),
         new("OnRowClick", "EventCallback<TItem>", "—", "Raised on click, Enter or Space. Makes rows focusable."),
         new("RowClass", "Func<TItem, string?>?", "null", "Extra classes for a row, from its item."),
-        new("ItemKey", "Func<TItem, object?>?", "null", "A unique key per item, so rows keep their DOM when re-ordered.")
+        new("ItemKey", "Func<TItem, object?>?", "null", "A unique key per item, so rows keep their DOM when re-ordered."),
+        new("AsyncItems", "IAsyncEnumerable<TItem>?", "null", "The items as a stream, read only as far as the page or scroll needs. Instead of Items; a new stream starts over."),
+        new("ItemsProvider", "ItemsProviderDelegate<TItem>?", "null", "Fetches the rows in view a range at a time - Virtualize's contract. Instead of Items or AsyncItems; always virtualizes."),
+        new("Paging", "VetoTablePaging", "None", "None, Pages (Previous and Next), Scroll (the next batch as the end comes into view) or Virtualize (only the rows in view are rendered)."),
+        new("PageSize", "int", "25", "Rows per page, or per batch when scrolling."),
+        new("PageIndex", "int", "0", "The page shown, from 0. Bindable."),
+        new("PageIndexChanged", "EventCallback<int>", "—", "Raised when the page changes."),
+        new("PageStatus", "Func<int, int?, string>?", "null", "The pager's status from the page (from 1) and the count, null until known."),
+        new("PagerLabel", "string", "\"Table pages\"", "The pager's accessible name."),
+        new("PageSizeOptions", "IReadOnlyList<int>?", "[5, 10, 25, 50, 100]", "The rows-per-page choices. Set your own, or null to hide the picker."),
+        new("PageSizeChanged", "EventCallback<int>", "—", "Raised when the picker changes the page size. Bind PageSize to follow it."),
+        new("Sort", "VetoTableSort?", "null", "The sorted column's key and direction. Bindable; with AsyncItems or ItemsProvider, the source sorts by it."),
+        new("SortChanged", "EventCallback<VetoTableSort?>", "—", "Raised when a sortable header is clicked."),
+        new("RangeText", "Func<int, int, int?, string>?", "null", "The pager's range line from the first and last row and the total."),
+        new("FirstText", "string", "\"First page\"", "The First button's accessible name."),
+        new("PreviousText", "string", "\"Previous page\"", "The Previous button's accessible name."),
+        new("NextText", "string", "\"Next page\"", "The Next button's accessible name."),
+        new("LastText", "string", "\"Last page\"", "The Last button's accessible name."),
+        new("PageText", "string", "\"Page\"", "The word in the page buttons' names: \"Page 4\"."),
+        new("RowsPerPageText", "string", "\"Rows per page\"", "The page-size picker's label."),
+        new("GoToPageText", "string", "\"Go to page\"", "The go-to-page box's label."),
+        new("TableSortHeader Title", "string", "—", "A sortable header cell, in HeaderTemplate: its text, and its key by default."),
+        new("TableSortHeader By", "Func<TItem, object?>?", "null", "The value the table sorts Items by."),
+        new("TableSortHeader SortKey", "string?", "Title", "The key reported in Sort."),
+        new("LoadMoreText", "string", "\"Load more\"", "The Load more button's text, when scrolling."),
+        new("LoadingText", "string", "\"Loading…\"", "Shown while rows are read from AsyncItems."),
+        new("ErrorText", "string", "\"The rows could not be loaded.\"", "Shown if AsyncItems throws."),
+        new("RowHeight", "float", "37", "A row's height in pixels when virtualized; sizes the space for the rows not rendered."),
+        new("OverscanCount", "int", "5", "Rows rendered beyond the visible ones when virtualized.")
     ];
 
+    // Each sample is the whole component behind its demo, ready to paste into a .razor file.
+    // The car samples read Data.Get() - this site's demo data; put your own list or service there.
+
     private const string BasicCode = """
+        @using Veto.Components.Table
+
         <Table TItem="Order" Items="_orders" Caption="Recent orders">
             <HeaderTemplate>
                 <th>Order</th>
@@ -123,34 +321,349 @@
             </RowTemplate>
             <FooterTemplate>
                 <td colspan="2">Total</td>
-                <td>@_orders.Sum(o => o.Total).ToString("0.00")</td>
+                <td>@(_orders.Sum(o => o.Total).ToString("0.00"))</td>
             </FooterTemplate>
         </Table>
+
+        @code {
+            private sealed record Order ( string Number, string Customer, decimal Total );
+
+            private readonly Order[] _orders =
+            [
+                new("#1001", "Ada Lovelace", 42.50m),
+                new("#1002", "Alan Turing", 120.00m),
+                new("#1003", "Grace Hopper", 18.75m)
+            ];
+        }
         """;
 
     private const string EmptyCode = """
-        <Table TItem="Order" Items="_orders" EmptyText="No orders yet." ... />
+        @using Veto.Components.Table
 
-        <Table TItem="Order" Items="_orders">
-            ...
-            <EmptyContent><strong>No orders yet.</strong> They show up here as they come in.</EmptyContent>
+        @* A null list shows EmptyText - "No data to show." unless you set your own. *@
+        <Table TItem="Order" Items="null">
+            <HeaderTemplate>
+                <th>Order</th>
+                <th>Customer</th>
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.Number</td>
+                <td>@context.Customer</td>
+            </RowTemplate>
         </Table>
+
+        @* EmptyContent when the empty state needs markup. *@
+        <Table TItem="Order" Items="Array.Empty<Order>()">
+            <HeaderTemplate>
+                <th>Order</th>
+                <th>Customer</th>
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.Number</td>
+                <td>@context.Customer</td>
+            </RowTemplate>
+            <EmptyContent>
+                <strong>No orders yet.</strong> They show up here as they come in.
+            </EmptyContent>
+        </Table>
+
+        @code {
+            private sealed record Order ( string Number, string Customer, decimal Total );
+        }
         """;
 
     private const string OptionsCode = """
+        @using Veto.Components.Table
+
         <Table TItem="Order" Items="_orders"
                Striped="false" Bordered="false" Hover="false" Dense="true">
-            ...
+            <HeaderTemplate>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Total</th>
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.Number</td>
+                <td>@context.Customer</td>
+                <td>@context.Total.ToString("0.00")</td>
+            </RowTemplate>
         </Table>
+
+        @code {
+            private sealed record Order ( string Number, string Customer, decimal Total );
+
+            private readonly Order[] _orders =
+            [
+                new("#1001", "Ada Lovelace", 42.50m),
+                new("#1002", "Alan Turing", 120.00m),
+                new("#1003", "Grace Hopper", 18.75m)
+            ];
+        }
         """;
 
     private const string InteractiveCode = """
-        <Table TItem="Order" Items="_orders"
+        @using Veto.Components.Table
+
+        <Table TItem="Order" Items="_orders" ItemKey="o => o.Number"
                StickyHeader="true" RootMaxHeight="12rem"
                OnRowClick="o => _picked = o.Number"
-               RowClass='o => o.Total > 100 ? "large-order" : null'
-               ItemKey="o => o.Number">
-            ...
+               RowClass='o => o.Total > 100 ? "large-order" : null'>
+            <HeaderTemplate>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Total</th>
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.Number</td>
+                <td>@context.Customer</td>
+                <td>@context.Total.ToString("0.00")</td>
+            </RowTemplate>
         </Table>
+
+        <p>Picked: @(_picked ?? "none")</p>
+
+        @code {
+            private sealed record Order ( string Number, string Customer, decimal Total );
+
+            private readonly Order[] _orders =
+                [.. Enumerable.Range(1, 20).Select(i => new Order($"#{2000 + i}", $"Customer {i}", i * 11.5m))];
+
+            private string? _picked;
+        }
+
+        @*
+            The class lands on a row the Table renders, so style it from a global stylesheet
+            (wwwroot/app.css) - a page's scoped CSS does not reach inside another component:
+
+            .large-order > td { font-weight: 600; color: var(--veto-color-primary); }
+        *@
+        """;
+
+    private const string PagesCode = """
+        @using Veto.Components.Table
+        @using VetoWeb.Client.DemoData
+        @using VetoWeb.Client.DemoData.Models
+
+        <Table TItem="Car" Items="Data.Get().Cars" ItemKey="c => c.ID"
+               Paging="VetoTablePaging.Pages" PageSize="10" @bind-PageIndex="_page"
+               StickyHeader="true" RootMaxHeight="16rem">
+            <HeaderTemplate>
+                <TableSortHeader Title="Car" By="c => c.Name" />
+                <TableSortHeader Title="Fuel" By="c => c.FuelType.ToString()" />
+                <TableSortHeader Title="Power" By="c => c.HorsePower" />
+                <TableSortHeader Title="Price" By="c => c.Price" />
+                <TableSortHeader Title="Dealer" By="c => c.Dealer.Name" />
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.Name</td>
+                <td>@context.FuelType</td>
+                <td>@context.HorsePower hp</td>
+                <td>@context.Price.ToString("N0")</td>
+                <td>@context.Dealer.Name</td>
+            </RowTemplate>
+        </Table>
+
+        @* PageIndex is bound: set it from outside, and the pager's moves come back out. *@
+        <VetoButton Variant="VetoVariant.Outlined" OnClick="() => _page = 0">Set PageIndex to 0</VetoButton>
+        <VetoButton Variant="VetoVariant.Outlined" OnClick="() => _page = 99">Set PageIndex to 99</VetoButton>
+        <span>PageIndex: @_page</span>
+
+        @code {
+            private int _page;
+        }
+
+        @* Your own page sizes, or null to hide the picker: PageSizeOptions="[20, 40, 80]" *@
+        """;
+
+    private const string StreamPagesCode = """
+        @using System.Runtime.CompilerServices
+        @using Veto.Components.Table
+        @using VetoWeb.Client.DemoData
+        @using VetoWeb.Client.DemoData.Models
+
+        <Table TItem="Car" AsyncItems="_cars" ItemKey="c => c.ID"
+               Paging="VetoTablePaging.Pages" PageSize="5" PageSizeOptions="[5, 15, 30]">
+            <HeaderTemplate>
+                <th>Car</th>
+                <th>Fuel</th>
+                <th>Power</th>
+                <th>Price</th>
+                <th>Dealer</th>
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.Name</td>
+                <td>@context.FuelType</td>
+                <td>@context.HorsePower hp</td>
+                <td>@context.Price.ToString("N0")</td>
+                <td>@context.Dealer.Name</td>
+            </RowTemplate>
+        </Table>
+
+        @code {
+            // A field, not AsyncItems="StreamCars()": an inline call is a new stream on every
+            // render, and a new stream is how the table knows to start over.
+            private IAsyncEnumerable<Car> _cars = StreamCars(c => c.DealerID == 1);
+
+            // The table reads only as far as the page it shows (and one row further, so Next
+            // knows whether there is another page). Swap the loop for your API's paged calls.
+            private static async IAsyncEnumerable<Car> StreamCars (
+                Func<Car, bool>? filter = null,
+                [EnumeratorCancellation] CancellationToken cancellationToken = default )
+            {
+                var index = 0;
+
+                foreach (var car in Data.Get().Cars.Where(filter ?? (_ => true)))
+                {
+                    // A pretend network: every ten rows take a moment to arrive.
+                    if (index++ % 10 == 0)
+                    {
+                        await Task.Delay(350, cancellationToken);
+                    }
+
+                    yield return car;
+                }
+            }
+        }
+        """;
+
+    private const string ScrollCode = """
+        @using System.Runtime.CompilerServices
+        @using Veto.Components.Table
+        @using VetoWeb.Client.DemoData
+        @using VetoWeb.Client.DemoData.Models
+
+        <VetoButton Variant="@(_electricOnly ? VetoVariant.Outlined : VetoVariant.Filled)"
+                    aria-pressed="@(_electricOnly ? "false" : "true")"
+                    OnClick="() => Filter(false)">All cars</VetoButton>
+        <VetoButton Variant="@(_electricOnly ? VetoVariant.Filled : VetoVariant.Outlined)"
+                    aria-pressed="@(_electricOnly ? "true" : "false")"
+                    OnClick="() => Filter(true)">Electric only</VetoButton>
+
+        <Table TItem="Car" AsyncItems="_feed" ItemKey="c => c.ID"
+               Paging="VetoTablePaging.Scroll" PageSize="10"
+               StickyHeader="true" RootMaxHeight="18rem">
+            <HeaderTemplate>
+                <th>Car</th>
+                <th>Fuel</th>
+                <th>Power</th>
+                <th>Price</th>
+                <th>Dealer</th>
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.Name</td>
+                <td>@context.FuelType</td>
+                <td>@context.HorsePower hp</td>
+                <td>@context.Price.ToString("N0")</td>
+                <td>@context.Dealer.Name</td>
+            </RowTemplate>
+        </Table>
+
+        @code {
+            private IAsyncEnumerable<Car> _feed = StreamCars();
+            private bool _electricOnly;
+
+            // A new stream starts the table over from the top; the old one is cancelled.
+            private void Filter ( bool electricOnly )
+            {
+                if (electricOnly == _electricOnly)
+                {
+                    return;
+                }
+
+                _electricOnly = electricOnly;
+                _feed = StreamCars(electricOnly ? c => c.FuelType == FuelType.Electric : null);
+            }
+
+            private static async IAsyncEnumerable<Car> StreamCars (
+                Func<Car, bool>? filter = null,
+                [EnumeratorCancellation] CancellationToken cancellationToken = default )
+            {
+                var index = 0;
+
+                foreach (var car in Data.Get().Cars.Where(filter ?? (_ => true)))
+                {
+                    // A pretend network: every ten rows take a moment to arrive.
+                    if (index++ % 10 == 0)
+                    {
+                        await Task.Delay(350, cancellationToken);
+                    }
+
+                    yield return car;
+                }
+            }
+        }
+        """;
+
+    private const string VirtualCode = """
+        @using Microsoft.AspNetCore.Components.Web.Virtualization
+        @using Veto.Components.Table
+        @using VetoWeb.Client.DemoData
+        @using VetoWeb.Client.DemoData.Models
+
+        <Table TItem="Car" ItemsProvider="LoadCarsAsync" @bind-Sort="_sort" ItemKey="c => c.ID"
+               StickyHeader="true" RootMaxHeight="20rem">
+            <HeaderTemplate>
+                @* No By: the table cannot reorder rows it does not hold, so the provider sorts. *@
+                <TableSortHeader Title="#" SortKey="ID" />
+                <TableSortHeader Title="Car" />
+                <TableSortHeader Title="Fuel" />
+                <TableSortHeader Title="Power" />
+                <TableSortHeader Title="Price" />
+                <TableSortHeader Title="Dealer" />
+            </HeaderTemplate>
+            <RowTemplate>
+                <td>@context.ID</td>
+                <td>@context.Name</td>
+                <td>@context.FuelType</td>
+                <td>@context.HorsePower hp</td>
+                <td>@context.Price.ToString("N0")</td>
+                <td>@context.Dealer.Name</td>
+            </RowTemplate>
+        </Table>
+
+        @code {
+            private VetoTableSort? _sort;
+            private (VetoTableSort? By, IReadOnlyList<Car> Cars)? _ordered;
+
+            // Called for each range Virtualize needs: the rows in view, in the bound sort's order,
+            // and how many there are in all. Against an API: pass the sort, start and count on.
+            private async ValueTask<ItemsProviderResult<Car>> LoadCarsAsync ( ItemsProviderRequest request )
+            {
+                await Task.Delay(120, request.CancellationToken);   // a pretend network
+
+                var cars = OrderedCars(_sort);
+                return new ItemsProviderResult<Car>(cars.Skip(request.StartIndex).Take(request.Count), cars.Count);
+            }
+
+            // The server's ORDER BY: sorted once per sort, not once per range.
+            private IReadOnlyList<Car> OrderedCars ( VetoTableSort? sort )
+            {
+                if (_ordered is { } cached && cached.By == sort)
+                {
+                    return cached.Cars;
+                }
+
+                var all = Data.Get().Cars;
+                Func<Car, object> key = sort?.Key switch
+                {
+                    "Car" => c => c.Name,
+                    "Fuel" => c => c.FuelType.ToString(),
+                    "Power" => c => c.HorsePower,
+                    "Price" => c => c.Price,
+                    "Dealer" => c => c.Dealer.Name,
+                    _ => c => c.ID
+                };
+
+                IReadOnlyList<Car> ordered = sort?.Direction == VetoSortDirection.Descending
+                    ? [.. all.OrderByDescending(key)]
+                    : [.. all.OrderBy(key)];
+
+                _ordered = (sort, ordered);
+                return ordered;
+            }
+        }
+
+        @* After the data behind the provider changes - a new filter, say - ask again:
+           <Table @ref="_table" ...>  then  await _table.RefreshAsync(); *@
         """;
 }

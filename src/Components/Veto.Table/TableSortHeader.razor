@@ -1,0 +1,31 @@
+@namespace Veto.Components.Table
+@typeparam TItem
+@inherits Veto.Core.VetoComponentBase
+@implements IDisposable
+
+@if (Visible)
+{
+    @* A real button inside the header cell: reachable by Tab, pressed with Enter or Space. The
+       cell carries aria-sort, which is what a screen reader announces as the column's state. *@
+    <th @ref="RootElement" @attributes="InnerAttributes"
+        id="@ElementId" class="@CssClass" style="@CssStyle"
+        scope="col" aria-sort="@AriaSort" data-testid="@TestId">
+        <button type="button" class="veto-table__sort-button" @onclick="ToggleAsync"
+                data-testid="@(TestId is null ? null : $"{TestId}-button")">
+            <span class="veto-table__sort-label">
+                @if (ChildContent is not null)
+                {
+                    @ChildContent
+                }
+                else
+                {
+                    @Title
+                }
+            </span>
+            <svg class="veto-table__sort-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path class="veto-table__sort-up" d="m8 10 4-4 4 4" />
+                <path class="veto-table__sort-down" d="m8 14 4 4 4-4" />
+            </svg>
+        </button>
+    </th>
+}

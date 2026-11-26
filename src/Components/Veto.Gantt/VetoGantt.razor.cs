@@ -1638,7 +1638,6 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     public void HideTooltip ()
     {
         _hoveredId = null;
-        StateHasChanged();
     }
 
     /// <summary>The item the templated tooltip belongs to, and the row it is drawn on.</summary>
@@ -1862,7 +1861,6 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
             _pagedDays += back;
             Rebuild();
             _centreNowPending = true;
-            StateHasChanged();
 
             await OnRangeChanged.InvokeAsync(new VetoGanttRange(Timeline.Start, Timeline.End));
             return;
@@ -2228,7 +2226,6 @@ public partial class VetoGantt : VetoComponentBase, IAsyncDisposable
     {
         _overrides.Clear();
         Rebuild();
-        StateHasChanged();
 
         if (PersistKey is null || _storeModule is null)
         {
