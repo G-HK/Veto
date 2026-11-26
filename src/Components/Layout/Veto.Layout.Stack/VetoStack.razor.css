@@ -30,13 +30,13 @@
 }
 
 /* Gap - the numeric suffix is the step on the spacing scale. */
-.veto-stack--gap-0 { gap: 0; }
-.veto-stack--gap-1 { gap: var(--veto-space-1); }
-.veto-stack--gap-2 { gap: var(--veto-space-2); }
-.veto-stack--gap-3 { gap: var(--veto-space-3); }
-.veto-stack--gap-4 { gap: var(--veto-space-4); }
-.veto-stack--gap-5 { gap: var(--veto-space-5); }
-.veto-stack--gap-6 { gap: var(--veto-space-6); }
+.veto-stack--gap-0 { gap: 0; --veto-stack-gap: 0; }
+.veto-stack--gap-1 { gap: var(--veto-space-1); --veto-stack-gap: var(--veto-space-1); }
+.veto-stack--gap-2 { gap: var(--veto-space-2); --veto-stack-gap: var(--veto-space-2); }
+.veto-stack--gap-3 { gap: var(--veto-space-3); --veto-stack-gap: var(--veto-space-3); }
+.veto-stack--gap-4 { gap: var(--veto-space-4); --veto-stack-gap: var(--veto-space-4); }
+.veto-stack--gap-5 { gap: var(--veto-space-5); --veto-stack-gap: var(--veto-space-5); }
+.veto-stack--gap-6 { gap: var(--veto-space-6); --veto-stack-gap: var(--veto-space-6); }
 
 /* Cross axis */
 .veto-stack--align-stretch { align-items: stretch; }
@@ -52,3 +52,71 @@
 .veto-stack--justify-space-between { justify-content: space-between; }
 .veto-stack--justify-space-around { justify-content: space-around; }
 .veto-stack--justify-space-evenly { justify-content: space-evenly; }
+
+/* Dividers - each child after the first gets a line on its leading edge, padded by the gap.
+   With the flex gap before it, that leaves the line centred between the two children.
+   ::deep because the children are rendered by the parent, not by this component. */
+.veto-stack--divided {
+    --veto-stack-divider-line: var(--veto-stack-divider-color, var(--veto-border-color, var(--veto-color-border)));
+    --veto-stack-divider: var(--veto-stack-divider-thickness, 1px)
+                          var(--veto-stack-divider-style, solid)
+                          var(--veto-stack-divider-line);
+}
+
+.veto-stack--divided.veto-stack--column > ::deep * + * {
+    border-top: var(--veto-stack-divider);
+    padding-top: var(--veto-stack-gap, 0);
+}
+
+.veto-stack--divided.veto-stack--row > ::deep * + * {
+    border-left: var(--veto-stack-divider);
+    padding-left: var(--veto-stack-gap, 0);
+}
+
+/* Reversed, the leading edge is on the other side. */
+.veto-stack--divided.veto-stack--column.veto-stack--reverse > ::deep * + * {
+    border-top: 0;
+    padding-top: 0;
+    border-bottom: var(--veto-stack-divider);
+    padding-bottom: var(--veto-stack-gap, 0);
+}
+
+.veto-stack--divided.veto-stack--row.veto-stack--reverse > ::deep * + * {
+    border-left: 0;
+    padding-left: 0;
+    border-right: var(--veto-stack-divider);
+    padding-right: var(--veto-stack-gap, 0);
+}
+/* Inset - a border always spans the whole edge, so the shorter line is painted as a border-image
+   gradient, transparent for the inset at each end. Not a pseudo-element: children's ::before and
+   ::after already belong to Glow, Ping and the underline effects. A gradient has no dashes, so
+   an inset line is solid. Only the leading edge has a width, so this covers Reverse too. */
+/* The line runs from --from to --to. Every alignment keeps it 100% minus twice the inset long. */
+.veto-stack--divider-center {
+    --veto-stack-divider-from: var(--veto-stack-divider-inset);
+    --veto-stack-divider-to: calc(100% - var(--veto-stack-divider-inset));
+}
+
+.veto-stack--divider-start {
+    --veto-stack-divider-from: 0px;
+    --veto-stack-divider-to: calc(100% - 2 * var(--veto-stack-divider-inset));
+}
+
+.veto-stack--divider-end {
+    --veto-stack-divider-from: calc(2 * var(--veto-stack-divider-inset));
+    --veto-stack-divider-to: 100%;
+}
+
+.veto-stack--inset.veto-stack--column > ::deep * + * {
+    border-image: linear-gradient(to right,
+        transparent var(--veto-stack-divider-from),
+        var(--veto-stack-divider-line) var(--veto-stack-divider-from) var(--veto-stack-divider-to),
+        transparent var(--veto-stack-divider-to)) 1;
+}
+
+.veto-stack--inset.veto-stack--row > ::deep * + * {
+    border-image: linear-gradient(to bottom,
+        transparent var(--veto-stack-divider-from),
+        var(--veto-stack-divider-line) var(--veto-stack-divider-from) var(--veto-stack-divider-to),
+        transparent var(--veto-stack-divider-to)) 1;
+}

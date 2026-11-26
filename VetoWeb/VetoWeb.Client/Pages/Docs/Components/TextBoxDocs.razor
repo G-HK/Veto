@@ -59,6 +59,13 @@
         </VetoStack>
     </DemoBlock>
 
+    <DemoBlock TestId="demo-multiline"
+               Title="Multiline"
+               Description="Multiline renders a textarea that the user can resize vertically. Rows sets its starting height. Everything else works the same way."
+               Code="@MultilineCode">
+        <VetoTextBox TValue="string" TestId="multiline" Label="Notes" Multiline="true" Rows="4" Clearable="true" MaxLength="200" ShowCounter="true" @bind-Value="_notes" />
+    </DemoBlock>
+
     <DemoBlock TestId="demo-sizes"
                Title="Sizes and variants"
                Description="Five sizes and seven visual treatments, all driven by modifier classes rather than inline styles."
@@ -137,6 +144,7 @@
     private string? _title = "Quarterly report";
     private decimal? _price = 9.99m;
     private string? _site = "veto.dev";
+    private string? _notes;
     private DateOnly? _due = new(2026, 9, 30);
     private readonly FormModel _form = new();
     private string? _submitted;
@@ -157,6 +165,8 @@
         new("HelperText", "string?", "null", "Guidance under the field, replaced by the validation message while invalid."),
         new("Placeholder", "string?", "null", "Shown while the field is empty."),
         new("Type", "string", "\"text\"", "The input's type: text, email, password, search, tel, url, number, date."),
+        new("Multiline", "bool", "false", "Renders a textarea instead of an input. Type is ignored."),
+        new("Rows", "int", "3", "The textarea's starting line count when Multiline is on."),
         new("Immediate", "bool", "false", "Update the bound value on every keystroke instead of on blur."),
         new("Format", "string?", "null", "Format used to convert the value to and from its string form, e.g. dd/MM/yyyy. Dates and times are parsed back with the same format."),
         new("Clearable", "bool", "false", "Shows a button that empties the field while it has a value and can be edited."),
@@ -201,6 +211,11 @@
         <VetoTextBox TValue="decimal?" Label="Price" Prefix="$" Suffix="USD" @bind-Value="_price" />
         <VetoTextBox TValue="string" Label="Website" Prefix="https://"
                      Style="--veto-textbox-prefix-width: 7ch" @bind-Value="_site" />
+        """;
+
+    private const string MultilineCode = """
+        <VetoTextBox TValue="string" Label="Notes" Multiline="true" Rows="4"
+                     Clearable="true" MaxLength="200" ShowCounter="true" @bind-Value="_notes" />
         """;
 
     private const string SizesCode = """

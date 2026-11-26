@@ -150,6 +150,24 @@
     color: var(--veto-color-danger);
 }
 
+/* Multiline: the textarea grows downward, so pin the clear button and affixes to the first line. */
+.veto-textbox--multiline .veto-textbox__input {
+    resize: vertical;
+    min-height: 2.5em;
+}
+
+.veto-textbox--multiline .veto-textbox__field {
+    align-items: flex-start;
+}
+
+.veto-textbox--multiline .veto-textbox__clear {
+    top: var(--veto-space-2);
+}
+
+.veto-textbox--multiline .veto-textbox__affix {
+    inset-block: var(--veto-space-2) auto;
+}
+
 /* Size modifiers */
 .veto-textbox--sm .veto-textbox__input {
     font-size: var(--veto-font-size-sm);

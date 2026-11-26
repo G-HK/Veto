@@ -291,4 +291,20 @@ public class VetoTextBoxTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         await Expect(Page.GetByTestId("formatted-output")).ToHaveTextAsync("2026-12-25");
     }
+
+    [Fact]
+    public async Task Multiline_renders_a_textarea_that_keeps_line_breaks ()
+    {
+        await GotoComponentAsync(Route);
+
+        var area = Component("multiline").Locator("textarea");
+        await Expect(area).ToHaveAttributeAsync("rows", "4");
+        await Expect(Component("multiline")).ToHaveClassAsync(new Regex(@"\bveto-textbox--multiline\b"));
+        await Expect(Component("multiline").Locator("input")).ToHaveCountAsync(0);
+
+        await area.FillAsync("line one\nline two");
+        await area.BlurAsync();
+        await Expect(area).ToHaveValueAsync("line one\nline two");
+        await Expect(Page.GetByTestId("multiline-output")).ToContainTextAsync("line two");
+    }
 }

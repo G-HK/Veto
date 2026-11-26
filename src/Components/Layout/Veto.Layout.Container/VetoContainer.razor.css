@@ -14,6 +14,7 @@
 .veto-container--medium { max-width: 48rem; }
 .veto-container--large { max-width: 64rem; }
 .veto-container--extralarge { max-width: 80rem; }
+.veto-container--extraextralarge { max-width: 120rem; }
 .veto-container--full { max-width: none; }
 
 .veto-container--padding-0 { padding-inline: 0; }

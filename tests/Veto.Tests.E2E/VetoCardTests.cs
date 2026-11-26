@@ -151,6 +151,14 @@ public class VetoCardTests ( BlazorAppFixture app ) : VetoPageTest(app)
         await Expect(Component("flat")).ToHaveClassAsync(new Regex(@"\bveto-card--flat\b"));
         await Expect(Component("outlined")).ToHaveClassAsync(new Regex(@"\bveto-card--outlined\b"));
         await Expect(Component("raised")).ToHaveClassAsync(new Regex(@"\bveto-card--raised\b"));
+        await Expect(Component("elevated")).ToHaveClassAsync(new Regex(@"\bveto-card--elevated\b"));
+        await Expect(Component("floating")).ToHaveClassAsync(new Regex(@"\bveto-card--floating\b"));
+
+        // Each step casts a shadow, and the deepest differs from Raised.
+        var raised = await Component("raised").EvaluateAsync<string>("el => getComputedStyle(el).boxShadow");
+        var floating = await Component("floating").EvaluateAsync<string>("el => getComputedStyle(el).boxShadow");
+        Assert.NotEqual("none", floating);
+        Assert.NotEqual(raised, floating);
     }
 
     [Fact]

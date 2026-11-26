@@ -1,0 +1,158 @@
+/*
+ * Veto's opt-in layout utilities. Link after VetoStyles.css:
+ *   <link rel="stylesheet" href="_content/Veto.Core/veto-utilities.css" />
+ * !important for the same reason as the veto-hide-* classes in VetoStyles.css: isolated
+ * component styles out-rank any plain class. Spacing steps 0-6 map to --veto-space-0..6.
+ * Breakpoint hiding (veto-hide-below-md, veto-hide-from-lg, ...) lives in VetoStyles.css.
+ */
+
+.veto-d-block { display: block !important; }
+.veto-d-inline { display: inline !important; }
+.veto-d-inline-block { display: inline-block !important; }
+.veto-d-flex { display: flex !important; }
+.veto-d-inline-flex { display: inline-flex !important; }
+.veto-d-grid { display: grid !important; }
+.veto-d-none { display: none !important; }
+
+.veto-flex-row { flex-direction: row !important; }
+.veto-flex-col { flex-direction: column !important; }
+.veto-flex-row-reverse { flex-direction: row-reverse !important; }
+.veto-flex-col-reverse { flex-direction: column-reverse !important; }
+.veto-flex-wrap { flex-wrap: wrap !important; }
+.veto-flex-1 { flex: 1 1 0% !important; min-width: 0; }
+.veto-shrink-0 { flex-shrink: 0 !important; }
+
+.veto-items-start { align-items: flex-start !important; }
+.veto-items-center { align-items: center !important; }
+.veto-items-end { align-items: flex-end !important; }
+.veto-items-stretch { align-items: stretch !important; }
+.veto-items-baseline { align-items: baseline !important; }
+.veto-justify-start { justify-content: flex-start !important; }
+.veto-justify-center { justify-content: center !important; }
+.veto-justify-end { justify-content: flex-end !important; }
+.veto-justify-between { justify-content: space-between !important; }
+.veto-justify-around { justify-content: space-around !important; }
+.veto-justify-evenly { justify-content: space-evenly !important; }
+
+.veto-gap-0 { gap: 0 !important; }
+.veto-gap-1 { gap: var(--veto-space-1) !important; }
+.veto-gap-2 { gap: var(--veto-space-2) !important; }
+.veto-gap-3 { gap: var(--veto-space-3) !important; }
+.veto-gap-4 { gap: var(--veto-space-4) !important; }
+.veto-gap-5 { gap: var(--veto-space-5) !important; }
+.veto-gap-6 { gap: var(--veto-space-6) !important; }
+
+.veto-m-0 { margin: 0 !important; }
+.veto-m-1 { margin: var(--veto-space-1) !important; }
+.veto-m-2 { margin: var(--veto-space-2) !important; }
+.veto-m-3 { margin: var(--veto-space-3) !important; }
+.veto-m-4 { margin: var(--veto-space-4) !important; }
+.veto-m-5 { margin: var(--veto-space-5) !important; }
+.veto-m-6 { margin: var(--veto-space-6) !important; }
+.veto-m-auto { margin: auto !important; }
+.veto-mt-0 { margin-block-start: 0 !important; }
+.veto-mt-1 { margin-block-start: var(--veto-space-1) !important; }
+.veto-mt-2 { margin-block-start: var(--veto-space-2) !important; }
+.veto-mt-3 { margin-block-start: var(--veto-space-3) !important; }
+.veto-mt-4 { margin-block-start: var(--veto-space-4) !important; }
+.veto-mt-5 { margin-block-start: var(--veto-space-5) !important; }
+.veto-mt-6 { margin-block-start: var(--veto-space-6) !important; }
+.veto-mt-auto { margin-block-start: auto !important; }
+.veto-mb-0 { margin-block-end: 0 !important; }
+.veto-mb-1 { margin-block-end: var(--veto-space-1) !important; }
+.veto-mb-2 { margin-block-end: var(--veto-space-2) !important; }
+.veto-mb-3 { margin-block-end: var(--veto-space-3) !important; }
+.veto-mb-4 { margin-block-end: var(--veto-space-4) !important; }
+.veto-mb-5 { margin-block-end: var(--veto-space-5) !important; }
+.veto-mb-6 { margin-block-end: var(--veto-space-6) !important; }
+.veto-mb-auto { margin-block-end: auto !important; }
+.veto-ms-0 { margin-inline-start: 0 !important; }
+.veto-ms-1 { margin-inline-start: var(--veto-space-1) !important; }
+.veto-ms-2 { margin-inline-start: var(--veto-space-2) !important; }
+.veto-ms-3 { margin-inline-start: var(--veto-space-3) !important; }
+.veto-ms-4 { margin-inline-start: var(--veto-space-4) !important; }
+.veto-ms-5 { margin-inline-start: var(--veto-space-5) !important; }
+.veto-ms-6 { margin-inline-start: var(--veto-space-6) !important; }
+.veto-ms-auto { margin-inline-start: auto !important; }
+.veto-me-0 { margin-inline-end: 0 !important; }
+.veto-me-1 { margin-inline-end: var(--veto-space-1) !important; }
+.veto-me-2 { margin-inline-end: var(--veto-space-2) !important; }
+.veto-me-3 { margin-inline-end: var(--veto-space-3) !important; }
+.veto-me-4 { margin-inline-end: var(--veto-space-4) !important; }
+.veto-me-5 { margin-inline-end: var(--veto-space-5) !important; }
+.veto-me-6 { margin-inline-end: var(--veto-space-6) !important; }
+.veto-me-auto { margin-inline-end: auto !important; }
+.veto-mx-0 { margin-inline: 0 !important; }
+.veto-mx-1 { margin-inline: var(--veto-space-1) !important; }
+.veto-mx-2 { margin-inline: var(--veto-space-2) !important; }
+.veto-mx-3 { margin-inline: var(--veto-space-3) !important; }
+.veto-mx-4 { margin-inline: var(--veto-space-4) !important; }
+.veto-mx-5 { margin-inline: var(--veto-space-5) !important; }
+.veto-mx-6 { margin-inline: var(--veto-space-6) !important; }
+.veto-mx-auto { margin-inline: auto !important; }
+.veto-my-0 { margin-block: 0 !important; }
+.veto-my-1 { margin-block: var(--veto-space-1) !important; }
+.veto-my-2 { margin-block: var(--veto-space-2) !important; }
+.veto-my-3 { margin-block: var(--veto-space-3) !important; }
+.veto-my-4 { margin-block: var(--veto-space-4) !important; }
+.veto-my-5 { margin-block: var(--veto-space-5) !important; }
+.veto-my-6 { margin-block: var(--veto-space-6) !important; }
+.veto-my-auto { margin-block: auto !important; }
+
+.veto-p-0 { padding: 0 !important; }
+.veto-p-1 { padding: var(--veto-space-1) !important; }
+.veto-p-2 { padding: var(--veto-space-2) !important; }
+.veto-p-3 { padding: var(--veto-space-3) !important; }
+.veto-p-4 { padding: var(--veto-space-4) !important; }
+.veto-p-5 { padding: var(--veto-space-5) !important; }
+.veto-p-6 { padding: var(--veto-space-6) !important; }
+.veto-pt-0 { padding-block-start: 0 !important; }
+.veto-pt-1 { padding-block-start: var(--veto-space-1) !important; }
+.veto-pt-2 { padding-block-start: var(--veto-space-2) !important; }
+.veto-pt-3 { padding-block-start: var(--veto-space-3) !important; }
+.veto-pt-4 { padding-block-start: var(--veto-space-4) !important; }
+.veto-pt-5 { padding-block-start: var(--veto-space-5) !important; }
+.veto-pt-6 { padding-block-start: var(--veto-space-6) !important; }
+.veto-pb-0 { padding-block-end: 0 !important; }
+.veto-pb-1 { padding-block-end: var(--veto-space-1) !important; }
+.veto-pb-2 { padding-block-end: var(--veto-space-2) !important; }
+.veto-pb-3 { padding-block-end: var(--veto-space-3) !important; }
+.veto-pb-4 { padding-block-end: var(--veto-space-4) !important; }
+.veto-pb-5 { padding-block-end: var(--veto-space-5) !important; }
+.veto-pb-6 { padding-block-end: var(--veto-space-6) !important; }
+.veto-ps-0 { padding-inline-start: 0 !important; }
+.veto-ps-1 { padding-inline-start: var(--veto-space-1) !important; }
+.veto-ps-2 { padding-inline-start: var(--veto-space-2) !important; }
+.veto-ps-3 { padding-inline-start: var(--veto-space-3) !important; }
+.veto-ps-4 { padding-inline-start: var(--veto-space-4) !important; }
+.veto-ps-5 { padding-inline-start: var(--veto-space-5) !important; }
+.veto-ps-6 { padding-inline-start: var(--veto-space-6) !important; }
+.veto-pe-0 { padding-inline-end: 0 !important; }
+.veto-pe-1 { padding-inline-end: var(--veto-space-1) !important; }
+.veto-pe-2 { padding-inline-end: var(--veto-space-2) !important; }
+.veto-pe-3 { padding-inline-end: var(--veto-space-3) !important; }
+.veto-pe-4 { padding-inline-end: var(--veto-space-4) !important; }
+.veto-pe-5 { padding-inline-end: var(--veto-space-5) !important; }
+.veto-pe-6 { padding-inline-end: var(--veto-space-6) !important; }
+.veto-px-0 { padding-inline: 0 !important; }
+.veto-px-1 { padding-inline: var(--veto-space-1) !important; }
+.veto-px-2 { padding-inline: var(--veto-space-2) !important; }
+.veto-px-3 { padding-inline: var(--veto-space-3) !important; }
+.veto-px-4 { padding-inline: var(--veto-space-4) !important; }
+.veto-px-5 { padding-inline: var(--veto-space-5) !important; }
+.veto-px-6 { padding-inline: var(--veto-space-6) !important; }
+.veto-py-0 { padding-block: 0 !important; }
+.veto-py-1 { padding-block: var(--veto-space-1) !important; }
+.veto-py-2 { padding-block: var(--veto-space-2) !important; }
+.veto-py-3 { padding-block: var(--veto-space-3) !important; }
+.veto-py-4 { padding-block: var(--veto-space-4) !important; }
+.veto-py-5 { padding-block: var(--veto-space-5) !important; }
+.veto-py-6 { padding-block: var(--veto-space-6) !important; }
+
+.veto-w-100 { width: 100% !important; }
+.veto-h-100 { height: 100% !important; }
+.veto-mw-0 { min-width: 0 !important; }
+
+.veto-text-start { text-align: start !important; }
+.veto-text-center { text-align: center !important; }
+.veto-text-end { text-align: end !important; }

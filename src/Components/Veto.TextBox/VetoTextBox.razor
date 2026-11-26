@@ -22,22 +22,44 @@
                 <span class="veto-textbox__affix veto-textbox__affix--prefix" aria-hidden="true">@Prefix</span>
             }
 
-            <input @ref="InputElement"
-                   @attributes="InnerAttributes"
-                   id="@ElementId"
-                   name="@NameAttributeValue"
-                   class="veto-textbox__input @FieldValidationClass"
-                   type="@Type"
-                   value="@CurrentValueAsString"
-                   placeholder="@Placeholder"
-                   maxlength="@MaxLength"
-                   disabled="@Disabled"
-                   readonly="@ReadOnly"
-                   aria-required="@(Required ? "true" : null)"
-                   aria-invalid="@(HasErrors ? "true" : null)"
-                   aria-describedby="@DescribedBy"
-                   @oninput="OnInputAsync"
-                   @onchange="OnChangeAsync" />
+            @if (Multiline)
+            {
+                <textarea @ref="InputElement"
+                          @attributes="InnerAttributes"
+                          id="@ElementId"
+                          name="@NameAttributeValue"
+                          class="veto-textbox__input @FieldValidationClass"
+                          rows="@Rows"
+                          value="@CurrentValueAsString"
+                          placeholder="@Placeholder"
+                          maxlength="@MaxLength"
+                          disabled="@Disabled"
+                          readonly="@ReadOnly"
+                          aria-required="@(Required ? "true" : null)"
+                          aria-invalid="@(HasErrors ? "true" : null)"
+                          aria-describedby="@DescribedBy"
+                          @oninput="OnInputAsync"
+                          @onchange="OnChangeAsync" />
+            }
+            else
+            {
+                <input @ref="InputElement"
+                       @attributes="InnerAttributes"
+                       id="@ElementId"
+                       name="@NameAttributeValue"
+                       class="veto-textbox__input @FieldValidationClass"
+                       type="@Type"
+                       value="@CurrentValueAsString"
+                       placeholder="@Placeholder"
+                       maxlength="@MaxLength"
+                       disabled="@Disabled"
+                       readonly="@ReadOnly"
+                       aria-required="@(Required ? "true" : null)"
+                       aria-invalid="@(HasErrors ? "true" : null)"
+                       aria-describedby="@DescribedBy"
+                       @oninput="OnInputAsync"
+                       @onchange="OnChangeAsync" />
+            }
 
             @if (ShowClearButton)
             {

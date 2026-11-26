@@ -33,6 +33,10 @@ Link the stylesheet once, inside `<head>` in `App.razor` or `index.html`:
 <VetoIcon Icon="@VetoIcons.Search" />
 ```
 
+## Credits
+
+The industry, energy and work icons (`Factory`, `EvCharger`, `Wrench`, `HardHat`, `Network`, `ArrowRight` and the rest of that section) are from [Lucide](https://lucide.dev), ISC licence.
+
 ## Documentation
 
 Every parameter, with a live demo, is documented on the Veto docs site at `/docs/components/icon`. Source and issues: https://github.com/G-HK/Veto

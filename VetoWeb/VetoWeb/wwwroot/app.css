@@ -104,3 +104,8 @@ a.veto-link.footer__link:hover {
     font-weight: 600;
     color: var(--veto-color-primary);
 }
+
+/* A DemoBlock's anchor jump (and the contents rail's scroll-spy) stops clear of the app bar. */
+.demo-block {
+    scroll-margin-top: calc(var(--veto-appbar-height, 0px) + var(--veto-space-5));
+}
