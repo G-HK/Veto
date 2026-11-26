@@ -1,5 +1,5 @@
-using System.Globalization;
 using Microsoft.Playwright;
+using System.Globalization;
 using Veto.Tests.E2E.Infrastructure;
 using Xunit;
 
@@ -9,19 +9,19 @@ namespace Veto.Tests.E2E;
 /// End-to-end specs for the three layout presets and the gallery that lists them, driven
 /// against the demo pages that run each layout full-screen.
 /// </summary>
-public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
+public class VetoLayoutPresetTests(BlazorAppFixture app) : VetoPageTest(app)
 {
-    private ILocator DockItem ( string testId ) => Component(testId);
+    private ILocator DockItem(string testId) => Component(testId);
 
-    private async Task<double> WidthAsync ( ILocator locator )
-        => await locator.EvaluateAsync<double>("el => el.getBoundingClientRect().width");
+    private async Task<double> WidthAsync(ILocator locator) =>
+        await locator.EvaluateAsync<double>("el => el.getBoundingClientRect().width");
 
-    private Task<bool> IsHighlightedAsync ( string testId )
-        => Component(testId).EvaluateAsync<bool>(
+    private Task<bool> IsHighlightedAsync(string testId) =>
+        Component(testId).EvaluateAsync<bool>(
             "el => el.classList.contains('veto-handbook-page__section--highlighted')");
 
     /// <summary>Polls until a section reaches the expected highlight state, or gives up.</summary>
-    private async Task WaitForHighlightAsync ( string testId, bool highlighted, int timeoutMs = 5_000 )
+    private async Task WaitForHighlightAsync(string testId, bool highlighted, int timeoutMs = 5_000)
     {
         var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
 
@@ -41,7 +41,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     // ------------------------------------------------------------------ Gallery
 
     [Fact]
-    public async Task The_gallery_lists_every_layout ()
+    public async Task The_gallery_lists_every_layout()
     {
         await GotoComponentAsync("docs/layouts");
 
@@ -53,7 +53,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Every_link_in_a_demo_navigation_goes_somewhere ()
+    public async Task Every_link_in_a_demo_navigation_goes_somewhere()
     {
         // The regression this covers: the demo navigations pointed at routes that did not exist,
         // so clicking an entry did nothing at all.
@@ -86,7 +86,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_shell_demo_switches_drawer_variant ()
+    public async Task The_shell_demo_switches_drawer_variant()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/shell");
@@ -103,7 +103,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_shell_demo_swaps_the_drawer_to_the_other_side ()
+    public async Task The_shell_demo_swaps_the_drawer_to_the_other_side()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/shell");
@@ -118,7 +118,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Dashboard_toolbar_buttons_do_something ()
+    public async Task Dashboard_toolbar_buttons_do_something()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dashboard");
@@ -131,7 +131,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Dashboard_navigation_changes_the_page ()
+    public async Task Dashboard_navigation_changes_the_page()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dashboard");
@@ -145,7 +145,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     // ------------------------------------------------------------------ Dock
 
     [Fact]
-    public async Task Dock_items_are_rendered_at_their_configured_size ()
+    public async Task Dock_items_are_rendered_at_their_configured_size()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dock");
@@ -159,7 +159,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Dock_items_activate ()
+    public async Task Dock_items_activate()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dock");
@@ -170,7 +170,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_dock_moves_to_every_edge ()
+    public async Task The_dock_moves_to_every_edge()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dock");
@@ -194,7 +194,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_hovered_dock_item_comes_to_the_front ()
+    public async Task A_hovered_dock_item_comes_to_the_front()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dock");
@@ -208,7 +208,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Magnification_swells_the_item_under_the_pointer ()
+    public async Task Magnification_swells_the_item_under_the_pointer()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dock");
@@ -217,7 +217,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         var box = await DockItem("dock-terminal").BoundingBoxAsync()
             ?? throw new InvalidOperationException("The dock item has no box.");
-        await Page.Mouse.MoveAsync((float) (box.X + box.Width / 2), (float) (box.Y + box.Height / 2), new() { Steps = 4 });
+        await Page.Mouse.MoveAsync((float)(box.X + box.Width / 2), (float)(box.Y + box.Height / 2), new() { Steps = 4 });
 
         // Polled: the scale is applied through a 90ms transition, so reading the computed
         // transform in the same tick as the pointer event catches it at its starting value.
@@ -235,7 +235,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_flat_appearance_does_not_magnify ()
+    public async Task The_flat_appearance_does_not_magnify()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dock");
@@ -245,7 +245,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
 
         var box = await DockItem("dock-terminal").BoundingBoxAsync()
             ?? throw new InvalidOperationException("The dock item has no box.");
-        await Page.Mouse.MoveAsync((float) (box.X + box.Width / 2), (float) (box.Y + box.Height / 2), new() { Steps = 4 });
+        await Page.Mouse.MoveAsync((float)(box.X + box.Width / 2), (float)(box.Y + box.Height / 2), new() { Steps = 4 });
 
         // Given a moment to be sure nothing happens, rather than reading before it could have.
         await Page.WaitForTimeoutAsync(250);
@@ -254,7 +254,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_dock_is_a_toolbar_with_one_tab_stop ()
+    public async Task The_dock_is_a_toolbar_with_one_tab_stop()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dock");
@@ -277,7 +277,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Auto_hide_slides_the_dock_away_and_focus_brings_it_back ()
+    public async Task Auto_hide_slides_the_dock_away_and_focus_brings_it_back()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dock");
@@ -299,7 +299,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     // ------------------------------------------------------------------ Dashboard
 
     [Fact]
-    public async Task Dashboard_tiles_reflow_by_breakpoint ()
+    public async Task Dashboard_tiles_reflow_by_breakpoint()
     {
         await GotoComponentAsync("layouts/dashboard");
 
@@ -317,7 +317,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_wide_tile_is_wider_than_a_single_one ()
+    public async Task A_wide_tile_is_wider_than_a_single_one()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dashboard");
@@ -329,7 +329,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_tile_span_never_exceeds_the_column_count ()
+    public async Task A_tile_span_never_exceeds_the_column_count()
     {
         // A tile asking for two columns in a one-column grid must not overflow the grid.
         await Page.SetViewportSizeAsync(500, 900);
@@ -342,7 +342,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Dashboard_tiles_are_announced_as_a_list ()
+    public async Task Dashboard_tiles_are_announced_as_a_list()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dashboard");
@@ -355,7 +355,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     // ------------------------------------------------------------------ Docs
 
     [Fact]
-    public async Task The_docs_layout_shows_its_contents_rail_only_when_there_is_room ()
+    public async Task The_docs_layout_shows_its_contents_rail_only_when_there_is_room()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/docs");
@@ -368,7 +368,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Each_docs_page_has_its_own_content_and_contents_rail ()
+    public async Task Each_docs_page_has_its_own_content_and_contents_rail()
     {
         // The regression this covers: every route resolved but rendered identical content under
         // a different heading, so navigating looked as though nothing had happened.
@@ -389,7 +389,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_reading_column_and_the_contents_rail_stay_together ()
+    public async Task The_reading_column_and_the_contents_rail_stay_together()
     {
         // Sizing the column to the window rather than to the text left a wide dead gap between
         // the writing and the rail, which made the two look unrelated.
@@ -406,7 +406,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_contents_link_scrolls_the_page_instead_of_leaving_it ()
+    public async Task A_contents_link_scrolls_the_page_instead_of_leaving_it()
     {
         // The regression this covers: with <base href="/"> a bare "#id" link resolves against
         // the base rather than the current URL, so every contents link went to the home page.
@@ -434,7 +434,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_section_keeps_the_anchor_it_was_given ()
+    public async Task A_section_keeps_the_anchor_it_was_given()
     {
         // Components render their own id after splatting attributes, so a consumer's id used to
         // be silently replaced by a generated one - leaving every anchor pointing at nothing.
@@ -446,7 +446,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_contents_rail_marks_the_section_being_read ()
+    public async Task The_contents_rail_marks_the_section_being_read()
     {
         await Page.SetViewportSizeAsync(1500, 900);
         await GotoComponentAsync("layouts/docs/start");
@@ -458,7 +458,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_landing_section_is_highlighted_and_then_fades ()
+    public async Task The_landing_section_is_highlighted_and_then_fades()
     {
         await Page.SetViewportSizeAsync(1500, 900);
         await GotoComponentAsync("layouts/docs/start");
@@ -474,7 +474,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_highlight_can_be_made_to_stay ()
+    public async Task The_highlight_can_be_made_to_stay()
     {
         await Page.SetViewportSizeAsync(1500, 900);
         await GotoComponentAsync("layouts/docs/start");
@@ -490,7 +490,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_highlight_can_be_turned_off ()
+    public async Task The_highlight_can_be_turned_off()
     {
         await Page.SetViewportSizeAsync(1500, 900);
         await GotoComponentAsync("layouts/docs/start");
@@ -502,7 +502,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Sections_are_long_enough_that_an_anchor_actually_scrolls ()
+    public async Task Sections_are_long_enough_that_an_anchor_actually_scrolls()
     {
         await Page.SetViewportSizeAsync(1500, 900);
         await GotoComponentAsync("layouts/docs/start");
@@ -515,7 +515,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task The_docs_layout_renders_its_own_footer ()
+    public async Task The_docs_layout_renders_its_own_footer()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/docs");
@@ -524,7 +524,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task Every_preset_is_built_from_the_shell ()
+    public async Task Every_preset_is_built_from_the_shell()
     {
         await Page.SetViewportSizeAsync(1400, 900);
 
@@ -541,7 +541,7 @@ public class VetoLayoutPresetTests ( BlazorAppFixture app ) : VetoPageTest(app)
     }
 
     [Fact]
-    public async Task A_dock_moved_to_a_side_magnifies_along_its_new_axis ()
+    public async Task A_dock_moved_to_a_side_magnifies_along_its_new_axis()
     {
         await Page.SetViewportSizeAsync(1400, 900);
         await GotoComponentAsync("layouts/dock");
