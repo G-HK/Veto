@@ -1,8 +1,14 @@
 @* One worked example: what it does, the live component, and the markup that produced it. *@
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject IVetoToastService Toasts
 
-<VetoStack Gap="VetoSpacing.Medium" TestId="@TestId">
+<VetoStack Gap="VetoSpacing.Medium" TestId="@TestId" Id="@Anchor" Class="demo-block">
     <VetoStack Gap="VetoSpacing.ExtraSmall">
-        <h3 class="demo-block__title">@Title</h3>
+        <h3 class="demo-block__title">
+            <a class="demo-block__anchor" href="@AnchorHref" @onclick="CopyLinkAsync" aria-label="@($"Link to {Title}")">#</a>
+            @Title
+        </h3>
         @if (Description is not null)
         {
             <p class="demo-block__description">@Description</p>
@@ -21,6 +27,34 @@
 </VetoStack>
 
 @code {
+    [CascadingParameter]
+    private DocsPage? Page { get; set; }
+
+    // "With icons" -> "WithIcons": the section's id, so /docs/components/button#WithIcons lands here.
+    private string Anchor => string.Concat(Title.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .Select(w => char.ToUpperInvariant(w[0]) + w[1..]).SelectMany(w => w.Where(char.IsLetterOrDigit)));
+
+    // Path plus fragment, not a bare "#id": a bare fragment resolves against <base href="/">.
+    private string AnchorHref => $"/{Nav.ToBaseRelativePath(Nav.Uri).Split('?', '#')[0]}#{Anchor}";
+
+    protected override void OnInitialized () => Page?.Register(Anchor, Title);
+
+    // The link still navigates (no preventDefault); this also puts the full URL on the clipboard.
+    private async Task CopyLinkAsync ()
+    {
+        var url = Nav.ToAbsoluteUri(AnchorHref).ToString();
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Veto.Code/veto-code.js");
+
+        if (await module.InvokeAsync<bool>("copyText", url))
+        {
+            Toasts.Success("Link copied to clipboard");
+        }
+        else
+        {
+            Toasts.Error("Could not copy the link");
+        }
+    }
+
     /// <summary>What this example demonstrates.</summary>
     [Parameter, EditorRequired]
     public string Title { get; set; } = string.Empty;

@@ -1,5 +1,6 @@
 @* Frame for every documentation page: title, lead paragraph, then sections. *@
 
+<div class="docs-page__frame">
 <VetoContainer Size="VetoContainerSize.Large" Padding="VetoSpacing.ExtraLarge" Class="docs-page">
     <div data-testid="page" data-ready="@(_interactive ? "true" : null)">
         <VetoStack Gap="VetoSpacing.Huge">
@@ -15,13 +16,31 @@
                 }
             </VetoStack>
 
-            @ChildContent
+            <CascadingValue Value="this" IsFixed="true">
+                @ChildContent
+            </CascadingValue>
         </VetoStack>
     </div>
 </VetoContainer>
 
+@if (_sections.Count > 1)
+{
+    <aside class="docs-page__rail">
+        <VetoHandbookToc Sections="_sections" ScrollSpy="true" TestId="toc" />
+    </aside>
+}
+</div>
+
 @code {
     private bool _interactive;
+    private readonly List<VetoHandbookSection> _sections = [];
+
+    /// <summary>Called by each DemoBlock so the contents rail lists it.</summary>
+    internal void Register ( string id, string title )
+    {
+        _sections.Add(new VetoHandbookSection { Id = id, Title = title });
+        StateHasChanged();
+    }
 
     /// <summary>The page's heading.</summary>
     [Parameter, EditorRequired]

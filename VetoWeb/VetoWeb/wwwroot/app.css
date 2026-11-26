@@ -89,3 +89,8 @@ a {
     flex: 1 1 22rem;
     max-width: 34rem;
 }
+
+/* A DemoBlock's anchor jump (and the contents rail's scroll-spy) stops clear of the app bar. */
+.demo-block {
+    scroll-margin-top: calc(var(--veto-appbar-height, 0px) + var(--veto-space-5));
+}
